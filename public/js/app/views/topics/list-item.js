@@ -91,13 +91,39 @@ define([
             }
         },
         
+        leadingZero: function(num) {
+            // if lenght of number is only 1, add leading 0
+            num = num.toString();
+            return num.length < 2 ? ("0" + num) : num;
+        },
+        
         formatDate: function(rawDate) {
             var date = new Date(rawDate);
             var y = date.getFullYear();
-            var m = date.getMonth();
-            var d = date.getDate();
-            var newDate = d+"-"+m+"-"+y;
+            var m = this.leadingZero(date.getMonth()+1);
+            var d = this.leadingZero(date.getDate());
+            var newDate = y+"-"+m+"-"+d;
             return newDate;
+        },
+        
+        setColors: function(stage) {
+            switch (stage) {
+                case -1:
+                    this.model.set('progress', 'stage-1');
+                    break;
+                case 0:
+                    this.model.set('progress', 'stage0');
+                    break;
+                case 1:
+                    this.model.set('progress', 'stage1');
+                    break;
+                case 2:
+                    this.model.set('progress', 'stage2');
+                    break;
+                case 3:
+                    this.model.set('progress', 'stage3');
+                    break;
+            }
         },
         
         initialize: function() {
@@ -108,7 +134,12 @@ define([
                     return opts.inverse(this);
                 }
             });
-            this.model.set('formattedDate', this.formatDate(this.model.get('timeCreated')));
+            //console.log(this.model.get('timeCreated'));
+            //console.log('stage: '+this.model.get('stage'));
+            this.model.set('creationDate', this.formatDate(this.model.get('timeCreated')));
+            this.model.set('proposalDate', this.formatDate(this.model.get('stageProposalStarted')));
+            this.model.set('consensusDate', this.formatDate(this.model.get('stageConsensusStarted')));
+            this.setColors(this.model.get('stage'));
         },
         
         onShow: function() {

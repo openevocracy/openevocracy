@@ -26,10 +26,9 @@
 #toolbar .noti-reput span { background-image: url('../img/karma.png'); }
 #toolbar .settings span { background-image: url('../img/settings.png'); }
 
-#content .ico.active {
-    background: #dfb none; /*#fdb*/
-    box-shadow: inset 0 0 8px 2px rgba(0,0,0,0.2);
-}
+#content .edit.active span { background-image: url('../img/save.png'); }
+
+#content .ico.active { background: #dfb none; /*#fdb*/ box-shadow: inset 0 0 8px 2px rgba(0,0,0,0.2); }
 
 /* ############## */
 /* ### TOPICS ### */
@@ -54,14 +53,6 @@
     background-color: #f0f0f0;
 }
 
-#topic-list .progress {
-    height: 100%;
-    width: 5px;
-    margin-right: 5px;
-    float: left;
-    background-color: #60a5ff;
-}
-
 #topic-list .time-remaining { padding-right: 5px; font-size: 12px; }
 #topic-list .time-remaining div { text-align: right; }
 
@@ -79,6 +70,22 @@
 #topic-list button.ico {
     margin-top: 3px;
 }
+
+/* Progress Colors */
+
+#topic-list .progress {
+    height: 100%;
+    width: 5px;
+    margin-right: 5px;
+    float: left;
+    background-color: #000;
+}
+
+#topic-list .stage-1 { background-color: #999; }
+#topic-list .stage0 { background-color: #60a5ff; }
+#topic-list .stage1 { background-color: #7de8b2; }
+#topic-list .stage2 { background-color: #ff5369; }
+#topic-list .stage3 { background-color: #ffed73; }
 
 /* ### TOPICS-DETAILS ### */
 

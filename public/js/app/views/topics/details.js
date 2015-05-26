@@ -26,6 +26,8 @@ define([
             'click .edit': function(e) {
                 if($('.edit').hasClass('active')) {
                     $('.edit').removeClass('active');
+                    $('.edit').prop('title', 'edit');
+                    // etherpad
                     $('#editor').find('iframe').remove();
                     var fetching = this.model.fetch();
                     var that = this;
@@ -34,8 +36,16 @@ define([
                         $('.desc').show();
                         //$('.open-desc').show();
                     });
+                    // title
+                    this.model.set('name', $('#titleInput').val());
+                    var titleHeading = '<h1 id="title">'+this.model.get('name')+'</h1>';
+                    $('#titleInput').replaceWith(titleHeading);
+                    this.model.save();
+                    
                 } else {
                     $('.edit').addClass('active');
+                    $('.edit').prop('title', 'leave editor mode and save changes');
+                    // etherpad
                     $('.desc').hide();
                     //$('.open-desc').hide();
                     $('#editor').pad({
@@ -45,6 +55,10 @@ define([
                         'borderStyle' : 'none',
                         'showControls' : true
                     });
+                    // title
+                    var inputField = '<input id="titleInput" class="simple-input" type="text" value="'+this.model.get('name')+'"></input>';
+                    $('#title').replaceWith(inputField);
+                    
                 }
             },
             'click .del': function(e) {

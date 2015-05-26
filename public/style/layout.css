@@ -3,6 +3,8 @@
 /* ################### */
 
 .barbtn {
+    color: inherit;
+    display: block;
     cursor: pointer;
     line-height: 2.5em;
     padding-left: 28px;

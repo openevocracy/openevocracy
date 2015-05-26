@@ -25,7 +25,6 @@ define([
                 if(e) e.preventDefault();
                 this.$('.topic-id').val("");
                 this.$('.topic-name').val("");
-                this.$('.topic-desc').val("");
                 
                 this.$(".lightbox").fadeIn(500);
             },
@@ -38,15 +37,13 @@ define([
                     // if topic already exists -> edit
                     topic = topics.get(this.$('.topic-id').val());
                     topic.set({
-                        name: this.$('.topic-name').val(),
-                        desc: this.$('.topic-desc').val()
+                        name: this.$('.topic-name').val()
                     });
                 } else {
                     // if topic is new -> create
                     var Model = this.collection.model;
                     topic = new Model({
-                        name: this.$('.topic-name').val(),
-                        desc: this.$('.topic-desc').val()
+                        name: this.$('.topic-name').val()
                     });
                     newtopic=true;
                 }

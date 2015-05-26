@@ -6,10 +6,10 @@
         <!-- TODO in v0.2 <button class="ico merge" title="merge request"><span></span></button>-->
     </div>
     
-    <h1>{{name}}</h1>
+    <h1 id="title"><span>{{name}}</span></h1>
     
     <div class="sub-info">
-        <span>{{stageName}}{{#ifis stage 2}} in level{{level}}{{/ifis}}, next {{#ifis stage 2}}level{{else}}stage{{/ifis}} in <span id="timeremaining">{{timeRemaining}}</span></span></span>
+        <span>{{stageName}} stage{{#ifis stage 2}} in level{{level}}{{/ifis}}, next {{#ifis stage 2}}level{{else}}stage{{/ifis}} in <span id="timeremaining">{{timeRemaining}}</span></span></span>
     </div>
     
     <hr/>
@@ -68,11 +68,12 @@
     <div class="block" id="block-prop">
         <h2>Proposal</h2>
         <div class="block-content">
-            {{#if proposal}}
-                <div class="barbtn" id="createprop">Create porposal</div>
+            <a class="barbtn" id="yourprop" target="_blank" href="https://beta.etherpad.org/p/{{ppid}}">Your proposal</a>
+            <!--{{#if ppid}}
+                <a class="barbtn" id="yourprop">Your proposal</a>
             {{else}}
-                <div class="barbtn" id="yourprop">Your proposal</div>
-            {{/if}}
+                <a class="barbtn" id="createprop">Create proposal</a>
+            {{/if}}-->
         </div>
     </div>
     

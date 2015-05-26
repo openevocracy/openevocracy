@@ -1,4 +1,4 @@
-<div class="progress"></div>
+<div class="progress {{progress}}"></div>
 
 <div class="link">
 
@@ -19,9 +19,13 @@
 <div>
     <div class="name">{{name}}</div>
     <div class="stats">
-        {{#ifis stage 0}}created: {{formattedDate}}{{else}}started: {{proposal-date}}{{/ifis}}
+        {{#ifis stage 0}}created: {{creationDate}}{{/ifis}}
+        {{#ifis stage 1}}started: {{proposalDate}}{{/ifis}}
+        {{#ifis stage 2}}started: {{consensusDate}}{{/ifis}}
+        
         {{#ifis stage 0}}, {{votes}} votes{{/ifis}},
         {{participants}} participants
+        {{#ifis stage 1}}, X proposals{{/ifis}}
     </div>
 </div>
 

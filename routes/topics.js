@@ -4,6 +4,11 @@ var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
 
+var STAGE_REJECTED  = -1;
+var STAGE_SELECTION =  0;
+var STAGE_PROPOSAL  =  1;
+var STAGE_CONSENSUS =  2;
+
 function count_votes(response,tid) {
     db.collection('topic_votes').count( {'tid': tid}, function(err, count) {
         response.send(count.toString());
@@ -16,27 +21,32 @@ function count_participants(response,tid) {
     });
 }
 
-function extendTopicInfo(topic,uid,finished) {
-    var tid = topic._id;
-
-    // extend timeCreated
-    topic.timeCreated = tid.getTimestamp();
+function getDeadline(nextStage, prevStageDeadline) {
     
-    // extend stage name
-    switch (topic.stage) {
-        case 0:
-            topic.stageName = "selection";
+    var ONE_WEEK = 1000*60*60*24*7; // one week milliseconds
+    
+    // calculate
+    var nextStageDeadline = prevStageDeadline || Date.now();
+    switch (nextStage) {
+        case STAGE_SELECTION: // get selection stage deadline
+            nextStageDeadline += (2*ONE_WEEK); // two weeks
             break;
-        case 1:
-            topic.stageName = "proposal";
+        case STAGE_PROPOSAL: // get proposal stage deadline
+            nextStageDeadline += ONE_WEEK;
             break;
-        case 2:
-            topic.stageName = "consensus";
+        case STAGE_CONSENSUS: // get consensus stage deadline
+            nextStageDeadline = 0; // no deadline in consensus stage
             break;
     }
     
+    return nextStageDeadline;
+}
+
+function extendTopicInfo(topic,uid,finished) {
+    var tid = topic._id;
+    
     // send response only if all queries have completed
-    var finishedTopic = _.after(6, function(topic) {
+    var finishedTopic = _.after(8, function(topic) {
         // send response
         finished(topic);
     });
@@ -93,6 +103,43 @@ function extendTopicInfo(topic,uid,finished) {
             topic.joined = count;
             finishedTopic(topic);
         });
+    
+    // get proposal or create proposal if it does not exist
+    // from http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
+    db.collection('proposals').findAndModify(
+        { 'tid':tid, 'uid':uid },
+        [],
+        { $setOnInsert: {pid: ObjectId()}},
+        { new: true, upsert: true },
+        function(err, proposal) {
+            topic.ppid = proposal.pid;
+            finishedTopic(topic);
+        });
+    
+    // perform serial queries
+    {
+        // extend timeCreated
+        topic.timeCreated = tid.getTimestamp();
+        
+        // extend stage name
+        switch (topic.stage) {
+            case STAGE_REJECTED:
+                topic.stageName = "rejected";
+                break;
+            case STAGE_SELECTION:
+                topic.stageName = "selection";
+                break;
+            case STAGE_PROPOSAL:
+                topic.stageName = "proposal";
+                break;
+            case STAGE_CONSENSUS:
+                topic.stageName = "consensus";
+                break;
+        }
+        
+        // confirm finish
+        finishedTopic(topic);
+    }
 }
 
 exports.list = function(req, res) {
@@ -113,15 +160,17 @@ exports.list = function(req, res) {
 };
 
 exports.update = function(req, res) {
-    var topic = req.body;
+    var topicNew = req.body;
     
-    db.collection('topics').findOne({ '_id': ObjectId(req.params.id) }, function(err, topic) {
-        // only the owner can delete the topic
-        if(topic.owner != req.signedCookies.uid)
+    db.collection('topics').findOne({ '_id': ObjectId(topicNew._id) }, function(err, topic) {
+        // only the owner can update the topic
+        if(topic.owner != ObjectId(req.signedCookies.uid)) {
+            res.json(topic);
             return;
-            
+        }
+        
         db.collection('topics').update(
-            { '_id': ObjectId(topic._id) }, { $set: {name: topic.name, desc: topic.desc } }, 
+            { '_id': topic._id }, { $set: {name: topicNew.name} }, 
             {}, function (err, topic) {res.json(topic);});
     });
 };
@@ -194,25 +243,13 @@ function createGroups(topic) {
 }
 exports.createGroups = createGroups;
 
-function getDeadline(givenStage) {
-    
-    var ONE_WEEK = 1000*60*60*24*7; // one week milliseconds
-    
-    // calculate
-    var deadline = Date.now();
-    switch (givenStage) {
-        case 0: // get selection stage deadline
-            deadline += ONE_WEEK;
-            break;
-        case 1: // get proposal stage deadline
-            deadline += ONE_WEEK;
-            break;
-        case 2: // get consensus stage deadline
-            deadline = 0; // no deadline in consensus stage
-            break;
-    }
-    
-    return deadline;
+function updateTopicState(topic,stageStartedEntryName) {
+    db.collection('topics').update(
+        { '_id': topic._id },
+        { $set:
+        {stage: topic.stage, nextStageDeadline: topic.nextStageDeadline,
+         stageStartedEntryName: topic[stageStartedEntryName] } },
+        {}, function (err, inserted) {});
 }
 
 function manageTopicState(topic) {
@@ -221,27 +258,46 @@ function manageTopicState(topic) {
         return;
     
     // move to next stage
+    var prevStageDeadline = topic.nextStageDeadline;
     switch (topic.stage) {
-        case 0: // we are currently in selection stage
-            ++topic.stage;
-            topic.nextStageDeadline = getDeadline(1); // get deadline for proposal stage
+        case STAGE_SELECTION: // we are currently in selection stage
+            var MIN_PARTICIPANTS = 2;
+            if(topic.participants < MIN_PARTICIPANTS) {
+                // topic has been rejected
+                // move to rejection stage
+                topic.stage = STAGE_REJECTED;
+                
+                // update database
+                var stageStartedEntryName = 'stageRejectedStarted';
+                topic[stageStartedEntryName] = Date.now();
+                updateTopicState(topic,stageStartedEntryName);
+            } else {
+                // topic does meet the minimum requirements for the next stage
+                // move to next stage
+                ++topic.stage;
+                topic.nextStageDeadline = getDeadline(STAGE_PROPOSAL,prevStageDeadline); // get deadline for proposal stage
+                
+                // update database
+                var stageStartedEntryName = 'stageProposalStarted';
+                topic[stageStartedEntryName] = Date.now();
+                updateTopicState(topic,stageStartedEntryName);
+            }
             break;
-        case 1: // we are currently in proposal stage
+        case STAGE_PROPOSAL: // we are currently in proposal stage
             ++topic.stage;
             //topic.nextStageDeadline = ..; // TODO see below
             createGroups(topic);
+            
+            // update database
+            var stageStartedEntryName = 'stageConsensusStarted';
+            topic[stageStartedEntryName] = Date.now();
+            updateTopicState(topic,stageStartedEntryName);
             break;
-        case 2: // we are currently in consensus stage
+        case STAGE_CONSENSUS: // we are currently in consensus stage
             //++topic.stage; // TODO consensus stage should be handled with separate logic
             // e.g. when groups are finished
             break;
     }
-    
-    // update database
-    db.collection('topics').update(
-        { '_id': topic._id },
-        { $set: {stage: topic.stage, nextStageDeadline: topic.nextStageDeadline } },
-        {}, function (err, inserted) {});
 }
 
 exports.query = function(req, res) {
@@ -273,9 +329,9 @@ exports.create = function(req, res) {
         
         topic.owner = req.signedCookies.uid;
         topic.pid = ObjectId(); // create random pad id
-        topic.stage = 0;
+        topic.stage = STAGE_SELECTION;
         topic.level = 0;
-        topic.nextStageDeadline = getDeadline(0);
+        topic.nextStageDeadline = getDeadline(topic.stage);
         db.collection('topics').insert(topic, function(err, topic){
             res.json(topic[0]);
             console.log('new topic');
@@ -284,14 +340,16 @@ exports.create = function(req, res) {
 };
 
 exports.delete = function(req,res) {
-    db.collection('topics').findOne({ '_id': ObjectId(req.params.id) }, function(err, topic) {
+    var topic = req.body;
+    
+    db.collection('topics').findOne({ '_id': ObjectId(topic._id) }, function(err, topic) {
         // only the owner can delete the topic
-        if(topic.owner != req.signedCookies.uid) {
+        if(topic.owner != ObjectId(req.signedCookies.uid)) {
             res.json({deleted: false});
             return;
         }
         
-        db.collection('topics').removeById(ObjectId(req.params.id), function() {
+        db.collection('topics').removeById(topic._id, function() {
             res.json({deleted: true});
         });
     });
