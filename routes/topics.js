@@ -42,16 +42,31 @@ function getDeadline(nextStage, prevStageDeadline) {
     return nextStageDeadline;
 }
 
-function extendTopicInfo(topic,uid,finished) {
+function appendBasicTopicInfo(topic) {
+    // append timeCreated
+    topic.timeCreated = topic._id.getTimestamp();
+    
+    // append stage name
+    switch (topic.stage) {
+        case STAGE_REJECTED:
+            topic.stageName = "rejected";
+            break;
+        case STAGE_SELECTION:
+            topic.stageName = "selection";
+            break;
+        case STAGE_PROPOSAL:
+            topic.stageName = "proposal";
+            break;
+        case STAGE_CONSENSUS:
+            topic.stageName = "consensus";
+            break;
+    }
+}
+
+function appendExtendedTopicInfo(topic,uid,finishedTopic) {
     var tid = topic._id;
     
-    // send response only if all queries have completed
-    var finishedTopic = _.after(8, function(topic) {
-        // send response
-        finished(topic);
-    });
-    
-    // get html export    
+    // get html export
     var padurl = 'https://beta.etherpad.org/p/'+topic.pid+'/export/html';
     request.get(padurl,
         function(error, response, data) {
@@ -72,7 +87,7 @@ function extendTopicInfo(topic,uid,finished) {
             finishedTopic(topic);
         });
     
-    // extend number of votes for this topic
+    // append number of votes for this topic
     db.collection('topic_votes').count(
         {'tid': tid},
         function(err, count) {
@@ -88,7 +103,7 @@ function extendTopicInfo(topic,uid,finished) {
             finishedTopic(topic);
         });
     
-    // extend number of members for this topic
+    // append number of members for this topic
     db.collection('topic_participants').count(
         {'tid': tid},
         function(err, count) {
@@ -115,29 +130,18 @@ function extendTopicInfo(topic,uid,finished) {
             topic.ppid = proposal.pid;
             finishedTopic(topic);
         });
+}
+
+function appendTopicInfo(topic,uid,finished) {
+    // send response only if all queries have completed
+    var finishedTopic = _.after(8, function(topic) {
+        // send response
+        finished(topic);
+    });
     
-    // perform serial queries
+    appendExtendedTopicInfo(topic,uid,finishedTopic);
     {
-        // extend timeCreated
-        topic.timeCreated = tid.getTimestamp();
-        
-        // extend stage name
-        switch (topic.stage) {
-            case STAGE_REJECTED:
-                topic.stageName = "rejected";
-                break;
-            case STAGE_SELECTION:
-                topic.stageName = "selection";
-                break;
-            case STAGE_PROPOSAL:
-                topic.stageName = "proposal";
-                break;
-            case STAGE_CONSENSUS:
-                topic.stageName = "consensus";
-                break;
-        }
-        
-        // confirm finish
+        appendBasicTopicInfo(topic);
         finishedTopic(topic);
     }
 }
@@ -154,7 +158,7 @@ exports.list = function(req, res) {
 
         // loop over all topics        
         _.each(topics,function(topic) {
-            extendTopicInfo(topic,ObjectId(req.signedCookies.uid),finished);
+            appendTopicInfo(topic,ObjectId(req.signedCookies.uid),finished);
         });
     });
 };
@@ -302,7 +306,7 @@ function manageTopicState(topic) {
 
 exports.query = function(req, res) {
     db.collection('topics').findOne({ '_id': ObjectId(req.params.id) }, function(err, topic) {
-        extendTopicInfo(topic,ObjectId(req.signedCookies.uid),function(topic) {res.json(topic);});
+        appendTopicInfo(topic,ObjectId(req.signedCookies.uid),function(topic) {res.json(topic);});
         manageTopicState(topic);
     });
 };
@@ -332,17 +336,23 @@ exports.create = function(req, res) {
         topic.stage = STAGE_SELECTION;
         topic.level = 0;
         topic.nextStageDeadline = getDeadline(topic.stage);
-        db.collection('topics').insert(topic, function(err, topic){
-            res.json(topic[0]);
+        
+        // insert into database
+        db.collection('topics').insert(topic, function(err, topics){
+            var topic = topics[0];
+            
+            topic.votes = 0;
+            topic.participants = 0;
+            appendBasicTopicInfo(topic);
+            
+            res.json(topic);
             console.log('new topic');
         });
     });
 };
 
 exports.delete = function(req,res) {
-    var topic = req.body;
-    
-    db.collection('topics').findOne({ '_id': ObjectId(topic._id) }, function(err, topic) {
+    db.collection('topics').findOne({ '_id': ObjectId(req.params.id) }, function(err, topic) {
         // only the owner can delete the topic
         if(topic.owner != ObjectId(req.signedCookies.uid)) {
             res.json({deleted: false});
