@@ -11,6 +11,7 @@ define([
     Topics,
     Topic
     ) {
+
     var login = new Login();
     var register = new Register();
     var topics = new Topics();

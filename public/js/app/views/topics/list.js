@@ -1,10 +1,14 @@
 define([
+    'application',
+    'underscore',
     'Marionette',
     'hbs!templates/topics/list',
     'views/topics/list-item',
     'models/topic',
     'collections/topics'
     ], function(
+    app,
+    _,
     Marionette,
     Template,
     ChildView,
@@ -33,7 +37,7 @@ define([
                 
                 var topic;
                 var newtopic=false;
-                if(this.$('.topic-id').val()) {
+                if(this.$('.topic-id').val()) { // TODO can be removed, only creation is needed here
                     // if topic already exists -> edit
                     topic = topics.get(this.$('.topic-id').val());
                     topic.set({
@@ -49,9 +53,10 @@ define([
                 }
                 //check if edited model is valid before performing changes
                 topic.save({}, {
+                    wait: true,
                     success: function(model,res) {
                         if(!res._id) {
-                            alert("Couldn't create topic! Topic name already exists.")
+                            alert("Couldn't create topic! Topic name already exists.");
                             return;
                         }
                         topic.set(res);
@@ -73,8 +78,17 @@ define([
             }*/
         },
         
+        initialize: function() {
+            _.bindAll(this, 'onDestroyTopic');
+            app.eventAggregator.bind('destroyTopic', this.onDestroyTopic);
+        },
+        
         onBeforeRender: function() {
             topics.fetch();
+        },
+        
+        onDestroyTopic: function(topic) {
+            topics.remove(topic);
         }
     });
     

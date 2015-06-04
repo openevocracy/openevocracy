@@ -1,5 +1,6 @@
 define([
     'jquery',
+    'application',
     'Marionette',
     'etherpad',
     'hbs!templates/topics/details',
@@ -7,6 +8,7 @@ define([
     'jquerycountdown'
 ], function(
     $,
+    app,
     Marionette,
     etherpad,
     Template
@@ -62,12 +64,17 @@ define([
                 }
             },
             'click .del': function(e) {
-                if (confirm('Do you really want to delete the topic "'+this.model.get('name')+'"?')) {
-                    this.model.destroy({success: function(model, res) {
-                        if(!res.deleted)
-                            alert('Only the owner can delete the topic!');
+                var warning = 'Delete topic "'+this.model.get('name')+'"?';
+                if (confirm(warning)) {
+                    this.model.destroy({
+                        wait: true,
+                        success: function(model, res) {
+                            if(!res.deleted)
+                                alert('401: Unauthorized');
+                            
+                            app.eventAggregator.trigger("destroyTopic", model);
+                            window.location.hash = '/topics';
                     }});
-                    window.location.href='/#/topics';
                 }
             },
             'click .vote': function(e) {
