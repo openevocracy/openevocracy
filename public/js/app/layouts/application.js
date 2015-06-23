@@ -5,13 +5,14 @@ define([
     Marionette,
     Template
     ) {
-    //Template application.html wird beschrieben
+    
     var Layout = Marionette.LayoutView.extend({
         template: Template,
         id: 'wrapper',
         
         regions: {
-            'content': '#content'
+            'content': '#content',
+            'blocks': '#blocks'
         }
     });
     

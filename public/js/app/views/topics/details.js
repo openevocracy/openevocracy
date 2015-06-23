@@ -4,6 +4,7 @@ define([
     'Marionette',
     'etherpad',
     'hbs!templates/topics/details',
+    'views/blocks/myproposal',
     'jquerycookie',
     'jquerycountdown'
 ], function(
@@ -11,7 +12,8 @@ define([
     app,
     Marionette,
     etherpad,
-    Template
+    Template,
+    MyProposalView
     ) {
     
     var ht = 0;

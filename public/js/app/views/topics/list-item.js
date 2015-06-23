@@ -1,9 +1,11 @@
 define([
     'Marionette',
-    'hbs!templates/topics/list-item'
+    'hbs!templates/topics/list-item',
+    'constants'
 ], function(
     Marionette,
-    Template
+    Template,
+    C
     ) {
     var View = Marionette.ItemView.extend({
         template: Template,
@@ -106,26 +108,6 @@ define([
             return newDate;
         },
         
-        setColors: function(stage) {
-            switch (stage) {
-                case -1:
-                    this.model.set('progress', 'stage-1');
-                    break;
-                case 0:
-                    this.model.set('progress', 'stage0');
-                    break;
-                case 1:
-                    this.model.set('progress', 'stage1');
-                    break;
-                case 2:
-                    this.model.set('progress', 'stage2');
-                    break;
-                case 3:
-                    this.model.set('progress', 'stage3');
-                    break;
-            }
-        },
-        
         initialize: function() {
             Handlebars.registerHelper('ifis', function(a, b, opts) {
                 if(a == b) {
@@ -136,20 +118,21 @@ define([
             });
             //console.log(this.model.get('timeCreated'));
             //console.log('stage: '+this.model.get('stage'));
+            
+            // append model
+            this.model.set(C); // append constants to model
             this.model.set('creationDate', this.formatDate(this.model.get('timeCreated')));
             this.model.set('proposalDate', this.formatDate(this.model.get('stageProposalStarted')));
             this.model.set('consensusDate', this.formatDate(this.model.get('stageConsensusStarted')));
-            this.setColors(this.model.get('stage'));
         },
         
         onShow: function() {
             //var date = Date.now() + (7*24*3600*1000);
             if(this.model.get('stage') != 0) {
                 var date = this.model.get('nextStageDeadline');
-                var selector = '#timeremaining-'+this.model.get('_id');
-                $("#timeremaining-"+this.model.get('_id')).countdown(date, function(event) {
-                    $(this).html(event.strftime('%D:%H:%M:%S'));
-                });
+                $("#timeremaining-"+this.model.get('_id')).countdown(date)
+                .on('update.countdown', function(event) { $(this).html(event.strftime('%D:%H:%M:%S')); })
+                .on('finish.countdown', function(event) { this.model.fetch(); }.bind(this) );
             }
         }
     });

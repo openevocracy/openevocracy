@@ -33,6 +33,7 @@
 #wrapper {
     min-height: 100%;
     position: relative;
+    overflow: hidden;
 }
 
 #container {
@@ -139,14 +140,14 @@
 /* ##### B L O C K S ##### */
 /* ####################### */
 
-.left-blocks {
+#navigation {
     float: left;
     width: 199px;
     padding-top: 20px;
     border-right: 1px solid #ccc;
 }
 
-.right-blocks {
+#blocks {
     float: left;
     width: 199px;
     padding-top: 20px;
@@ -195,15 +196,17 @@
 /* ##### C O N T E N T ##### */
 /* ######################### */
 
+#content {
+    float: left;
+    margin: 0 -1px;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
 .view {
     float: left;
     width: 640px;
     padding: 20px 30px;
-}
-
-.content-only {
-    width: 870px;
-    padding: 20px 0 20px 30px;
 }
 
 /* ######################### */

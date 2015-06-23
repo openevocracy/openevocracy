@@ -8,6 +8,18 @@ define([
 ], function(app,BackboneRouteFilter){
 
     var AuthRouter = Backbone.Router.extend({
+        
+        // http://stackoverflow.com/questions/10326244/what-to-be-done-to-prevent-the-router-url-being-used-directly-on-the-address-bar
+        
+        loggedIn: false, // new for Splash, implement in before function??
+        
+        setLoggedIn: function() { // new
+            this.loggedIn = true; 
+        },
+        
+        sendUserToHome: function() { // new, implement in before function?
+            this.navigate('home', {trigger:true});
+        },
 
         initialize: function(){
             _.bindAll.apply(_, [this].concat(_.functions(this)));

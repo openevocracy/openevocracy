@@ -20,6 +20,21 @@ define([
     var View = Marionette.CompositeView.extend({
         template: Template,
         collection: topics,
+        //viewComparator: 'stage',
+        viewComparator: function(t0,t1) {
+            // sort by stage number
+            var s0 = t0.get('stage');
+            var s1 = t1.get('stage');
+            
+            // special cases
+            if(s0 < 0 && s1 >= 0)
+                return 1;
+            if(s1 < 0 && s0 >= 0)
+                return -1;
+            
+            // normal comparison
+            return (s0 < s1) ? -1 : (s0 > s1) ? 1 : 0;
+        },
         
         childView: ChildView,
         childViewContainer: '#topic-list',

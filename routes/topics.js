@@ -3,11 +3,15 @@ var request = require('request');
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
-
-var STAGE_REJECTED  = -1;
-var STAGE_SELECTION =  0;
-var STAGE_PROPOSAL  =  1;
-var STAGE_CONSENSUS =  2;
+var requirejs = require('requirejs');
+var C = requirejs('public/js/app/constants');
+//var C = require('public/js/app/constants');
+/*var C = {
+    STAGE_REJECTED  : -1,
+    STAGE_SELECTION :  0,
+    STAGE_PROPOSAL  :  1,
+    STAGE_CONSENSUS :  2
+};*/
 
 function count_votes(response,tid) {
     db.collection('topic_votes').count( {'tid': tid}, function(err, count) {
@@ -28,18 +32,66 @@ function getDeadline(nextStage, prevStageDeadline) {
     // calculate
     var nextStageDeadline = prevStageDeadline || Date.now();
     switch (nextStage) {
-        case STAGE_SELECTION: // get selection stage deadline
+        case C.STAGE_SELECTION: // get selection stage deadline
             nextStageDeadline += (2*ONE_WEEK); // two weeks
             break;
-        case STAGE_PROPOSAL: // get proposal stage deadline
+        case C.STAGE_PROPOSAL: // get proposal stage deadline
             nextStageDeadline += ONE_WEEK;
             break;
-        case STAGE_CONSENSUS: // get consensus stage deadline
+        case C.STAGE_CONSENSUS: // get consensus stage deadline
             nextStageDeadline = 0; // no deadline in consensus stage
             break;
     }
     
     return nextStageDeadline;
+}
+
+function manageTopicState(topic) {
+    // exit this funtion if stage transition is not due yet
+    if(Date.now()<topic.nextStageDeadline)
+        return;
+    
+    // move to next stage
+    var prevStageDeadline = topic.nextStageDeadline;
+    switch (topic.stage) {
+        case C.STAGE_SELECTION: // we are currently in selection stage
+            var MIN_PARTICIPANTS = 2;
+            if(topic.participants < MIN_PARTICIPANTS) {
+                // topic has been rejected
+                // move to rejection stage
+                topic.stage = C.STAGE_REJECTED;
+                
+                // update database
+                var stageStartedEntryName = 'stageRejectedStarted';
+                topic[stageStartedEntryName] = Date.now();
+                updateTopicState(topic,stageStartedEntryName);
+            } else {
+                // topic does meet the minimum requirements for the next stage
+                // move to next stage
+                ++topic.stage;
+                topic.nextStageDeadline = getDeadline(C.STAGE_PROPOSAL,prevStageDeadline); // get deadline for proposal stage
+                
+                // update database
+                var stageStartedEntryName = 'stageProposalStarted';
+                topic[stageStartedEntryName] = Date.now();
+                updateTopicState(topic,stageStartedEntryName);
+            }
+            break;
+        case C.STAGE_PROPOSAL: // we are currently in proposal stage
+            ++topic.stage;
+            //topic.nextStageDeadline = ..; // TODO see below
+            createGroups(topic);
+            
+            // update database
+            var stageStartedEntryName = 'stageConsensusStarted';
+            topic[stageStartedEntryName] = Date.now();
+            updateTopicState(topic,stageStartedEntryName);
+            break;
+        case C.STAGE_CONSENSUS: // we are currently in consensus stage
+            //++topic.stage; // TODO consensus stage should be handled with separate logic
+            // e.g. when groups are finished
+            break;
+    }
 }
 
 function appendBasicTopicInfo(topic) {
@@ -48,16 +100,16 @@ function appendBasicTopicInfo(topic) {
     
     // append stage name
     switch (topic.stage) {
-        case STAGE_REJECTED:
+        case C.STAGE_REJECTED:
             topic.stageName = "rejected";
             break;
-        case STAGE_SELECTION:
+        case C.STAGE_SELECTION:
             topic.stageName = "selection";
             break;
-        case STAGE_PROPOSAL:
+        case C.STAGE_PROPOSAL:
             topic.stageName = "proposal";
             break;
-        case STAGE_CONSENSUS:
+        case C.STAGE_CONSENSUS:
             topic.stageName = "consensus";
             break;
     }
@@ -118,23 +170,11 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
             topic.joined = count;
             finishedTopic(topic);
         });
-    
-    // get proposal or create proposal if it does not exist
-    // from http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
-    db.collection('proposals').findAndModify(
-        { 'tid':tid, 'uid':uid },
-        [],
-        { $setOnInsert: {pid: ObjectId()}},
-        { new: true, upsert: true },
-        function(err, proposal) {
-            topic.ppid = proposal.pid;
-            finishedTopic(topic);
-        });
 }
 
 function appendTopicInfo(topic,uid,finished) {
     // send response only if all queries have completed
-    var finishedTopic = _.after(8, function(topic) {
+    var finishedTopic = _.after(7, function(topic) {
         // send response
         finished(topic);
     });
@@ -159,6 +199,7 @@ exports.list = function(req, res) {
         // loop over all topics        
         _.each(topics,function(topic) {
             appendTopicInfo(topic,ObjectId(req.signedCookies.uid),finished);
+            manageTopicState(topic);
         });
     });
 };
@@ -250,58 +291,8 @@ exports.createGroups = createGroups;
 function updateTopicState(topic,stageStartedEntryName) {
     db.collection('topics').update(
         { '_id': topic._id },
-        { $set:
-        {stage: topic.stage, nextStageDeadline: topic.nextStageDeadline,
-         stageStartedEntryName: topic[stageStartedEntryName] } },
+        { $set: _.pick(topic, 'stage', 'nextStageDeadline', stageStartedEntryName) },
         {}, function (err, inserted) {});
-}
-
-function manageTopicState(topic) {
-    // exit this funtion if stage transition is not due yet
-    if(Date.now()<topic.nextStageDeadline)
-        return;
-    
-    // move to next stage
-    var prevStageDeadline = topic.nextStageDeadline;
-    switch (topic.stage) {
-        case STAGE_SELECTION: // we are currently in selection stage
-            var MIN_PARTICIPANTS = 2;
-            if(topic.participants < MIN_PARTICIPANTS) {
-                // topic has been rejected
-                // move to rejection stage
-                topic.stage = STAGE_REJECTED;
-                
-                // update database
-                var stageStartedEntryName = 'stageRejectedStarted';
-                topic[stageStartedEntryName] = Date.now();
-                updateTopicState(topic,stageStartedEntryName);
-            } else {
-                // topic does meet the minimum requirements for the next stage
-                // move to next stage
-                ++topic.stage;
-                topic.nextStageDeadline = getDeadline(STAGE_PROPOSAL,prevStageDeadline); // get deadline for proposal stage
-                
-                // update database
-                var stageStartedEntryName = 'stageProposalStarted';
-                topic[stageStartedEntryName] = Date.now();
-                updateTopicState(topic,stageStartedEntryName);
-            }
-            break;
-        case STAGE_PROPOSAL: // we are currently in proposal stage
-            ++topic.stage;
-            //topic.nextStageDeadline = ..; // TODO see below
-            createGroups(topic);
-            
-            // update database
-            var stageStartedEntryName = 'stageConsensusStarted';
-            topic[stageStartedEntryName] = Date.now();
-            updateTopicState(topic,stageStartedEntryName);
-            break;
-        case STAGE_CONSENSUS: // we are currently in consensus stage
-            //++topic.stage; // TODO consensus stage should be handled with separate logic
-            // e.g. when groups are finished
-            break;
-    }
 }
 
 exports.query = function(req, res) {
@@ -333,7 +324,7 @@ exports.create = function(req, res) {
         
         topic.owner = req.signedCookies.uid;
         topic.pid = ObjectId(); // create random pad id
-        topic.stage = STAGE_SELECTION;
+        topic.stage = C.STAGE_SELECTION;
         topic.level = 0;
         topic.nextStageDeadline = getDeadline(topic.stage);
         
