@@ -8,7 +8,7 @@ define([
         var Controller = Marionette.Controller.extend({
             route_topics_index: function() {
                 var view = new TopicsView();
-                App.layout.content.show(view);
+                App.layout.view.show(view);
             }
         });
         

@@ -14,21 +14,20 @@
     width: 80px;
 }
 
-#content .add span { background-image: url('../img/add.png'); }
-#content .edit span { background-image: url('../img/edit.png'); }
-#content .del span { background-image: url('../img/del.png'); }
-#content .join span { background-image: url('../img/participate.png'); }
-#content .vote span { background-image: url('../img/vote.png'); }
-#content .merge span { background-image: url('../img/merge.png'); }
+.add span { background-image: url('../img/add.png'); }
+.edit span { background-image: url('../img/edit.png'); }
+.del span { background-image: url('../img/del.png'); }
+.join span { background-image: url('../img/participate.png'); }
+.vote span { background-image: url('../img/vote.png'); }
+.merge span { background-image: url('../img/merge.png'); }
 
-#toolbar .noti-topics span { background-image: url('../img/proposal.png'); }
-#toolbar .noti-msg span { background-image: url('../img/msg.png'); }
-#toolbar .noti-reput span { background-image: url('../img/karma.png'); }
-#toolbar .settings span { background-image: url('../img/settings.png'); }
+.noti-topics span { background-image: url('../img/proposal.png'); }
+.noti-msg span { background-image: url('../img/msg.png'); }
+.noti-reput span { background-image: url('../img/karma.png'); }
+.settings span { background-image: url('../img/settings.png'); }
 
-#content .edit.active span { background-image: url('../img/save.png'); }
-
-#content .ico.active { background: #dfb none; /*#fdb*/ box-shadow: inset 0 0 8px 2px rgba(0,0,0,0.2); }
+.edit.active span { background-image: url('../img/save.png'); }
+.ico.active { background: #dfb none; /*#fdb*/ box-shadow: inset 0 0 8px 2px rgba(0,0,0,0.2); }
 
 /* ############## */
 /* ### TOPICS ### */
@@ -91,11 +90,6 @@
 
 #topic-details h1 {
     margin-bottom: 0.1em;
-}
-
-#topic-details .sub-info {
-    color: #333;
-    font-size: 11px;
 }
 
 #topic-details .desc {

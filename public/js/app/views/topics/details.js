@@ -4,7 +4,6 @@ define([
     'Marionette',
     'etherpad',
     'hbs!templates/topics/details',
-    'views/blocks/myproposal',
     'jquerycookie',
     'jquerycountdown'
 ], function(
@@ -12,13 +11,12 @@ define([
     app,
     Marionette,
     etherpad,
-    Template,
-    MyProposalView
+    Template
     ) {
     
     var ht = 0;
     
-    var View = Marionette.ItemView.extend({
+    var View = Marionette.LayoutView.extend({
         template: Template,
 
         events: {
@@ -80,47 +78,23 @@ define([
                 }
             },
             'click .vote': function(e) {
-                e.preventDefault();
-                
-                if(this.model.get('voted')) {
-                    // if we have already voted then unvote
-                    $.post('/json/topic-unvote',
-                           {'tid':this.model.get('_id')},
-                           function(data,status) {
-                               this.model.set('votes',data);
-                               this.model.set('voted',0);
-                               this.render();
-                           }.bind(this));
-                } else {
-                    $.post('/json/topic-vote',
-                           {'tid':this.model.get('_id')},
-                           function(data,status) {
-                               this.model.set('votes',data);
-                               this.model.set('voted',1);
-                               this.render();
-                           }.bind(this));
-                }
+                // if we have already voted then unvote
+                this.setVoted(!this.model.get('voted'));
             },
             'click .join': function(e) {
-                e.preventDefault();
-                
-                if(this.model.get('joined')) {
-                    // if we have already joined then unjoin (leave after join)
-                    $.post('/json/topic-unjoin',
-                           {'tid':this.model.get('_id')},
-                           function(data,status) {
-                               this.model.set('participants',data);
-                               this.model.set('joined',0);
-                               this.render();
-                           }.bind(this));
-                } else {
-                    $.post('/json/topic-join',
-                           {'tid':this.model.get('_id')},
-                           function(data,status) {
-                               this.model.set('participants',data);
-                               this.model.set('joined',1);
-                               this.render();
-                           }.bind(this));
+                // if we have already joined then unjoin (leave after join)
+                this.setJoined(!this.model.get('joined'));
+            },
+            'click #yourprop': function(e) {
+                var warning = 'You have to join the topic before you can create your proposal. Do you want to join "'+this.model.get('name')+'" now? ';
+                if(!this.model.get('joined')) {
+                    // if user has not joined this topic, force join
+                    if(confirm(warning)) {
+                        this.setJoined(1);
+                        return true;
+                    } else {
+                        e.preventDefault();
+                    }
                 }
             }
         },
@@ -162,6 +136,28 @@ define([
             $('#timeremaining').countdown(date, function(event) {
                 $(this).html(event.strftime('%D:%H:%M:%S'));
             });
+        },
+        
+        setVoted: function(status) {
+            $.post(status ? '/json/topic-vote' : '/json/topic-unvote',
+               {'tid':this.model.get('_id')},
+               function(data,status) {
+                   this.model.set('votes',data);
+                   this.model.set('voted',status);
+                   this.model.fetch();
+                   $('.vote').toggleClass('active');
+               }.bind(this));
+        },
+        
+        setJoined: function(status) {
+            $.post(status ? '/json/topic-join' : '/json/topic-unjoin',
+               {'tid':this.model.get('_id')},
+               function(data,status) {
+                   this.model.set('participants',data);
+                   this.model.set('joined',status);
+                   this.model.fetch();
+                   $('.join').toggleClass('active');
+               }.bind(this));
         }
     });
     

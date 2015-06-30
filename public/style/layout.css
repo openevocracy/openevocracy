@@ -42,15 +42,11 @@
     padding-top: 50px;
 }
 
-#main {
-    
-}
-
 /* ####################### */
 /* ##### H E A D E R ##### */
 /* ####################### */
 
-#header {
+header {
     position: fixed;
     display: block;
     height: 40px;
@@ -196,24 +192,31 @@
 /* ##### C O N T E N T ##### */
 /* ######################### */
 
-#content {
+.content {
     float: left;
+    width: 640px;
     margin: 0 -1px;
+    padding: 20px 30px;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
 }
 
-.view {
-    float: left;
-    width: 640px;
-    padding: 20px 30px;
+.content-title {
+    border-bottom: 1px solid #ccc;
+    margin: 0.8em 0;
+}
+
+.sub-info {
+    color: #333;
+    font-size: 11px;
+    padding-bottom: 3px;
 }
 
 /* ######################### */
 /* ###### F O O T E R ###### */
 /* ######################### */
 
-#footer {
+footer {
     font-size: 0.8em;
     position: absolute;
     bottom: 0px;

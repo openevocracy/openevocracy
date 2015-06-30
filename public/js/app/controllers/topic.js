@@ -4,14 +4,16 @@ define([
     'layouts/blocks',
     'views/blocks/myproposal',
     'views/blocks/statistics',
-    'models/topic'
+    'models/topic',
+    'constants'
 ], function(
     Marionette,
     TopicView,
     BlocksLayout,
     MyProposalView,
     StatisticsView,
-    Model
+    Model,
+    C
     ) {
     var Controller = Marionette.Controller.extend({
         route_topic_index: function(id) {
@@ -19,20 +21,17 @@ define([
             
             topic.fetch().done(function () {
                 var topicView = new TopicView({model:topic});
-                App.layout.content.show(topicView);
+                App.layout.view.show(topicView);
                 
-                var blocksLayout = new BlocksLayout({model:topic}); // ist hier das model nötig?
-                App.layout.blocks.show(blocksLayout);
+                if(C.STAGE_PROPOSAL == topic.get('stage')) {
+                    $('#blocks').append('<div id="myproposal"></div>');
+                    topicView.addRegion('myproposal','#myproposal');
+                    topicView.myproposal.show(new MyProposalView({model:topic}));
+                }
                 
-                $('#blocklist').append('<div id="myproposal"></div>');
-                blocksLayout.addRegion('myproposal','#myproposal');
-                blocksLayout.myproposal.show(new MyProposalView({model:topic})); // wie kommen wir dan die ppid?
-                
-                $('#blocklist').append('<div id="statistics"></div>');
-                blocksLayout.addRegion('statistics','#statistics');
-                blocksLayout.statistics.show(new StatisticsView({model:topic}));
-                
-                // empty sub-layouts, wenn topic wieder verlassen wird
+                $('#blocks').append('<div id="statistics"></div>');
+                topicView.addRegion('statistics','#statistics');
+                topicView.statistics.show(new StatisticsView({model:topic}));
             });
         }
     });

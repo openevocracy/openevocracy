@@ -15,9 +15,9 @@ define([
     var View = Marionette.ItemView.extend({
         template: Template,
         
-        initialize: function() {
+        onShow: function() {
             $('#editor').pad({
-                'padId': this.model.get('ppid'),
+                'padId': this.model.get('pid'),
                 'height' : 400,
                 'noColors' : true,
                 'borderStyle' : 'none',

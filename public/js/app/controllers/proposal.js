@@ -4,7 +4,7 @@ define([
     'models/proposal'
 ], function(
     Marionette,
-    TopicView,
+    ProposalView,
     Model
     ) {
     var Controller = Marionette.Controller.extend({
@@ -12,8 +12,8 @@ define([
             var proposal = new Model({_id:id});
             var fetching = proposal.fetch();
             fetching.done(function () {
-                var view = new TopicView({model:proposal});
-                App.layout.content.show(view);
+                var view = new ProposalView({model:proposal});
+                App.layout.view.show(view);
             });
         }
     });

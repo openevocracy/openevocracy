@@ -14,7 +14,7 @@ define([
         template: Template,
         
         initialize: function() {
-            // wie kommt man jetzt ans model?
+            
         }
     });
     

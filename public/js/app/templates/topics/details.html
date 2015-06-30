@@ -1,4 +1,4 @@
-<div class="view" id="topic-details">
+<section class="content" id="topic-details">
     
     <div class="right-pos">
         <button class="ico join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span></span></button>
@@ -6,13 +6,13 @@
         <!-- TODO in v0.2 <button class="ico merge" title="merge request"><span></span></button>-->
     </div>
     
-    <h1 id="title"><span>{{name}}</span></h1>
-    
-    <div class="sub-info">
-        <span>{{stageName}} stage{{#ifis stage 2}} in level{{level}}{{/ifis}}, next {{#ifis stage 2}}level{{else}}stage{{/ifis}} in <span id="timeremaining">{{timeRemaining}}</span></span></span>
+    <div class="content-title">
+        <h1 id="title"><span>{{name}}</span></h1>
+        
+        <div class="sub-info">
+            <span>{{stageName}} stage{{#ifis stage 2}} in level{{level}}{{/ifis}}, next {{#ifis stage 2}}level{{else}}stage{{/ifis}} in <span id="timeremaining">{{timeRemaining}}</span></span></span>
+        </div>
     </div>
-    
-    <hr/>
         
     <!--<h2>Description</h2>-->
     <div class="desc">{{{desc}}}</div>
@@ -60,4 +60,6 @@
         </div>
     </div>-->
     
-</div>
+</section>
+
+<aside class="blocks" id="blocks"></aside>

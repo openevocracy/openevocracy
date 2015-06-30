@@ -1,6 +1,4 @@
-<script type="text/html" id="blocks-template"><div class="empty"></div></script>
-
-<div id="header">
+<header>
     <div id="header-inner">
         <div id="toolbar">
             <div id="user-notification">
@@ -15,40 +13,34 @@
         </div>
         <a href="/" id="logo"></a>
     </div>
-</div>
+</header>
 
 <div id="container">
-
-    <div id="main" class="clearfix">
         
-        <div class="blocks" id="navigation">
-            
-            <div class="block" id="navigation">
-                <h2>Navigation</h2>
-                <div class="block-content">
-                    <ul>
-                        <li><a href="/#/login">login</a></li>
-                        <li><a href="/#/register">register</a></li>
-                        <li><a href="/#/topics">topics</a></li>
-                    </ul>
-                </div>
+    <aside class="blocks" id="navigation">
+        
+        <div class="block" id="navi-block">
+            <h2>Navigation</h2>
+            <div class="block-content">
+                <ul>
+                    <li><a href="/#/login">login</a></li>
+                    <li><a href="/#/register">register</a></li>
+                    <li><a href="/#/topics">topics</a></li>
+                </ul>
             </div>
-            
         </div>
         
-        <div id="content"></div>
-        
-        <div class="blocks" id="blocks"></div>
-        
-    </div>
+    </aside>
+    
+    <main id="view"></main>
 
 </div>
 
-<div id="footer">
+<footer>
     <ul id="footmenu">
         <li><a href="/#/about">about</a></li>
         <li><a href="/#/contact">contact</a></li>
         <li><a target="_blank" href="https://github.com/openevocracy/openevocracy">github</a></li>
         <li><a target="_blank" href="https://twitter.com/openevocracy">twitter</a></li>
     </ul>
-</div>
+</footer>

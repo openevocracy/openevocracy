@@ -1,9 +1,11 @@
 define([
     'Marionette',
-    'hbs!templates/layouts/application'
+    'hbs!templates/layouts/application',
+    'layouts/blocks'
 ], function(
     Marionette,
-    Template
+    Template,
+    BlocksLayout
     ) {
     
     var Layout = Marionette.LayoutView.extend({
@@ -11,8 +13,7 @@ define([
         id: 'wrapper',
         
         regions: {
-            'content': '#content',
-            'blocks': '#blocks'
+            'view': '#view'
         }
     });
     
