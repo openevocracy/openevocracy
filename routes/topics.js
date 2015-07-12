@@ -170,11 +170,25 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
             topic.joined = count;
             finishedTopic(topic);
         });
+    
+    // get groups with highest level
+    // FIXME http://stackoverflow.com/questions/22118210/using-findone-in-mongodb-to-get-element-with-max-id
+    db.collection('groups').find({ 'tid': tid, 'level': -1 }).toArray(
+        function(err, groups) {
+            // find the group out of previously found groups
+            // that the current user is part of
+            db.collection('group_participants').findOne(
+                {'gid': groups, 'uid': uid},
+                function(err, group_participant) {
+                    topic.gid = group_participant.gid;
+                    finishedTopic(topic);
+                });
+        });
 }
 
 function appendTopicInfo(topic,uid,finished) {
     // send response only if all queries have completed
-    var finishedTopic = _.after(7, function(topic) {
+    var finishedTopic = _.after(7+1, function(topic) {
         // send response
         finished(topic);
     });
@@ -272,17 +286,17 @@ function createGroups(topic) {
             var gid = ObjectId();
             
             // create group itself
-            db.collection('groups').insert({'gid': gid,'tid': topic.tid},
+            db.collection('groups').insert({'_id': gid,'tid': topic.tid,'level': 0},
                                            function(err) {});
             
             // create participants for this group
-            /*_.each(group, function(uid) {
+            _.each(group, function(uid) {
                 db.collection('group_participants').insert(
                     {'gid':gid,'uid':uid},
                     function(err, group_participant){
                         console.log('new group_participant');
                     });
-            });*/
+            });
         });
     });
 }

@@ -1,65 +1,59 @@
-<section class="content" id="topic-details">
-    
-    <div class="right-pos">
-        <button class="ico join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span></span></button>
-        <button class="ico vote{{#if voted}} active{{/if}}" title="{{#if joined}}unvote{{else}}vote{{/if}}"><span></span></button>
-        <!-- TODO in v0.2 <button class="ico merge" title="merge request"><span></span></button>-->
-    </div>
-    
-    <div class="content-title">
-        <h1 id="title"><span>{{name}}</span></h1>
-        
-        <div class="sub-info">
-            <span>{{stageName}} stage{{#ifis stage 2}} in level{{level}}{{/ifis}}, next {{#ifis stage 2}}level{{else}}stage{{/ifis}} in <span id="timeremaining">{{timeRemaining}}</span></span></span>
-        </div>
-    </div>
-        
-    <!--<h2>Description</h2>-->
-    <div class="desc">{{{desc}}}</div>
-    <!--<div class="open-desc"><span>more</span></div>-->
-    
-	<div id="editor"></div>
-    <!--<hr/>
-    
-     #ifis status 3 
-    <h2>Groups in current level</h2>
-       
-    <div id="groups">
-        <div id="group-1" class="group"><span>1</span></div>
-        <div id="group-2" class="group"><span>2</span></div>
-        <div id="group-3" class="group"><span>3</span></div>
-        <div id="group-4" class="group"><span>4</span></div>
-        <div id="group-5" class="group"><span>5</span></div>
-        <div id="group-6" class="group"><span>6</span></div>
-        <div id="group-7" class="group"><span>7</span></div>
-        <div id="group-8" class="group"><span>8</span></div>
-    </div>
-    /ifis -->
-    
-    <!--<h2>Background</h2>
-       
-    <div id="references">
-        
-    </div>
-    
-    <hr/>-->
-    
-    <!--<h2>Discussion</h2>
-    <div id="dis">
-        <div class="section">
-            <div class="user">Carlo</div>
-            <p>Wir sollten dringend weniger Cola trinken! Aber wenn es sein muss, dann wenigstens Cola mit viel Zucker!</p>
-        </div>
-        <div class="section">
-            <div class="user">Patrick</div>
-            <p>Mindestens!</p>
-        </div>
-        <div class="section">
-            <div class="user">Max</div>
-            <p>Und bitte schwarz!</p>
-        </div>
-    </div>-->
-    
-</section>
+<div class="right-pos">
+    <button class="ico join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span></span></button>
+    <button class="ico vote{{#if voted}} active{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span></span></button>
+    <!-- TODO in v0.2 <button class="ico merge" title="merge request"><span></span></button>-->
+</div>
 
-<aside class="blocks" id="blocks"></aside>
+<div class="content-title">
+    <h1 id="title"><span>{{name}}</span></h1>
+    
+    <div class="sub-info">
+        <span>{{stageName}} stage{{#ifis stage 2}} in level{{level}}{{/ifis}}, next {{#ifis stage 2}}level{{else}}stage{{/ifis}} in <span id="timeremaining">{{timeRemaining}}</span></span></span>
+    </div>
+</div>
+    
+<!--<h2>Description</h2>-->
+<div class="desc">{{{desc}}}</div>
+<!--<div class="open-desc"><span>more</span></div>-->
+
+<div id="editor"></div>
+<!--<hr/>
+
+ #ifis status 3 
+<h2>Groups in current level</h2>
+   
+<div id="groups">
+    <div id="group-1" class="group"><span>1</span></div>
+    <div id="group-2" class="group"><span>2</span></div>
+    <div id="group-3" class="group"><span>3</span></div>
+    <div id="group-4" class="group"><span>4</span></div>
+    <div id="group-5" class="group"><span>5</span></div>
+    <div id="group-6" class="group"><span>6</span></div>
+    <div id="group-7" class="group"><span>7</span></div>
+    <div id="group-8" class="group"><span>8</span></div>
+</div>
+/ifis -->
+
+<!--<h2>Background</h2>
+   
+<div id="references">
+    
+</div>
+
+<hr/>-->
+
+<!--<h2>Discussion</h2>
+<div id="dis">
+    <div class="section">
+        <div class="user">Carlo</div>
+        <p>Wir sollten dringend weniger Cola trinken! Aber wenn es sein muss, dann wenigstens Cola mit viel Zucker!</p>
+    </div>
+    <div class="section">
+        <div class="user">Patrick</div>
+        <p>Mindestens!</p>
+    </div>
+    <div class="section">
+        <div class="user">Max</div>
+        <p>Und bitte schwarz!</p>
+    </div>
+</div>-->

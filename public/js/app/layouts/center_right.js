@@ -1,6 +1,6 @@
 define([
     'Marionette',
-    'hbs!templates/layouts/application'
+    'hbs!templates/layouts/center_right'
 ], function(
     Marionette,
     Template
@@ -8,10 +8,11 @@ define([
     
     var Layout = Marionette.LayoutView.extend({
         template: Template,
-        id: 'wrapper',
+        id: 'center-right',
         
         regions: {
-            'view': '#view'
+            'center': '#center',
+            'right': '#right'
         }
     });
     

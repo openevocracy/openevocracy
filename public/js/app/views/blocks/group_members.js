@@ -1,10 +1,8 @@
 define([
-    'jquery',
     'application',
     'Marionette',
-    'hbs!templates/blocks/statistics'
+    'hbs!templates/blocks/group_members'
 ], function(
-    $,
     app,
     Marionette,
     Template
@@ -14,7 +12,7 @@ define([
         template: Template,
         
         initialize: function() {
-            this.model.on('change', this.render, this);
+            
         }
     });
     

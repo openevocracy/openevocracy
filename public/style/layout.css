@@ -136,19 +136,14 @@ header {
 /* ##### B L O C K S ##### */
 /* ####################### */
 
-#navigation {
+#left, #right {
     float: left;
     width: 199px;
     padding-top: 20px;
-    border-right: 1px solid #ccc;
 }
 
-#blocks {
-    float: left;
-    width: 199px;
-    padding-top: 20px;
-    border-left: 1px solid #ccc;
-}
+#left { border-right: 1px solid #ccc; }
+#right { border-left: 1px solid #ccc; }
 
 .blocks h2 {
     padding-bottom: 0.2em;

@@ -1,16 +1,18 @@
 define([
     'Marionette',
+    'layouts/center_right',
     'views/topics/details',
-    'layouts/blocks',
     'views/blocks/myproposal',
+    'views/blocks/mygroup',
     'views/blocks/statistics',
     'models/topic',
     'constants'
 ], function(
     Marionette,
+    CenterRightLayout,
     TopicView,
-    BlocksLayout,
     MyProposalView,
+    MyGroupView,
     StatisticsView,
     Model,
     C
@@ -19,19 +21,28 @@ define([
         route_topic_index: function(id) {
             var topic = new Model({_id:id});
             
+            var centerRightLayout = new CenterRightLayout();
+            App.layout.view.show(centerRightLayout);
+            
             topic.fetch().done(function () {
                 var topicView = new TopicView({model:topic});
-                App.layout.view.show(topicView);
+                centerRightLayout.center.show(topicView);
                 
-                if(C.STAGE_PROPOSAL == topic.get('stage')) {
-                    $('#blocks').append('<div id="myproposal"></div>');
-                    topicView.addRegion('myproposal','#myproposal');
-                    topicView.myproposal.show(new MyProposalView({model:topic}));
+                if(topic.get('stage') >= C.STAGE_PROPOSAL) {
+                    $('#right').append('<div id="myproposal"></div>');
+                    centerRightLayout.addRegion('myproposal','#myproposal');
+                    centerRightLayout.myproposal.show(new MyProposalView({model:topic}));
                 }
                 
-                $('#blocks').append('<div id="statistics"></div>');
-                topicView.addRegion('statistics','#statistics');
-                topicView.statistics.show(new StatisticsView({model:topic}));
+                if(topic.get('stage') == C.STAGE_CONSENSUS && typeof topic.get('gid') != 'undefined') {
+                    $('#right').append('<div id="mygroup"></div>');
+                    centerRightLayout.addRegion('mygroup','#mygroup');
+                    centerRightLayout.mygroup.show(new MyGroupView({model:topic}));
+                }
+                
+                $('#right').append('<div id="statistics"></div>');
+                centerRightLayout.addRegion('statistics','#statistics');
+                centerRightLayout.statistics.show(new StatisticsView({model:topic}));
             });
         }
     });
