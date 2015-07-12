@@ -171,14 +171,17 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
             finishedTopic(topic);
         });
     
+    // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
+    
     // get groups with highest level
     // FIXME http://stackoverflow.com/questions/22118210/using-findone-in-mongodb-to-get-element-with-max-id
-    db.collection('groups').find({ 'tid': tid, 'level': -1 }).toArray(
-        function(err, groups) {
+    db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
+        map(function (group) {return group.gid;}).
+        toArray(function(err, gids) {
             // find the group out of previously found groups
             // that the current user is part of
             db.collection('group_participants').findOne(
-                {'gid': groups, 'uid': uid},
+                {'gid': gids, 'uid': uid},
                 function(err, group_participant) {
                     topic.gid = group_participant.gid;
                     finishedTopic(topic);
