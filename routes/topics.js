@@ -128,17 +128,10 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
             finishedTopic(topic);
         });
     
-    // check if current user is owner
-    db.collection('topics').findOne(
-        { '_id': tid },
-        function(err) {
-            // delete pad id if user is not owner, pid is removed from response
-            if(topic.owner != uid)
-                delete topic.pid;
-            
-            finishedTopic(topic);
-        });
-    
+    // delete pad id if user is not owner, pid is removed from response
+    if(topic.owner != uid)
+        delete topic.pid;
+
     // append number of votes for this topic
     db.collection('topic_votes').count(
         {'tid': tid},
@@ -176,7 +169,7 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
     // get groups with highest level
     // FIXME http://stackoverflow.com/questions/22118210/using-findone-in-mongodb-to-get-element-with-max-id
     db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
-        map(function (group) {return group.gid;}).
+        map(function (group) {return group._id;}).
         toArray(function(err, gids) {
             // find the group out of previously found groups
             // that the current user is part of
@@ -191,7 +184,7 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
 
 function appendTopicInfo(topic,uid,finished) {
     // send response only if all queries have completed
-    var finishedTopic = _.after(7+1, function(topic) {
+    var finishedTopic = _.after(6+1, function(topic) {
         // send response
         finished(topic);
     });
