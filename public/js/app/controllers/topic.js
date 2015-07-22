@@ -1,6 +1,7 @@
 define([
     'Marionette',
     'layouts/center_right',
+    'views/blocks/navigation',
     'views/topics/details',
     'views/blocks/myproposal',
     'views/blocks/mygroup',
@@ -10,6 +11,7 @@ define([
 ], function(
     Marionette,
     CenterRightLayout,
+    NaviView,
     TopicView,
     MyProposalView,
     MyGroupView,
@@ -21,6 +23,11 @@ define([
         route_topic_index: function(id) {
             var topic = new Model({_id:id});
             
+            /* ### LEFT ### */
+            var naviView = new NaviView();
+            App.layout.sidebar.show(naviView);
+            
+            /* ### CONTENT RIGHT ### */
             var centerRightLayout = new CenterRightLayout();
             App.layout.view.show(centerRightLayout);
             

@@ -11,7 +11,8 @@ define([
         id: 'wrapper',
         
         regions: {
-            'view': '#view'
+            'view': '#view',
+            'sidebar': '#sidebar'
         }
     });
     

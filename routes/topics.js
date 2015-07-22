@@ -169,12 +169,21 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
     // get groups with highest level
     // FIXME http://stackoverflow.com/questions/22118210/using-findone-in-mongodb-to-get-element-with-max-id
     db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
-        map(function (group) {return group._id;}).
+        //map(function (group) {return group._id;}).
         toArray(function(err, gids) {
+            
+            if(_.isEmpty(gids)) {
+                finishedTopic(topic);
+                return;
+            }
+            
+            // TODO use mongodb map for better performance
+            gids = _.map(gids, function (group) {return group._id;});
+            
             // find the group out of previously found groups
             // that the current user is part of
             db.collection('group_participants').findOne(
-                {'gid': gids, 'uid': uid},
+                {'gid': { $in: gids }, 'uid': uid},
                 function(err, group_participant) {
                     topic.gid = group_participant.gid;
                     finishedTopic(topic);
@@ -282,8 +291,12 @@ function createGroups(topic) {
             var gid = ObjectId();
             
             // create group itself
-            db.collection('groups').insert({'_id': gid,'tid': topic.tid,'level': 0},
-                                           function(err) {});
+            db.collection('groups').insert({
+                '_id': gid,
+                'tid': topic._id,
+                'pid': ObjectId(),
+                'level': 0
+            });
             
             // create participants for this group
             _.each(group, function(uid) {

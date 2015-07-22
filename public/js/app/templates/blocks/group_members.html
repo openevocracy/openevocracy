@@ -1,4 +1,7 @@
 <h2>Members</h2>
 <div class="block-content">
     <a class="barbtn" id="grpmem" href="/#/group/{{_id}}/members">Group members</a>
+    {{#each participants}}
+        {{this.name}}
+    {{/each}}
 </div>

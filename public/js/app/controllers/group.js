@@ -1,6 +1,7 @@
 define([
     'Marionette',
     'layouts/center_right',
+    'views/blocks/navigation',
     'views/blocks/ourproposal',
     'views/blocks/group_members',
     'views/groups/collaborative',
@@ -8,6 +9,7 @@ define([
 ], function(
     Marionette,
     CenterRightLayout,
+    NaviView,
     OurProposalView,
     GroupMembersView,
     CollabView,
@@ -17,6 +19,11 @@ define([
         route_group_index: function(id) {
             var group = new Model({_id:id});
             
+            /* ### LEFT ### */
+            var naviView = new NaviView();
+            App.layout.sidebar.show(naviView);
+            
+            /* ### CONTENT RIGHT ### */
             var centerRightLayout = new CenterRightLayout();
             App.layout.view.show(centerRightLayout);
             

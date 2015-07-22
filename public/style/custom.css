@@ -22,12 +22,15 @@
 .merge span { background-image: url('../img/merge.png'); }
 
 .noti-topics span { background-image: url('../img/proposal.png'); }
-.noti-msg span { background-image: url('../img/msg.png'); }
+.noti-msg span { background-image: url('../img/bubble.png'); }
 .noti-reput span { background-image: url('../img/karma.png'); }
 .settings span { background-image: url('../img/settings.png'); }
 
 .edit.active span { background-image: url('../img/save.png'); }
 .ico.active { background: #dfb none; /*#fdb*/ box-shadow: inset 0 0 8px 2px rgba(0,0,0,0.2); }
+
+#mygroup .barbtn { background-image: url('../img/bubble.png'); }
+#group-members .barbtn { background-image: url('../img/participate.png'); }
 
 /* ############## */
 /* ### TOPICS ### */
