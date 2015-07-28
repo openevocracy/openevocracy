@@ -94,7 +94,7 @@ define([
         },
         
         initialize: function() {
-            _.bindAll(this, 'onDestroyTopic');
+            _.bindAll.apply(_, [this].concat(_.functions(this)));
             app.eventAggregator.bind('destroyTopic', this.onDestroyTopic);
         },
         

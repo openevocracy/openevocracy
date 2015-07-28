@@ -134,3 +134,17 @@
     line-height: 64px;
     text-shadow: 1px 1px #666;
 }
+
+/* ### MEMBERS ### */
+
+#members ul { border-top: 1px solid #e0e6ef; }
+
+#members ul li {
+    color: inherit;
+    display: block;
+    line-height: 2.5em;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e0e6ef;
+}
+
+#backtotopic { background-color: #e8e8e8; }

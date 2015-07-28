@@ -1,19 +1,17 @@
 define([
+    'jquery',
     'application',
     'Marionette',
-    'hbs!templates/blocks/ourproposal'
+    'hbs!templates/groups/members'
 ], function(
+    $,
     app,
     Marionette,
     Template
     ) {
     
     var View = Marionette.ItemView.extend({
-        template: Template,
-        
-        initialize: function() {
-            
-        }
+        template: Template
     });
     
     return View;
