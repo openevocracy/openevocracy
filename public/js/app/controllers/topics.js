@@ -1,21 +1,27 @@
 define([
     'Marionette',
     'views/blocks/navigation',
-    'views/topics/list'
+    'views/topics/list',
+    'collections/topics'
 ], function(
         Marionette,
         NaviView,
-        TopicsView
+        TopicsView,
+        Collection
         ) {
         var Controller = Marionette.Controller.extend({
             route_topics_index: function() {
-                /* ### LEFT ### */
-                var naviView = new NaviView();
-                App.layout.sidebar.show(naviView);
+                var topics = new Collection();
                 
-                /* ### CONTENT RIGHT ### */
-                var view = new TopicsView();
-                App.layout.view.show(view);
+                topics.fetch().done(function () {
+                    /* ### LEFT ### */
+                    var naviView = new NaviView();
+                    App.layout.sidebar.show(naviView);
+                    
+                    /* ### CONTENT RIGHT ### */
+                    var view = new TopicsView({collection: topics});
+                    App.layout.view.show(view);
+                });
             }
         });
         

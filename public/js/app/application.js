@@ -3,7 +3,7 @@ define([
   'jquery',
   'Marionette',
   'layouts/application',
-  'models/session_test',
+  'models/session',
   'router'
 ], function (
   _,
@@ -20,6 +20,7 @@ define([
     session: new Session(),
     layout: new AppLayout(),
     router: new AuthRouter(),
+    eventAggregator: _.extend({}, Backbone.Events),
 
     onStart: function() {
         $('body').prepend(App.layout.render().el);
@@ -31,9 +32,6 @@ define([
   
   // force ajax call on all browsers
   $.ajaxSetup({ cache: false });
-  
-  // Global event aggregator
-  Application.eventAggregator = _.extend({}, Backbone.Events);
   
   return Application;
 });

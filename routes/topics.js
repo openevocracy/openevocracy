@@ -72,7 +72,7 @@ function manageTopicState(topic) {
             break;
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
             ++topic.stage;
-            //topic.nextStageDeadline = ..; // TODO see below
+            topic.nextStageDeadline = -1; // TODO see below
             createGroups(topic);
             
             // update database
@@ -108,24 +108,37 @@ function appendBasicTopicInfo(topic) {
     }
 }
 
-function appendExtendedTopicInfo(topic,uid,finishedTopic) {
+function appendExtendedTopicInfo(topic,uid,with_details,finished) {
     var tid = topic._id;
     
-    utils.getPadBody(topic.pid,function done(body) {
-        topic.body = body;
-        finishedTopic(topic);
+    var finishedExtendedTopicInfo = _.after(5 + (with_details ? 1 : 0),
+    function(topic) {
+        finished(topic);
     });
     
+    if(with_details)
+        utils.getPadBody(topic.pid,function done(body) {
+            topic.body = body;
+            finishedExtendedTopicInfo(topic);
+        });
+    
     // delete pad id if user is not owner, pid is removed from response
-    if(topic.owner != uid)
+    console.log(typeof topic.owner + " " + typeof uid);
+    //if(!uid.equals(topic.owner)) {
+    if(topic.owner.valueOf() != uid.valueOf()) {
+        console.log( topic.owner + " != " + uid );
         delete topic.pid;
-
+    } else { console.log( topic.owner + " != " + uid ); }
+    
+    // extract time created from id
+    topic.timeCreated = tid.getTimestamp();
+    
     // append number of votes for this topic
     db.collection('topic_votes').count(
         {'tid': tid},
         function(err, count) {
             topic.votes = count;
-            finishedTopic(topic);
+            finishedExtendedTopicInfo(topic);
         });
     
     // check if user has voted for topic
@@ -133,7 +146,7 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
         {'tid': tid, 'uid': uid},
         function(err, count) {
             topic.voted = count;
-            finishedTopic(topic);
+            finishedExtendedTopicInfo(topic);
         });
     
     // append number of members for this topic
@@ -141,7 +154,7 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
         {'tid': tid},
         function(err, count) {
             topic.participants = count;
-            finishedTopic(topic);
+            finishedExtendedTopicInfo(topic);
         });
     
     // check if user has joined topic
@@ -149,7 +162,7 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
         {'tid': tid, 'uid': uid},
         function(err, count) {
             topic.joined = count;
-            finishedTopic(topic);
+            finishedExtendedTopicInfo(topic);
         });
     
     // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
@@ -161,7 +174,7 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
         toArray(function(err, gids) {
             
             if(_.isEmpty(gids)) {
-                finishedTopic(topic);
+                finishedExtendedTopicInfo(topic);
                 return;
             }
             
@@ -174,22 +187,22 @@ function appendExtendedTopicInfo(topic,uid,finishedTopic) {
                 {'gid': { $in: gids }, 'uid': uid},
                 function(err, group_participant) {
                     topic.gid = group_participant.gid;
-                    finishedTopic(topic);
+                    finishedExtendedTopicInfo(topic);
                 });
         });
 }
 
-function appendTopicInfo(topic,uid,finished) {
+function appendTopicInfo(topic,uid,with_details,finished) {
     // send response only if all queries have completed
-    var finishedTopic = _.after(6+1, function(topic) {
+    var finishedTopicInfo = _.after(2, function(topic) {
         // send response
         finished(topic);
     });
     
-    appendExtendedTopicInfo(topic,uid,finishedTopic);
+    appendExtendedTopicInfo(topic,uid,with_details,finishedTopicInfo);
     {
         appendBasicTopicInfo(topic);
-        finishedTopic(topic);
+        finishedTopicInfo(topic);
     }
 }
 
@@ -197,15 +210,15 @@ exports.list = function(req, res) {
     db.collection('topics').find().toArray(function(err, topics) {
        
         console.log('get topics');
-
+        
         // send response only if all queries have completed
         var finished = _.after(topics.length, function(topic) {
             res.json(topics);
         });
-
-        // loop over all topics        
+        
+        // loop over all topics
         _.each(topics,function(topic) {
-            appendTopicInfo(topic,ObjectId(req.signedCookies.uid),finished);
+            appendTopicInfo(topic,ObjectId(req.signedCookies.uid),false,finished);
             manageTopicState(topic);
         });
     });
@@ -307,8 +320,13 @@ function updateTopicState(topic,stageStartedEntryName) {
 }
 
 exports.query = function(req, res) {
+    console.log(req.params.id);
+    
     db.collection('topics').findOne({ '_id': ObjectId(req.params.id) }, function(err, topic) {
-        appendTopicInfo(topic,ObjectId(req.signedCookies.uid),function(topic) {res.json(topic);});
+        console.log(topic.name);
+        
+        appendTopicInfo(topic,ObjectId(req.signedCookies.uid),true,
+            function(topic) {res.json(topic);});
         manageTopicState(topic);
     });
 };
@@ -333,7 +351,7 @@ exports.create = function(req, res) {
             return;
         }
         
-        topic.owner = req.signedCookies.uid;
+        topic.owner = ObjectId(req.signedCookies.uid);
         topic.pid = ObjectId(); // create random pad id
         topic.stage = C.STAGE_SELECTION;
         topic.level = 0;

@@ -1,25 +1,20 @@
 define([
-    'application',
     'underscore',
     'Marionette',
     'hbs!templates/topics/list',
     'views/topics/list-item',
     'models/topic',
-    'collections/topics'
     ], function(
-    app,
     _,
     Marionette,
     Template,
     ChildView,
-    Model,
-    Collection
+    Model
     ) {
-    var topics = new Collection();
-    
+
     var View = Marionette.CompositeView.extend({
         template: Template,
-        collection: topics,
+        
         //viewComparator: 'stage',
         viewComparator: function(t0,t1) {
             // sort by stage number
@@ -50,22 +45,11 @@ define([
             'click .save': function(e) {
                 if(e) e.preventDefault();
                 
-                var topic;
-                var newtopic=false;
-                if(this.$('.topic-id').val()) { // TODO can be removed, only creation is needed here
-                    // if topic already exists -> edit
-                    topic = topics.get(this.$('.topic-id').val());
-                    topic.set({
-                        name: this.$('.topic-name').val()
-                    });
-                } else {
-                    // if topic is new -> create
-                    var Model = this.collection.model;
-                    topic = new Model({
-                        name: this.$('.topic-name').val()
-                    });
-                    newtopic=true;
-                }
+                var Model = this.collection.model;
+                var topic = new Model({
+                    name: this.$('.topic-name').val()
+                });
+                
                 //check if edited model is valid before performing changes
                 topic.save({}, {
                     wait: true,
@@ -75,7 +59,7 @@ define([
                             return;
                         }
                         topic.set(res);
-                        if(newtopic) topics.add(topic);
+                        this.collection.add(topic);
                     }.bind(this)
                 });
                 this.$('.lightbox').fadeOut(500);
@@ -95,15 +79,11 @@ define([
         
         initialize: function() {
             _.bindAll.apply(_, [this].concat(_.functions(this)));
-            app.eventAggregator.bind('destroyTopic', this.onDestroyTopic);
-        },
-        
-        onBeforeRender: function() {
-            topics.fetch();
+            App.eventAggregator.bind('destroyTopic', this.onDestroyTopic);
         },
         
         onDestroyTopic: function(topic) {
-            topics.remove(topic);
+            this.collection.remove(topic);
         }
     });
     

@@ -8,4 +8,4 @@ exports.getPadBody = function(pid,done) {
         var body = str.replace(/^.*?<body[^>]*>(.*?)<\/body>.*?$/i,"$1");
         done(body);
     });
-}
+};

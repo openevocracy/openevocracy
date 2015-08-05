@@ -21,7 +21,7 @@
 </div>
 
 <div>
-    <div class="name">{{name}}</div>
+    <div class="name">{{name}} <strong class="body">{{#if body}}#body{{/if}}</strong></div>
     <div class="stats">
         {{#ifis stage STAGE_REJECTED}}
             rejected

@@ -4,6 +4,7 @@ define([
     'layouts/center_right',
     'views/blocks/navigation',
     'views/blocks/group_tabs',
+    'views/blocks/group_pads',
     'views/groups/collaborative',
     'views/groups/members',
     'models/group'
@@ -13,6 +14,7 @@ define([
     CenterRightLayout,
     NaviView,
     GroupTabsBlock,
+    GroupPadsBlock,
     CollabView,
     MembersView,
     Model
@@ -47,16 +49,11 @@ define([
                 groupTabsBlock.bind("group_tabs:show_members", this.show_members);
                 this.centerRightLayout.group_tabs.show(groupTabsBlock);
                 
+                $('#right').append('<div id="group-pads"></div>');
+                this.centerRightLayout.addRegion('group_pads','#group-pads');
+                var groupPadsBlock = new GroupPadsBlock({model:this.group});
+                this.centerRightLayout.group_pads.show(groupPadsBlock);
                 
-                /*$('#right').append('<div id="ourproposal"></div>');
-                this.centerRightLayout.addRegion('ourproposal','#ourproposal');
-                this.centerRightLayout.ourproposal.show(new OurProposalBlock({model:this.group}));
-                
-                $('#right').append('<div id="group-members"></div>');
-                this.centerRightLayout.addRegion('group_members','#group-members');
-                var groupMembersBlock = new GroupMembersBlock({model:this.group});
-                groupMembersBlock.bind("group_members:show_members", this.show_members);
-                this.centerRightLayout.group_members.show(groupMembersBlock);*/
             }.bind(this));
         },
         

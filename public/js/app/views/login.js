@@ -44,11 +44,10 @@ define([
         },
         
         onShow: function() {
-            /*if(App.session.logged_in) {
+            if(App.session.get('logged_in')) {
                 console.log('status: logged in');
                 $('#status').html('Online');
-            }*/
-            //console.log('asd');
+            }
         }
     });
     

@@ -15,17 +15,11 @@ define([
         },
         
         before: function( route, params ){
-            return true;
-            
-            // special case to handle when App has not been initialized yet
-            if(!App || !App.session)
-                return true;
-            
             if(App.session.get('logged_in') ||
-               route == 'login' || route == 'register')
+               route == '' || route == 'login' || route == 'register')
                 return true;
             
-            //this.navigate('login',true);
+            this.navigate('login',true);
             return false;
         }
     });

@@ -23,7 +23,7 @@
 
 .noti-topics span { background-image: url('../img/proposal.png'); }
 .noti-msg span { background-image: url('../img/bubble.png'); }
-.noti-reput span { background-image: url('../img/karma.png'); }
+.noti-reput span { background-image: url('../img/star.png'); }
 .settings span { background-image: url('../img/settings.png'); }
 
 .edit.active span { background-image: url('../img/save.png'); }
@@ -169,5 +169,5 @@
 
 #members .member-rep {
     padding-left: 28px;
-    background-image: url('../img/karma.png');
+    background-image: url('../img/star.png');
 }
