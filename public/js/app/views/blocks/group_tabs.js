@@ -15,12 +15,14 @@ define([
             'click #grpmem': function(e) {
                 if(e) e.preventDefault();
                 this.trigger("group_tabs:show_members");
-                this.$('#grpmem').toggleClass('active');
+                this.$('.barbtn').removeClass('active');
+                this.$('#grpmem').addClass('active');
             },
             'click #ourprop': function(e) {
                 if(e) e.preventDefault();
                 this.trigger("group_tabs:show_collab");
-                this.$('#ourprop').toggleClass('active');
+                this.$('.barbtn').removeClass('active');
+                this.$('#ourprop').addClass('active');
             }
         }
     });

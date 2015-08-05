@@ -18,28 +18,27 @@ define([
     
     var View = Marionette.ItemView.extend({
         template: Template,
+        tagName: 'section',
         className: "content",
         id: "topic-details",
 
         events: {
-            'click .open-desc': function(e) {
+            /*'click .open-desc': function(e) {
                 //alert(ht);
                 $('.desc').animate({height: ht + 'px'}, 500 );
                 $('.open-desc').slideUp(250);
-            },
+            },*/
             'click .edit': function(e) {
                 if($('.edit').hasClass('active')) {
                     $('.edit').removeClass('active');
                     $('.edit').prop('title', 'edit');
                     // etherpad
                     $('#editor').find('iframe').remove();
-                    var fetching = this.model.fetch();
-                    var that = this;
-                    fetching.done(function () {
-                        $('.desc').html(that.model.get('desc'));
+                    this.model.fetch().done(function () {
+                        $('.desc').html(this.model.get('body'));
                         $('.desc').show();
                         //$('.open-desc').show();
-                    });
+                    }.bind(this));
                     // title
                     this.model.set('name', $('#titleInput').val());
                     var titleHeading = '<h1 id="title">'+this.model.get('name')+'</h1>';

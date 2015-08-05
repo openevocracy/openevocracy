@@ -1,17 +1,10 @@
 var _ = require('underscore');
-var request = require('request');
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
+var utils = require('../utils');
 var requirejs = require('requirejs');
 var C = requirejs('public/js/app/constants');
-//var C = require('public/js/app/constants');
-/*var C = {
-    STAGE_REJECTED  : -1,
-    STAGE_SELECTION :  0,
-    STAGE_PROPOSAL  :  1,
-    STAGE_CONSENSUS :  2
-};*/
 
 function count_votes(response,tid) {
     db.collection('topic_votes').count( {'tid': tid}, function(err, count) {
@@ -118,15 +111,10 @@ function appendBasicTopicInfo(topic) {
 function appendExtendedTopicInfo(topic,uid,finishedTopic) {
     var tid = topic._id;
     
-    // get html export
-    var padurl = 'https://beta.etherpad.org/p/'+topic.pid+'/export/html';
-    request.get(padurl,
-        function(error, response, data) {
-            var str = data.replace(/\r?\n/g, "");
-            var body = str.replace(/^.*?<body[^>]*>(.*?)<\/body>.*?$/i,"$1");
-            topic.desc = body;
-            finishedTopic(topic);
-        });
+    utils.getPadBody(topic.pid,function done(body) {
+        topic.body = body;
+        finishedTopic(topic);
+    });
     
     // delete pad id if user is not owner, pid is removed from response
     if(topic.owner != uid)

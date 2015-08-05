@@ -2,6 +2,7 @@ var _ = require('underscore');
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
+var utils = require('../utils');
 
 exports.list = function(req, res) {
     db.collection('groups').find().toArray(function(err, groups) {
@@ -9,6 +10,16 @@ exports.list = function(req, res) {
         res.json(groups);
     });
 };
+
+function getProposalBody(participant) {
+    db.collection('proposals').findOne({ 'uid': participant._id },
+        function(err, proposal) {
+            utils.getPadBody(proposal.pid,
+                function (body) {
+                    participant.proposal_body = body;
+                });
+        });
+}
 
 // get group by id
 exports.query = function(req, res) {
@@ -44,6 +55,12 @@ exports.query = function(req, res) {
             toArray(function(err, users) {
                 group.participants = users;
                 finishedGroup();
+                
+                /*var finishedGroup_ = _.after(_. ,finishedGroup);
+                
+                _.each(group.participants,function () {
+                    getProposalBody();
+                });*/
             });
     });
 };

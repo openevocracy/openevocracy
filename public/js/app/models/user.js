@@ -16,7 +16,7 @@ define([
 
         url: function(){
             return '/json/user';
-        }
+        },
 
     });
     

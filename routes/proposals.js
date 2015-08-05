@@ -2,10 +2,12 @@ var _ = require('underscore');
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
+var utils = require('../utils');
 var requirejs = require('requirejs');
 var C = requirejs('public/js/app/constants');
 
 exports.query = function(req, res) {
+    console.log('req ' + JSON.stringify(req.params));
     var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.signedCookies.uid);
     
@@ -18,7 +20,12 @@ exports.query = function(req, res) {
             { $setOnInsert: {pid: ObjectId()}},
             { new: true, upsert: true },
             function(err, proposal) {
-                res.json(proposal);
+                // append pad body
+                utils.getPadBody(proposal.pid,
+                function(body) {
+                    proposal.body = body;
+                    res.json(proposal);
+                });
         });
     });
     var requestInvalid = function() {
@@ -26,8 +33,9 @@ exports.query = function(req, res) {
     }
     
     // check if topic is in proposal stage
+    console.log('tid ' + JSON.stringify(tid));
     db.collection('topics').findOne({ '_id': tid }, function(err, topic) {
-        if(C.STAGE_PROPOSAL == topic.stage)
+        if(topic.stage >= C.STAGE_PROPOSAL)
             requestValid();
         else
             requestInvalid();

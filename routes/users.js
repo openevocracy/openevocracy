@@ -30,6 +30,9 @@ exports.auth_wrapper = function(req, res, next) {
             // redirect to login
             // res.redirect("/#/login"); FIXME login server-sided possible? seems not (main.js:88)
             
+            // from https://vickev.com/?_escaped_fragment_=/article/authentication-in-single-page-applications-node-js-passportjs-angularjs#!/article/authentication-in-single-page-applications-node-js-passportjs-angularjs
+            res.sendStatus(401);
+            
             console.log('User authentication invalid');
             // res.json({ error: "Client has no valid login cookies." });
         }
@@ -120,7 +123,7 @@ exports.logout = function(req, res) {
     res.clearCookie('uid');
     res.clearCookie('name');
     res.clearCookie('auth_token');
-    res.json({ success: "User successfully logged out." });
+    res.sendStatus(200);
     
     console.log('User successfully logged out');
 };

@@ -1,9 +1,7 @@
 define([
-    'application',
     'Marionette',
     'hbs!templates/login'
     ], function(
-    app,
     Marionette,
     Template
     ) {
@@ -13,7 +11,7 @@ define([
         
         login: function (e) {
             if(this.$("#login-form")) { //.parsley('validate')){
-                app.session.login({
+                App.session.login({
                     name: this.$("#name").val(),
                     pass: this.$("#pass").val()
                 }, {
@@ -46,7 +44,7 @@ define([
         },
         
         onShow: function() {
-            /*if(app.session.logged_in) {
+            /*if(App.session.logged_in) {
                 console.log('status: logged in');
                 $('#status').html('Online');
             }*/

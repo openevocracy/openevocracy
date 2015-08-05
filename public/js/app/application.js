@@ -1,26 +1,25 @@
 define([
+  'underscore',
   'jquery',
   'Marionette',
   'layouts/application',
+  'models/session_test',
   'router'
 ], function (
+  _,
   $,
   Marionette,
   AppLayout,
+  Session,
   AuthRouter
   ) {
-    
-  // will be overwritten by main
-  var Router = Marionette.AppRouter.extend();
   
   var Application = Marionette.Application.extend({
-    layout: new AppLayout(),
-    router: new Router(),
-    
     // TODO wie in 4-backbone-login-master/public/router.js
     
-    // NOTE we cannot create session here because it does JSON calls
-    //session: new Session(),
+    session: new Session(),
+    layout: new AppLayout(),
+    router: new AuthRouter(),
 
     onStart: function() {
         $('body').prepend(App.layout.render().el);
@@ -30,10 +29,11 @@ define([
     }
   });
   
-    $.ajaxSetup({ cache: false });          // force ajax call on all browsers
-
-    // Global event aggregator
-    Application.eventAggregator = _.extend({}, Backbone.Events);
-
+  // force ajax call on all browsers
+  $.ajaxSetup({ cache: false });
+  
+  // Global event aggregator
+  Application.eventAggregator = _.extend({}, Backbone.Events);
+  
   return Application;
 });

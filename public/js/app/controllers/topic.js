@@ -2,9 +2,8 @@ define([
     'Marionette',
     'layouts/center_right',
     'views/blocks/navigation',
+    'views/blocks/topic_tabs',
     'views/topics/details',
-    'views/blocks/myproposal',
-    'views/blocks/mygroup',
     'views/blocks/statistics',
     'models/topic',
     'constants'
@@ -12,9 +11,8 @@ define([
     Marionette,
     CenterRightLayout,
     NaviView,
+    TopicTabsBlock,
     TopicView,
-    MyProposalView,
-    MyGroupView,
     StatisticsView,
     Model,
     C
@@ -35,17 +33,12 @@ define([
                 var topicView = new TopicView({model:topic});
                 centerRightLayout.center.show(topicView);
                 
-                if(topic.get('stage') >= C.STAGE_PROPOSAL) {
-                    $('#right').append('<div id="myproposal"></div>');
-                    centerRightLayout.addRegion('myproposal','#myproposal');
-                    centerRightLayout.myproposal.show(new MyProposalView({model:topic}));
-                }
-                
-                if(topic.get('stage') == C.STAGE_CONSENSUS && typeof topic.get('gid') != 'undefined') {
-                    $('#right').append('<div id="mygroup"></div>');
-                    centerRightLayout.addRegion('mygroup','#mygroup');
-                    centerRightLayout.mygroup.show(new MyGroupView({model:topic}));
-                }
+                $('#right').append('<div id="topic-tabs"></div>');
+                centerRightLayout.addRegion('topic_tabs','#topic-tabs');
+                var topicTabsBlock = new TopicTabsBlock({model:topic});
+                //topicTabsBlock.bind("group_tabs:show_collab", this.show_collab);
+                //topicTabsBlock.bind("group_tabs:show_members", this.show_members);
+                centerRightLayout.topic_tabs.show(topicTabsBlock);
                 
                 $('#right').append('<div id="statistics"></div>');
                 centerRightLayout.addRegion('statistics','#statistics');

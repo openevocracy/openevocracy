@@ -1,7 +1,7 @@
 define([
     'application',
     'Marionette',
-    'hbs!templates/blocks/mygroup'
+    'hbs!templates/blocks/proposal_tabs'
 ], function(
     app,
     Marionette,
@@ -9,11 +9,7 @@ define([
     ) {
     
     var View = Marionette.ItemView.extend({
-        template: Template,
-        
-        initialize: function() {
-            
-        }
+        template: Template
     });
     
     return View;

@@ -4,7 +4,7 @@ define([
     Backbone
     ) {
     var Model = Backbone.Model.extend({
-        idAttribute: '_id',
+        idAttribute: 'tid',
         urlRoot: '/json/proposal'
     });
     

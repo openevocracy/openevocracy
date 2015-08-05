@@ -21,7 +21,6 @@ define([
             this.user = new User({ });
         },
 
-
         url: function(){
             return '/json/auth';
         },
@@ -30,8 +29,6 @@ define([
         updateSessionUser: function( userData ){
             this.user.set( _.pick( userData, _.keys(this.user.defaults) ) );
         },
-
-
 
         /*
          * Check for session from API 
@@ -121,6 +118,11 @@ define([
         removeAccount: function(opts, callback, args){
             this.postAuth(_.extend(opts, { method: 'remove_account' }), callback);
         },
+        
+        sync: function() {
+            return false;
+            // do nothing
+        }
 
     });
     

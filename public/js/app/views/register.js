@@ -22,7 +22,7 @@ define([
         events: {
             'click #signup': function(e) {
                 if(this.$("#signup-form")/*.parsley('validate')*/){
-                    app.session.signup({
+                    App.session.signup({
                         name: this.$("#name").val(),
                         pass: this.$("#pass").val(),
                         email: this.$("#email").val()

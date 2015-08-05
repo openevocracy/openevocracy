@@ -13,10 +13,14 @@
       Marionette: '../vendor/backbone.marionette.min',
       handlebars: '../vendor/handlebars',
       ember: '../vendor/ember.min',
-      etherpad: '../vendor/etherpad',
-      Session: 'models/session',
-      User: 'models/user'
+      etherpad: '../vendor/etherpad'
     },
+    /*
+    shim: Configure the dependencies, exports, and custom initialization for
+    older, traditional "browser globals" scripts that do not use define() to
+    declare the dependencies and set a module value.
+    see http://requirejs.org/docs/api.html#config-shim
+    */
     shim: {
       jquery: {
         exports: 'jQuery'
@@ -33,7 +37,7 @@
         exports: 'BackboneRouteFilter'
       },
       Marionette: {
-        deps: ['jquery', 'underscore', 'backbone'],
+        deps: ['jquery', 'underscore', 'BackboneRouteFilter'],
         exports: 'Marionette'
       },
       handlebars: {
@@ -46,7 +50,7 @@
     }
   });
   
-  require(['underscore','backbone','Session','router'], function(_, Backbone, Session, AuthRouter) {
+  require(['underscore','backbone'], function(_, Backbone) {
     var modules = {
         core: 'modules/core'
     };
@@ -60,12 +64,6 @@
     });
 
     require(files_to_load, function(Application) {
-      
-      // Create a new session model and scope it to the app global
-      // This will be a singleton, which other modules can access
-      Application.session = new Session({});
-      //Application.router = new AuthRouter({});
-      
       var app = window.App = new Application();
       var module_names = _.keys(modules);
 
@@ -76,7 +74,7 @@
 
       /*// Check the auth status upon initialization,
       // before rendering anything or matching routes
-      Application.session.checkAuth({
+      app.session.checkAuth({
             // Start the backbone routing once we have captured a user's auth status
             complete: function() {
                 // HTML5 pushState for URLs without hashbangs

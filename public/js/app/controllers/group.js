@@ -35,10 +35,13 @@ define([
             App.layout.view.show(this.centerRightLayout);
             
             this.group.fetch().done(function () {
+                this.collabView = new CollabView({model:this.group});
+                this.membersView = new MembersView({model:this.group});
+                
                 this.show_collab();
                 
-                $('#right').append('<div id="tabs"></div>');
-                this.centerRightLayout.addRegion('group_tabs','#tabs');
+                $('#right').append('<div id="group-tabs"></div>');
+                this.centerRightLayout.addRegion('group_tabs','#group-tabs');
                 var groupTabsBlock = new GroupTabsBlock({model:this.group});
                 groupTabsBlock.bind("group_tabs:show_collab", this.show_collab);
                 groupTabsBlock.bind("group_tabs:show_members", this.show_members);
@@ -58,13 +61,11 @@ define([
         },
         
         show_collab: function() {
-            var collabView = new CollabView({model:this.group});
-            this.centerRightLayout.center.show(collabView);
+            this.centerRightLayout.center.show(this.collabView, { preventDestroy: true });
         },
         
         show_members: function() {
-            var membersView = new MembersView({model:this.group});
-            this.centerRightLayout.center.show(membersView);
+            this.centerRightLayout.center.show(this.membersView, { preventDestroy: true });
         }
         
     });

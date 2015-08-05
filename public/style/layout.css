@@ -207,6 +207,15 @@ header {
     padding-bottom: 3px;
 }
 
+/* ### TABS ### */
+
+.tabs-block .barbtn.active { background-color: #ccc; }
+.tabs-block .barbtn { border-bottom: none; }
+.tabs-block .last { border-bottom: 1px solid #e0e6ef; }
+.tabs-block .back { background-color: #eaeaea; }
+.tabs-block .back:hover { background-color: #e2e2e2; }
+
+
 /* ######################### */
 /* ###### F O O T E R ###### */
 /* ######################### */
