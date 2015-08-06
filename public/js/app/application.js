@@ -30,8 +30,5 @@ define([
     }
   });
   
-  // force ajax call on all browsers
-  $.ajaxSetup({ cache: false });
-  
   return Application;
 });

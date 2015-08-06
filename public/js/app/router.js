@@ -15,7 +15,7 @@ define([
         },
         
         before: function( route, params ){
-            if(App.session.get('logged_in') ||
+            if(App.session.is_logged_in() ||
                route == '' || route == 'login' || route == 'register')
                 return true;
             

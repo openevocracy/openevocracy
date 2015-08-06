@@ -123,12 +123,8 @@ function appendExtendedTopicInfo(topic,uid,with_details,finished) {
         });
     
     // delete pad id if user is not owner, pid is removed from response
-    console.log(typeof topic.owner + " " + typeof uid);
-    //if(!uid.equals(topic.owner)) {
-    if(topic.owner.valueOf() != uid.valueOf()) {
-        console.log( topic.owner + " != " + uid );
+    if(topic.owner.toString() != uid.toString())
         delete topic.pid;
-    } else { console.log( topic.owner + " != " + uid ); }
     
     // extract time created from id
     topic.timeCreated = tid.getTimestamp();
@@ -226,17 +222,24 @@ exports.list = function(req, res) {
 
 exports.update = function(req, res) {
     var topicNew = req.body;
+    var tid = ObjectId(topicNew._id);
+    var uid = ObjectId(req.signedCookies.uid);
     
-    db.collection('topics').findOne({ '_id': ObjectId(topicNew._id) }, function(err, topic) {
+    db.collection('topics').findOne({ '_id': tid }, function(err, topic) {
         // only the owner can update the topic
-        if(topic.owner != ObjectId(req.signedCookies.uid)) {
-            res.json(topic);
+        if(topic.owner.toString() != uid.toString()) {
+            res.sendStatus(403);
             return;
         }
         
+        topic.name = topicNew.name;
         db.collection('topics').update(
-            { '_id': topic._id }, { $set: {name: topicNew.name} }, 
-            {}, function (err, topic) {res.json(topic);});
+            { '_id': tid }, { $set: {name: topicNew.name} }, 
+            {},
+            function (err){
+                appendTopicInfo(topic,uid,true,function() {res.json(topic);});
+                manageTopicState(topic);
+            });
     });
 };
 
@@ -320,11 +323,7 @@ function updateTopicState(topic,stageStartedEntryName) {
 }
 
 exports.query = function(req, res) {
-    console.log(req.params.id);
-    
     db.collection('topics').findOne({ '_id': ObjectId(req.params.id) }, function(err, topic) {
-        console.log(topic.name);
-        
         appendTopicInfo(topic,ObjectId(req.signedCookies.uid),true,
             function(topic) {res.json(topic);});
         manageTopicState(topic);
@@ -342,12 +341,12 @@ exports.create = function(req, res) {
         // topic already exists
         if(count > 0 ) {
             console.log("Couldn't create new Topic! - Topic already exists")
-            res.json({});
+            res.sendStatus(409);
             return;
         }
         if(topic.name=="") {
             console.log("Couldn't create new Topic! - Topic Name is empty")
-            res.json({});
+            res.sendStatus(400);
             return;
         }
         
@@ -372,15 +371,19 @@ exports.create = function(req, res) {
 };
 
 exports.delete = function(req,res) {
-    db.collection('topics').findOne({ '_id': ObjectId(req.params.id) }, function(err, topic) {
+    var tid = ObjectId(req.params.id);
+    var uid = ObjectId(req.signedCookies.uid);
+    
+    db.collection('topics').findOne({ '_id': tid }, { 'owner': 1 },
+    function(err, topic) {
         // only the owner can delete the topic
-        if(topic.owner != ObjectId(req.signedCookies.uid)) {
-            res.json({deleted: false});
+        if(topic.owner.toString() != uid.toString()) {
+            res.sendStatus(401);
             return;
         }
         
-        db.collection('topics').removeById(topic._id, function() {
-            res.json({deleted: true});
+        db.collection('topics').removeById(tid, function() {
+            res.sendStatus(200);
         });
     });
 };

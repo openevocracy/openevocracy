@@ -6,18 +6,15 @@ define([
 
     var SessionModel = Backbone.Model.extend({
 
-        // Initialize with negative/empty defaults
-        // These will be overriden after the initial checkAuth
-        defaults: {
-            logged_in: false,
-            uid: ''
+        is_logged_in: function(){
+            return this.get('logged_in') || document.cookie;
         },
 
         initialize: function(){
             _.bindAll.apply(_, [this].concat(_.functions(this)));
 
             // Singleton user object
-            // Access or listen on this throughout any module with app.session.user
+            // Access or listen on this throughout any module with App.session.user
             this.user = new User({ });
         },
 
@@ -28,10 +25,8 @@ define([
 
         // Fxn to update user attributes after recieving API response
         updateSessionUser: function( userData ){
-            this.user.set( _.pick( userData, _.keys(this.user.defaults) ) );
+            this.user.set( userData );
         },
-
-
 
         /*
          * Check for session from API 
@@ -39,21 +34,21 @@ define([
          * and return a user object if authenticated
          */
         checkAuth: function(callback, args) {
-            var self = this;
             this.fetch({                                                                          // Check if there are tokens in localstorage
                 success: function(mod, res){
                     if(!res.error && res.user){
-                        self.updateSessionUser( res.user );
-                        self.set({ logged_in : true });
+                        this.updateSessionUser( res.user );
+                        this.set({ logged_in : true });
                         if('success' in callback) callback.success(mod, res);    
                     } else {
-                        self.set({ logged_in : false });
+                        this.set({ logged_in : false });
                         if('error' in callback) callback.error(mod, res);    
                     }
-                }, error:function(mod, res){
-                    self.set({ logged_in : false });
+                }.bind(this),
+                error:function(mod, res){
+                    this.set({ logged_in : false });
                     if('error' in callback) callback.error(mod, res);    
-                }
+                }.bind(this)
             }).complete( function(){
                 if('complete' in callback) callback.complete();
             });
@@ -66,7 +61,6 @@ define([
          * updating the user and session after receiving an API response
          */
         postAuth: function(opts, callback, args){
-            var self = this;
             var postData = _.omit(opts, 'method');
             //if(DEBUG) console.log(postData);
             $.ajax({
@@ -85,22 +79,22 @@ define([
                     if( !res.error ){
                         if(_.indexOf(['login', 'signup'], opts.method) !== -1){
                             
-                            self.updateSessionUser( res.user || {} );
-                            self.set({ uid: res.user.uid, logged_in: true });
+                            this.updateSessionUser( res.user || {} );
+                            this.set({ logged_in: true });
                         } else {
                             
-                            self.set({ logged_in: false });
+                            this.set({ logged_in: false });
                         }
                             
                         if( callback && 'success' in callback ) callback.success(res);
                     } else {
                         if( callback && 'error' in callback ) callback.error(res);
                     }
-                },
+                }.bind(this),
                 error: function(mod, res){
                     if(callback && 'error' in callback ) callback.error(res);
-                }
-            }).complete( function(){
+                }.bind(this)
+            }).complete( function(res){
                 if(callback && 'complete' in callback ) callback.complete(res);
             });
         },

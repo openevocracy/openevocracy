@@ -1,6 +1,5 @@
 define([
     'jquery',
-    'application',
     'Marionette',
     'etherpad',
     'hbs!templates/topics/details',
@@ -8,13 +7,12 @@ define([
     'jquerycountdown'
 ], function(
     $,
-    app,
     Marionette,
     etherpad,
     Template
     ) {
     
-    var ht = 0;
+    //var ht = 0;
     
     var View = Marionette.ItemView.extend({
         template: Template,
@@ -25,7 +23,7 @@ define([
         events: {
             /*'click .open-desc': function(e) {
                 //alert(ht);
-                $('.desc').animate({height: ht + 'px'}, 500 );
+                $('#body').animate({height: ht + 'px'}, 500 );
                 $('.open-desc').slideUp(250);
             },*/
             'click .edit': function(e) {
@@ -34,22 +32,24 @@ define([
                     $('.edit').prop('title', 'edit');
                     // etherpad
                     $('#editor').find('iframe').remove();
-                    this.model.fetch().done(function () {
-                        $('.desc').html(this.model.get('body'));
-                        $('.desc').show();
+                    /*this.model.fetch().done(function () {
+                        $('#body').html(this.model.get('body'));
+                        $('#body').show();
                         //$('.open-desc').show();
-                    }.bind(this));
+                    }.bind(this));*/
                     // title
                     this.model.set('name', $('#titleInput').val());
                     var titleHeading = '<h1 id="title">'+this.model.get('name')+'</h1>';
                     $('#titleInput').replaceWith(titleHeading);
-                    this.model.save();
                     
+                    // bidirectional server-sync
+                    // view will rerender automatically due to model change-event
+                    this.model.save();
                 } else {
                     $('.edit').addClass('active');
                     $('.edit').prop('title', 'leave editor mode and save changes');
                     // etherpad
-                    $('.desc').hide();
+                    $('#body').hide();
                     //$('.open-desc').hide();
                     $('#editor').pad({
                         'padId': this.model.get('pid'),
@@ -61,7 +61,6 @@ define([
                     // title
                     var inputField = '<input id="titleInput" class="simple-input" type="text" value="'+this.model.get('name')+'"></input>';
                     $('#title').replaceWith(inputField);
-                    
                 }
             },
             'click .del': function(e) {
@@ -70,12 +69,13 @@ define([
                     this.model.destroy({
                         wait: true,
                         success: function(model, res) {
-                            if(!res.deleted)
-                                alert('401: Unauthorized');
-                            
-                            app.eventAggregator.trigger("destroyTopic", model);
-                            window.location.hash = '/topics';
-                    }});
+                            App.eventAggregator.trigger("destroyTopic", model);
+                            // delete is a link and will automatically go to topics
+                        },
+                        error: function() {
+                            e.preventDefault();
+                        }
+                    });
                 }
             },
             'click .vote': function(e) {
@@ -105,9 +105,9 @@ define([
         onRender: function() {
             this.onAction();
             
-            /*ht = $('.desc').height();
+            /*ht = $('#body').height();
             if(ht > 300) {
-                $('.desc').height(200);
+                $('#body').height(200);
                 $('.open-desc').css("display", "block");
             }*/
         },
@@ -117,12 +117,6 @@ define([
         },
         
         onAction: function() {
-            // if user is owner, pid is in response
-            if(this.model.get('pid')) {
-                $('.right-pos').append('<button class="ico edit" title="edit"><span></span></button>');
-                $('.right-pos').append('<button class="ico del" title="delete"><span></span></button>');
-            }
-            
             //var date = Date.now() + (7*24*3600*1000);
             var date = this.model.get('nextStageDeadline');
             $('#timeremaining').countdown(date, function(event) {

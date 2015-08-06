@@ -83,18 +83,12 @@
                 else Backbone.history.start({ pushState: false, root: '/' });
             }
       });*/
-      
+
+      // force ajax call on all browsers
+      $.ajaxSetup({ cache: false });
+
       app.start();
       Backbone.history.start({ pushState: false, root: '/' });
-      
-      /*// All navigation that is relative should be passed through the navigate
-      // method, to be processed by the router. If the link has a `data-bypass`
-      // attribute, bypass the delegation completely.
-      $('#content-app').on("click", "a:not([data-bypass])", function(evt) {
-          evt.preventDefault();
-          var href = $(this).attr("href");
-          Application.router.navigate(href, { trigger : true, replace : false } );
-      });*/
     });
   });
 })();

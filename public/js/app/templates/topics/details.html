@@ -2,6 +2,13 @@
     <button class="ico join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span></span></button>
     <button class="ico vote{{#if voted}} active{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span></span></button>
     <!-- TODO in v0.2 <button class="ico merge" title="merge request"><span></span></button>-->
+    
+    {{#if pid}}
+    <button class="ico edit" title="edit"><span></span></button>
+    <form action="#/topics">
+        <button class="ico del" title="delete"><span></span></button>
+    </form>
+    {{/if}}
 </div>
 
 <div class="content-title">
@@ -12,10 +19,8 @@
     </div>
 </div>
 
-<div class="desc">{{{body}}}</div>
-<!--<div class="open-desc"><span>more</span></div>-->
-
-<div id="<edit></edit>or"></div>
+<div id="body">{{{body}}}</div>
+<div id="editor"></div>
 
 <!--<h2>Background</h2>
 <div id="references"></div>-->

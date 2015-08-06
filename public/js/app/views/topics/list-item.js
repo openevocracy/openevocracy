@@ -135,7 +135,6 @@ define([
                 //.on('finish.countdown', function(event) { this.model.fetch(); }.bind(this));
                 // FIXME Register model on-change event handler that resets the countdown when a new model is loaded.
             }
-            console.log(this.model.get('body'));
         }
     });
     
