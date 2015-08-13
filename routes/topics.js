@@ -122,13 +122,6 @@ function appendExtendedTopicInfo(topic,uid,with_details,finished) {
             finishedExtendedTopicInfo(topic);
         });
     
-    // delete pad id if user is not owner, pid is removed from response
-    if(topic.owner.toString() != uid.toString())
-        delete topic.pid;
-    
-    // extract time created from id
-    topic.timeCreated = tid.getTimestamp();
-    
     // append number of votes for this topic
     db.collection('topic_votes').count(
         {'tid': tid},
@@ -186,6 +179,12 @@ function appendExtendedTopicInfo(topic,uid,with_details,finished) {
                     finishedExtendedTopicInfo(topic);
                 });
         });
+    
+    // delete pad id if user is not owner, pid is removed from response
+    if(topic.owner.toString() != uid.toString())
+        delete topic.pid;
+    // extract time created from id
+    topic.timeCreated = tid.getTimestamp();
 }
 
 function appendTopicInfo(topic,uid,with_details,finished) {
