@@ -57,6 +57,7 @@
   });
   
   require(['underscore','backbone','handlebars'], function(_, Backbone, Handlebars) {
+    // register handlebars helper for equality conditions
     Handlebars.registerHelper('ifis', function(a, b, opts) {
           if(a == b) {
               return opts.fn(this);

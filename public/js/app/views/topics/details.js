@@ -1,7 +1,6 @@
 define([
     'jquery',
     'Marionette',
-    'handlebars',
     'etherpad',
     'hbs!templates/topics/details',
     'jquerycookie',
@@ -9,7 +8,6 @@ define([
 ], function(
     $,
     Marionette,
-    Handlebars,
     etherpad,
     Template
     ) {

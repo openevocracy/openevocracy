@@ -1,11 +1,9 @@
 define([
     'Marionette',
-    'handlebars',
     'hbs!templates/topics/list-item',
     'constants'
 ], function(
     Marionette,
-    Handlebars,
     Template,
     C
     ) {
