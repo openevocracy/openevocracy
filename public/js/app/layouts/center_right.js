@@ -9,6 +9,7 @@ define([
     var Layout = Marionette.LayoutView.extend({
         template: Template,
         id: 'center-right',
+        className: 'row',
         
         regions: {
             'center': '#center',

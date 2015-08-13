@@ -244,6 +244,8 @@ exports.update = function(req, res) {
 };
 
 function createGroups(topic) {
+    var tid = topic._id;
+    
     // constants
     var groupSize = 4.5; // group size is 4 or 5
     var limitSimpleRule = 50; // number of topic_participants (if more then x topic_participants, complex rule is used)
@@ -253,7 +255,7 @@ function createGroups(topic) {
     var groupMaxSize = (groupSize+0.5);
     
     // find topic_participants
-    db.collection('topic_participants').find({ 'tid': topic._id }).toArray(
+    db.collection('topic_participants').find({ 'tid': tid }).toArray(
     function(err, topic_participants) {
         var numTopicParticipants = topic_participants.length;
         
@@ -297,7 +299,7 @@ function createGroups(topic) {
             // create group itself
             db.collection('groups').insert({
                 '_id': gid,
-                'tid': topic._id,
+                'tid': tid,
                 'pid': ObjectId(),
                 'level': 0
             });
@@ -305,10 +307,17 @@ function createGroups(topic) {
             // create participants for this group
             _.each(group, function(uid) {
                 db.collection('group_participants').insert(
-                    {'gid':gid,'uid':uid},
+                    { 'gid': gid, 'uid': uid },
                     function(err, group_participant){
                         console.log('new group_participant');
                     });
+                
+                // add gid to proposal
+                // so we can identify it later
+                db.collection('proposals').update(
+                    { 'tid': tid, 'uid': uid },
+                    { $set: { 'gid': gid } },
+                    function() {});
             });
         });
     });

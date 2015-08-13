@@ -1,28 +1,32 @@
 <section class="content" id="register">
     
-    <div class="content-title">
-        <h1>Register</h1>
+    <div class="page-header">
+        <h2>Register</h2>
     </div>
     
     <p>Nice to have you with us!</p>
     
-    <form id="signup-form" class="form" data-validate="parsley">
-        <p>
-            <label for="name">Your ID:</label>
-            <input type="text" id="name" name="name" value="" readonly />
-            <button id="again">New ID!</button>
-        </p>
-        
-        <p>
-            <label for="email">Your email-address:</label>
-            <input type="email" id="email" name="email" placeholder="your e-mail" />
-        </p>
-        
-        <p>
-            <label for="pass">Your password:</label>
-            <input type="password" id="pass" name="pass" placeholder="choose password" />
-        </p>
+    <form id="signup-form" class="well" data-validate="parsley">
+        <fieldset>
+            <div class="form-group">
+                <label class="control-label" for="name">Your ID:</label>
+                <div class="row">
+                    <div class="col-md-10"><input class="form-control disabled" type="text" id="name" name="name" value="" readonly /></div>
+                    <button class="btn btn-info" id="again">New ID!</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="control-label" for="email">Your email-address:</label>
+                <input class="form-control" type="email" id="email" name="email" placeholder="your e-mail" />
+            </div>
+            
+            <div class="form-group">
+                <label class="control-label" for="pass">Your password:</label>
+                <input class="form-control" type="password" id="pass" name="pass" placeholder="choose password" />
+            </div>
+        </fieldset>
     </form>
     
-    <button id="signup">Register</button>
+    <button id="signup" class="btn btn-primary">Register</button>
 </section>

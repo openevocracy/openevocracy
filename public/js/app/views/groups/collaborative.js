@@ -1,12 +1,10 @@
 define([
     'jquery',
-    'application',
     'Marionette',
     'etherpad',
     'hbs!templates/groups/collaborative'
 ], function(
     $,
-    app,
     Marionette,
     etherpad,
     Template

@@ -1,9 +1,7 @@
 define([
-    'application',
     'Marionette',
     'hbs!templates/blocks/group_tabs'
 ], function(
-    app,
     Marionette,
     Template
     ) {
@@ -13,16 +11,16 @@ define([
         
         events: {
             'click #grpmem': function(e) {
-                if(e) e.preventDefault();
                 this.trigger("group_tabs:show_members");
-                this.$('.barbtn').removeClass('active');
+                this.$('.btn').removeClass('active');
                 this.$('#grpmem').addClass('active');
+                if(e) e.preventDefault();
             },
             'click #ourprop': function(e) {
-                if(e) e.preventDefault();
                 this.trigger("group_tabs:show_collab");
-                this.$('.barbtn').removeClass('active');
+                this.$('.btn').removeClass('active');
                 this.$('#ourprop').addClass('active');
+                if(e) e.preventDefault();
             }
         }
     });

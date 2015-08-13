@@ -55,7 +55,7 @@ exports.create_test_suite = function(req, res) {
     db.collection('topics').insert({
         '_id': tid,
         'name': 'TestTopic'+Date.now(),
-        'owner': req.signedCookies.uid,
+        'owner': ObjectId(req.signedCookies.uid),
         'pid': ObjectId(),
         'stage': C.STAGE_CONSENSUS,
         'level': 0,
@@ -80,6 +80,12 @@ exports.create_test_suite = function(req, res) {
     db.collection('group_participants').insert(
                   [{'gid':gid,'uid':u123},
                    {'gid':gid,'uid':ucarlo}],
+                  function (){});
+    
+    // create proposals for this group
+    db.collection('proposals').insert(
+                  [{'tid':tid,'gid':gid,'uid':u123},
+                   {'tid':tid,'gid':gid,'uid':ucarlo}],
                   function (){});
     
     res.send('successfull');

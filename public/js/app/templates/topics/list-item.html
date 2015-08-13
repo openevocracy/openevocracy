@@ -1,12 +1,12 @@
-<div class="progress stage{{stage}}"></div>
+<div class="stage stage{{stage}}"></div>
 
 <div class="link">
 
 <div class="right-pos">
     {{#ifis stage STAGE_SELECTION}}
     <div class="buttons">
-        <button class="ico join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span></span></button>
-        <button class="ico vote{{#if voted}} active{{/if}}" title="{{#if joined}}unvote{{else}}vote{{/if}}"><span></span></button>
+        <button class="btn btn-sm btn-default join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
+        <button class="btn btn-sm btn-default vote{{#if voted}} active{{/if}}" title="{{#if joined}}unvote{{else}}vote{{/if}}"><span class="fa fa-heart"></span></button>
     </div>
     {{else}}
         {{#ifis stage STAGE_REJECTED}}

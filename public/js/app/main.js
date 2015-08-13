@@ -13,7 +13,9 @@
       Marionette: '../vendor/backbone.marionette.min',
       handlebars: '../vendor/handlebars',
       ember: '../vendor/ember.min',
-      etherpad: '../vendor/etherpad'
+      etherpad: '../vendor/etherpad',
+      bootstrap:  '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
+      bootstrapcustom:  '../vendor/bootstrap.custom'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for
@@ -42,6 +44,9 @@
       },
       handlebars: {
         exports: 'Handlebars'
+      },
+      bootstrap : {
+        deps: ['jquery']
       }
     },
     hbs: {

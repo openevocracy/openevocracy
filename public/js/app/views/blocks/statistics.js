@@ -1,11 +1,9 @@
 define([
     'jquery',
-    'application',
     'Marionette',
     'hbs!templates/blocks/statistics'
 ], function(
     $,
-    app,
     Marionette,
     Template
     ) {

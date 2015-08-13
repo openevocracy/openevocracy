@@ -1,9 +1,7 @@
 define([
-    'application',
     'Marionette',
     'hbs!templates/blocks/navigation'
 ], function(
-    app,
     Marionette,
     Template
     ) {

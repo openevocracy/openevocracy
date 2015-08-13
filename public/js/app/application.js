@@ -4,7 +4,9 @@ define([
   'Marionette',
   'layouts/application',
   'models/session',
-  'router'
+  'router',
+  'bootstrap',
+  'bootstrapcustom'
 ], function (
   _,
   $,
@@ -15,13 +17,11 @@ define([
   ) {
   
   var Application = Marionette.Application.extend({
-    // TODO wie in 4-backbone-login-master/public/router.js
-    
     session: new Session(),
     layout: new AppLayout(),
     router: new AuthRouter(),
     eventAggregator: _.extend({}, Backbone.Events),
-
+    
     onStart: function() {
         $('body').prepend(App.layout.render().el);
         //Backbone.history.start({ pushState: false, root: '/' });

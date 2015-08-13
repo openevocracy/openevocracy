@@ -2,16 +2,19 @@
 <html>
     <head>
         <title>OpenEvocracy</title>
-        <!-- Stylesheets -->
-        <link rel="stylesheet" href="/style/basic.css">
-        <link rel="stylesheet" href="/style/layout.css">
-        <link rel="stylesheet" href="/style/custom.css">
         <link rel="shortcut icon" href="/img/favicon.ico">
-        <!--Scripts -->
-        <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+        <!--Meta -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Stylesheets -->
+        <link rel="stylesheet" href="/style/bootstrap.superhero.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/style/custom.css">
     </head>
     <body>
-        <div id="loading"></div>
+        <div id="loading">
+            <p class="fa fa-cog fa-spin"></p>
+            <p class="text-muted">Loading ...</p>
+        </div>
         <script type="text/javascript" data-main="/js/app/main" src="/js/vendor/require.js"></script>
     </body>
 </html>

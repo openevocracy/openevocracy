@@ -29,6 +29,8 @@ define([
             'click .edit': function(e) {
                 if($('.edit').hasClass('active')) {
                     $('.edit').removeClass('active');
+                    $('.edit span').removeClass('fa-floppy-o');
+                    $('.edit span').addClass('fa-pencil');
                     $('.edit').prop('title', 'edit');
                     // etherpad
                     $('#editor').find('iframe').remove();
@@ -47,6 +49,8 @@ define([
                     this.model.save();
                 } else {
                     $('.edit').addClass('active');
+                    $('.edit span').addClass('fa-floppy-o');
+                    $('.edit span').removeClass('fa-pencil');
                     $('.edit').prop('title', 'leave editor mode and save changes');
                     // etherpad
                     $('#body').hide();

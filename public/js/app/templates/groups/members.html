@@ -6,9 +6,19 @@
 	
 	<div>
 		<ul>
-			<li class="list-head"><span>User's document</span><span>Quality of document</span><span>User's reputation</span><span>Integration skill</span></li>
+			<li class="list-head">
+				<span>User</span>
+				<span>User's reputation</span>
+				<span>Quality of document</span>
+				<span>Integration skill</span>
+			</li>
 			{{#each participants}}
-	        <li><a class="member-name">{{this.name}}</a><span></span><a class="member-rep">0.58/3.412</a><span></span></li>
+	        <li>
+	        	<a class="member-name">{{this.name}}</a>
+	        	<a class="member-rep">0.58/3.412</a>
+	        	<a class="member-proposal" data-member-id="{{this._id}}">Show</a>
+	        	<span></span>
+	        </li>
 	    	{{/each}}
     	</ul>
     </div>

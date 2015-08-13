@@ -1,38 +1,52 @@
-/*#content .ico {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    line-height: 0;
-    background-color: transparent;
-    background-position: center center;
-    background-repeat: no-repeat;
-}*/
+body { padding: 50px 0; }
+.page-header { margin-top: 0; }
+.right-pos { float: right; }
+.active .fa { color: #5cb85c; }
+.btn-block { text-align: left; }
 
-/*#content .ico span { display: none; }*/
-
-#block-manage button {
-    width: 80px;
+#logo {
+    padding-left: 40px;
+    background: transparent url(../img/logo20px.png) 15px center no-repeat;
 }
 
-.add span { background-image: url('../img/add.png'); }
-.edit span { background-image: url('../img/edit.png'); }
-.del span { background-image: url('../img/del.png'); }
-.join span { background-image: url('../img/participate.png'); }
-.vote span { background-image: url('../img/vote.png'); }
-.merge span { background-image: url('../img/merge.png'); }
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding-top: 250px;
+    /*background: #333 url('../img/ladekreis4.gif') center center no-repeat;*/
+    text-align: center;
+    /*vertical-align: middle;*/
+}
 
-.noti-topics span { background-image: url('../img/proposal.png'); }
-.noti-msg span { background-image: url('../img/bubble.png'); }
-.noti-reput span { background-image: url('../img/star.png'); }
-.settings span { background-image: url('../img/settings.png'); }
+#loading .fa { font-size: 40px; }
 
-.edit.active span { background-image: url('../img/save.png'); }
-.ico.active { background: #dfb none; /*#fdb*/ box-shadow: inset 0 0 8px 2px rgba(0,0,0,0.2); }
+/* ############################### */
+/* ##### N A V I G A T I O N ##### */
+/* ############################### */
 
-#mygroup .barbtn { background-image: url('../img/bubble.png'); }
-.barbtn.people { background-image: url('../img/participate.png'); }
-.barbtn.back { background-image: url('../img/back.png'); }
-.barbtn.foreward { background-image: url('../img/foreward.png'); }
+#navigation li { list-style: none; }
+#navigation li a:before { content: '» '; }
+#navigation li a { display: block; font-size: 0.9em; line-height: 1.7em; z-index: 1; }
+#navigation li a:hover { color: #555; }
+
+/* ######################### */
+/* ##### C O N T E N T ##### */
+/* ######################### */
+
+.sub-info { margin-top: -20px; margin-bottom: 20px; }
+
+/* ######################### */
+/* ###### F O O T E R ###### */
+/* ######################### */
+
+footer { font-size: 0.8em; text-align: center; }
+#footmenu { display: inline-block; margin: 0; }
+#footmenu li { list-style: none; float: left; }
+#footmenu a { display: inline-block; padding: 0 0.3em; line-height: 40px; }
+
 
 /* ############## */
 /* ### TOPICS ### */
@@ -40,44 +54,17 @@
 
 /* ### TOPICS-LIST ### */
 
-#topic-list { border-top: 1px solid #e0e6ef; }
-
-#topic-list .topic-item {
-    height: 39px;
-    border-bottom: 1px solid #e0e6ef;
-    background-color: #f8f8f8;
-}
-
-#topic-list .link {
-    padding: 2px 0;
-    cursor: pointer;
-}
-
-#topic-list .link:hover {
-    background-color: #f0f0f0;
-}
-
+#topic-list .list-group-item { padding: 0; height: 41px; }
+#topic-list .link { padding: 3px 0; cursor: pointer; }
+#topic-list .link:hover { background-color: #485563; }
 #topic-list .time-remaining { padding-right: 5px; font-size: 12px; }
 #topic-list .time-remaining div { text-align: right; }
+#topic-list .stats { font-size: 11px; line-height: 14px; }
+#topic-list .name { font-size: 17px; line-height: 21px; }
 
-#topic-list .stats {
-    font-size: 11px;
-    line-height: 14px;
-}
+/* Stage colors */
 
-#topic-list .name {
-    text-shadow: 0 1px rgba(0,0,0,0.2);
-    font-size: 17px;
-    line-height: 21px;
-}
-
-#topic-list button.ico {
-    margin-top: 3px;
-}
-
-/* Progress Colors */
-
-#topic-list .progress {
+#topic-list .stage {
     height: 100%;
     width: 5px;
     margin-right: 5px;
@@ -92,10 +79,6 @@
 #topic-list .stage3 { background-color: #ffed73; }
 
 /* ### TOPICS-DETAILS ### */
-
-#topic-details h1 {
-    margin-bottom: 0.1em;
-}
 
 #topic-details .desc {
     overflow: hidden;

@@ -10,7 +10,7 @@ define([
     var View = Marionette.ItemView.extend({
         template: Template,
         tagName: 'div',
-        className: 'topic-item',
+        className: 'list-group-item',
         
         events: {
             'click .del': function() {

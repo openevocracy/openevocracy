@@ -1,10 +1,8 @@
 define([
-    'application',
     'Marionette',
     'hbs!templates/blocks/topic_tabs',
     'constants'
 ], function(
-    app,
     Marionette,
     Template,
     C
