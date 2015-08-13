@@ -400,9 +400,10 @@ exports.delete = function(req,res) {
 exports.vote = function(req, res) {
     var topic_vote = req.body;
     
+    // assemble vote
     topic_vote.tid = ObjectId(topic_vote.tid);
-    // get user id and put into vote
     topic_vote.uid = ObjectId(req.signedCookies.uid);
+    
     // TODO use findAndModify as in proposal
     db.collection('topic_votes').count(topic_vote, function(err, count) {
         // do not allow user to vote twice for the same topic
@@ -423,8 +424,8 @@ exports.unvote = function(req, res) {
     var topic_vote = req.body;
     
     topic_vote.tid = ObjectId(topic_vote.tid);
-    // get user id and put into vote
     topic_vote.uid = ObjectId(req.signedCookies.uid);
+    
     // remove entry
     db.collection('topic_votes').remove(topic_vote,true,
         function(vote,err) {
@@ -436,9 +437,10 @@ exports.unvote = function(req, res) {
 exports.join = function(req, res) {
     var topic_participant = req.body;
     
+    // assemble participant
     topic_participant.tid = ObjectId(topic_participant.tid);
-    // get user id and put into vote
     topic_participant.uid = ObjectId(req.signedCookies.uid);
+    
     // TODO use findAndModify as in proposal
     db.collection('topic_participants').count( topic_participant, function(err, count) {
         // do not allow user to vote twice for the same topic
@@ -458,8 +460,8 @@ exports.unjoin = function(req, res) {
     var topic_participant = req.body;
     
     topic_participant.tid = ObjectId(topic_participant.tid);
-    // get user name and put into vote
     topic_participant.uid = ObjectId(req.signedCookies.uid);
+    
     // remove entry
     db.collection('topic_participants').remove(topic_participant,true,
         function(member,err) {
