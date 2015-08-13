@@ -1,18 +1,19 @@
 (function() {
   requirejs.config({
     paths: {
-      text: '../vendor/text',
-      hbs: '../vendor/hbs',
-      jquery: '../vendor/jquery.min',
+      // CDN POLICY use "http://osscdn.com/#/"
+      text: '//oss.maxcdn.com/requirejs.text/2.0.12/text.min',
+      hbs: '../vendor/hbs', // FIXME
+      jquery: '//oss.maxcdn.com/jquery/3.0.0-alpha1/jquery.min',
       jquerycookie: '../vendor/jquery.cookie.min',
       jquerycountdown: '../vendor/jquery.countdown.min',
-      underscore: '../vendor/underscore-min',
-      backbone: '../vendor/backbone-min',
-      //Backbone: '../vendor/backbone-min',
+      underscore: '//oss.maxcdn.com/underscorejs/1.8.3/underscore-min',
+      backbone: '//oss.maxcdn.com/backbonejs/1.2.1/backbone-min',
+      BackboneDeepmodel: '//oss.maxcdn.com/backbone.deepmodel/0.10.4/deep-model.min',
       BackboneRouteFilter: '../vendor/backbone.routefilter.min',
-      Marionette: '../vendor/backbone.marionette.min',
-      handlebars: '../vendor/handlebars',
-      ember: '../vendor/ember.min',
+      Marionette: '//oss.maxcdn.com/backbone.marionette/2.4.2/backbone.marionette.min',
+      handlebars: '//oss.maxcdn.com/handlebarsjs/3.0.3/handlebars.min',
+      ember: '//oss.maxcdn.com/emberjs/2.0.0/ember.min',
       etherpad: '../vendor/etherpad',
       bootstrap:  '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
       bootstrapcustom:  '../vendor/bootstrap.custom'
@@ -55,15 +56,21 @@
     }
   });
   
-  require(['underscore','backbone'], function(_, Backbone) {
+  require(['underscore','backbone','handlebars'], function(_, Backbone, Handlebars) {
+    Handlebars.registerHelper('ifis', function(a, b, opts) {
+          if(a == b) {
+              return opts.fn(this);
+          } else {
+              return opts.inverse(this);
+          }
+    });
+    
     var modules = {
         core: 'modules/core'
     };
-
     var files_to_load = [
       'application'
     ];
-
     _.each(modules, function(module) {
       files_to_load.push(module);
     });

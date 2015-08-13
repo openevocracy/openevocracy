@@ -50,18 +50,17 @@ define([
                     name: this.$('.topic-name').val()
                 });
                 
-                //check if edited model is valid before performing changes
                 topic.save({}, {
                     wait: true,
                     success: function(model,res) {
-                        if(!res._id) {
-                            alert("Couldn't create topic! Topic name already exists.");
-                            return;
-                        }
                         topic.set(res);
                         this.collection.add(topic);
-                    }.bind(this)
+                    }.bind(this),
+                    error:  function(model,res) {
+                        alert("Topic creation failed!");
+                    }
                 });
+                
                 this.$('.lightbox').fadeOut(500);
                 this.render();
             },

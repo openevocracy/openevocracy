@@ -1,6 +1,7 @@
 define([
     'jquery',
     'Marionette',
+    'handlebars',
     'etherpad',
     'hbs!templates/topics/details',
     'jquerycookie',
@@ -8,6 +9,7 @@ define([
 ], function(
     $,
     Marionette,
+    Handlebars,
     etherpad,
     Template
     ) {
@@ -93,15 +95,6 @@ define([
         },
         
         initialize: function() {
-            // define new helper for template
-            Handlebars.registerHelper('ifis', function(a, b, opts) {
-                if(a == b) {
-                    return opts.fn(this);
-                } else {
-                    return opts.inverse(this);
-                }
-            });
-            
             // render on change
             this.model.on('change', this.render, this);
         },

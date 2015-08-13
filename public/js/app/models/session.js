@@ -49,7 +49,7 @@ define([
                     this.set({ logged_in : false });
                     if('error' in callback) callback.error(mod, res);    
                 }.bind(this)
-            }).complete( function(){
+            }).ajaxComplete( function(){
                 if('complete' in callback) callback.complete();
             });
         },
@@ -94,7 +94,7 @@ define([
                 error: function(mod, res){
                     if(callback && 'error' in callback ) callback.error(res);
                 }.bind(this)
-            }).complete( function(res){
+            }).ajaxComplete( function(res){
                 if(callback && 'complete' in callback ) callback.complete(res);
             });
         },

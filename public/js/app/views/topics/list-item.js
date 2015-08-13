@@ -1,9 +1,11 @@
 define([
     'Marionette',
+    'handlebars',
     'hbs!templates/topics/list-item',
     'constants'
 ], function(
     Marionette,
+    Handlebars,
     Template,
     C
     ) {
@@ -109,16 +111,6 @@ define([
         },
         
         initialize: function() {
-            Handlebars.registerHelper('ifis', function(a, b, opts) {
-                if(a == b) {
-                    return opts.fn(this);
-                } else {
-                    return opts.inverse(this);
-                }
-            });
-            //console.log(this.model.get('timeCreated'));
-            //console.log('stage: '+this.model.get('stage'));
-            
             // append model
             this.model.set(C); // append constants to model
             this.model.set('creationDate', this.formatDate(this.model.get('timeCreated')));
