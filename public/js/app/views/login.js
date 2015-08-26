@@ -19,10 +19,12 @@ define([
                         //if(DEBUG) console.log(mod, res);
                         
                         // Redirect
-                        window.location.href = "#/topics";
+                        //window.location.href = "#/topics";
+                        
+                        App.eventAggregator.trigger('App:logged_in');
                     },
                     error: function(mod, res){
-                        //if(DEBUG) console.log("ERROR", mod, res);
+                        e.preventDefault();
                     }
                 });
             } else {
@@ -38,7 +40,7 @@ define([
                 }
             },
             'click #log': function(e) {
-                if(e) e.preventDefault();
+                //if(e) e.preventDefault();
                 this.login(e);
             }
         },

@@ -2,7 +2,6 @@ define([
   'underscore',
   'jquery',
   'Marionette',
-  'layouts/application',
   'models/session',
   'router',
   'bootstrap',
@@ -11,23 +10,60 @@ define([
   _,
   $,
   Marionette,
-  AppLayout,
   Session,
-  AuthRouter
+  Router
   ) {
   
   var Application = Marionette.Application.extend({
     session: new Session(),
-    layout: new AppLayout(),
-    router: new AuthRouter(),
+    router: new Router(),
     eventAggregator: _.extend({}, Backbone.Events),
     
     onStart: function() {
-        $('body').prepend(App.layout.render().el);
-        //Backbone.history.start({ pushState: false, root: '/' });
+        if(this.session.is_logged_in())
+            this.loadCoreModule();
+        else
+            this.loadSplashModule();
+        
+        // load splash module on login
+        this.eventAggregator.on('App:logged_in',this.loadCoreModule.bind(this), true);
         
         $('#loading').fadeOut(500);
-    }
+    },
+    
+    render: function() {
+        $('#layout').empty();
+        $('#layout').prepend(this.layout.render().el);
+        
+        // history should be started when all routes are defined        
+        if(!Backbone.history.started)
+            Backbone.history.start({ pushState: false, root: '/' });
+    },
+    
+    loadCoreModule: function() {
+        require(['modules/core','layouts/application'],
+          function(CoreModule,AppLayout) {
+            this.module('core',CoreModule);
+            this.layout = new AppLayout();
+            
+            // render the app
+            this.render();
+          }.bind(this));
+    },
+    
+    loadSplashModule: function() {
+        require(['modules/splash','layouts/splash'],
+          function(SplashModule,SplashLayout) {
+            this.module('core',SplashModule);
+            this.layout = new SplashLayout();
+          
+            // render the app
+            this.render();
+            
+            // preload core module and app layout
+            require(['modules/core','layouts/application']);
+          }.bind(this));
+      }
   });
   
   return Application;

@@ -16,6 +16,7 @@ define([
                 topics.fetch().done(function () {
                     /* ### LEFT ### */
                     var naviView = new NaviView();
+                    /*console.log(sidebar);*/
                     App.layout.sidebar.show(naviView);
                     
                     /* ### CONTENT RIGHT ### */

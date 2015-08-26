@@ -1,13 +1,15 @@
 define([
     'underscore',
+    'jquery',
     'backbone',
-    'models/user'
-], function(_, Backbone, User){
+    'models/user',
+    'jquerycookie'
+], function(_, $, Backbone, User){
 
     var SessionModel = Backbone.Model.extend({
 
         is_logged_in: function(){
-            return this.get('logged_in') || document.cookie;
+            return this.get('logged_in') || $.cookie('auth_token');
         },
 
         initialize: function(){
@@ -49,7 +51,7 @@ define([
                     this.set({ logged_in : false });
                     if('error' in callback) callback.error(mod, res);    
                 }.bind(this)
-            }).ajaxComplete( function(){
+            }).complete( function(){
                 if('complete' in callback) callback.complete();
             });
         },
@@ -94,7 +96,7 @@ define([
                 error: function(mod, res){
                     if(callback && 'error' in callback ) callback.error(res);
                 }.bind(this)
-            }).ajaxComplete( function(res){
+            }).complete( function(res){
                 if(callback && 'complete' in callback ) callback.complete(res);
             });
         },

@@ -15,12 +15,14 @@ define([
         },
         
         before: function( route, params ){
-            if(App.session.is_logged_in() ||
+            return true;
+            
+            /*if(App.session.is_logged_in() ||
                route == '' || route == 'login' || route == 'register')
                 return true;
             
             this.navigate('login',true);
-            return false;
+            return false;*/
         }
     });
 

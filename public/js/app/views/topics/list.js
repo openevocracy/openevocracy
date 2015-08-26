@@ -79,6 +79,7 @@ define([
         initialize: function() {
             _.bindAll.apply(_, [this].concat(_.functions(this)));
             App.eventAggregator.bind('destroyTopic', this.onDestroyTopic);
+            $('#nav-tpc').addClass('active'); /* FIXME more general solution? */
         },
         
         onDestroyTopic: function(topic) {

@@ -27,10 +27,10 @@ body { padding: 50px 0; }
 /* ##### N A V I G A T I O N ##### */
 /* ############################### */
 
-#navigation li { list-style: none; }
+/*#navigation li { list-style: none; }
 #navigation li a:before { content: '» '; }
 #navigation li a { display: block; font-size: 0.9em; line-height: 1.7em; z-index: 1; }
-#navigation li a:hover { color: #555; }
+#navigation li a:hover { color: #555; }*/
 
 /* ######################### */
 /* ##### C O N T E N T ##### */
