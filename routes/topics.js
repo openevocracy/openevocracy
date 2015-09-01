@@ -301,7 +301,7 @@ function createGroups(topic) {
                 'tid': tid,
                 'pid': ObjectId(),
                 'level': 0
-            });
+            }, function() {});
             
             // create participants for this group
             _.each(group, function(uid) {

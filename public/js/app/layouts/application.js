@@ -13,6 +13,12 @@ define([
         regions: {
             'view': '#view',
             'sidebar': '#sidebar'
+        },
+        
+        events: {
+            'click #logout': function (e) {
+                App.eventAggregator.trigger('App:logged_out');
+            }
         }
     });
     

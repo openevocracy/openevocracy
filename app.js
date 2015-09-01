@@ -83,12 +83,12 @@ app.get("/json/auth", users.auth );
 app.post("/json/auth/login", users.login );
 // creates a user
 app.post("/json/auth/signup", users.signup );
-// POST /api/auth/logout
+// POST /json/auth/logout
 // @desc: logs out a user, clearing the signed cookies
-app.post("/api/auth/logout", users.logout );
-/*// POST /api/auth/remove_account
+app.post("/json/auth/logout", users.logout );
+/*// POST /json/auth/remove_account
 // @desc: deletes a user
-app.post("/api/auth/remove_account", users.delete );*/
+app.post("/json/auth/remove_account", users.delete );*/
 
 // ###################
 // ###   T E S T   ###

@@ -17,7 +17,7 @@
 </div>
 
 <p class="text-muted sub-info">
-    <span>{{stageName}} stage{{#ifis stage 2}} in level{{level}}{{/ifis}}, next {{#ifis stage 2}}level{{else}}stage{{/ifis}} in <span id="timeremaining">{{timeRemaining}}</span></span></span>
+    <span>{{stageName}} stage{{#ifis stage STAGE_CONSENSUS}} in level{{level}}{{/ifis}}, next {{#ifis stage STAGE_CONSENSU}}level{{else}}stage{{/ifis}} in <span id="timeremaining">{{timeRemaining}}</span></span></span>
 </p>
 
 <div id="body">{{{body}}}</div>

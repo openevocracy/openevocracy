@@ -4,6 +4,8 @@ define([
   'Marionette',
   'models/session',
   'router',
+  'layouts/splash',
+  'layouts/application',
   'bootstrap',
   'bootstrapcustom'
 ], function (
@@ -11,7 +13,9 @@ define([
   $,
   Marionette,
   Session,
-  Router
+  Router,
+  SplashLayout,
+  AppLayout
   ) {
   
   var Application = Marionette.Application.extend({
@@ -20,45 +24,64 @@ define([
     eventAggregator: _.extend({}, Backbone.Events),
     
     onStart: function() {
+        _.bindAll.apply(_, [this].concat(_.functions(this)));
+        
         if(this.session.is_logged_in())
-            this.loadCoreModule();
+            this.loadCoreModule(this.startHistory);
         else
-            this.loadSplashModule();
+            this.loadSplashModule(this.startHistory);
         
         // load splash module on login
-        this.eventAggregator.on('App:logged_in',this.loadCoreModule.bind(this), true);
+        this.eventAggregator.on('App:logged_in',this.loadCoreModule.bind(this,this.onLogin), true);
+        this.eventAggregator.on('App:logged_out',this.onLogout, true);
         
         $('#loading').fadeOut(500);
     },
     
-    render: function() {
-        $('#layout').empty();
-        $('#layout').prepend(this.layout.render().el);
-        
-        // history should be started when all routes are defined        
-        if(!Backbone.history.started)
-            Backbone.history.start({ pushState: false, root: '/' });
+    startHistory: function() {
+        Backbone.history.start({ pushState: false, root: '/' });
     },
     
-    loadCoreModule: function() {
-        require(['modules/core','layouts/application'],
-          function(CoreModule,AppLayout) {
+    onLogin: function() {
+        this.router.navigate('topics', true);
+    },
+    
+    onLogout: function() {
+        this.session.logout({});
+        this.setSplashLayout();
+    },
+    
+    setAppLayout: function() {
+        this.layout = new AppLayout();
+        
+        $('#layout').empty();
+        $('#layout').prepend(this.layout.render().el);
+    },
+    
+    setSplashLayout: function() {
+        this.layout = new SplashLayout();
+        
+        $('#layout').empty();
+        $('#layout').prepend(this.layout.render().el);
+    },
+    
+    loadCoreModule: function(callback) {
+        require(['modules/core'],
+          function(CoreModule) {
             this.module('core',CoreModule);
-            this.layout = new AppLayout();
+            this.setAppLayout();
             
-            // render the app
-            this.render();
+            callback();
           }.bind(this));
     },
     
-    loadSplashModule: function() {
-        require(['modules/splash','layouts/splash'],
-          function(SplashModule,SplashLayout) {
+    loadSplashModule: function(callback) {
+        require(['modules/splash'],
+          function(SplashModule) {
             this.module('core',SplashModule);
-            this.layout = new SplashLayout();
-          
-            // render the app
-            this.render();
+            this.setSplashLayout();
+            
+            callback();
             
             // preload core module and app layout
             require(['modules/core','layouts/application']);

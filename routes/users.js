@@ -104,9 +104,6 @@ exports.signup = function(req, res) {
             res.json({ error: "Error while trying to register user " + JSON.stringify(user) });
             console.log(err);
         } else {
-            // redirect to topics
-            res.redirect("/#/topics");
-            
             console.log('Saved user ' + JSON.stringify(user));
             res.cookie('uid', user._id, { signed: true, maxAge: config.cookieMaxAge });
             res.cookie('name', user.name, { signed: true, maxAge: config.cookieMaxAge });

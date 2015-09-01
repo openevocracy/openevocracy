@@ -16,11 +16,6 @@ define([
                     pass: this.$("#pass").val()
                 }, {
                     success: function(mod, res){
-                        //if(DEBUG) console.log(mod, res);
-                        
-                        // Redirect
-                        //window.location.href = "#/topics";
-                        
                         App.eventAggregator.trigger('App:logged_in');
                     },
                     error: function(mod, res){
@@ -32,14 +27,16 @@ define([
                 //if(DEBUG) console.log("Did not pass clientside validation");
             }
         },
-    
+        
         events: {
             'keypress #pass': function(e) {
                 if (e.which == 13) {
                     this.login(e);
+                    // prevent form action
+                    if(e) e.preventDefault();
                 }
             },
-            'click #log': function(e) {
+            'click #login': function(e) {
                 //if(e) e.preventDefault();
                 this.login(e);
             }

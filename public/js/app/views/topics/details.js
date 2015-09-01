@@ -3,13 +3,15 @@ define([
     'Marionette',
     'etherpad',
     'hbs!templates/topics/details',
+    'constants',
     'jquerycookie',
     'jquerycountdown'
 ], function(
     $,
     Marionette,
     etherpad,
-    Template
+    Template,
+    C
     ) {
     
     //var ht = 0;
@@ -93,6 +95,7 @@ define([
         },
         
         initialize: function() {
+            this.model.set(C);
             // render on change
             this.model.on('change', this.render, this);
         },
