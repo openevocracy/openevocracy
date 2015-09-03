@@ -20,49 +20,15 @@ define([
             'click .join': function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                
-                if(this.model.get('joined')) {
-                    // if we have already joined then unjoin (leave again)
-                    $.post('/json/topic-unjoin',
-                           {'tid':this.model.get('_id')},
-                           function(data,status) {
-                               this.model.set('participants',data);
-                               this.model.set('joined',0);
-                               this.render();
-                           }.bind(this));
-                } else {
-                    $.post('/json/topic-join',
-                           {'tid':this.model.get('_id')},
-                           function(data,status) {
-                               this.model.set('participants',data);
-                               this.model.set('joined',1);
-                               this.render();
-                           }.bind(this));
-                }
+                // if we have already joined then unjoin (leave after join)
+                this.model.setJoined(!this.model.get('joined'));
             },
             // toggle vote
             'click .vote': function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                
-                if(this.model.get('voted')) {
-                    // if we have already voted then unvote
-                    $.post('/json/topic-unvote',
-                           {'tid':this.model.get('_id')},
-                           function(data,status) {
-                               this.model.set('votes',data);
-                               this.model.set('voted',0);
-                               this.render();
-                           }.bind(this));
-                } else {
-                    $.post('/json/topic-vote',
-                           {'tid':this.model.get('_id')},
-                           function(data,status) {
-                               this.model.set('votes',data);
-                               this.model.set('voted',1);
-                               this.render();
-                           }.bind(this));
-                }
+                // if we have already voted then unvote
+                this.model.setVoted(!this.model.get('voted'));
             },
             'click .participate': function(e) {
                 e.stopPropagation();
@@ -75,14 +41,6 @@ define([
                 
                 $(".lightbox").fadeIn(500);
             },
-            // 'click .save': function(e) {
-            //     // FIXME this is not being called
-            //     e.preventDefault();
-            //     this.model.name = this.$(".topic-name").val(),
-            //     this.model.desc = this.$(".topic-desc").val(),
-                
-            //     this.model.save();
-            // },
             'click .cancel': function(e) {
                 this.$(".lightbox").fadeOut(500);
                 this.$(".topic-name").val("");
@@ -114,6 +72,7 @@ define([
             this.model.set('creationDate', this.formatDate(this.model.get('timeCreated')));
             this.model.set('proposalDate', this.formatDate(this.model.get('stageProposalStarted')));
             this.model.set('consensusDate', this.formatDate(this.model.get('stageConsensusStarted')));
+            this.model.on('change', this.render, this);
         },
         
         onShow: function() {

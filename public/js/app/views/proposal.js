@@ -3,15 +3,13 @@ define([
     'application',
     'Marionette',
     'etherpad',
-    'hbs!templates/proposal',
-    'constants'
+    'hbs!templates/proposal'
 ], function(
     $,
     app,
     Marionette,
     etherpad,
-    Template,
-    C
+    Template
     ) {
     
     var View = Marionette.ItemView.extend({
@@ -51,10 +49,6 @@ define([
                     
                 }
             }
-        },
-        
-        initialize: function() {
-            this.model.set(C);
         },
         
         onShow: function() {

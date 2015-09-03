@@ -25,6 +25,7 @@ var users = require('./routes/users');
 var topics = require('./routes/topics');
 var groups = require('./routes/groups');
 var proposals = require('./routes/proposals');
+var ratings = require('./routes/ratings');
 var tests = require('./routes/tests');
 var auth = users.auth_wrapper;
 
@@ -70,6 +71,14 @@ app.get('/json/proposal/:id', function(req, res) { auth(req, res, proposals.quer
 app.get('/json/groups', function(req, res) { auth(req, res, groups.list); });
 // get group by id
 app.get('/json/group/:id', function(req, res) { auth(req, res, groups.query); });
+
+// #####################
+// ### R A T I N G S ###
+// #####################
+
+app.get('/json/ratings/count', function(req, res) { auth(req, res, ratings.count); });
+app.get('/json/ratings/:id', function(req, res) { auth(req, res, ratings.query); });
+app.post('/json/ratings/rate', function(req, res) { auth(req, res, ratings.rate); });
 
 // ###################
 // ###   A U T H   ###

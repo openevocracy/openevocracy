@@ -7,9 +7,17 @@ define([
 ], function(_, $, Backbone, User){
 
     var SessionModel = Backbone.Model.extend({
-
-        is_logged_in: function(){
-            return this.get('logged_in') || $.cookie('auth_token');
+        
+        isLoggedIn: function(){
+            if(this.get('logged_in'))
+                return true;
+            else {
+                if($.cookie('auth_token')) {
+                    this.checkAuth({});
+                    return true;
+                } else
+                    return false;
+            }
         },
 
         initialize: function(){
@@ -80,14 +88,12 @@ define([
                     
                     if( !res.error ){
                         if(_.indexOf(['login', 'signup'], opts.method) !== -1){
-                            
                             this.updateSessionUser( res.user || {} );
                             this.set({ logged_in: true });
                         } else {
-                            
                             this.set({ logged_in: false });
                         }
-                            
+                        
                         if( callback && 'success' in callback ) callback.success(res);
                     } else {
                         if( callback && 'error' in callback ) callback.error(res);
@@ -100,20 +106,19 @@ define([
                 if(callback && 'complete' in callback ) callback.complete(res);
             });
         },
-
-
+        
         login: function(opts, callback, args){
             this.postAuth(_.extend(opts, { method: 'login' }), callback);
         },
-
+        
         logout: function(opts, callback, args){
             this.postAuth(_.extend(opts, { method: 'logout' }), callback);
         },
-
+        
         signup: function(opts, callback, args){
             this.postAuth(_.extend(opts, { method: 'signup' }), callback);
         },
-
+        
         removeAccount: function(opts, callback, args){
             this.postAuth(_.extend(opts, { method: 'remove_account' }), callback);
         },

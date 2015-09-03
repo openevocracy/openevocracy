@@ -40,7 +40,7 @@ exports.auth_wrapper = function(req, res, next) {
 }
 
 // authentification
-// TODO required?
+// TODO use middleware, e.g. Passport?
 exports.auth = function(req, res) {
     db.collection('users').findOne({ '_id': ObjectId(req.signedCookies.uid),
                                      'auth_token': req.signedCookies.auth_token },

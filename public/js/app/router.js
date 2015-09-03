@@ -15,14 +15,12 @@ define([
         },
         
         before: function( route, params ){
-            return true;
-            
-            /*if(App.session.is_logged_in() ||
+            if(App.session.isLoggedIn() ||
                route == '' || route == 'login' || route == 'register')
                 return true;
             
-            this.navigate('login',true);
-            return false;*/
+            App.eventAggregator.trigger('App:logged_out');
+            return false;
         }
     });
 

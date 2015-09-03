@@ -11,13 +11,26 @@ exports.list = function(req, res) {
     });
 };
 
-function getProposalBody(participant,gid,finished) {
+function getProposalBodyAndRating(participant,gid,finished) {
     db.collection('proposals').findOne(
         { 'uid': participant._id, 'gid': gid },
         function(err, proposal) {
+            // get proposal body
             utils.getPadBody(proposal.pid,
                 function (body) {
                     participant.proposal_body = body;
+                    finished();
+                });
+            
+            // get proposal rating
+            db.collection('ratings').findOne(
+                { '_id': proposal.pid, 'gid': gid },
+                { 'score': 1 },
+                function(err, rating) {
+                    if(rating)
+                        participant.proposal_rating = rating.score;
+                    else
+                        participant.proposal_rating = 0;
                     finished();
                 });
         });
@@ -27,11 +40,12 @@ function getProposalBody(participant,gid,finished) {
 exports.query = function(req, res) {
     
     var gid = ObjectId(req.params.id);
+    var uid = ObjectId(req.signedCookies.uid);
     
     var group = {};
     var finishedGroup = _.after(2, function() {
         res.json(group);
-    })
+    });
     
     // get all participants
     db.collection('group_participants').
@@ -45,9 +59,22 @@ exports.query = function(req, res) {
             toArray(function(err, users) {
                 group.participants = users;
 
-                var finishedGroup_ = _.after(group.participants.length, finishedGroup);
+                var finishedGroup_ = _.after(3*group.participants.length, finishedGroup);
                 _.each(group.participants,function (participant) {
-                    getProposalBody(participant,gid,finishedGroup_);
+                    // get proposal body and rating
+                    getProposalBodyAndRating(participant,gid,finishedGroup_);
+                    
+                    // get participant rating
+                    db.collection('ratings').findOne(
+                        { '_id': participant._id, 'gid': gid, 'uid': uid },
+                        { 'score': 1 },
+                        function(err, rating) {
+                            if(rating)
+                                participant.participant_rating = rating.score;
+                            else
+                                participant.participant_rating = 0;
+                            finishedGroup_();
+                        });
                 });
             });
     });

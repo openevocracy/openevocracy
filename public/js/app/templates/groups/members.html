@@ -4,23 +4,27 @@
 		<h1 id="title"><span>Group members</span></h1>
 	</div>
 	
-	<div>
-		<ul>
-			<li class="list-head">
-				<span>User</span>
-				<span>User's reputation</span>
-				<span>Quality of document</span>
-				<span>Integration skill</span>
-			</li>
+	<table class="table table-hover">
+		<thead>
+			<tr class="list-head">
+				<th>User</th>
+				<th></th>
+				<th><span data-toggle="tooltip" data-placement="top" title="skill of user to unite contents to everyone's satisfaction">Integration skill</span></th>
+				<th></th>
+				<th><span data-toggle="tooltip" data-placement="top" title="quality of ideas and clearness of text">Quality of document</span></th>
+			</tr>
+		</thead>
+		<tbody>
 			{{#each participants}}
-	        <li>
-	        	<a class="member-name">{{this.name}}</a>
-	        	<a class="member-rep">0.58/3.412</a>
-	        	<a class="member-proposal" data-member-id="{{this._id}}">Show</a>
-	        	<span></span>
-	        </li>
+	        <tr {{#if this.is_me}}class="active"{{/if}}>
+        		<td class="memb-name">{{this.name}}</td>
+        		<td class="memb-repu"><span class="fa fa-trophy"></span> 0.58/3.412</td>
+        		<td>{{#if this.is_me}}-{{else}}<div class="rate" data-rate-type="participant" data-member-id="{{this._id}}"></div>{{/if}}</td>
+        		<td class="memb-prop-show"><a data-member-id="{{this._id}}" href="/#"><span class="fa fa-file-text"></span> Show</a></td>
+        		<td>{{#if this.is_me}}-{{else}}<div class="rate" data-rate-type="proposal" data-member-id="{{this._id}}"></div>{{/if}}</td>
+	        </tr>
 	    	{{/each}}
-    	</ul>
-    </div>
+    	</tbody>
+    </table>
 
 </section>

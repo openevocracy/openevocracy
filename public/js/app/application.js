@@ -26,7 +26,7 @@ define([
     onStart: function() {
         _.bindAll.apply(_, [this].concat(_.functions(this)));
         
-        if(this.session.is_logged_in())
+        if(this.session.isLoggedIn())
             this.loadCoreModule(this.startHistory);
         else
             this.loadSplashModule(this.startHistory);
@@ -78,7 +78,7 @@ define([
     loadSplashModule: function(callback) {
         require(['modules/splash'],
           function(SplashModule) {
-            this.module('core',SplashModule);
+            this.module('splash',SplashModule);
             this.setSplashLayout();
             
             callback();

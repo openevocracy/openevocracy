@@ -27,13 +27,11 @@ define([
                 //if(DEBUG) console.log("Did not pass clientside validation");
             }
         },
-        
+    
         events: {
             'keypress #pass': function(e) {
                 if (e.which == 13) {
                     this.login(e);
-                    // prevent form action
-                    if(e) e.preventDefault();
                 }
             },
             'click #login': function(e) {

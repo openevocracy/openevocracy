@@ -16,7 +16,8 @@
       ember: '//oss.maxcdn.com/emberjs/2.0.0/ember.min',
       etherpad: '../vendor/etherpad',
       bootstrap: '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
-      bootstrapcustom: '../vendor/bootstrap.custom'
+      bootstrapcustom: '../vendor/bootstrap.custom',
+      ratyfa: '../vendor/jquery.raty-fa'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for
@@ -51,6 +52,9 @@
       },
       bootstrap : {
         deps: ['jquery']
+      },
+      bootstrapcustom : {
+        deps: ['bootstrap']
       }
     },
     hbs: {
@@ -71,6 +75,10 @@
     // force ajax call on all browsers
     $.ajaxSetup({ cache: false });
     
+    /*$('[data-toggle="popover"]').on('DOMNodeInserted') popover();
+    $(document).on('DOMNodeInserted','[data-toggle="tooltip"]',
+      function(e) {e.target.tooltip();});*/
+
     require(['application'], function(Application) {
       App = new Application();
       App.start();
