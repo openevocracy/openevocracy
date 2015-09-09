@@ -8,10 +8,10 @@
 		<thead>
 			<tr class="list-head">
 				<th>User</th>
-				<th></th>
-				<th><span data-toggle="tooltip" data-placement="top" title="skill of user to unite contents to everyone's satisfaction">Integration skill</span></th>
-				<th></th>
-				<th><span data-toggle="tooltip" data-placement="top" title="quality of ideas and clearness of text">Quality of document</span></th>
+				<th>Reputation</th>
+				<th>Integration skill <span class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="skill of user to unite contents to everyone's satisfaction"></span></th>
+				<th>Proposal</th>
+				<th>Quality of proposal <span class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="quality of ideas and clearness of text"></span></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -19,9 +19,9 @@
 	        <tr {{#if this.is_me}}class="active"{{/if}}>
         		<td class="memb-name">{{this.name}}</td>
         		<td class="memb-repu"><span class="fa fa-trophy"></span> 0.58/3.412</td>
-        		<td>{{#if this.is_me}}-{{else}}<div class="rate" data-rate-type="participant" data-member-id="{{this._id}}"></div>{{/if}}</td>
-        		<td class="memb-prop-show"><a data-member-id="{{this._id}}" href="/#"><span class="fa fa-file-text"></span> Show</a></td>
-        		<td>{{#if this.is_me}}-{{else}}<div class="rate" data-rate-type="proposal" data-member-id="{{this._id}}"></div>{{/if}}</td>
+        		<td>{{#if this.is_me}}-{{else}}<div class="rate" data-rate-type="participant" data-rate-id="{{this._id}}"></div>{{/if}}</td>
+        		<td class="memb-prop-show"><a data-member-id="{{this._id}}"><span class="fa fa-file-text"></span> 8/59</a></td>
+        		<td>{{#if this.is_me}}-{{else}}<div class="rate" data-rate-type="proposal" data-rate-id="{{this.ppid}}"></div>{{/if}}</td>
 	        </tr>
 	    	{{/each}}
     	</tbody>

@@ -16,7 +16,7 @@ define([
         template: Template,
         
         events: {
-            'click .memb-prop': function(e) {
+            'click .memb-prop-show': function(e) {
                 this.trigger(
                     "members:show_member_proposal",
                     e.target.getAttribute('data-member-id'));
@@ -36,28 +36,32 @@ define([
             /*$('[data-toggle="popover"]').popover();*/
             $('[data-toggle="tooltip"]').tooltip();
             
-            $('.rate').raty({
+            var ratySettings = {
                 /*half: true, FIXME: https://github.com/FortAwesome/Font-Awesome/issues/2301 */
                 starOff : 'fa fa-fw fa-heart-o',
                 starOn  : 'fa fa-fw fa-heart'
-            });
+            };
             
             _.each(this.model.get('participants'), function(participant) {
-                $('[data-rate-type="participant"][data-member-id="'+participant._id+'"]').raty({ score: participant.participant_rating });
-                $('[data-rate-type="proposal"][data-member-id="'+participant._id+'"]').raty({ score: participant.proposal_rating });
-            });
+                $('[data-rate-type="participant"][data-rate-id="'+participant._id+'"]').
+                    raty(_.extend(ratySettings,
+                         { score: participant.participant_rating,
+                           click: _.partial(this.saveRating, this.model, 'participant') }));
+                $('[data-rate-type="proposal"][data-rate-id="'+participant.ppid+'"]').
+                    raty(_.extend(ratySettings,
+                         { score: participant.proposal_rating,
+                           click: _.partial(this.saveRating, this.model, 'proposal') }));
+            }.bind(this));
+        },
+        
+        saveRating: function(model, type, score, e) {
+            var id = $(this).attr('data-rate-id');
             
-            var that = this;
-            $('[data-rate-type="participant"]').raty({
-                click: function(score, e) {
-                    var pid = $(this).attr('data-member-id');
-                    
-                    $.post('/json/ratings/rate',
-                        {'id': pid, 'gid': that.model.get('_id'), 'score': score},
-                        function(data) {
-                            //this.set({'votes': data, 'voted': status});
-                        });
-                }});
+            $.post('/json/ratings/rate',
+                {'id': id, 'type': type, 'gid': model.get('_id'), 'score': score},
+                function(data) {
+                    //this.set({'votes': data, 'voted': status});
+                });
         }
     });
     

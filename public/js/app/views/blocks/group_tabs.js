@@ -12,14 +12,14 @@ define([
         events: {
             'click #grpmem': function(e) {
                 this.trigger("group_tabs:show_members");
-                this.$('.btn').removeClass('active');
-                this.$('#grpmem').addClass('active');
+                $('#center-right .btn').removeClass('active');
+                $('#grpmem').addClass('active');
                 if(e) e.preventDefault();
             },
             'click #ourprop': function(e) {
                 this.trigger("group_tabs:show_collab");
-                this.$('.btn').removeClass('active');
-                this.$('#ourprop').addClass('active');
+                $('#center-right .btn').removeClass('active');
+                $('#ourprop').addClass('active');
                 if(e) e.preventDefault();
             }
         }

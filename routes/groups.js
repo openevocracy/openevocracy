@@ -11,10 +11,13 @@ exports.list = function(req, res) {
     });
 };
 
-function getProposalBodyAndRating(participant,gid,finished) {
+function getProposalBodyAndRating(participant,gid,uid,finished) {
     db.collection('proposals').findOne(
         { 'uid': participant._id, 'gid': gid },
         function(err, proposal) {
+            // get proposal id
+            participant.ppid = proposal._id;
+            
             // get proposal body
             utils.getPadBody(proposal.pid,
                 function (body) {
@@ -24,7 +27,7 @@ function getProposalBodyAndRating(participant,gid,finished) {
             
             // get proposal rating
             db.collection('ratings').findOne(
-                { '_id': proposal.pid, 'gid': gid },
+                { '_id': proposal._id, 'gid': gid, 'uid': uid },
                 { 'score': 1 },
                 function(err, rating) {
                     if(rating)
@@ -62,7 +65,7 @@ exports.query = function(req, res) {
                 var finishedGroup_ = _.after(3*group.participants.length, finishedGroup);
                 _.each(group.participants,function (participant) {
                     // get proposal body and rating
-                    getProposalBodyAndRating(participant,gid,finishedGroup_);
+                    getProposalBodyAndRating(participant,gid,uid,finishedGroup_);
                     
                     // get participant rating
                     db.collection('ratings').findOne(

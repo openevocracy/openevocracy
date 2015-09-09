@@ -62,10 +62,12 @@ define([
         
         show_collab: function() {
             this.centerRightLayout.center.show(this.collabView, { preventDestroy: true });
+            $('#center-right .btn').removeClass('active');
         },
         
         show_members: function() {
             this.centerRightLayout.center.show(this.membersView, { preventDestroy: true });
+            $('#center-right .btn').removeClass('active');
         },
         
         show_member_proposal: function(member_id) {
@@ -74,6 +76,9 @@ define([
             this.centerRightLayout.center.show(
                 new MembersProposalView({model: new Backbone.Model(participant)}),
                 { preventDestroy: true });
+            
+            $('#center-right .btn').removeClass('active');
+            $('[data-member-id="'+member_id+'"]').addClass('active');
         }
     });
     

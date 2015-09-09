@@ -17,13 +17,13 @@ define([
         id: "collaborative",
         
         onShow: function() {
-            $('#editor').pad({
+            /*$('#editor').pad({
                 'padId': this.model.get('pid'),
                 'height' : 400,
                 'noColors' : true,
                 'borderStyle' : 'none',
                 'showControls' : true
-            });
+            });*/
         },
         
         onDestroy: function() {
