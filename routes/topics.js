@@ -504,26 +504,18 @@ exports.vote = function(req, res) {
     topic_vote.uid = ObjectId(req.signedCookies.uid);
     
     // TODO use findAndModify as in proposal
-    /*db.collection('topic_votes').count(topic_vote, function(err, count) {
-        // do not allow user to vote twice for the same topic
-        if(0 == count) {
-            db.collection('topic_votes').insert(topic_vote, function(err, topic_vote) {
-                // return number of current votes
-                count_votes(res,topic_vote[0].tid);
-            });
-            console.log('user ' + topic_vote.uid + ' voted for topic ' + topic_vote.tid );
-        } else
-            // return number of current votes
-            count_votes(res,topic_vote.tid);
-    });*/
-    
-    db.collection('topic_votes').countAsync(topic_vote).then(function(count) {
-        // do not allow user to vote twice for the same topic
-        if(0 == count) {
-            return Promise.all(res,db.collection('topic_votes').insertAsync(topic_vote));
-        } else
-            return Promise.all(res,topic_vote);
-    }).then(function(res,topic_vote) {count_votes(res,topic_vote.tid);});
+    db.collection('topic_votes').findAsync(_.pick(topic_vote, 'tid'), {'uid': 1}).
+    then(function(topic_votes) {
+        var count = _.size(topic_votes);
+        
+        if(undefined == _.findWhere(topic_votes, _.pick(topic_vote, 'uid'))) {
+            // do not allow user to vote twice for the same topic
+            db.collection('topic_votes').insertAsync(topic_vote);
+            ++count;
+        }
+        
+        res.json(count);
+    });
 };
 
 exports.unvote = function(req, res) {
@@ -534,7 +526,7 @@ exports.unvote = function(req, res) {
     
     // remove entry
     db.collection('topic_votes').removeAsync(topic_vote,true).
-        then(function(topic_vote) {
+        then(function() {
             // return number of current votes
             count_votes(res,topic_vote.tid);
         });
@@ -548,17 +540,17 @@ exports.join = function(req, res) {
     topic_participant.uid = ObjectId(req.signedCookies.uid);
     
     // TODO use findAndModify as in proposal
-    db.collection('topic_participants').count( topic_participant, function(err, count) {
-        // do not allow user to vote twice for the same topic
-        if(0 == count) {
-            db.collection('topic_participants').insert(topic_participant, function(err, topic_participant) {
-                // return number of current votes
-                count_participants(res,topic_participant[0].tid);
-            });
-            console.log('user ' + topic_participant.uid + ' joined topic ' + topic_participant.tid );
-        } else
-            // return number of current topic_participants
-            count_participants(res,topic_participant.tid);
+    db.collection('topic_participants').findAsync(_.pick(topic_participant, 'tid'), {'uid': 1}).
+    then(function(topic_participants) {
+        var count = _.size(topic_participants);
+        
+        if(undefined == _.findWhere(topic_participants, _.pick(topic_participant, 'uid'))) {
+            // do not allow user to vote twice for the same topic
+            db.collection('topic_participants').insertAsync(topic_participant);
+            ++count;
+        }
+        
+        res.json(count);
     });
 };
 
@@ -570,7 +562,7 @@ exports.unjoin = function(req, res) {
     
     // remove entry
     db.collection('topic_participants').remove(topic_participant,true,
-        function(member,err) {
+        function() {
             // return number of current topic_participants
             count_participants(res,topic_participant.tid);
         });
