@@ -78,7 +78,7 @@ define([
         onShow: function() {
             //var date = Date.now() + (7*24*3600*1000);
             if(this.model.get('stage') != C.STAGE_SELECTION) {
-                var date = this.model.get('nextStageDeadline');
+                var date = this.model.get('nextDeadline');
                 $("#timeremaining-"+this.model.get('_id')).countdown(date)
                 .on('update.countdown', function(event) { $(this).html(event.strftime('%D:%H:%M:%S')); });
                 //.on('finish.countdown', function(event) { this.model.fetch(); }.bind(this));

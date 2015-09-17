@@ -36,11 +36,6 @@ define([
                     $('.edit').prop('title', 'edit');
                     // etherpad
                     $('#editor').find('iframe').remove();
-                    /*this.model.fetch().done(function () {
-                        $('#body').html(this.model.get('body'));
-                        $('#body').show();
-                        //$('.open-desc').show();
-                    }.bind(this));*/
                     // title
                     this.model.set('name', $('#titleInput').val());
                     var titleHeading = '<h1 id="title">'+this.model.get('name')+'</h1>';
@@ -116,7 +111,7 @@ define([
         
         onAction: function() {
             //var date = Date.now() + (7*24*3600*1000);
-            var date = this.model.get('nextStageDeadline');
+            var date = this.model.get('nextDeadline');
             $('#timeremaining').countdown(date, function(event) {
                 $(this).html(event.strftime('%D:%H:%M:%S'));
             });

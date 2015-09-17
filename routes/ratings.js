@@ -2,7 +2,6 @@ var _ = require('underscore');
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
-var utils = require('../utils');
 var requirejs = require('requirejs');
 var C = requirejs('public/js/app/constants');
 
@@ -50,3 +49,14 @@ exports.rate = function(req, res) {
             res.sendStatus(200);
         });
 };
+
+/*
+return the user with the highest overall ratings
+@param gid group id
+*/
+exports.getGroupLeader = function(gid) {
+    return db.collection('ratings').aggregate(
+        [{ $match: { 'gid': gid } },
+         { $group: { '_id': '$uid', 'score': { $sum: '$score' }}}]).
+        sort({ 'score': -1 }).limitAsync(1).get('uid');
+}

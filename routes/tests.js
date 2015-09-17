@@ -59,7 +59,7 @@ exports.create_test_suite = function(req, res) {
         'pid': ObjectId(),
         'stage': C.STAGE_CONSENSUS,
         'level': 0,
-        'nextStageDeadline': Date.now() + 1000*ONE_WEEK
+        'nextDeadline': Date.now() + 1000*ONE_WEEK
     }, function (){});
     
     // create participants for this group

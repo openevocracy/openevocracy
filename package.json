@@ -14,21 +14,22 @@
         "connect": "2.11.0",
         "morgan": "*",
         "method-override": "*",
-        "express-session": "*",
         "body-parser": "*",
         "multer": "*",
         "errorhandler": "*",
         "json": "*",
         "cookie-session": "*",
         "express": "*",
+        "express-session": "*",
         "bcrypt": "*",
         "requirejs": "*",
         "underscore": "*",
         "request": "*",
+        "request-promise": "*",
         "ejs": "*",
-        "backbone": "*",
-        "backbone.marionette": "*",
+        "mongodb": "1.4.4",
         "mongoskin": "*",
-        "mongodb": "1.4.4"
+        "bluebird": "*",
+        "mongodb-bluebird": "*"
     }
 }

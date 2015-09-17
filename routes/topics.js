@@ -2,50 +2,61 @@ var _ = require('underscore');
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
+var Promise = require('bluebird');
+var ratings = require('./ratings');
 var utils = require('../utils');
 var requirejs = require('requirejs');
 var C = requirejs('public/js/app/constants');
 
-function count_votes(response,tid) {
+Object.keys(mongoskin).forEach(function(key) {
+  var value = mongoskin[key];
+  if (typeof value === "function") {
+    Promise.promisifyAll(value);
+    Promise.promisifyAll(value.prototype);
+  }
+});
+Promise.promisifyAll(mongoskin);
+
+function count_votes(res,tid) {
     db.collection('topic_votes').count( {'tid': tid}, function(err, count) {
-        response.send(count.toString());
+        res.send(count.toString());
     });
 }
 
-function count_participants(response,tid) {
+function count_participants(res,tid) {
     db.collection('topic_participants').count( {'tid': tid}, function(err, count) {
-        response.send(count.toString());
+        res.send(count.toString());
     });
 }
 
-function getDeadline(nextStage, prevStageDeadline) {
+function getDeadline(nextStage, prevDeadline) {
     
     var ONE_WEEK = 1000*60*60*24*7; // one week milliseconds
     
     // calculate
-    var nextStageDeadline = prevStageDeadline || Date.now();
+    var nextDeadline = prevDeadline || Date.now();
     switch (nextStage) {
         case C.STAGE_SELECTION: // get selection stage deadline
-            nextStageDeadline += (2*ONE_WEEK); // two weeks
+            nextDeadline += (2*ONE_WEEK); // two weeks
             break;
         case C.STAGE_PROPOSAL: // get proposal stage deadline
-            nextStageDeadline += ONE_WEEK;
+            nextDeadline += ONE_WEEK;
             break;
         case C.STAGE_CONSENSUS: // get consensus stage deadline
-            nextStageDeadline = 0; // no deadline in consensus stage
+            nextDeadline = ONE_WEEK; // no deadline in consensus stage
             break;
     }
     
-    return nextStageDeadline;
+    return nextDeadline;
 }
 
 function manageTopicState(topic) {
     // exit this funtion if stage transition is not due yet
-    if(Date.now()<topic.nextStageDeadline)
+    if(Date.now()<topic.nextDeadline)
         return;
     
     // move to next stage
-    var prevStageDeadline = topic.nextStageDeadline;
+    var prevDeadline = topic.nextDeadline;
     switch (topic.stage) {
         case C.STAGE_SELECTION: // we are currently in selection stage
             var MIN_PARTICIPANTS = 2;
@@ -62,7 +73,7 @@ function manageTopicState(topic) {
                 // topic does meet the minimum requirements for the next stage
                 // move to next stage
                 ++topic.stage;
-                topic.nextStageDeadline = getDeadline(C.STAGE_PROPOSAL,prevStageDeadline); // get deadline for proposal stage
+                topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
                 
                 // update database
                 var stageStartedEntryName = 'stageProposalStarted';
@@ -72,7 +83,7 @@ function manageTopicState(topic) {
             break;
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
             ++topic.stage;
-            topic.nextStageDeadline = -1; // TODO see below
+            topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline);
             createGroups(topic);
             
             // update database
@@ -81,8 +92,19 @@ function manageTopicState(topic) {
             updateTopicState(topic,stageStartedEntryName);
             break;
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
-            //++topic.stage; // TODO consensus stage should be handled with separate logic
-            // e.g. when groups are finished
+            var callback = function(proposalStageIsOver) {
+                if(proposalStageIsOver) {
+                    ++topic.stage;
+                    topic.nextDeadline = -1;
+                    
+                    db.collection('topics').update(
+                        { '_id': topic._id },
+                        { $set: _.pick(topic, 'stage', 'nextDeadline') },
+                        {}, function () {});
+                }
+            }
+            
+            //remixGroups(topic,callback);
             break;
     }
 }
@@ -111,11 +133,12 @@ function appendBasicTopicInfo(topic) {
 function appendExtendedTopicInfo(topic,uid,with_details,finished) {
     var tid = topic._id;
     
-    var finishedExtendedTopicInfo = _.after(5 + (with_details ? 1 : 0),
+    var finishedExtendedTopicInfo = _.after(3 + (with_details ? 1 : 0),
     function(topic) {
         finished(topic);
     });
     
+    // get pad body if asked for
     if(with_details)
         utils.getPadBody(topic.pid,function done(body) {
             topic.body = body;
@@ -123,41 +146,26 @@ function appendExtendedTopicInfo(topic,uid,with_details,finished) {
         });
     
     // append number of votes for this topic
-    db.collection('topic_votes').count(
-        {'tid': tid},
-        function(err, count) {
-            topic.votes = count;
+    db.collection('topic_votes').find(
+        {'tid': tid}, {'uid': 1}).toArray(
+        function(err, topic_votes) {
+            topic.votes = _.size(topic_votes);
+            topic.voted = _.find(topic_votes, {'uid': uid}) != undefined;
             finishedExtendedTopicInfo(topic);
         });
     
-    // check if user has voted for topic
-    db.collection('topic_votes').count(
-        {'tid': tid, 'uid': uid},
-        function(err, count) {
-            topic.voted = count;
+    // append number of participants for this topic
+    db.collection('topic_participants').find(
+        {'tid': tid}, {'uid': 1}).toArray(
+        function(err, topic_participants) {
+            topic.participants  = _.size(topic_participants);
+            topic.joined        = _.find(topic_participants, {'uid': uid}) != undefined;
             finishedExtendedTopicInfo(topic);
         });
-    
-    // append number of members for this topic
-    db.collection('topic_participants').count(
-        {'tid': tid},
-        function(err, count) {
-            topic.participants = count;
-            finishedExtendedTopicInfo(topic);
-        });
-    
-    // check if user has joined topic
-    db.collection('topic_participants').count(
-        {'tid': tid, 'uid': uid},
-        function(err, count) {
-            topic.joined = count;
-            finishedExtendedTopicInfo(topic);
-        });
-    
+
     // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
     
     // get groups with highest level
-    // FIXME http://stackoverflow.com/questions/22118210/using-findone-in-mongodb-to-get-element-with-max-id
     db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
         //map(function (group) {return group._id;}).
         toArray(function(err, gids) {
@@ -187,36 +195,69 @@ function appendExtendedTopicInfo(topic,uid,with_details,finished) {
     topic.timeCreated = tid.getTimestamp();
 }
 
-function appendTopicInfo(topic,uid,with_details,finished) {
-    // send response only if all queries have completed
-    var finishedTopicInfo = _.after(2, function(topic) {
-        // send response
-        finished(topic);
-    });
+function appendExtendedTopicInfoAsync(topic,uid,with_details) {
+    var tid = topic._id;
     
-    appendExtendedTopicInfo(topic,uid,with_details,finishedTopicInfo);
-    {
-        appendBasicTopicInfo(topic);
-        finishedTopicInfo(topic);
-    }
+    // get pad body if asked for
+    var pad_body_promise = null;
+    if(with_details)
+        pad_body_promise = utils.getPadBodyAsync(topic.pid);
+    
+    var topic_votes_promise = db.collection('topic_votes').find(
+        {'tid': tid}, {'uid': 1}).toArrayAsync();
+    var topic_participants_promise = db.collection('topic_participants').find(
+        {'tid': tid}, {'uid': 1}).toArrayAsync();
+    
+    // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
+    
+    // get groups with highest level
+    var find_user_proup_promise = db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
+        //map(function (group) {return group._id;}).
+        toArrayAsync().then(function(groups) {
+            if(_.isEmpty(groups))
+                return null;
+            
+            // TODO use mongodb map for better performance
+            var gids = _.map(groups, function (group) {return group._id;});
+            
+            // find the group out of previously found groups
+            // that the current user is part of
+            return db.collection('group_participants').findOneAsync(
+                {'gid': { $in: gids }, 'uid': uid}, {'gid': 1}).
+                then(function(group_participant) {
+                    if(group_participant)
+                        return group_participant.gid;
+                    return null;
+                });
+        });
+    
+    // delete pad id if user is not owner, pid is removed from response
+    if(topic.owner.toString() != uid.toString())
+        delete topic.pid;
+    
+    return Promise.props(_.extend(topic,{
+        'body': pad_body_promise,
+        'votes': topic_votes_promise.then(_.size),
+        'participants': topic_participants_promise.then(_.size),
+        'voted': topic_votes_promise.then(function(topic_votes) {
+            return _.find(topic_votes, {'uid': uid}) != undefined;}),
+        'joined': topic_participants_promise.then(function(topic_participants) {
+            return _.find(topic_participants, {'uid': uid}) != undefined;}),
+        'gid': find_user_proup_promise,
+        'timeCreated': tid.getTimestamp()
+    }));
+}
+
+function appendTopicInfoAsync(topic,uid,with_details) {
+    appendBasicTopicInfo(topic);
+    return appendExtendedTopicInfoAsync(topic,uid,with_details);
 }
 
 exports.list = function(req, res) {
-    db.collection('topics').find().toArray(function(err, topics) {
-       
-        console.log('get topics');
-        
-        // send response only if all queries have completed
-        var finished = _.after(topics.length, function(topic) {
-            res.json(topics);
-        });
-        
-        // loop over all topics
-        _.each(topics,function(topic) {
-            appendTopicInfo(topic,ObjectId(req.signedCookies.uid),false,finished);
-            manageTopicState(topic);
-        });
-    });
+    db.collection('topics').find().toArrayAsync().map(function(topic) {
+        manageTopicState(topic);
+        return appendTopicInfoAsync(topic,ObjectId(req.signedCookies.uid),false);
+    }).then(res.json.bind(res));
 };
 
 exports.update = function(req, res) {
@@ -224,24 +265,25 @@ exports.update = function(req, res) {
     var tid = ObjectId(topicNew._id);
     var uid = ObjectId(req.signedCookies.uid);
     
-    db.collection('topics').findOne({ '_id': tid }, function(err, topic) {
+    db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
         // only the owner can update the topic
-        if(topic.owner.toString() != uid.toString()) {
+        if(!topic || topic.owner.toString() != uid.toString()) {
             res.sendStatus(403);
-            return;
+            throw new Promise.CancellationError();
         }
         
+        return topic;
+    }).cancellable().then(function(topic) {
         topic.name = topicNew.name;
-        db.collection('topics').update(
-            { '_id': tid }, { $set: {name: topicNew.name} }, 
-            {},
-            function (err){
-                appendTopicInfo(topic,uid,true,function() {res.json(topic);});
-                manageTopicState(topic);
-            });
-    });
+        return db.collection('topics').updateAsync(
+                { '_id': tid }, { $set: {name: topicNew.name} }, {}).return(topic);
+    }).then(function (topic){
+        manageTopicState(topic);
+        return appendTopicInfoAsync(topic,uid,true);
+    }).then(res.json.bind(res));
 };
 
+// TODO move to groups?
 function createGroups(topic) {
     var tid = topic._id;
     
@@ -305,13 +347,14 @@ function createGroups(topic) {
             
             // create participants for this group
             _.each(group, function(uid) {
+                // insert group particpant
                 db.collection('group_participants').insert(
                     { 'gid': gid, 'uid': uid },
                     function(err, group_participant){
                         console.log('new group_participant');
                     });
                 
-                // add gid to proposal
+                // append gid to proposal
                 // so we can identify it later
                 db.collection('proposals').update(
                     { 'tid': tid, 'uid': uid },
@@ -323,19 +366,78 @@ function createGroups(topic) {
 }
 exports.createGroups = createGroups;
 
+// TODO move to groups?
+function remixGroups(topic) {
+    var tid = topic._id;
+    
+    // get groups with highest level
+    db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
+        toArrayAsync().then(function(groups_in) {
+            
+            // if we only have one group then the proposal stage is over
+            if(0 == groups_in.length)
+                return true;
+            
+            // get highest level
+            var highestLevel = groups_in[0].level;
+            
+            // shuffle groups
+            _.shuffle(groups_in);
+            
+            // initialize empty groups_out
+            var numGroups = groups_in.length;
+            var groups_out = new Array(numGroups);
+            for(var i=0; i<numGroups; ++i)
+                groups_out[i] = [];
+            
+            // push groups_in into groups_out
+            _.each(groups_in, function(group_in) {
+                // skip if this is a lower level group
+                if(group_in.level != highestLevel)
+                    return;
+                
+                // find first smallest group
+                var group_out = _.min(groups_out, function(group_out) {return group_out.length;});
+                group_out.push(ratings.getGroupLeader(group_in._id));
+            });
+            
+            // insert all groups into database
+            var nextLevel = highestLevel+1;
+            Promise.each(groups_out, function(group_out) {
+                // create group new id
+                var gid = ObjectId();
+                
+                // create group itself
+                db.collection('groups').insertAsync({
+                    '_id': gid,
+                    'tid': tid,
+                    'pid': ObjectId(),
+                    'level': nextLevel
+                });
+                
+                // create participants for this group
+                _.each(group_out, function(uid) {
+                    // insert group participant
+                    db.collection('group_participants').insertAsync(
+                        { 'gid': gid, 'uid': uid });
+                });
+            });
+        });
+}
+
 function updateTopicState(topic,stageStartedEntryName) {
-    db.collection('topics').update(
+    return db.collection('topics').updateAsync(
         { '_id': topic._id },
-        { $set: _.pick(topic, 'stage', 'nextStageDeadline', stageStartedEntryName) },
-        {}, function (err, inserted) {});
+        { $set: _.pick(topic, 'stage', 'nextDeadline', stageStartedEntryName) },
+        {});
 }
 
 exports.query = function(req, res) {
-    db.collection('topics').findOne({ '_id': ObjectId(req.params.id) }, function(err, topic) {
-        appendTopicInfo(topic,ObjectId(req.signedCookies.uid),true,
-            function(topic) {res.json(topic);});
+    db.collection('topics').findOneAsync({ '_id': ObjectId(req.params.id) }).
+    then(function(topic) {
         manageTopicState(topic);
-    });
+        return appendTopicInfoAsync(topic,ObjectId(req.signedCookies.uid),true);
+    }).then(res.json.bind(res));
 };
 
 exports.create = function(req, res) {
@@ -348,12 +450,12 @@ exports.create = function(req, res) {
         
         // topic already exists
         if(count > 0 ) {
-            console.log("Couldn't create new Topic! - Topic already exists")
+            console.log("Couldn't create new topic! - topic already exists")
             res.sendStatus(409);
             return;
         }
         if(topic.name=="") {
-            console.log("Couldn't create new Topic! - Topic Name is empty")
+            console.log("Couldn't create new topic! - topic Name is empty")
             res.sendStatus(400);
             return;
         }
@@ -362,7 +464,7 @@ exports.create = function(req, res) {
         topic.pid = ObjectId(); // create random pad id
         topic.stage = C.STAGE_SELECTION;
         topic.level = 0;
-        topic.nextStageDeadline = getDeadline(topic.stage);
+        topic.nextDeadline = getDeadline(topic.stage);
         
         // insert into database
         db.collection('topics').insert(topic, function(err, topics){
@@ -382,18 +484,16 @@ exports.delete = function(req,res) {
     var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.signedCookies.uid);
     
-    db.collection('topics').findOne({ '_id': tid }, { 'owner': 1 },
-    function(err, topic) {
+    db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': 1 }).then(
+    function(topic) {
         // only the owner can delete the topic
         if(topic.owner.toString() != uid.toString()) {
             res.sendStatus(401);
-            return;
+            throw new Promise.CancellationError();
         }
         
-        db.collection('topics').removeById(tid, function() {
-            res.sendStatus(200);
-        });
-    });
+        return db.collection('topics').removeByIdAsync(tid);
+    }).cancellable().then(res.sendStatus.bind(res,200));
 };
 
 exports.vote = function(req, res) {
@@ -404,7 +504,7 @@ exports.vote = function(req, res) {
     topic_vote.uid = ObjectId(req.signedCookies.uid);
     
     // TODO use findAndModify as in proposal
-    db.collection('topic_votes').count(topic_vote, function(err, count) {
+    /*db.collection('topic_votes').count(topic_vote, function(err, count) {
         // do not allow user to vote twice for the same topic
         if(0 == count) {
             db.collection('topic_votes').insert(topic_vote, function(err, topic_vote) {
@@ -415,8 +515,15 @@ exports.vote = function(req, res) {
         } else
             // return number of current votes
             count_votes(res,topic_vote.tid);
-    });
+    });*/
     
+    db.collection('topic_votes').countAsync(topic_vote).then(function(count) {
+        // do not allow user to vote twice for the same topic
+        if(0 == count) {
+            return Promise.all(res,db.collection('topic_votes').insertAsync(topic_vote));
+        } else
+            return Promise.all(res,topic_vote);
+    }).then(function(res,topic_vote) {count_votes(res,topic_vote.tid);});
 };
 
 exports.unvote = function(req, res) {
@@ -426,8 +533,8 @@ exports.unvote = function(req, res) {
     topic_vote.uid = ObjectId(req.signedCookies.uid);
     
     // remove entry
-    db.collection('topic_votes').remove(topic_vote,true,
-        function(vote,err) {
+    db.collection('topic_votes').removeAsync(topic_vote,true).
+        then(function(topic_vote) {
             // return number of current votes
             count_votes(res,topic_vote.tid);
         });
