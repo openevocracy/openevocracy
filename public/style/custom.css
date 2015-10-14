@@ -1,7 +1,5 @@
 body { padding: 50px 0; }
 a { cursor: pointer; }
-.page-header { margin-top: 0; }
-.right-pos { float: right; }
 .btn.active .fa { color: #5cb85c; }
 .tr.active .fa { color: #aaa; }
 .btn-block { text-align: left; }
@@ -11,6 +9,15 @@ a { cursor: pointer; }
 #logo {
     padding-left: 40px;
     background: transparent url(../img/logo20px.png) 15px center no-repeat;
+}
+
+#textlogo {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    height: 20px;
+    width: 20px;
+    background: transparent url(../img/logo20px.png) center center no-repeat;
 }
 
 #loading {
@@ -27,10 +34,13 @@ a { cursor: pointer; }
 
 #loading .fa { font-size: 40px; }
 
-/* ######################### */
-/* ##### C O N T E N T ##### */
-/* ######################### */
+/* ##################### */
+/* ##### V I E W S ##### */
+/* ##################### */
 
+.page-header { margin-top: 0; } /* old */
+.view-header {}
+.right-pos { float: right; }
 .sub-info { margin-top: -20px; margin-bottom: 20px; }
 
 /* ######################### */
@@ -100,19 +110,3 @@ footer { font-size: 0.8em; text-align: center; }
 /* ############## */
 
 #members table a { text-decoration: none; }
-
-/*#groups .group {
-    text-align: center;
-    background: transparent url('../img/group.png') no-repeat left top;
-    width: 64px;
-    height: 64px;
-    float: left;
-    margin: 0 10px 10px 0;
-}
-
-#groups .group span {
-    color: #fff;
-    font-weight: 400;
-    line-height: 64px;
-    text-shadow: 1px 1px #666;
-}*/

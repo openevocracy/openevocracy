@@ -28,13 +28,11 @@ define([
                         email: this.$("#email").val()
                     }, {
                     success: function(mod, res){
-                        console.log(mod);
-                        
-                        // Redirect
-                        window.location.href = "#/topics";
+                        App.eventAggregator.trigger('App:logged_in');
                     },
                     error: function(mod, res){
-                        console.log(mod);
+                        e.preventDefault();
+                        $('.message').html('<div class="alert alert-danger">User ID already exists, try another one!</div>');
                     }});
                 } else {
                     // Invalid clientside validations thru parsley

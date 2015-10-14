@@ -20,6 +20,7 @@ define([
                     },
                     error: function(mod, res){
                         e.preventDefault();
+                        $('.message').html('<div class="alert alert-danger">Wrong ID or password.</div>');
                     }
                 });
             } else {
@@ -34,7 +35,7 @@ define([
                     this.login(e);
                 }
             },
-            'click #login': function(e) {
+            'click #login-btn': function(e) {
                 //if(e) e.preventDefault();
                 this.login(e);
             }
@@ -43,7 +44,6 @@ define([
         onShow: function() {
             if(App.session.get('logged_in')) {
                 console.log('status: logged in');
-                $('#status').html('Online');
             }
         }
     });

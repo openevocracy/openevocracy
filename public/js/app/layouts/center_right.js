@@ -1,9 +1,15 @@
 define([
     'Marionette',
-    'hbs!templates/layouts/center_right'
+    'handlebars',
+    'hbs!templates/layouts/center_right',
+    'text!partials/center_right/header.html',
+    'text!partials/center_right/buttons.html'
 ], function(
     Marionette,
-    Template
+    Handlebars,
+    Template,
+    HeaderPartial,
+    ButtonsPartial
     ) {
     
     var Layout = Marionette.LayoutView.extend({
@@ -16,6 +22,9 @@ define([
             'right': '#right'
         }
     });
+    
+    Handlebars.registerPartial('header', HeaderPartial);
+    Handlebars.registerPartial('buttons', ButtonsPartial);
     
     return Layout;
 });

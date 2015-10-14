@@ -78,21 +78,23 @@ function manageTopicState(topic) {
                 // update database
                 var stageStartedEntryName = 'stageProposalStarted';
                 topic[stageStartedEntryName] = Date.now();
-                updateTopicState(topic,stageStartedEntryName);
+                return updateTopicState(topic,stageStartedEntryName);
             }
             break;
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
             ++topic.stage;
             topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline);
-            createGroups(topic);
+            p = createGroups(topic);
             
             // update database
             var stageStartedEntryName = 'stageConsensusStarted';
             topic[stageStartedEntryName] = Date.now();
-            updateTopicState(topic,stageStartedEntryName);
+            return updateTopicState(topic,stageStartedEntryName);
+            
+            return Promise.
             break;
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
-            var callback = function(proposalStageIsOver) {
+            /*remixGroupsAsync(topic).then(function(proposalStageIsOver) {
                 if(proposalStageIsOver) {
                     ++topic.stage;
                     topic.nextDeadline = -1;
@@ -102,9 +104,7 @@ function manageTopicState(topic) {
                         { $set: _.pick(topic, 'stage', 'nextDeadline') },
                         {}, function () {});
                 }
-            }
-            
-            //remixGroups(topic,callback);
+            });*/
             break;
     }
 }
@@ -130,71 +130,6 @@ function appendBasicTopicInfo(topic) {
     }
 }
 
-function appendExtendedTopicInfo(topic,uid,with_details,finished) {
-    var tid = topic._id;
-    
-    var finishedExtendedTopicInfo = _.after(3 + (with_details ? 1 : 0),
-    function(topic) {
-        finished(topic);
-    });
-    
-    // get pad body if asked for
-    if(with_details)
-        utils.getPadBody(topic.pid,function done(body) {
-            topic.body = body;
-            finishedExtendedTopicInfo(topic);
-        });
-    
-    // append number of votes for this topic
-    db.collection('topic_votes').find(
-        {'tid': tid}, {'uid': 1}).toArray(
-        function(err, topic_votes) {
-            topic.votes = _.size(topic_votes);
-            topic.voted = _.find(topic_votes, {'uid': uid}) != undefined;
-            finishedExtendedTopicInfo(topic);
-        });
-    
-    // append number of participants for this topic
-    db.collection('topic_participants').find(
-        {'tid': tid}, {'uid': 1}).toArray(
-        function(err, topic_participants) {
-            topic.participants  = _.size(topic_participants);
-            topic.joined        = _.find(topic_participants, {'uid': uid}) != undefined;
-            finishedExtendedTopicInfo(topic);
-        });
-
-    // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
-    
-    // get groups with highest level
-    db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
-        //map(function (group) {return group._id;}).
-        toArray(function(err, gids) {
-            
-            if(_.isEmpty(gids)) {
-                finishedExtendedTopicInfo(topic);
-                return;
-            }
-            
-            // TODO use mongodb map for better performance
-            gids = _.map(gids, function (group) {return group._id;});
-            
-            // find the group out of previously found groups
-            // that the current user is part of
-            db.collection('group_participants').findOne(
-                {'gid': { $in: gids }, 'uid': uid},
-                function(err, group_participant) {
-                    topic.gid = group_participant.gid;
-                    finishedExtendedTopicInfo(topic);
-                });
-        });
-    
-    // delete pad id if user is not owner, pid is removed from response
-    if(topic.owner.toString() != uid.toString())
-        delete topic.pid;
-    // extract time created from id
-    topic.timeCreated = tid.getTimestamp();
-}
-
 function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     var tid = topic._id;
     
@@ -203,10 +138,10 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     if(with_details)
         pad_body_promise = utils.getPadBodyAsync(topic.pid);
     
-    var topic_votes_promise = db.collection('topic_votes').find(
-        {'tid': tid}, {'uid': 1}).toArrayAsync();
-    var topic_participants_promise = db.collection('topic_participants').find(
-        {'tid': tid}, {'uid': 1}).toArrayAsync();
+    var topic_votes_promise = db.collection('topic_votes').
+        find({'tid': tid}, {'uid': 1}).toArrayAsync();
+    var topic_participants_promise = db.collection('topic_participants').
+        find({'tid': tid}, {'uid': 1}).toArrayAsync();
     
     // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
     
@@ -240,9 +175,9 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
         'votes': topic_votes_promise.then(_.size),
         'participants': topic_participants_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
-            return _.find(topic_votes, {'uid': uid}) != undefined;}),
+            return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
         'joined': topic_participants_promise.then(function(topic_participants) {
-            return _.find(topic_participants, {'uid': uid}) != undefined;}),
+            return utils.checkArrayEntryExists(topic_participants, {'uid': uid});}),
         'gid': find_user_proup_promise,
         'timeCreated': tid.getTimestamp()
     }));
@@ -254,9 +189,11 @@ function appendTopicInfoAsync(topic,uid,with_details) {
 }
 
 exports.list = function(req, res) {
+    var uid = ObjectId(req.signedCookies.uid);
+    
     db.collection('topics').find().toArrayAsync().map(function(topic) {
         manageTopicState(topic);
-        return appendTopicInfoAsync(topic,ObjectId(req.signedCookies.uid),false);
+        return appendTopicInfoAsync(topic,uid,false);
     }).then(res.json.bind(res));
 };
 
@@ -269,7 +206,7 @@ exports.update = function(req, res) {
         // only the owner can update the topic
         if(!topic || topic.owner.toString() != uid.toString()) {
             res.sendStatus(403);
-            throw new Promise.CancellationError();
+            return Promise.reject();
         }
         
         return topic;
@@ -367,7 +304,7 @@ function createGroups(topic) {
 exports.createGroups = createGroups;
 
 // TODO move to groups?
-function remixGroups(topic) {
+function remixGroupsAsync(topic) {
     var tid = topic._id;
     
     // get groups with highest level
@@ -435,34 +372,35 @@ function updateTopicState(topic,stageStartedEntryName) {
 exports.query = function(req, res) {
     db.collection('topics').findOneAsync({ '_id': ObjectId(req.params.id) }).
     then(function(topic) {
-        manageTopicState(topic);
         return appendTopicInfoAsync(topic,ObjectId(req.signedCookies.uid),true);
     }).then(res.json.bind(res));
 };
 
 exports.create = function(req, res) {
     var topic = req.body;
-
+    
+    // reject empty topic names
+    if(topic.name == "") {
+        console.log("Couldn't create new topic! - topic Name is empty")
+        res.sendStatus(400);
+        return;
+    }
+    
     // only allow new topics if they do not exist yet
     db.collection('topics').count( { name: topic.name }, function(err, count) {
         console.log(JSON.stringify(topic));
         console.log(count);
         
         // topic already exists
-        if(count > 0 ) {
+        if(count > 0) {
             console.log("Couldn't create new topic! - topic already exists")
             res.sendStatus(409);
-            return;
-        }
-        if(topic.name=="") {
-            console.log("Couldn't create new topic! - topic Name is empty")
-            res.sendStatus(400);
             return;
         }
         
         topic.owner = ObjectId(req.signedCookies.uid);
         topic.pid = ObjectId(); // create random pad id
-        topic.stage = C.STAGE_SELECTION;
+        topic.stage = C.STAGE_SELECTION; // start in selection stage
         topic.level = 0;
         topic.nextDeadline = getDeadline(topic.stage);
         
@@ -504,11 +442,13 @@ exports.vote = function(req, res) {
     topic_vote.uid = ObjectId(req.signedCookies.uid);
     
     // TODO use findAndModify as in proposal
-    db.collection('topic_votes').findAsync(_.pick(topic_vote, 'tid'), {'uid': 1}).
+    db.collection('topic_votes').
+    find(_.pick(topic_vote, 'tid'), {'uid': 1}).toArrayAsync().
     then(function(topic_votes) {
         var count = _.size(topic_votes);
         
-        if(undefined == _.findWhere(topic_votes, _.pick(topic_vote, 'uid'))) {
+        // check if vote exists already
+        if(!utils.checkArrayEntryExists(topic_votes, _.pick(topic_vote, 'uid'))) {
             // do not allow user to vote twice for the same topic
             db.collection('topic_votes').insertAsync(topic_vote);
             ++count;
@@ -540,11 +480,13 @@ exports.join = function(req, res) {
     topic_participant.uid = ObjectId(req.signedCookies.uid);
     
     // TODO use findAndModify as in proposal
-    db.collection('topic_participants').findAsync(_.pick(topic_participant, 'tid'), {'uid': 1}).
+    db.collection('topic_participants').
+    find(_.pick(topic_participant, 'tid'), {'uid': 1}).toArrayAsync().
     then(function(topic_participants) {
         var count = _.size(topic_participants);
         
-        if(undefined == _.findWhere(topic_participants, _.pick(topic_participant, 'uid'))) {
+        // check if user has already joined
+        if(!utils.checkArrayEntryExists(topic_participants, _.pick(topic_participant, 'uid'))) {
             // do not allow user to vote twice for the same topic
             db.collection('topic_participants').insertAsync(topic_participant);
             ++count;
