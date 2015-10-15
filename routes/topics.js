@@ -17,16 +17,12 @@ Object.keys(mongoskin).forEach(function(key) {
 });
 Promise.promisifyAll(mongoskin);
 
-function count_votes(res,tid) {
-    db.collection('topic_votes').count( {'tid': tid}, function(err, count) {
-        res.send(count.toString());
-    });
+function countVotes(tid) {
+    return db.collection('topic_votes').countAsync( {'tid': tid} );
 }
 
-function count_participants(res,tid) {
-    db.collection('topic_participants').count( {'tid': tid}, function(err, count) {
-        res.send(count.toString());
-    });
+function countParticipants(tid) {
+    return db.collection('topic_participants').countAsync( {'tid': tid} );
 }
 
 function getDeadline(nextStage, prevDeadline) {
@@ -53,7 +49,7 @@ function getDeadline(nextStage, prevDeadline) {
 function manageTopicState(topic) {
     // exit this funtion if stage transition is not due yet
     if(Date.now()<topic.nextDeadline)
-        return;
+        return Promise.resolve(topic);
     
     // move to next stage
     var prevDeadline = topic.nextDeadline;
@@ -64,35 +60,29 @@ function manageTopicState(topic) {
                 // topic has been rejected
                 // move to rejection stage
                 topic.stage = C.STAGE_REJECTED;
-                
-                // update database
                 var stageStartedEntryName = 'stageRejectedStarted';
                 topic[stageStartedEntryName] = Date.now();
-                updateTopicState(topic,stageStartedEntryName);
             } else {
                 // topic does meet the minimum requirements for the next stage
                 // move to next stage
                 ++topic.stage;
                 topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
-                
-                // update database
                 var stageStartedEntryName = 'stageProposalStarted';
                 topic[stageStartedEntryName] = Date.now();
-                return updateTopicState(topic,stageStartedEntryName);
             }
-            break;
+            
+            return updateTopicState(topic,stageStartedEntryName).
+                   return(topic);
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
+            // update topic
             ++topic.stage;
             topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline);
-            p = createGroups(topic);
-            
-            // update database
             var stageStartedEntryName = 'stageConsensusStarted';
             topic[stageStartedEntryName] = Date.now();
-            return updateTopicState(topic,stageStartedEntryName);
             
-            return Promise.
-            break;
+            return Promise.join(createGroups(topic),
+                                updateTopicState(topic,stageStartedEntryName))
+                          .return(topic);
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
             /*remixGroupsAsync(topic).then(function(proposalStageIsOver) {
                 if(proposalStageIsOver) {
@@ -192,8 +182,7 @@ exports.list = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
     
     db.collection('topics').find().toArrayAsync().map(function(topic) {
-        manageTopicState(topic);
-        return appendTopicInfoAsync(topic,uid,false);
+        return manageTopicState(topic).then(_.partial(appendTopicInfoAsync,_,uid,false));
     }).then(res.json.bind(res));
 };
 
@@ -214,10 +203,9 @@ exports.update = function(req, res) {
         topic.name = topicNew.name;
         return db.collection('topics').updateAsync(
                 { '_id': tid }, { $set: {name: topicNew.name} }, {}).return(topic);
-    }).then(function (topic){
-        manageTopicState(topic);
-        return appendTopicInfoAsync(topic,uid,true);
-    }).then(res.json.bind(res));
+    }).then(manageTopicState)
+      .then(_.partial(appendTopicInfoAsync,_,uid,true))
+      .then(res.json.bind(res));
 };
 
 // TODO move to groups?
@@ -370,10 +358,11 @@ function updateTopicState(topic,stageStartedEntryName) {
 }
 
 exports.query = function(req, res) {
-    db.collection('topics').findOneAsync({ '_id': ObjectId(req.params.id) }).
-    then(function(topic) {
-        return appendTopicInfoAsync(topic,ObjectId(req.signedCookies.uid),true);
-    }).then(res.json.bind(res));
+    var tid = ObjectId(req.params.id);
+    var uid = ObjectId(req.signedCookies.uid);
+    
+    db.collection('topics').findOneAsync({ '_id': tid }).
+    then(_.partial(appendTopicInfoAsync,_,uid,true)).then(res.json.bind(res));
 };
 
 exports.create = function(req, res) {
@@ -427,7 +416,7 @@ exports.delete = function(req,res) {
         // only the owner can delete the topic
         if(topic.owner.toString() != uid.toString()) {
             res.sendStatus(401);
-            throw new Promise.CancellationError();
+            return Promise.reject();
         }
         
         return db.collection('topics').removeByIdAsync(tid);
@@ -464,12 +453,10 @@ exports.unvote = function(req, res) {
     topic_vote.tid = ObjectId(topic_vote.tid);
     topic_vote.uid = ObjectId(req.signedCookies.uid);
     
-    // remove entry
+    // remove vote and return number of current votes
     db.collection('topic_votes').removeAsync(topic_vote,true).
-        then(function() {
-            // return number of current votes
-            count_votes(res,topic_vote.tid);
-        });
+        then(countVotes.bind(topic_vote.tid)).call('toString').
+        then(res.json.bind(res));
 };
 
 exports.join = function(req, res) {
@@ -499,13 +486,12 @@ exports.join = function(req, res) {
 exports.unjoin = function(req, res) {
     var topic_participant = req.body;
     
+    // assemble participant
     topic_participant.tid = ObjectId(topic_participant.tid);
     topic_participant.uid = ObjectId(req.signedCookies.uid);
     
-    // remove entry
-    db.collection('topic_participants').remove(topic_participant,true,
-        function() {
-            // return number of current topic_participants
-            count_participants(res,topic_participant.tid);
-        });
+    // remove participant and return number of current participants
+    db.collection('topic_participants').removeAsync(topic_participant,true).
+        then(countParticipants.bind(topic_participant.tid)).call('toString').
+        then(res.json.bind(res));
 };
