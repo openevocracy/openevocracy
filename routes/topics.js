@@ -8,6 +8,7 @@ var utils = require('../utils');
 var requirejs = require('requirejs');
 var C = requirejs('public/js/app/constants');
 
+// promisify mongoskin
 Object.keys(mongoskin).forEach(function(key) {
   var value = mongoskin[key];
   if (typeof value === "function") {
@@ -16,14 +17,6 @@ Object.keys(mongoskin).forEach(function(key) {
   }
 });
 Promise.promisifyAll(mongoskin);
-
-function countVotes(tid) {
-    return db.collection('topic_votes').countAsync( {'tid': tid} );
-}
-
-function countParticipants(tid) {
-    return db.collection('topic_participants').countAsync( {'tid': tid} );
-}
 
 function getDeadline(nextStage, prevDeadline) {
     
@@ -118,6 +111,8 @@ function appendBasicTopicInfo(topic) {
             topic.stageName = "consensus";
             break;
     }
+    
+    return topic;
 }
 
 function appendExtendedTopicInfoAsync(topic,uid,with_details) {
@@ -394,7 +389,7 @@ exports.create = function(req, res) {
         topic.nextDeadline = getDeadline(topic.stage);
         
         // insert into database
-        db.collection('topics').insert(topic, function(err, topics){
+        db.collection('topics').insert(topic, function(err, topics) {
             var topic = topics[0];
             
             topic.votes = 0;
@@ -422,6 +417,13 @@ exports.delete = function(req,res) {
         return db.collection('topics').removeByIdAsync(tid);
     }).cancellable().then(res.sendStatus.bind(res,200));
 };
+
+function countVotes(tid) {
+    return db.collection('topic_votes').countAsync( {'tid': tid} );
+}
+function countParticipants(tid) {
+    return db.collection('topic_participants').countAsync( {'tid': tid} );
+}
 
 exports.vote = function(req, res) {
     var topic_vote = req.body;
