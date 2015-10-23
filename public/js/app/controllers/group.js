@@ -1,7 +1,7 @@
 define([
     'underscore',
     'Marionette',
-    'layouts/center_right',
+    //'layouts/center_right',
     'views/blocks/navigation',
     'views/blocks/group_tabs',
     'views/blocks/group_proposals',
@@ -12,7 +12,7 @@ define([
 ], function(
     _,
     Marionette,
-    CenterRightLayout,
+    //CenterRightLayout,
     NaviView,
     GroupTabsBlock,
     GroupProposalsBlock,
@@ -35,7 +35,7 @@ define([
             App.layout.sidebar.show(naviView);
             
             /* ### CONTENT RIGHT ### */
-            this.centerRightLayout = new CenterRightLayout();
+            /*this.centerRightLayout = new CenterRightLayout();
             App.layout.view.show(this.centerRightLayout);
             
             this.group.fetch().done(function () {
@@ -57,8 +57,8 @@ define([
                 var groupProposalsBlock = new GroupProposalsBlock({model:this.group});
                 groupProposalsBlock.bind("group_proposals:show_member_proposal", this.show_member_proposal);
                 this.centerRightLayout.group_proposals.show(groupProposalsBlock);
-            }.bind(this));
-        },
+            }.bind(this));*/
+        }/*,
         
         show_collab: function() {
             this.centerRightLayout.center.show(this.collabView, { preventDestroy: true });
@@ -79,7 +79,7 @@ define([
             
             $('#center-right .btn').removeClass('active');
             $('[data-member-id="'+member_id+'"]').addClass('active');
-        }
+        }*/
     });
     
     return Controller;

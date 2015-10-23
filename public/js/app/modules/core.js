@@ -1,19 +1,31 @@
 define([
     'Marionette',
+    'handlebars',
     'controllers/login',
     'controllers/register',
     'controllers/topics',
     'controllers/topic',
     'controllers/proposal',
-    'controllers/group'
+    'controllers/group',
+    'text!partials/views/header.html',
+    'text!partials/views/buttons.html',
+    'text!partials/blocks/topic_statistics.html',
+    'text!partials/blocks/topic_tabs.html',
+    'text!partials/blocks/topic_author.html'
 ], function(
     Marionette,
+    Handlebars,
     Login,
     Register,
     Topics,
     Topic,
     Proposal,
-    Group
+    Group,
+    HeaderPartial,
+    ButtonsPartial,
+    StatBlockPartials,
+    TopicTabsBlockPartials,
+    TopicAuthorBlockPartials
     ) {
 
     var login = new Login();
@@ -32,6 +44,12 @@ define([
         App.router.route('proposal/:id', 'proposal_index', proposal.route_proposal_index.bind(proposal));
         App.router.route('group/:id', 'group_index', group.route_group_index.bind(group));
     };
+    
+    Handlebars.registerPartial('header', HeaderPartial);
+    Handlebars.registerPartial('buttons', ButtonsPartial);
+    Handlebars.registerPartial('topic_statistics', StatBlockPartials);
+    Handlebars.registerPartial('topic_tabs', TopicTabsBlockPartials);
+    Handlebars.registerPartial('topic_author', TopicAuthorBlockPartials);
     
     return Module;
 });

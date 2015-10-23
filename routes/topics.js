@@ -77,19 +77,26 @@ function manageTopicState(topic) {
                                 updateTopicState(topic,stageStartedEntryName))
                           .return(topic);
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
-            /*remixGroupsAsync(topic).then(function(proposalStageIsOver) {
+            return remixGroupsAsync(topic).then(function(proposalStageIsOver) {
+                var updateSet;
                 if(proposalStageIsOver) {
+                    // updates below are only required when proposal stage is over
                     ++topic.stage;
                     topic.nextDeadline = -1;
-                    
-                    db.collection('topics').update(
-                        { '_id': topic._id },
-                        { $set: _.pick(topic, 'stage', 'nextDeadline') },
-                        {}, function () {});
+                    updateSet = _.pick(topic, 'stage', 'nextDeadline');
+                } else {
+                    // otherwise just update level
+                    ++topic.level;
+                    updateSet = _.pick(topic, 'level');
                 }
-            });*/
-            break;
+                
+                // update database
+                return db.collection('topics').updateAsync(
+                    { '_id': topic._id }, { $set: updateSet }, {}).return(topic);
+            });
     }
+    
+    return Promise.resolve(topic);
 }
 
 function appendBasicTopicInfo(topic) {
@@ -219,7 +226,6 @@ function createGroups(topic) {
     db.collection('topic_participants').find({ 'tid': tid }).toArray(
     function(err, topic_participants) {
         var numTopicParticipants = topic_participants.length;
-        
         console.log('numTopicParticipants: '+numTopicParticipants);
         
         // compute number of groups
@@ -229,7 +235,6 @@ function createGroups(topic) {
         else
             numGroups = numTopicParticipants/groupMaxSize; // complex rule, 4 and 5 uniformly distributed
         numGroups = Math.ceil(numGroups); // round up to next integer
-        
         console.log('rounded groups: '+numGroups);
         
         // shuffle topic_participants
@@ -253,34 +258,31 @@ function createGroups(topic) {
         console.log('groups filled: ' + JSON.stringify(counts));
         
         // insert all groups into database
-        _.each(groups, function(group) {
+        return Promise.each(groups, function(group) {
             // create group new id
             var gid = ObjectId();
             
             // create group itself
-            db.collection('groups').insert({
-                '_id': gid,
-                'tid': tid,
-                'pid': ObjectId(),
-                'level': 0
-            }, function() {});
+            var create_group_promise =
+            db.collection('groups').insertAsync({
+                '_id': gid, 'tid': tid,
+                'pid': ObjectId(), 'level': 0});
+            
+            // insert group participant
+            var insert_group_participants_promise =
+            db.collection('group_participants').insertAsync(
+                _.map(group, function(uid) {return { 'gid': gid, 'uid': uid }; }));
             
             // create participants for this group
-            _.each(group, function(uid) {
-                // insert group particpant
-                db.collection('group_participants').insert(
-                    { 'gid': gid, 'uid': uid },
-                    function(err, group_participant){
-                        console.log('new group_participant');
-                    });
-                
-                // append gid to proposal
-                // so we can identify it later
-                db.collection('proposals').update(
-                    { 'tid': tid, 'uid': uid },
-                    { $set: { 'gid': gid } },
-                    function() {});
-            });
+            // append gid to proposal so we can identify it later
+            var update_proposals_promise =
+            db.collection('proposals').updateAsync(
+                { 'tid': tid, 'uid': { $in: group } }, { $set: { 'gid': gid } });
+            
+            return Promise.join(
+                    create_group_promise,
+                    insert_group_participants_promise,
+                    update_proposals_promise);
         });
     });
 }
@@ -291,58 +293,56 @@ function remixGroupsAsync(topic) {
     var tid = topic._id;
     
     // get groups with highest level
-    db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
+    return db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
         toArrayAsync().then(function(groups_in) {
+        
+        // return true, if we only have one group then the proposal stage is over
+        if(0 == groups_in.length)
+            return true;
+        
+        // get highest level
+        var highestLevel = groups_in[0].level;
+        
+        // shuffle groups
+        _.shuffle(groups_in);
+        
+        // initialize empty groups_out
+        var numGroups = groups_in.length;
+        var groups_out = new Array(numGroups);
+        for(var i=0; i<numGroups; ++i)
+            groups_out[i] = [];
+        
+        // push groups_in into groups_out
+        _.each(groups_in, function(group_in) {
+            // skip if this is a lower level group
+            if(group_in.level != highestLevel)
+                return;
             
-            // if we only have one group then the proposal stage is over
-            if(0 == groups_in.length)
-                return true;
-            
-            // get highest level
-            var highestLevel = groups_in[0].level;
-            
-            // shuffle groups
-            _.shuffle(groups_in);
-            
-            // initialize empty groups_out
-            var numGroups = groups_in.length;
-            var groups_out = new Array(numGroups);
-            for(var i=0; i<numGroups; ++i)
-                groups_out[i] = [];
-            
-            // push groups_in into groups_out
-            _.each(groups_in, function(group_in) {
-                // skip if this is a lower level group
-                if(group_in.level != highestLevel)
-                    return;
-                
-                // find first smallest group
-                var group_out = _.min(groups_out, function(group_out) {return group_out.length;});
-                group_out.push(ratings.getGroupLeader(group_in._id));
-            });
-            
-            // insert all groups into database
-            var nextLevel = highestLevel+1;
-            Promise.each(groups_out, function(group_out) {
-                // create group new id
-                var gid = ObjectId();
-                
-                // create group itself
-                db.collection('groups').insertAsync({
-                    '_id': gid,
-                    'tid': tid,
-                    'pid': ObjectId(),
-                    'level': nextLevel
-                });
-                
-                // create participants for this group
-                _.each(group_out, function(uid) {
-                    // insert group participant
-                    db.collection('group_participants').insertAsync(
-                        { 'gid': gid, 'uid': uid });
-                });
-            });
+            // find first smallest group
+            var group_out = _.min(groups_out, function(group_out) {return group_out.length;});
+            group_out.push(ratings.getGroupLeader(group_in._id));
         });
+        
+        // insert all groups into database
+        var nextLevel = highestLevel+1;
+        return Promise.each(groups_out, function(group_out) {
+            // create group new id
+            var gid = ObjectId();
+            
+            // create group itself
+            var create_group_promise =
+            db.collection('groups').insertAsync({
+                '_id': gid, 'tid': tid,
+                'pid': ObjectId(), 'level': nextLevel});
+            
+            // insert group participant
+            var create_participants_promise =
+            db.collection('group_participants').insertAsync(
+                _.map(group_out,function(uid) {return { 'gid': gid, 'uid': uid };}));
+            
+            return Promise.join(create_group_promise,create_participants_promise);
+        }).return(false); // return false, proposal stage is not over
+    });
 }
 
 function updateTopicState(topic,stageStartedEntryName) {
@@ -452,12 +452,13 @@ exports.vote = function(req, res) {
 exports.unvote = function(req, res) {
     var topic_vote = req.body;
     
+    // assemble vote
     topic_vote.tid = ObjectId(topic_vote.tid);
     topic_vote.uid = ObjectId(req.signedCookies.uid);
     
     // remove vote and return number of current votes
     db.collection('topic_votes').removeAsync(topic_vote,true).
-        then(countVotes.bind(topic_vote.tid)).call('toString').
+        then(countVotes.bind(undefined,topic_vote.tid)).call('toString').
         then(res.json.bind(res));
 };
 
@@ -494,6 +495,6 @@ exports.unjoin = function(req, res) {
     
     // remove participant and return number of current participants
     db.collection('topic_participants').removeAsync(topic_participant,true).
-        then(countParticipants.bind(topic_participant.tid)).call('toString').
-        then(res.json.bind(res));
+        then(countParticipants.bind(undefined,topic_participant.tid)).
+        call('toString').then(res.json.bind(res));
 };

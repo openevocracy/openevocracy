@@ -103,9 +103,9 @@ app.post("/json/auth/remove_account", users.delete );*/
 // ###   T E S T   ###
 // ###################
 
-app.get('/test/fill_topic_participants', tests.fill_topic_participants );
+app.get('/test/create_standard_suite', tests.create_standard_suite );
 app.get('/test/create_groups', tests.create_groups );
-app.get('/test/create_test_suite', tests.create_test_suite );
+app.get('/test/remix_groups', tests.remix_groups );
 
 // ###################
 // ### S E R V E R ###

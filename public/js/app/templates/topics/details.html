@@ -1,30 +1,18 @@
-<!--<div class="right-pos">
-    <button class="btn btn-default btn-sm join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
-    <button class="btn btn-default btn-sm vote{{#if voted}} active{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-heart"></span></button>
-    <!-- TODO in v0.2 <button class="ico merge" title="merge request"><span></span></button>->
-    
-    {{#if pid}}
-    <button class="btn btn-default btn-sm edit" title="edit"><span class="fa fa-pencil"></span></button>
-    <!--<form action="#/topics">
-        <button class="ico del" title="delete"><span></span></button>
-    </form>->
-    <a class="btn btn-default btn-sm del" title="delete" href="#/topics"><span class="fa fa-times"></span></a>
-    {{/if}}
-</div>
-
-<div class="page-header">
-    <h2 id="title">{{name}}</h2>
-</div>
-
-<p class="text-muted sub-info">
-    <span>{{stageName}} stage{{#ifis stage STAGE_CONSENSUS}} in level{{level}}{{/ifis}}, next {{#ifis stage STAGE_CONSENSUS}}level{{else}}stage{{/ifis}} in <span id="timeremaining">{{timeRemaining}}</span></span>
-</p>-->
-
 {{> buttons}}
 {{> header}}
 
-<div id="body">{{{body}}}</div>
-<div id="editor"></div>
+<div class="row">
+    <div class="col-md-8">
+        <div id="body">{{{body}}}</div>
+        <div id="editor"></div>
+    </div>
+    
+    <aside class="col-md-4">
+        {{#if showTabs}}<div class="block">{{> topic_tabs}}</div>{{/if}}
+        <div class="block">{{> topic_author}}</div>
+        <div class="block last">{{> topic_statistics}}</div>
+    </aside>
+</div>
 
 <!--<h2>Background</h2>
 <div id="references"></div>-->

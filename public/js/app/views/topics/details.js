@@ -14,14 +14,12 @@ define([
     C
     ) {
     
-    //var ht = 0;
-    
     var View = Marionette.ItemView.extend({
         template: Template,
         tagName: 'section',
         className: "content",
         id: "topic-details",
-
+        
         events: {
             /*'click .open-desc': function(e) {
                 //alert(ht);
@@ -93,6 +91,10 @@ define([
             this.model.set(C);
             // render on change
             this.model.on('change', this.render, this);
+            this.setSubtitle();
+            
+            if( typeof this.model.get('ppid') !== 'undefined' && typeof this.model.get('gid') !== 'undefined' )
+                this.model.set('showTabs');
         },
 
         onRender: function() {
@@ -115,6 +117,20 @@ define([
             $('#timeremaining').countdown(date, function(event) {
                 $(this).html(event.strftime('%D:%H:%M:%S'));
             });
+        },
+        
+        setSubtitle: function() {
+            // set variables
+            var stage = this.model.get('stage');
+            var subtitle_begin = this.model.get('stageName') + ' stage';
+            var subtitle_level = ' in level ' + this.model.get('level');
+            var subtitle_remaining = ' in <span id="timeremaining"></span>';
+            
+            // evaluate conditions
+            var subtitle = subtitle_begin + ((stage == C.STAGE_CONSENSUS) ? subtitle_level : '' ) + ', next ' + ((stage == C.STAGE_CONSENSUS) ? 'level' : 'stage') + subtitle_remaining;
+            
+            // set model
+            this.model.set('subtitle',subtitle);
         }
     });
     

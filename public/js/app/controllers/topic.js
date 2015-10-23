@@ -1,19 +1,19 @@
 define([
     'Marionette',
-    'layouts/center_right',
+    //'layouts/center_right',
     'views/blocks/navigation',
-    'views/blocks/topic_tabs',
+    //'views/blocks/topic_tabs',
     'views/topics/details',
-    'views/blocks/statistics',
+    //'views/blocks/statistics',
     'models/topic',
     'constants'
 ], function(
     Marionette,
-    CenterRightLayout,
+    //CenterRightLayout,
     NaviView,
-    TopicTabsBlock,
+    //TopicTabsBlock,
     TopicView,
-    StatisticsView,
+    //StatisticsView,
     Model,
     C
     ) {
@@ -26,14 +26,14 @@ define([
             App.layout.sidebar.show(naviView);
             
             /* ### CONTENT RIGHT ### */
-            var centerRightLayout = new CenterRightLayout();
-            App.layout.view.show(centerRightLayout);
+            //var centerRightLayout = new CenterRightLayout();
+            //App.layout.view.show(centerRightLayout);
             
             topic.fetch().done(function () {
                 var topicView = new TopicView({model:topic});
-                centerRightLayout.center.show(topicView);
+                App.layout.view.show(topicView);
                 
-                $('#right').append('<div id="topic-tabs"></div>');
+                /*$('#right').append('<div id="topic-tabs"></div>');
                 centerRightLayout.addRegion('topic_tabs','#topic-tabs');
                 var topicTabsBlock = new TopicTabsBlock({model:topic});
                 //topicTabsBlock.bind("group_tabs:show_collab", this.show_collab);
@@ -42,7 +42,7 @@ define([
                 
                 $('#right').append('<div id="statistics"></div>');
                 centerRightLayout.addRegion('statistics','#statistics');
-                centerRightLayout.statistics.show(new StatisticsView({model:topic}));
+                centerRightLayout.statistics.show(new StatisticsView({model:topic}));*/
             });
         }
     });

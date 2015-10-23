@@ -2,6 +2,7 @@ var _ = require('underscore');
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
+var Promise = require('bluebird');
 var requirejs = require('requirejs');
 var C = requirejs('public/js/app/constants');
 
@@ -9,41 +10,10 @@ var topics = require('./topics');
 
 var tid = ObjectId('54f646ccc3a414a60d40d660');
 
-exports.fill_topic_participants = function(req, res) {
-    for(i = 0; i < 1000; ++i) {
-        db.collection('topic_participants').insert(
-            {'tid':tid,'uid':ObjectId()},
-            function(err, topic_participants){
-                console.log('new topic_participants');
-            });
-    }
-    for(i = 0; i < 40; ++i) {
-        db.collection('topic_participants').insert(
-            {'tid':tid,'uid':ObjectId()},
-            function(err, topic_participants){
-                console.log('new topic_participants');
-            });
-    }
-    
-    res.send('successfull');
-};
-
-exports.create_groups = function(req, res) {
-    /*db.collection('groups').remove({tid:'54ff453cfec7e11108ca2f65'},true,
-        function(topic_participant,err) {
-        });
-    createGroups({_id:'54ff453cfec7e11108ca2f65'});*/
-    
-    db.collection('groups').remove({'tid':tid},true,
-        function(topic_participant,err) {
-        });
-    var topic = {'_id':tid};
-    topics.createGroups(topic);
-
-    res.send('successfull');
-};
-
-exports.create_test_suite = function(req, res) {
+/*
+standard test suite
+*/
+exports.create_standard_suite = function(req, res) {
     var tid = ObjectId();
     var gid = ObjectId();
     
@@ -88,5 +58,52 @@ exports.create_test_suite = function(req, res) {
                    {'tid':tid,'gid':gid,'uid':ucarlo}],
                   function (){});
     
-    res.send('successfull');
+    res.sendStatus(200);
+};
+
+function fill_topic_participants(tid, num_participants) {
+    var topic_participants = [];
+    for(var i = 0; i < num_participants; ++i)
+        topic_participants.push({'tid':tid,'uid':ObjectId()});
+    
+    return db.collection('topic_participants').insertAsync(topic_participants);
+};
+
+exports.create_groups = function(req, res) {
+    /*db.collection('groups').remove({tid:'54ff453cfec7e11108ca2f65'},true,
+        function(topic_participant,err) {
+        });
+    createGroups({_id:'54ff453cfec7e11108ca2f65'});*/
+    
+    db.collection('groups').remove({'tid':tid},true,
+        function(topic_participant,err) {
+        });
+    var topic = {'_id':tid};
+    topics.createGroups(topic);
+
+    res.sendStatus(200);
+};
+
+/*
+test suite for testing of group remix
+*/
+exports.remix_groups = function(req, res) {
+    // create topic
+    var ONE_MINUTE = 1000*60; // one minute milliseconds
+    
+    var tid = ObjectId();
+    
+    Promise.join(
+        db.collection('topics').insertAsync({
+            '_id': tid,
+            'name': 'RemixGroupTest'+Date.now(),
+            'owner': ObjectId(req.signedCookies.uid),
+            'pid': ObjectId(),
+            'stage': C.STAGE_CONSENSUS,
+            'level': 0,
+            'nextDeadline': Date.now() + ONE_MINUTE
+        }),
+        
+        fill_topic_participants(tid,1000)
+    ).then(res.sendStatus.bind(res,200));
 };

@@ -13,12 +13,11 @@ define([
             route_topics_index: function() {
                 var topics = new Collection();
                 
+                /* ### LEFT ### */
+                var naviView = new NaviView();
+                App.layout.sidebar.show(naviView);
+                
                 topics.fetch().done(function () {
-                    /* ### LEFT ### */
-                    var naviView = new NaviView();
-                    /*console.log(sidebar);*/
-                    App.layout.sidebar.show(naviView);
-                    
                     /* ### CONTENT RIGHT ### */
                     var view = new TopicsView({collection: topics});
                     App.layout.view.show(view);
