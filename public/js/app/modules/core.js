@@ -9,6 +9,7 @@ define([
     'controllers/group',
     'text!partials/views/header.html',
     'text!partials/views/buttons.html',
+    'text!partials/views/messages.html',
     'text!partials/blocks/topic_statistics.html',
     'text!partials/blocks/topic_tabs.html',
     'text!partials/blocks/topic_author.html'
@@ -23,6 +24,7 @@ define([
     Group,
     HeaderPartial,
     ButtonsPartial,
+    MessagesPartials,
     StatBlockPartials,
     TopicTabsBlockPartials,
     TopicAuthorBlockPartials
@@ -47,6 +49,7 @@ define([
     
     Handlebars.registerPartial('header', HeaderPartial);
     Handlebars.registerPartial('buttons', ButtonsPartial);
+    Handlebars.registerPartial('messages', MessagesPartials);
     Handlebars.registerPartial('topic_statistics', StatBlockPartials);
     Handlebars.registerPartial('topic_tabs', TopicTabsBlockPartials);
     Handlebars.registerPartial('topic_author', TopicAuthorBlockPartials);

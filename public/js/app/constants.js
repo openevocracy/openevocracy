@@ -1,5 +1,6 @@
 // Stages
 define({
+    DEBUG           : false,
     STAGE_REJECTED  : -1,
     STAGE_SELECTION :  0,
     STAGE_PROPOSAL  :  1,

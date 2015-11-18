@@ -24,6 +24,7 @@
         "bcrypt": "*",
         "requirejs": "*",
         "underscore": "*",
+        "underscore.string": "*",
         "request": "*",
         "request-promise": "*",
         "ejs": "*",

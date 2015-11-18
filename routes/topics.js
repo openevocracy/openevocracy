@@ -32,7 +32,7 @@ function getDeadline(nextStage, prevDeadline) {
             nextDeadline += ONE_WEEK;
             break;
         case C.STAGE_CONSENSUS: // get consensus stage deadline
-            nextDeadline = ONE_WEEK; // no deadline in consensus stage
+            nextDeadline += ONE_WEEK; // no deadline in consensus stage
             break;
     }
     
@@ -58,7 +58,7 @@ function manageTopicState(topic) {
             } else {
                 // topic does meet the minimum requirements for the next stage
                 // move to next stage
-                ++topic.stage;
+                topic.stage = C.STAGE_PROPOSAL;
                 topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
                 var stageStartedEntryName = 'stageProposalStarted';
                 topic[stageStartedEntryName] = Date.now();
@@ -68,7 +68,7 @@ function manageTopicState(topic) {
                    return(topic);
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
             // update topic
-            ++topic.stage;
+            topic.stage = C.STAGE_CONSENSUS;
             topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline);
             var stageStartedEntryName = 'stageConsensusStarted';
             topic[stageStartedEntryName] = Date.now();
@@ -77,17 +77,35 @@ function manageTopicState(topic) {
                                 updateTopicState(topic,stageStartedEntryName))
                           .return(topic);
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
-            return remixGroupsAsync(topic).then(function(proposalStageIsOver) {
+            return remixGroupsAsync(topic).then(function(nextStage) {
+                /*console.log(Date.now());
+                console.log(topic.nextDeadline);*/
+                
                 var updateSet;
-                if(proposalStageIsOver) {
-                    // updates below are only required when proposal stage is over
-                    ++topic.stage;
-                    topic.nextDeadline = -1;
-                    updateSet = _.pick(topic, 'stage', 'nextDeadline');
-                } else {
-                    // otherwise just update level
-                    ++topic.level;
-                    updateSet = _.pick(topic, 'level');
+                switch(nextStage) {
+                case C.STAGE_CONSENSUS:
+                    // updates below are only required while we are in consensus stage
+                    updateSet = {
+                        'level': (++topic.level),
+                        'nextDeadline': (topic.nextDeadline = prevDeadline + 1000*60*5) // in 5 minutes
+                    };
+                    break;
+                case C.STAGE_PASSED:
+                    // updates below are only required if consensus stage is over
+                    updateSet = {
+                        'stage': (topic.stage = C.STAGE_PASSED),
+                        'nextDeadline': (topic.nextDeadline = -1)
+                    };
+                    break;
+                case C.STAGE_REJECTED:
+                    // updates below are only required if topic was rejected
+                    updateSet = {
+                        'stage': (topic.stage = C.STAGE_REJECTED),
+                        'nextDeadline': (topic.nextDeadline = -1)
+                    };
+                    break;
+                default:
+                    return Promise.reject('unknown stage');
                 }
                 
                 // update database
@@ -210,17 +228,41 @@ exports.update = function(req, res) {
       .then(res.json.bind(res));
 };
 
-// TODO move to groups?
-function createGroups(topic) {
-    var tid = topic._id;
+function calculateNumberOfGroups(numParticipants) {
     
     // constants
     var groupSize = 4.5; // group size is 4 or 5
     var limitSimpleRule = 50; // number of topic_participants (if more then x topic_participants, complex rule is used)
-    
     // calculated values
     var groupMinSize = (groupSize-0.5);
     var groupMaxSize = (groupSize+0.5);
+    
+    var numGroups;
+    if(numParticipants>limitSimpleRule)
+        numGroups = numParticipants/groupSize; // simple rule, ideally all groups are 5, group size 4 only exception
+    else
+        numGroups = numParticipants/groupMaxSize; // complex rule, 4 and 5 uniformly distributed
+    numGroups = Math.ceil(numGroups); // round up to next integer
+    console.log('rounded groups: '+numGroups);
+    
+    return numGroups;
+}
+
+/*function initialGroups() {
+    // get participants from topics
+    
+    mixGroups(participants);
+}*/
+
+/*function remixGroups() {
+    // get leaders from groups
+    
+    mixGroups(leaders);
+}*/
+
+// TODO move to groups?
+function createGroups(topic) {
+    var tid = topic._id;
     
     // find topic_participants
     db.collection('topic_participants').find({ 'tid': tid }).toArray(
@@ -229,13 +271,7 @@ function createGroups(topic) {
         console.log('numTopicParticipants: '+numTopicParticipants);
         
         // compute number of groups
-        var numGroups;
-        if(numTopicParticipants>limitSimpleRule)
-            numGroups = numTopicParticipants/groupSize; // simple rule, ideally all groups are 5, group size 4 only exception
-        else
-            numGroups = numTopicParticipants/groupMaxSize; // complex rule, 4 and 5 uniformly distributed
-        numGroups = Math.ceil(numGroups); // round up to next integer
-        console.log('rounded groups: '+numGroups);
+        var numGroups = calculateNumberOfGroups(numTopicParticipants);
         
         // shuffle topic_participants
         _.shuffle(topic_participants);
@@ -262,11 +298,18 @@ function createGroups(topic) {
             // create group new id
             var gid = ObjectId();
             
+            // create group's proposal
+            var ppid = ObjectId();
+            var create_group_proposal_promise =
+            db.collection('proposals').insertAsync({
+                '_id': ppid, 'source': gid,
+                'pid': ObjectId()});
+            
             // create group itself
             var create_group_promise =
             db.collection('groups').insertAsync({
                 '_id': gid, 'tid': tid,
-                'pid': ObjectId(), 'level': 0});
+                'ppid': ppid, 'level': 0});
             
             // insert group participant
             var insert_group_participants_promise =
@@ -275,14 +318,15 @@ function createGroups(topic) {
             
             // create participants for this group
             // append gid to proposal so we can identify it later
-            var update_proposals_promise =
+            var update_source_proposals_promise =
             db.collection('proposals').updateAsync(
-                { 'tid': tid, 'uid': { $in: group } }, { $set: { 'gid': gid } });
+                { 'tid': tid, 'uid': { $in: group } }, { $set: { 'sink': gid } });
             
             return Promise.join(
+                    create_group_proposal_promise,
                     create_group_promise,
                     insert_group_participants_promise,
-                    update_proposals_promise);
+                    update_source_proposals_promise);
         });
     });
 }
@@ -291,36 +335,59 @@ exports.createGroups = createGroups;
 // TODO move to groups?
 function remixGroupsAsync(topic) {
     var tid = topic._id;
-    
+
     // get groups with highest level
     return db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
         toArrayAsync().then(function(groups_in) {
         
-        // return true, if we only have one group then the proposal stage is over
+        // return true, if we only have one group then the consensus stage is over
         if(0 == groups_in.length)
             return true;
         
-        // get highest level
+        // get highest level number
         var highestLevel = groups_in[0].level;
         
-        // shuffle groups
-        _.shuffle(groups_in);
-        
-        // initialize empty groups_out
-        var numGroups = groups_in.length;
-        var groups_out = new Array(numGroups);
-        for(var i=0; i<numGroups; ++i)
-            groups_out[i] = [];
-        
-        // push groups_in into groups_out
+        // get all group leaders
+        var leaders = [];
         _.each(groups_in, function(group_in) {
             // skip if this is a lower level group
             if(group_in.level != highestLevel)
                 return;
             
+            // get group leader
+            var leader = ratings.getGroupLeader(group_in._id);
+            leaders.push(leader);
+        });
+        
+        return Promise.join(Promise.all(leaders),highestLevel);
+    }).then(function(leaders,highestLevel) {
+        // remove all undefined leaders
+        leaders = _.compact(leaders);
+        var numLeaders = leaders.length;
+        
+        if(1 == numLeaders)
+            // if there is only ONE leader, then the topic is finished/passed.
+            return C.STAGE_PASSED;
+        else if(0 == numLeaders)
+            // if there is NO leader, then the consensus stage has failed.
+            return C.STAGE_REJECTED;
+        
+        // shuffle group leaders
+        _.shuffle(leaders);
+        
+        // compute number of groups
+        var numGroups = calculateNumberOfGroups(numLeaders);
+        
+        // initialize empty groups_out
+        var groups_out = new Array(numGroups);
+        for(var i=0; i<numGroups; ++i)
+            groups_out[i] = [];
+        
+        // push leaders into groups_out
+        _.each(leaders, function(leader) {
             // find first smallest group
             var group_out = _.min(groups_out, function(group_out) {return group_out.length;});
-            group_out.push(ratings.getGroupLeader(group_in._id));
+            group_out.push(leader);
         });
         
         // insert all groups into database
@@ -328,7 +395,14 @@ function remixGroupsAsync(topic) {
         return Promise.each(groups_out, function(group_out) {
             // create group new id
             var gid = ObjectId();
-            
+                        
+            // create group's proposal
+            var ppid = ObjectId();
+            var create_group_proposal_promise =
+            db.collection('proposals').insertAsync({
+                '_id': ppid, 'source': gid,
+                'pid': ObjectId()});
+
             // create group itself
             var create_group_promise =
             db.collection('groups').insertAsync({
@@ -339,9 +413,19 @@ function remixGroupsAsync(topic) {
             var create_participants_promise =
             db.collection('group_participants').insertAsync(
                 _.map(group_out,function(uid) {return { 'gid': gid, 'uid': uid };}));
+                        
+            // create participants for this group
+            // append gid to proposal so we can identify it later
+            /*var update_source_proposals_promise =
+            db.collection('proposals').updateAsync(
+                { 'tid': tid, 'uid': { $in: group } }, { $set: { 'sink': gid } });*/
             
-            return Promise.join(create_group_promise,create_participants_promise);
-        }).return(false); // return false, proposal stage is not over
+            return Promise.join(
+                create_group_proposal_promise,
+                create_group_promise,
+                create_participants_promise);//,
+                //update_source_proposals_promise);
+        }).return(C.STAGE_CONSENSUS); // we stay in consensus stage
     });
 }
 
@@ -357,7 +441,14 @@ exports.query = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
     
     db.collection('topics').findOneAsync({ '_id': tid }).
-    then(_.partial(appendTopicInfoAsync,_,uid,true)).then(res.json.bind(res));
+    then(function(topic) {
+        if(null == topic)
+            return Promise.reject(404);
+        else
+            return appendTopicInfoAsync(topic,uid,true);
+    }).
+    then(res.json.bind(res)).
+    catch(res.sendStatus.bind(res,404));
 };
 
 exports.create = function(req, res) {
@@ -365,7 +456,7 @@ exports.create = function(req, res) {
     
     // reject empty topic names
     if(topic.name == "") {
-        console.log("Couldn't create new topic! - topic Name is empty")
+        console.log("Couldn't create new topic: Topic name is empty.");
         res.sendStatus(400);
         return;
     }
@@ -377,7 +468,7 @@ exports.create = function(req, res) {
         
         // topic already exists
         if(count > 0) {
-            console.log("Couldn't create new topic! - topic already exists")
+            console.log("Couldn't create new topic! - topic already exists");
             res.sendStatus(409);
             return;
         }

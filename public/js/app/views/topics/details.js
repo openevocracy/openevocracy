@@ -1,4 +1,5 @@
 define([
+    'underscore_string',
     'jquery',
     'Marionette',
     'etherpad',
@@ -7,6 +8,7 @@ define([
     'jquerycookie',
     'jquerycountdown'
 ], function(
+    _,
     $,
     Marionette,
     etherpad,
@@ -93,7 +95,16 @@ define([
             this.model.on('change', this.render, this);
             this.setSubtitle();
             
-            if( typeof this.model.get('ppid') !== 'undefined' && typeof this.model.get('gid') !== 'undefined' )
+            var body = this.model.get('body');
+            var error = 'Error';
+            if(_.startsWith(body, error)) {
+                this.model.set('body', '');
+                this.model.set('message', body);
+                this.model.set('message-type','alert alert-danger');
+            }
+            
+            if( typeof this.model.get('ppid') !== undefined &&
+                typeof this.model.get('gid' ) !== undefined )
                 this.model.set('showTabs');
         },
 

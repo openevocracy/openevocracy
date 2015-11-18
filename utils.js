@@ -24,5 +24,7 @@ exports.getPadBodyAsync = function(pid) {
         var body = str.replace(/^.*?<body[^>]*>(.*?)<\/body>.*?$/i,"$1");
         
         return body;
+    }).timeout(1000).catch(function (err) {
+        return err.message;
     });
 };

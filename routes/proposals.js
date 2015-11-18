@@ -16,7 +16,7 @@ exports.query = function(req, res) {
         // get proposal or create proposal if it does not exist
         // from http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
         db.collection('proposals').findAndModify(
-            { 'tid':tid, 'uid':uid },
+            { 'tid':tid, 'source':uid },
             [],
             { $setOnInsert: {pid: ObjectId()}},
             { new: true, upsert: true },

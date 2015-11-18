@@ -103,7 +103,7 @@ exports.remix_groups = function(req, res) {
             'level': 0,
             'nextDeadline': Date.now() + ONE_MINUTE
         }),
-        
-        fill_topic_participants(tid,1000)
+        fill_topic_participants(tid,1000),
+        topics.createGroups({'_id':tid})
     ).then(res.sendStatus.bind(res,200));
 };
