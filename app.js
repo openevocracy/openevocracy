@@ -76,9 +76,13 @@ app.get('/json/group/:id', function(req, res) { auth(req, res, groups.query); })
 // ### R A T I N G S ###
 // #####################
 
-app.get('/json/ratings/count', function(req, res) { auth(req, res, ratings.count); });
-app.get('/json/ratings/:id', function(req, res) { auth(req, res, ratings.query); });
-app.post('/json/ratings/rate', function(req, res) { auth(req, res, ratings.rate); });
+app.get('/json/ratings/user/count', function(req, res) { auth(req, res, ratings.count_user_rating); });
+app.get('/json/ratings/user/:id', function(req, res) { auth(req, res, ratings.query_user_rating); });
+app.post('/json/ratings/user/rate', function(req, res) { auth(req, res, ratings.rate_user_rating); });
+
+app.get('/json/ratings/proposal/count', function(req, res) { auth(req, res, ratings.count_proposal_rating); });
+app.get('/json/ratings/proposal/:id', function(req, res) { auth(req, res, ratings.query_proposal_rating); });
+app.post('/json/ratings/proposal/rate', function(req, res) { auth(req, res, ratings.rate_proposal_rating); });
 
 // ###################
 // ###   A U T H   ###

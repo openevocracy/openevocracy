@@ -43,10 +43,11 @@ define([
             };
             
             _.each(this.model.get('participants'), function(participant) {
+                // TODO partcipants => members
                 $('[data-rate-type="participant"][data-rate-id="'+participant._id+'"]').
                     raty(_.extend(ratySettings,
                          { score: participant.participant_rating,
-                           click: _.partial(this.saveRating, this.model, 'participant') }));
+                           click: _.partial(this.saveRating, this.model, 'user') }));
                 $('[data-rate-type="proposal"][data-rate-id="'+participant.ppid+'"]').
                     raty(_.extend(ratySettings,
                          { score: participant.proposal_rating,
@@ -57,8 +58,8 @@ define([
         saveRating: function(model, type, score, e) {
             var id = $(this).attr('data-rate-id');
             
-            $.post('/json/ratings/rate',
-                {'id': id, 'type': type, 'gid': model.get('_id'), 'score': score},
+            $.post('/json/ratings/'+type+'/rate',
+                {'id': id, 'gid': model.get('_id'), 'score': score},
                 function(data) {
                     //this.set({'votes': data, 'voted': status});
                 });

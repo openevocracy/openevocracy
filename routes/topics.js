@@ -20,19 +20,16 @@ Promise.promisifyAll(mongoskin);
 
 function getDeadline(nextStage, prevDeadline) {
     
-    var ONE_WEEK = 1000*60*60*24*7; // one week milliseconds
-    
-    // calculate
     var nextDeadline = prevDeadline || Date.now();
     switch (nextStage) {
         case C.STAGE_SELECTION: // get selection stage deadline
-            nextDeadline += (2*ONE_WEEK); // two weeks
+            nextDeadline += C.DEADLINE_SELECTION;
             break;
         case C.STAGE_PROPOSAL: // get proposal stage deadline
-            nextDeadline += ONE_WEEK;
+            nextDeadline += C.DEADLINE_PROPOSAL;
             break;
         case C.STAGE_CONSENSUS: // get consensus stage deadline
-            nextDeadline += ONE_WEEK; // no deadline in consensus stage
+            nextDeadline += C.DEADLINE_LEVEL; // deadline for first level
             break;
     }
     
@@ -48,8 +45,7 @@ function manageTopicState(topic) {
     var prevDeadline = topic.nextDeadline;
     switch (topic.stage) {
         case C.STAGE_SELECTION: // we are currently in selection stage
-            var MIN_PARTICIPANTS = 2;
-            if(topic.participants < MIN_PARTICIPANTS) {
+            if(topic.participants < C.MIN_PARTICIPANTS_PER_TOPIC) {
                 // topic has been rejected
                 // move to rejection stage
                 topic.stage = C.STAGE_REJECTED;
@@ -94,14 +90,14 @@ function manageTopicState(topic) {
                     // updates below are only required if consensus stage is over
                     updateSet = {
                         'stage': (topic.stage = C.STAGE_PASSED),
-                        'nextDeadline': (topic.nextDeadline = -1)
+                        'nextDeadline': (topic.nextDeadline = C.DEADLINE_NONE)
                     };
                     break;
                 case C.STAGE_REJECTED:
                     // updates below are only required if topic was rejected
                     updateSet = {
                         'stage': (topic.stage = C.STAGE_REJECTED),
-                        'nextDeadline': (topic.nextDeadline = -1)
+                        'nextDeadline': (topic.nextDeadline = C.DEADLINE_NONE)
                     };
                     break;
                 default:
@@ -134,6 +130,12 @@ function appendBasicTopicInfo(topic) {
             break;
         case C.STAGE_CONSENSUS:
             topic.stageName = "consensus";
+            break;
+        case C.STAGE_PASSED:
+            topic.stageName = "passed";
+            break;
+        default:
+            topic.stageName = "unknown";
             break;
     }
     
@@ -395,36 +397,49 @@ function remixGroupsAsync(topic) {
         return Promise.each(groups_out, function(group_out) {
             // create group new id
             var gid = ObjectId();
-                        
+            
             // create group's proposal
             var ppid = ObjectId();
             var create_group_proposal_promise =
             db.collection('proposals').insertAsync({
                 '_id': ppid, 'source': gid,
                 'pid': ObjectId()});
-
+            
             // create group itself
             var create_group_promise =
             db.collection('groups').insertAsync({
                 '_id': gid, 'tid': tid,
-                'pid': ObjectId(), 'level': nextLevel});
+                'ppid': ppid, 'level': nextLevel});
             
-            // insert group participant
+            // register as sink for source proposals
+            // find previous gids corresponding uids in group_out (current group)
+            var update_source_proposals_promise =
+            db.collection('group_participants').findAsync({'uid': { $in: group_out }}).
+            then(function(group_participants) {
+                var gids = _.pluck(group_participants,'gid');
+                
+                // filter out only previous level proposals
+                var prevLevel = highestLevel;
+                return db.collection('groups').findAsync(
+                    {'level': prevLevel, 'gid': { $in: gids }}, {'gid': true});
+            }).then(function(source_groups) {
+                var sources = _.pluck(source_groups,'gid');
+                
+                // update sink of previous proposals
+                return db.collection('proposals').updateAsync(
+                    { 'tid': tid, 'source': { $in: sources } }, { $set: { 'sink': gid } });
+            });
+            
+            // insert group members
             var create_participants_promise =
             db.collection('group_participants').insertAsync(
                 _.map(group_out,function(uid) {return { 'gid': gid, 'uid': uid };}));
-                        
-            // create participants for this group
-            // append gid to proposal so we can identify it later
-            /*var update_source_proposals_promise =
-            db.collection('proposals').updateAsync(
-                { 'tid': tid, 'uid': { $in: group } }, { $set: { 'sink': gid } });*/
             
             return Promise.join(
                 create_group_proposal_promise,
                 create_group_promise,
-                create_participants_promise);//,
-                //update_source_proposals_promise);
+                create_participants_promise,
+                update_source_proposals_promise);
         }).return(C.STAGE_CONSENSUS); // we stay in consensus stage
     });
 }
