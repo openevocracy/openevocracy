@@ -77,21 +77,13 @@ exports.getGroupLeader = function(gid) {
          then(function(ratings) {
             return (0 == _.size(ratings)) ? undefined : ratings[0].ruid;
          });*/
+         
+    //return "blub";
     
-    /*// WARNING HACK FIXME
-    return db.collection('ratings').findOneAsync(
-        { 'gid': gid, 'ruid': { $exists: true }}).
-        then(function(ratings) {
-            if(!C.DEBUG)
-                return (0 == _.size(ratings)) ? undefined : ratings[0].ruid;
-            //else
-                // return random leader if size is 0
-        });*/
-        
-    return db.collection('ratings').findAsync(
+    return db.collection('ratings').find(
         { 'gid': gid, 'ruid': { $exists: true }},
         { 'ruid': true, 'score': true }).
-        then(function(ratings) {
+        toArrayAsync().then(function(ratings) {
             if(_.isEmpty(ratings))
                 return undefined;
             
@@ -106,10 +98,11 @@ exports.getGroupLeader = function(gid) {
                 var scores = _.pluck(array,'score');
                 // scores = [x_1,...,x_5]
                 
-                return {'ruid': array[ruid], 'score': _.reduce(scores)};
+                return {'ruid': ruid, 'score': _.reduce(scores)};
             });
             // summed_ratings = [{'ruid': ruid1, 'score': sum1}, {'ruid': ruid2, 'score': sum2}, ...]
             
+            // TODO find better solution, if more than one have the same rating
             var best_rating = _.max(summed_ratings,function(rating) {return rating.score;});
             // best_rating = {'ruid': ruid_max, 'score': sum_max}
             return best_rating.ruid;

@@ -74,9 +74,6 @@ function manageTopicState(topic) {
                           .return(topic);
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
             return remixGroupsAsync(topic).then(function(nextStage) {
-                /*console.log(Date.now());
-                console.log(topic.nextDeadline);*/
-                
                 var updateSet;
                 switch(nextStage) {
                 case C.STAGE_CONSENSUS:
@@ -267,8 +264,8 @@ function createGroups(topic) {
     var tid = topic._id;
     
     // find topic_participants
-    db.collection('topic_participants').find({ 'tid': tid }).toArray(
-    function(err, topic_participants) {
+    return db.collection('topic_participants').find({ 'tid': tid }).
+    toArrayAsync().then(function(topic_participants) {
         var numTopicParticipants = topic_participants.length;
         console.log('numTopicParticipants: '+numTopicParticipants);
         
@@ -296,7 +293,7 @@ function createGroups(topic) {
         console.log('groups filled: ' + JSON.stringify(counts));
         
         // insert all groups into database
-        return Promise.each(groups, function(group) {
+        return Promise.map(groups, function(group) {
             // create group new id
             var gid = ObjectId();
             
@@ -350,19 +347,18 @@ function remixGroupsAsync(topic) {
         var highestLevel = groups_in[0].level;
         
         // get all group leaders
-        var leaders = [];
-        _.each(groups_in, function(group_in) {
+        var leader_promises =
+        Promise.map(groups_in, function(group_in) {
             // skip if this is a lower level group
             if(group_in.level != highestLevel)
                 return;
             
             // get group leader
-            var leader = ratings.getGroupLeader(group_in._id);
-            leaders.push(leader);
+            return ratings.getGroupLeader(group_in._id);
         });
         
-        return Promise.join(Promise.all(leaders),highestLevel);
-    }).then(function(leaders,highestLevel) {
+        return Promise.join(leader_promises, highestLevel);
+    }).spread(function(leaders,highestLevel) {
         // remove all undefined leaders
         leaders = _.compact(leaders);
         var numLeaders = leaders.length;
@@ -394,7 +390,7 @@ function remixGroupsAsync(topic) {
         
         // insert all groups into database
         var nextLevel = highestLevel+1;
-        return Promise.each(groups_out, function(group_out) {
+        return Promise.map(groups_out, function(group_out) {
             // create group new id
             var gid = ObjectId();
             
@@ -410,6 +406,11 @@ function remixGroupsAsync(topic) {
             db.collection('groups').insertAsync({
                 '_id': gid, 'tid': tid,
                 'ppid': ppid, 'level': nextLevel});
+            
+            // insert group members
+            var create_participants_promise =
+            db.collection('group_participants').insertAsync(
+                _.map(group_out,function(uid) {return { 'gid': gid, 'uid': uid };}));
             
             // register as sink for source proposals
             // find previous gids corresponding uids in group_out (current group)
@@ -429,11 +430,6 @@ function remixGroupsAsync(topic) {
                 return db.collection('proposals').updateAsync(
                     { 'tid': tid, 'source': { $in: sources } }, { $set: { 'sink': gid } });
             });
-            
-            // insert group members
-            var create_participants_promise =
-            db.collection('group_participants').insertAsync(
-                _.map(group_out,function(uid) {return { 'gid': gid, 'uid': uid };}));
             
             return Promise.join(
                 create_group_proposal_promise,

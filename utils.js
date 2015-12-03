@@ -20,8 +20,10 @@ exports.getPadBodyAsync = function(pid) {
     // get html export
     var padurl = 'https://beta.etherpad.org/p/'+pid+'/export/html';
     return rp.get(padurl).then(function(data) {
-        var str = data.replace(/\r?\n/g, "");
-        var body = str.replace(/^.*?<body[^>]*>(.*?)<\/body>.*?$/i,"$1");
+        
+        var body = data.statusCode;
+        /*var str = data.replace(/\r?\n/g, "");
+        var body = str.replace(/^.*?<body[^>]*>(.*?)<\/body>.*?$/i,"$1");*/
         
         return body;
     }).timeout(1000).catch(function (err) {

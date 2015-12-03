@@ -67,14 +67,29 @@ function fill_topic_participants(tid, num_participants) {
         topic_participants.push({'tid':tid,'uid':ObjectId()});
     
     return db.collection('topic_participants').insertAsync(topic_participants);
-};
+}
+
+function fill_topic_ratings(tid) {
+    var user_ratings = [];
+    
+    return db.collection('topic_participants').find({'tid': tid}, {'uid': true}).
+    toArrayAsync().map(function(topic_participant) {
+        
+        var uid = topic_participant.uid;
+        
+        return db.collection('group_participants').
+        findOneAsync({'uid': uid}, {'gid': true}).
+        then(function(group_participant) {
+            var gid = group_participant.gid; // FIXME group_participant is null
+            user_ratings.push({'ruid': uid, 'gid': gid, 'score': 3});
+        });
+    }).then(function() {
+        console.log(user_ratings.length);
+        return db.collection('ratings').insertAsync(user_ratings);
+    });
+}
 
 exports.create_groups = function(req, res) {
-    /*db.collection('groups').remove({tid:'54ff453cfec7e11108ca2f65'},true,
-        function(topic_participant,err) {
-        });
-    createGroups({_id:'54ff453cfec7e11108ca2f65'});*/
-    
     db.collection('groups').remove({'tid':tid},true,
         function(topic_participant,err) {
         });
@@ -93,17 +108,16 @@ exports.remix_groups = function(req, res) {
     
     var tid = ObjectId();
     
-    Promise.join(
-        db.collection('topics').insertAsync({
-            '_id': tid,
-            'name': 'RemixGroupTest'+Date.now(),
-            'owner': ObjectId(req.signedCookies.uid),
-            'pid': ObjectId(),
-            'stage': C.STAGE_CONSENSUS,
-            'level': 0,
-            'nextDeadline': Date.now() + ONE_MINUTE
-        }),
-        fill_topic_participants(tid,1000),
-        topics.createGroups({'_id':tid})
-    ).then(res.sendStatus.bind(res,200));
+    db.collection('topics').insertAsync({
+        '_id': tid,
+        'name': 'RemixGroupTest'+Date.now(),
+        'owner': ObjectId(req.signedCookies.uid),
+        'pid': ObjectId(),
+        'stage': C.STAGE_CONSENSUS,
+        'level': 0,
+        'nextDeadline': Date.now() + ONE_MINUTE })
+    .then(_.partial(fill_topic_participants,tid,1000))
+    .then(_.partial(topics.createGroups,{'_id':tid}))
+    .then(_.partial(fill_topic_ratings,tid))
+    .then(res.sendStatus.bind(res,200));
 };
