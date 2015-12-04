@@ -7,53 +7,44 @@ var requirejs = require('requirejs');
 var C = requirejs('public/js/app/constants');
 
 exports.query = function(req, res) {
-    console.log('req ' + JSON.stringify(req.params));
     var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.signedCookies.uid);
+
+    // get topic
+    var get_topic_promise = db.collection('topics').findOneAsync({ '_id': tid }).
+    then(function(topic) {
+        // check if topic is at least in proposal stage
+        if(topic.stage < C.STAGE_PROPOSAL)
+            return Promise.reject('Topic must be at least in proposal stage!');
+        return topic;
+    });
+    // check if user has joined topic
+    var check_user_joined_promise =
+    db.collection('topic_participants').countAsync({'tid': tid, 'uid': uid}).
+    then(function(count) {
+        if(count == 0)
+            return Promise.reject();
+    });
     
-    var topic = {};
-    var requestValid = _.after(2, function() {
+    Promise.join(get_topic_promise, check_user_joined_promise, function(topic) {
         // get proposal or create proposal if it does not exist
         // from http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
+        var get_proposal_promise =
         db.collection('proposals').findAndModify(
-            { 'tid':tid, 'source':uid },
-            [],
+            { 'tid':tid, 'source':uid },[],
             { $setOnInsert: {pid: ObjectId()}},
-            { new: true, upsert: true },
-            function(err, proposal) {
-                // append pad body
-                utils.getPadBody(proposal.pid,
-                function(body) {
-                    proposal.body = body;
-                    res.json(proposal);
-                });
-                
-                // pad can only be edited in proposal stage
-                if(topic.stage != C.STAGE_PROPOSAL)
-                    delete proposal.pid;
-        });
-    });
-    var requestInvalid = function() {
-        res.status(400).send('Bad Request');
-    }
-    
-    // check if topic is at least in proposal stage
-    console.log('tid ' + JSON.stringify(tid));
-    db.collection('topics').findOne({ '_id': tid }, function(err, topic_) {
-        topic = topic_;
-        if(topic_.stage >= C.STAGE_PROPOSAL)
-            requestValid();
-        else
-            requestInvalid();
-    });
-    
-    // check if user has joined topic
-    db.collection('topic_participants').count(
-        {'tid': tid, 'uid': uid},
-        function(err, count) {
-            if(count > 0)
-                requestValid();
-            else
-                requestInvalid();
-    });
+            { new: true, upsert: true });
+        
+        return Promise.join(topic, get_proposal_promise);
+    }).spread(function(topic, proposal) {
+        // get pad_body
+        var get_pad_body_promise = utils.getPadBodyAsync(proposal.pid);
+        
+        // pad can only be edited in proposal stage
+        if(topic.stage != C.STAGE_PROPOSAL)
+            delete proposal.pid;
+        
+        // append pad body
+        return Promise.props(_.extend(proposal,{'body': get_pad_body_promise}));
+    }).then(_.bind(res.json,res)).catch(_.bind(res.sendStatus,res,400));
 };

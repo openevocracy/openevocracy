@@ -90,7 +90,7 @@ exports.signup = function(req, res) {
         // user already exists
         if(count > 0) {
             res.sendStatus(403);
-            throw new Promise.CancellationError();
+            return Promise.reject();
         }
     }).cancellable().then(function() {
         return db.collection('users').insertAsync(user);

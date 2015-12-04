@@ -169,9 +169,7 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
             return db.collection('group_participants').findOneAsync(
                 {'gid': { $in: gids }, 'uid': uid}, {'gid': 1}).
                 then(function(group_participant) {
-                    if(group_participant)
-                        return group_participant.gid;
-                    return null;
+                    return group_participant ? group_participant.gid : null;
                 });
         });
     
