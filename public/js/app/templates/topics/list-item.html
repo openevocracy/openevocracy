@@ -12,10 +12,24 @@
         {{#ifis stage STAGE_REJECTED}}
         
         {{else}}
-        <div class="time-remaining">
-            <div>Completion of {{#ifis stage 1}}proposal stage{{else}}level {{level}}{{/ifis}} in</div>
-            <div id="timeremaining-{{_id}}"></div>
-        </div>
+            {{#ifis stage STAGE_PASSED}}
+            <div>Passed, see
+            <a href="no satisfaction">final document</a>.
+            </div>
+            {{else}}
+            <div class="time-remaining">
+                <div>
+                    Completion of 
+                    {{#ifis stage STAGE_CONSENSUS}}
+                    level {{level}}
+                    {{else}}
+                    {{stageName}} stage
+                    {{/ifis}}
+                    in
+                </div>
+                <div id="timeremaining-{{_id}}"></div>
+            </div>
+            {{/ifis}}
         {{/ifis}}
     {{/ifis}}
 </div>
@@ -29,6 +43,7 @@
             {{#ifis stage STAGE_SELECTION}}created: {{creationDate}}{{/ifis}}
             {{#ifis stage STAGE_PROPOSAL}}started: {{proposalDate}}{{/ifis}}
             {{#ifis stage STAGE_CONSENSUS}}started: {{consensusDate}}{{/ifis}}
+            {{#ifis stage STAGE_PASSED}}passed: %date%{{/ifis}}
             
             {{#ifis stage STAGE_SELECTION}}, {{votes}} votes{{/ifis}},
             {{participants}} participants

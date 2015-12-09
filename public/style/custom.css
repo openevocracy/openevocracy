@@ -7,18 +7,18 @@ a { cursor: pointer; }
 .table th { cursor: default; }
 
 #logo {
-    padding-left: 40px;
-    background: transparent url(../img/logo20px.png) 15px center no-repeat;
+    padding-left: 45px;
+    background: transparent url(../img/logo-white-trans_24.png) 15px center no-repeat;
 }
 
-#textlogo {
+/*#textlogo {
     position: fixed;
     bottom: 10px;
     right: 10px;
     height: 20px;
     width: 20px;
     background: transparent url(../img/logo20px.png) center center no-repeat;
-}
+}*/
 
 #loading {
     position: fixed;

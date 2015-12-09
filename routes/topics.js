@@ -18,23 +18,67 @@ Object.keys(mongoskin).forEach(function(key) {
 });
 Promise.promisifyAll(mongoskin);
 
-function getDeadline(nextStage, prevDeadline) {
+function getDeadline(nextStage, prevDeadline, levelDuration) {
     
-    var nextDeadline = prevDeadline || Date.now();
+    //var nextDeadline = prevDeadline || Date.now();
+    var nextDeadline = Date.now();
     switch (nextStage) {
         case C.STAGE_SELECTION: // get selection stage deadline
-            nextDeadline += C.DEADLINE_SELECTION;
+            nextDeadline += C.DURATION_SELECTION;
             break;
         case C.STAGE_PROPOSAL: // get proposal stage deadline
-            nextDeadline += C.DEADLINE_PROPOSAL;
+            nextDeadline += C.DURATION_PROPOSAL;
             break;
         case C.STAGE_CONSENSUS: // get consensus stage deadline
-            nextDeadline += C.DEADLINE_LEVEL; // deadline for first level
+            if(undefined == typeof(levelDuration))
+                nextDeadline += C.DURATION_LEVEL; // deadline for first level
+            else
+                nextDeadline += levelDuration;
+            break;
+        case C.STAGE_PASSED:
+        case C.STAGE_REJECTED:
+            nextDeadline = C.DURATION_NONE;
             break;
     }
     
     return nextDeadline;
 }
+
+function manageConsensusLevel(topic,levelDuration) {
+    return remixGroupsAsync(topic).then(function(nextStage) {
+        var updateSet;
+        switch(nextStage) {
+        case C.STAGE_CONSENSUS:
+            // updates below are only required while we are in consensus stage
+            updateSet = {
+                'level': (++topic.level),
+                'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,undefined,levelDuration))
+            };
+            break;
+        case C.STAGE_PASSED:
+            // updates below are only required if consensus stage is over
+            updateSet = {
+                'stage': (topic.stage = C.STAGE_PASSED),
+                'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_PASSED))
+            };
+            break;
+        case C.STAGE_REJECTED:
+            // updates below are only required if topic was rejected
+            updateSet = {
+                'stage': (topic.stage = C.STAGE_REJECTED),
+                'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_REJECTED))
+            };
+            break;
+        default:
+            return Promise.reject('unknown stage');
+        }
+        
+        // update database
+        return db.collection('topics').updateAsync(
+            { '_id': topic._id }, { $set: updateSet }, {}).return(topic);
+    });
+}
+exports.manageConsensusLevel = manageConsensusLevel;
 
 function manageTopicState(topic) {
     // exit this funtion if stage transition is not due yet
@@ -73,42 +117,12 @@ function manageTopicState(topic) {
                                 updateTopicState(topic,stageStartedEntryName))
                           .return(topic);
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
-            return remixGroupsAsync(topic).then(function(nextStage) {
-                var updateSet;
-                switch(nextStage) {
-                case C.STAGE_CONSENSUS:
-                    // updates below are only required while we are in consensus stage
-                    updateSet = {
-                        'level': (++topic.level),
-                        'nextDeadline': (topic.nextDeadline = prevDeadline + 1000*60*5) // in 5 minutes
-                    };
-                    break;
-                case C.STAGE_PASSED:
-                    // updates below are only required if consensus stage is over
-                    updateSet = {
-                        'stage': (topic.stage = C.STAGE_PASSED),
-                        'nextDeadline': (topic.nextDeadline = C.DEADLINE_NONE)
-                    };
-                    break;
-                case C.STAGE_REJECTED:
-                    // updates below are only required if topic was rejected
-                    updateSet = {
-                        'stage': (topic.stage = C.STAGE_REJECTED),
-                        'nextDeadline': (topic.nextDeadline = C.DEADLINE_NONE)
-                    };
-                    break;
-                default:
-                    return Promise.reject('unknown stage');
-                }
-                
-                // update database
-                return db.collection('topics').updateAsync(
-                    { '_id': topic._id }, { $set: updateSet }, {}).return(topic);
-            });
+            return manageConsensusLevel(topic,C.DURATION_LEVEL);
     }
     
     return Promise.resolve(topic);
 }
+exports.manageTopicState = manageTopicState;
 
 function appendBasicTopicInfo(topic) {
     // append timeCreated
@@ -332,34 +346,26 @@ exports.createGroups = createGroups;
 // TODO move to groups?
 function remixGroupsAsync(topic) {
     var tid = topic._id;
-
+    
     // get groups with highest level
-    return db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
+    return db.collection('groups').find({ 'tid': tid, 'level': topic.level }).
         toArrayAsync().then(function(groups_in) {
         
-        // return true, if we only have one group then the consensus stage is over
-        if(0 == groups_in.length)
-            return true;
-        
-        // get highest level number
-        var highestLevel = groups_in[0].level;
-        
+        // if we have no group, something went fundamentally wrong
+        //if(0 == groups_in.length)
+        //    return Promise.reject('This should not have happened!');
+        //else if(1 == groups_in.length)
+        //    return // TODO cancel everything and return C.STAGE_PASSED
+
         // get all group leaders
-        var leader_promises =
-        Promise.map(groups_in, function(group_in) {
-            // skip if this is a lower level group
-            if(group_in.level != highestLevel)
-                return;
-            
+        return Promise.map(groups_in, function(group_in) {
             // get group leader
             return ratings.getGroupLeader(group_in._id);
         });
-        
-        return Promise.join(leader_promises, highestLevel);
-    }).spread(function(leaders,highestLevel) {
+    }).then(function(leaders) {
         // remove all undefined leaders
         leaders = _.compact(leaders);
-        var numLeaders = leaders.length;
+        var numLeaders = _.size(leaders);
         
         if(1 == numLeaders)
             // if there is only ONE leader, then the topic is finished/passed.
@@ -387,7 +393,7 @@ function remixGroupsAsync(topic) {
         });
         
         // insert all groups into database
-        var nextLevel = highestLevel+1;
+        var nextLevel = topic.level+1;
         return Promise.map(groups_out, function(group_out) {
             // create group new id
             var gid = ObjectId();
@@ -418,7 +424,7 @@ function remixGroupsAsync(topic) {
                 var gids = _.pluck(group_participants,'gid');
                 
                 // filter out only previous level proposals
-                var prevLevel = highestLevel;
+                var prevLevel = topic.level;
                 return db.collection('groups').findAsync(
                     {'level': prevLevel, 'gid': { $in: gids }}, {'gid': true});
             }).then(function(source_groups) {
@@ -558,7 +564,7 @@ exports.unvote = function(req, res) {
     
     // remove vote and return number of current votes
     db.collection('topic_votes').removeAsync(topic_vote,true).
-        then(countVotes.bind(undefined,topic_vote.tid)).call('toString').
+        then(_.partial(countVotes,topic_vote.tid)).call('toString').
         then(res.json.bind(res));
 };
 
@@ -595,6 +601,6 @@ exports.unjoin = function(req, res) {
     
     // remove participant and return number of current participants
     db.collection('topic_participants').removeAsync(topic_participant,true).
-        then(countParticipants.bind(undefined,topic_participant.tid)).
+        then(_.partial(countParticipants,topic_participant.tid)).
         call('toString').then(res.json.bind(res));
 };

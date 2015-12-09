@@ -69,24 +69,20 @@ function fill_topic_participants(tid, num_participants) {
     return db.collection('topic_participants').insertAsync(topic_participants);
 }
 
-function fill_topic_ratings(tid) {
-    var user_ratings = [];
-    
-    return db.collection('topic_participants').find({'tid': tid}, {'uid': true}).
-    toArrayAsync().map(function(topic_participant) {
-        
-        var uid = topic_participant.uid;
-        
+function fill_topic_user_ratings(topic) {
+    // get all groups of topic with current level
+    return db.collection('groups').find(
+        {'tid': topic._id, 'level': topic.level}, {'_id': true}).
+    // get the corresponding group participants
+    toArrayAsync().then(function(groups) {
         return db.collection('group_participants').
-        findOneAsync({'uid': uid}, {'gid': true}).
-        then(function(group_participant) {
-            var gid = group_participant.gid; // FIXME group_participant is null
-            user_ratings.push({'ruid': uid, 'gid': gid, 'score': 3});
-        });
-    }).then(function() {
-        console.log(user_ratings.length);
-        return db.collection('ratings').insertAsync(user_ratings);
-    });
+            find({'gid': { $in: _.pluck(groups,'_id') }}, {'_id': false}).
+            toArrayAsync();
+    // create a rating for each participant
+    }).map(function(group_participant) {
+        return {'ruid': group_participant.uid, 'gid': group_participant.gid, 'score': 3};
+    // insert all ratings into database
+    }).then(db.collection('ratings').insertAsync.bind(db.collection('ratings')));
 }
 
 exports.create_groups = function(req, res) {
@@ -99,15 +95,23 @@ exports.create_groups = function(req, res) {
     res.sendStatus(200);
 };
 
+// see http://stackoverflow.com/a/24660323
+/*var promiseWhile = Promise.method(function(condition, action, cond_result) {
+    if (!cond_result) return;
+    return action().then(condition).then(_.partial(promiseWhile, condition, action, _));
+});*/
+function promiseWhile(condition, action, cond_result) {
+    if (!cond_result) return Promise.resolve();
+    return action().then(condition).then(_.partial(promiseWhile, condition, action));
+};
+
 /*
 test suite for testing of group remix
 */
 exports.remix_groups = function(req, res) {
-    // create topic
-    var ONE_MINUTE = 1000*60; // one minute milliseconds
+    var response_text = "";
     
     var tid = ObjectId();
-    
     db.collection('topics').insertAsync({
         '_id': tid,
         'name': 'RemixGroupTest'+Date.now(),
@@ -115,9 +119,31 @@ exports.remix_groups = function(req, res) {
         'pid': ObjectId(),
         'stage': C.STAGE_CONSENSUS,
         'level': 0,
-        'nextDeadline': Date.now() + ONE_MINUTE })
-    .then(_.partial(fill_topic_participants,tid,1000))
-    .then(_.partial(topics.createGroups,{'_id':tid}))
-    .then(_.partial(fill_topic_ratings,tid))
-    .then(res.sendStatus.bind(res,200));
+        'nextDeadline': Date.now()}).
+    then(_.partial(fill_topic_participants,tid,53)).
+    then(_.partial(topics.createGroups,{'_id':tid})).
+    then(_.partial(promiseWhile,
+        function condition() {
+            return db.collection('topics').findOneAsync({ '_id': tid }, { 'stage': true}).
+            then(function (topic) {
+                return C.STAGE_CONSENSUS == topic.stage;
+            });
+        },
+        function action() {
+            return db.collection('topics').findOneAsync({ '_id': tid }).
+            then(function(topic) {return fill_topic_user_ratings(topic).return(topic);}).
+            then(_.partial(topics.manageConsensusLevel,_,0)).
+            then(function(topic) {
+                return db.collection('groups').find({ 'tid': tid, 'level': topic.level }).
+                toArrayAsync().then(function(groups) {
+                    response_text += "<br/>level: " + topic.level + ", number of groups: " + _.size(groups) + ", sizes of each group: ";
+                    return groups;
+                }).map(function(group) {
+                    return db.collection('group_participants').countAsync({'gid': group._id}).
+                    then(function(count) {
+                        response_text += count + " ";
+                    });
+                });
+            });
+        },true)).then(function() {res.status(200).send("<pre>"+response_text+"</pre>");});
 };
