@@ -3,6 +3,7 @@
  * Module dependencies.
  */
 
+var Promise = require('bluebird');
 var express = require('express');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -19,6 +20,16 @@ var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var path = require('path');
 var app = express();
+
+// promisify mongoskin
+Object.keys(mongoskin).forEach(function(key) {
+  var value = mongoskin[key];
+  if (typeof value === "function") {
+    Promise.promisifyAll(value);
+    Promise.promisifyAll(value.prototype);
+  }
+});
+Promise.promisifyAll(mongoskin);
 
 // import routes
 var users = require('./routes/users');

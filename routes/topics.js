@@ -8,16 +8,6 @@ var utils = require('../utils');
 var requirejs = require('requirejs');
 var C = requirejs('public/js/app/constants');
 
-// promisify mongoskin
-Object.keys(mongoskin).forEach(function(key) {
-  var value = mongoskin[key];
-  if (typeof value === "function") {
-    Promise.promisifyAll(value);
-    Promise.promisifyAll(value.prototype);
-  }
-});
-Promise.promisifyAll(mongoskin);
-
 function getDeadline(nextStage, prevDeadline, levelDuration) {
     
     //var nextDeadline = prevDeadline || Date.now();
