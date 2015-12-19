@@ -73,6 +73,13 @@
               return opts.inverse(this);
           }
     });
+    Handlebars.registerHelper('ifis2', function(a, b, c, opts) {
+          if(a == b || a == c) {
+              return opts.fn(this);
+          } else {
+              return opts.inverse(this);
+          }
+    });
     // force ajax call on all browsers
     $.ajaxSetup({ cache: false });
     

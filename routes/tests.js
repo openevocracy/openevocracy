@@ -7,6 +7,7 @@ var requirejs = require('requirejs');
 var C = requirejs('public/js/app/constants');
 
 var topics = require('./topics');
+var groups = require('./groups');
 
 var tid = ObjectId('54f646ccc3a414a60d40d660');
 
@@ -121,7 +122,7 @@ exports.remix_groups = function(req, res) {
         'level': 0,
         'nextDeadline': Date.now()}).
     then(_.partial(fill_topic_participants,tid,53)).
-    then(_.partial(topics.createGroups,{'_id':tid})).
+    then(_.partial(groups.createGroups,{'_id':tid})).
     then(_.partial(promiseWhile,
         function condition() {
             return db.collection('topics').findOneAsync({ '_id': tid }, { 'stage': true}).
@@ -132,7 +133,7 @@ exports.remix_groups = function(req, res) {
         function action() {
             return db.collection('topics').findOneAsync({ '_id': tid }).
             then(function(topic) {return fill_topic_user_ratings(topic).return(topic);}).
-            then(_.partial(topics.manageConsensusLevel,_,0)).
+            then(_.partial(topics.manageConsensusStage,_,0)).
             then(function(topic) {
                 return db.collection('groups').find({ 'tid': tid, 'level': topic.level }).
                 toArrayAsync().then(function(groups) {

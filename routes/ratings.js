@@ -92,13 +92,14 @@ exports.getGroupLeader = function(gid) {
             // {ruid1: [{'ruid': ruid1, 'score': x_1},...,{'ruid': ruid1, 'score': x_5}], ruid2: [{'ruid': ruid2, score: x_1},...,{'ruid': ruid2, score: x_5}], ...}
             
             var summed_ratings = _.map(grouped_ratings,function(array,ruid) {
-                // array = {ruid1: [{'ruid': ruid1, 'score': x_1},...,{'ruid': ruid1, 'score': x_5}]}
+                // array contains multiple ratings, ruid contains the rated user
+                // array = [{'ruid': ruid1, 'score': x_1},...,{'ruid': ruid1, 'score': x_5}]
                 // ruid = ruid1
                 
                 var scores = _.pluck(array,'score');
                 // scores = [x_1,...,x_5]
                 
-                return {'ruid': ruid, 'score': _.reduce(scores)};
+                return {'ruid': ruid, 'score': _.reduce(scores, function(memo, num){ return memo + num; }, 0)};
             });
             // summed_ratings = [{'ruid': ruid1, 'score': sum1}, {'ruid': ruid2, 'score': sum2}, ...]
             

@@ -72,6 +72,8 @@ define([
             this.model.set('creationDate', this.formatDate(this.model.get('timeCreated')));
             this.model.set('proposalDate', this.formatDate(this.model.get('stageProposalStarted')));
             this.model.set('consensusDate', this.formatDate(this.model.get('stageConsensusStarted')));
+            this.model.set('passedDate', this.formatDate(this.model.get('stagePassedStarted')));
+            this.model.set('rejectedDate', this.formatDate(this.model.get('stageRejectedStarted')));
             this.model.on('change', this.render, this);
         },
         

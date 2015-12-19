@@ -38,12 +38,12 @@
     <div class="name">{{name}} <strong class="body">{{#if body}}#body{{/if}}</strong></div>
     <div class="stats">
         {{#ifis stage STAGE_REJECTED}}
-            rejected
+            rejected: {{rejectedDate}}
         {{else}}
             {{#ifis stage STAGE_SELECTION}}created: {{creationDate}}{{/ifis}}
             {{#ifis stage STAGE_PROPOSAL}}started: {{proposalDate}}{{/ifis}}
             {{#ifis stage STAGE_CONSENSUS}}started: {{consensusDate}}{{/ifis}}
-            {{#ifis stage STAGE_PASSED}}passed: %date%{{/ifis}}
+            {{#ifis stage STAGE_PASSED}}passed: {{passedDate}}{{/ifis}}
             
             {{#ifis stage STAGE_SELECTION}}, {{votes}} votes{{/ifis}},
             {{participants}} participants

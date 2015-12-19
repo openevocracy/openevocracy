@@ -2,7 +2,164 @@ var _ = require('underscore');
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
+var Promise = require('bluebird');
+var requirejs = require('requirejs');
+
+var C = requirejs('public/js/app/constants');
+var ratings = require('./ratings');
 var utils = require('../utils');
+
+function calculateNumberOfGroups(numParticipants) {
+    
+    // constants
+    var groupSize = 4.5; // group size is 4 or 5
+    var limitSimpleRule = 50; // number of topic_participants (if more then x topic_participants, complex rule is used)
+    // calculated values
+    var groupMinSize = (groupSize-0.5);
+    var groupMaxSize = (groupSize+0.5);
+    
+    var numGroups;
+    if(numParticipants>limitSimpleRule)
+        numGroups = numParticipants/groupSize; // simple rule, ideally all groups are 5, group size 4 only exception
+    else
+        numGroups = numParticipants/groupMaxSize; // complex rule, 4 and 5 uniformly distributed
+    numGroups = Math.ceil(numGroups); // round up to next integer
+    console.log('rounded groups: '+numGroups);
+    
+    return numGroups;
+}
+
+function assignGroupMembers(members) {
+    // shuffle topic_participants
+    _.shuffle(members);
+    
+    // compute number of groups
+    var numGroups = calculateNumberOfGroups(_.size(members));
+    
+    // initialize empty groups
+    var groups = new Array(numGroups);
+    for(var i=0; i<numGroups; ++i)
+        groups[i] = [];
+    
+    // push topic_participants into groups
+    _.each(members, function(member) {
+        // find first smallest group
+        var group = _.min(groups, function(group) {return _.size(group);});
+        group.push(member.uid);
+    });
+    
+    // TODO log with logging library
+    // log group participant distribution
+    var counts = _.countBy(groups, function(group) {return _.size(group);});
+    console.log('groups filled: ' + JSON.stringify(counts));
+    
+    return groups;
+}
+
+function storeGroup(gid,tid,level,group) {
+    // create group itself
+    var create_group_promise =
+    db.collection('groups').insertAsync({
+        '_id': gid, 'tid': tid,
+        'ppid': ppid, 'level': level});
+    
+    // create group's proposal
+    var ppid = ObjectId();
+    var create_proposal_promise =
+    db.collection('proposals').insertAsync({
+        '_id': ppid, 'source': gid,
+        'pid': ObjectId()});
+    
+    // insert group participant
+    var insert_members_promise =
+    db.collection('group_participants').insertAsync(
+        _.map(group, function(uid) {return { 'gid': gid, 'uid': uid }; }));
+    
+    return Promise.join(create_group_promise,
+                        create_proposal_promise,
+                        insert_members_promise);
+}
+
+exports.createGroups = function(topic) {
+    var tid = topic._id;
+    
+    // find topic_participants
+    return db.collection('topic_participants').find({ 'tid': tid }).
+    toArrayAsync().then(assignGroupMembers).map(function(group) {
+        // create new group id
+        var gid = ObjectId();
+        
+        // store group in database
+        var store_group_promise = storeGroup(gid,tid,0,group);
+        
+        // create members for this group
+        // append gid to proposal so we can identify it later
+        var update_source_proposals_promise =
+        db.collection('proposals').updateAsync(
+            { 'tid': tid, 'uid': { $in: group } }, { $set: { 'sink': gid } });
+        
+        return Promise.join(
+                store_group_promise,
+                update_source_proposals_promise);
+    });
+}
+
+exports.remixGroupsAsync = function(topic) {
+    var tid = topic._id;
+    
+    // get groups with highest level
+    return db.collection('groups').find({ 'tid': tid, 'level': topic.level }).
+    toArrayAsync().map(function(group_in) {
+        return ratings.getGroupLeader(group_in._id);
+    }).then(function(leaders) {
+        // remove all undefined leaders
+        leaders = _.compact(leaders);
+        var numLeaders = _.size(leaders);
+        
+        if(1 == numLeaders)
+            // if there is only ONE leader, then the topic is finished/passed.
+            return C.STAGE_PASSED;
+        else if(0 == numLeaders)
+            // if there is NO leader, then the consensus stage has failed.
+            return C.STAGE_REJECTED;
+        
+        // assign members to groups
+        var groups = assignGroupMembers(leaders);
+        
+        // insert all groups into database
+        var nextLevel = topic.level+1;
+        return Promise.map(groups, function(group) {
+            // create group new id
+            var gid = ObjectId();
+            
+            // store group in database
+            var store_group_promise = storeGroup(gid,tid,nextLevel,group);
+            
+            // register as sink for source proposals
+            // find previous gids corresponding uids in group_out (current group)
+            var update_source_proposals_promise =
+            db.collection('group_participants').findAsync({'uid': { $in: group }}).
+            then(function(group_participants) {
+                var gids = _.pluck(group_participants,'gid');
+                
+                // filter out only previous level proposals
+                var prevLevel = topic.level;
+                return db.collection('groups').findAsync(
+                    {'level': prevLevel, 'gid': { $in: gids }}, {'gid': true});
+            }).then(function(source_groups) {
+                var sources = _.pluck(source_groups,'gid');
+                
+                // update sink of previous proposals
+                return db.collection('proposals').updateAsync(
+                    { 'tid': tid, 'source': { $in: sources } }, { $set: { 'sink': gid } });
+            });
+            
+            return Promise.join(
+                store_group_promise,
+                update_source_proposals_promise);
+        }).return(C.STAGE_CONSENSUS); // we stay in consensus stage
+    });
+}
 
 exports.list = function(req, res) {
     db.collection('groups').find().toArrayAsync().then(_.bind(res.json,res));
