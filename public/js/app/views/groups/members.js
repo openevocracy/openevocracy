@@ -1,6 +1,7 @@
 define([
     'underscore',
     'Marionette',
+    'views/partials/group_events',
     'hbs!templates/groups/members',
     'jquery',
     'bootstrap',
@@ -9,27 +10,28 @@ define([
 ], function(
     _,
     Marionette,
+    Events,
     Template
     ) {
     
     var View = Marionette.ItemView.extend({
         template: Template,
+        tagName: 'section',
+        className: 'content',
+        id: 'members',
+        viewTitle: 'Group members',
         
-        events: {
-            'click .memb-prop-show': function(e) {
-                this.trigger(
-                    "members:show_member_proposal",
-                    e.target.getAttribute('data-member-id'));
-                
-                e.preventDefault();
-            }
-        },
+        events: Events,
         
         initialize: function() {
             _.each(this.model.get('participants'), function(participant) {
                 if(App.session.user.get('_id') == participant._id)
                     participant.is_me = true;
             });
+        },
+        
+        onBeforeRender: function() {
+            this.model.set('title', this.viewTitle);
         },
         
         onShow: function() {
@@ -58,11 +60,16 @@ define([
         saveRating: function(model, type, score, e) {
             var id = $(this).attr('data-rate-id');
             
+            // modify internal model
+            if(type == 'user')
+                _.findWhere(model.get('participants'),{'_id': id}).participant_rating = score;
+            else if(type == 'proposal')
+                _.findWhere(model.get('participants'),{'ppid': id}).proposal_rating = score;
+            
+            // send to server
             $.post('/json/ratings/'+type+'/rate',
                 {'id': id, 'gid': model.get('_id'), 'score': score},
-                function(data) {
-                    //this.set({'votes': data, 'voted': status});
-                });
+                function(data) {});
         }
     });
     

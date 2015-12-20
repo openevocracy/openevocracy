@@ -20,11 +20,9 @@ function query(req, res, type) {
     var gid = ObjectId(req.params.gid);
     var uid = ObjectId(req.signedCookies.uid);
     
-    db.collection('ratings').findOne(
-        { type: rid, 'uid': uid, 'gid': gid },
-        function(err, rating) {
-            res.json(rating);
-        });
+    var rating = { 'gid': gid, 'uid': uid };
+    rating[type] = rid;
+    db.collection('ratings').findOneAsync(rating).then(res.json.bind(res));
 };
 
 exports.query_user_rating = _.partial(query, _, _, 'ruid');
@@ -34,11 +32,9 @@ function count(req, res, type) {
     var rid = ObjectId(req.body.id);
     var gid = ObjectId(req.body.gid);
     
-    db.collection('ratings').count(
-        { type: rid, 'gid': gid },
-        function(err, count) {
-            res.json(count);
-        });
+    var rating = { 'gid': gid };
+    rating[type] = rid;
+    db.collection('ratings').countAsync(rating).then(res.json.bind(res));
 };
 
 exports.count_user_rating = _.partial(count, _, _, 'ruid');
@@ -50,16 +46,19 @@ function rate(req, res, type) {
     var uid = ObjectId(req.signedCookies.uid);
     var score = req.body.score;
     
-    // FIXME if check score is between 1 and 5
+    // return 404 score is not between 1 and 5
+    if(score < 0 || score > 5) {
+        res.sendStatus(402);
+        return;
+    }
     
-    var ratingHead = { type: rid, 'gid': gid, 'uid': uid };
-    db.collection('ratings').update(
+    var ratingHead = { 'gid': gid, 'uid': uid };
+    ratingHead[type] = rid;
+    db.collection('ratings').updateAsync(
         ratingHead,
         { $set: { 'score': score } },
-        { upsert: true },
-        function(err, rating) {
-            res.sendStatus(200);
-        });
+        { upsert: true }).
+    then(res.sendStatus.bind(res,200));
 };
 
 exports.rate_user_rating = _.partial(rate, _, _, 'ruid');
@@ -70,16 +69,6 @@ return the user with the highest overall ratings
 @param gid group id
 */
 exports.getGroupLeader = function(gid) {
-    /*return db.collection('ratings').aggregateAsync(
-        [{ $match: { 'gid': gid, 'ruid': { $exists: true }}},
-         { $group: { '_id': '$ruid', 'score': { $sum: '$score' }}},
-         { $sort : {'score': -1 }}]).
-         then(function(ratings) {
-            return (0 == _.size(ratings)) ? undefined : ratings[0].ruid;
-         });*/
-         
-    //return "blub";
-    
     return db.collection('ratings').find(
         { 'gid': gid, 'ruid': { $exists: true }},
         { 'ruid': true, 'score': true }).

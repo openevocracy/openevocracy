@@ -118,7 +118,8 @@ app.post("/json/auth/remove_account", users.delete );*/
 // ###   T E S T   ###
 // ###################
 
-app.get('/test/create_standard_suite', tests.create_standard_suite );
+app.get('/test/create_topic_consensus_stage', tests.create_topic_consensus_stage );
+app.get('/test/create_topic_proposal_stage', tests.create_topic_proposal_stage );
 app.get('/test/create_groups', tests.create_groups );
 app.get('/test/remix_groups', tests.remix_groups );
 

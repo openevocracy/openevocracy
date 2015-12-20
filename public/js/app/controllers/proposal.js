@@ -3,14 +3,14 @@ define([
     //'layouts/center_right',
     'views/blocks/navigation',
     'views/proposal',
-    'views/blocks/proposal_tabs',
+    //'views/blocks/proposal_tabs',
     'models/proposal',
 ], function(
     Marionette,
-    CenterRightLayout,
+    //CenterRightLayout,
     NaviView,
     ProposalView,
-    ProposalTabsBlock,
+    //ProposalTabsBlock,
     Model
     ) {
     var Controller = Marionette.Controller.extend({
@@ -26,6 +26,9 @@ define([
             //App.layout.view.show(centerRightLayout);
             
             proposal.fetch().done(function () {
+                var proposalView = new ProposalView({model:proposal});
+                App.layout.view.show(proposalView);
+                
                 /*var proposalView = new ProposalView({model:proposal});
                 centerRightLayout.center.show(proposalView);
                 

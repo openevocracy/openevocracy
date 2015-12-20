@@ -1,9 +1,13 @@
-<section id="collaborative" class="content">
+{{> header}}
+
+<div class="row">
+    <div class="col-md-8">
+        {{> messages}}
+        <!--<div id="editor"></div>-->
+    </div>
     
-<div class="content-title">
-	<h1 id="title"><span>Our proposal</span></h1>
+    <aside class="col-md-4">
+        <div class="block">{{> group_tabs}}</div>
+        <div class="block last">{{> group_proposals}}</div>
+    </aside>
 </div>
-
-<div id="editor"></div>
-
-</section>

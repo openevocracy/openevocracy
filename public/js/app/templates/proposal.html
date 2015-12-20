@@ -1,11 +1,20 @@
+{{> header}}
+
 <div class="right-pos">
     {{#if pid}}<button class="btn btn-default bn-sm edit" title="edit"><span class="fa fa-pencil"></span></button>{{/if}}
     <!-- TODO <button class="ico del" title="delete"><span></span></button> -->
 </div>
 
-<div class="page-header">
-	<h2>My proposal</h2>
+<div class="row">
+    <div class="col-md-8">
+        {{> messages}}
+        <div class="body">{{{body}}}</div>
+        <div id="editor"></div>
+    </div>
+    
+    <aside class="col-md-4">
+        <div class="block">{{> proposal_tabs}}</div>
+        <div class="block">{{> topic_author}}</div>
+        <div class="block last">{{> topic_statistics}}</div>
+    </aside>
 </div>
-
-<div class="body">{{{body}}}</div>
-<div id="editor"></div>

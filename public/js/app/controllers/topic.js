@@ -25,24 +25,9 @@ define([
             var naviView = new NaviView();
             App.layout.sidebar.show(naviView);
             
-            /* ### CONTENT RIGHT ### */
-            //var centerRightLayout = new CenterRightLayout();
-            //App.layout.view.show(centerRightLayout);
-            
             topic.fetch().done(function () {
                 var topicView = new TopicView({model:topic});
                 App.layout.view.show(topicView);
-                
-                /*$('#right').append('<div id="topic-tabs"></div>');
-                centerRightLayout.addRegion('topic_tabs','#topic-tabs');
-                var topicTabsBlock = new TopicTabsBlock({model:topic});
-                //topicTabsBlock.bind("group_tabs:show_collab", this.show_collab);
-                //topicTabsBlock.bind("group_tabs:show_members", this.show_members);
-                centerRightLayout.topic_tabs.show(topicTabsBlock);
-                
-                $('#right').append('<div id="statistics"></div>');
-                centerRightLayout.addRegion('statistics','#statistics');
-                centerRightLayout.statistics.show(new StatisticsView({model:topic}));*/
             });
         }
     });

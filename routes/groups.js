@@ -174,12 +174,12 @@ function getParticipantProposalBodyAndRating(participant,gid,uid) {
         // get proposal rating
         var proposal_rating_promise = 
         db.collection('ratings').findOneAsync(
-            { '_id': proposal._id, 'gid': gid, 'uid': uid },{ 'score': 1 }).
+            { 'rppid': proposal._id, 'gid': gid, 'uid': uid },{ 'score': 1 }).
         then(function(rating) {
             return rating ? rating.score : 0;
         });
         
-        return Promise.join({
+        return Promise.props({
             'ppid': proposal._id,
             'proposal_body': proposal_body_promise,
             'proposal_rating': proposal_rating_promise
@@ -200,7 +200,7 @@ exports.query = function(req, res) {
         { '_id': gid },
         [],
         { $setOnInsert: {pid: ObjectId()}},
-        { 'new': true, 'upsert': true });
+        { 'new': true, 'upsert': true }).get(0);
     
     // get all participants
     var participants_promise =
@@ -220,16 +220,23 @@ exports.query = function(req, res) {
         // get participant rating
         var participant_rating_promise =
         db.collection('ratings').findOneAsync(
-            { '_id': participant._id, 'gid': gid, 'uid': uid },{ 'score': 1 }).
+            { 'ruid': participant._id, 'gid': gid, 'uid': uid },{ 'score': 1 }).
         then(function(rating) {
             return rating ? rating.score : 0;
         });
         
-        return Promise.props(
-            _.extend(participant,proposal_body_and_rating_promise,
-                {'participant_rating': participant_rating_promise}));
+        return Promise.join(proposal_body_and_rating_promise,
+                            participant_rating_promise).
+        spread(function(proposal_body_and_rating,
+                        participant_rating) {
+            return _.extend(participant,
+                            proposal_body_and_rating,
+                            {'participant_rating': participant_rating});
+        });
     });
     
-    Promise.props(_.extend(group_promise, participants_promise)).
-    then(_.bind(res.json,res));
+    Promise.join(group_promise,participants_promise).
+    spread(function(group,participants) {
+        return _.extend(group,{'participants': participants});}).
+    then(res.json.bind(res));
 };

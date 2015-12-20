@@ -11,8 +11,8 @@ define([
         id: 'wrapper',
         
         regions: {
-            'view': '#view',
-            'sidebar': '#sidebar'
+            'sidebar': '#sidebar',
+            'view': '#view'
         },
         
         events: {

@@ -1,4 +1,4 @@
-<div class="button-group pull-right">
+<div class="btn-group pull-right" role="group">
     {{#ifis stage STAGE_SELECTION}}
     <button class="btn btn-default btn-sm vote{{#if voted}} active{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-heart"></span></button>
     {{/ifis}}
@@ -15,4 +15,5 @@
     </form>-->
     <a class="btn btn-default btn-sm del" title="delete" href="#/topics"><span class="fa fa-times"></span></a>
     {{/if}}
+    
 </div>

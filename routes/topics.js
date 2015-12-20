@@ -300,15 +300,19 @@ exports.delete = function(req,res) {
     var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.signedCookies.uid);
     
-    db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': 1 }).then(
-    function(topic) {
+    db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': 1 }).
+    then(function(topic) {
         // only the owner can delete the topic
         if(topic.owner.toString() != uid.toString()) {
             res.sendStatus(401);
             return Promise.reject();
         }
         
-        return db.collection('topics').removeByIdAsync(tid);
+        return Promise.join(
+            db.collection('topics').removeByIdAsync(tid),
+            db.collection('topic_votes').removeAsync({tid: 'tid'}),
+            db.collection('topic_participants').removeAsync({tid: 'tid'}),
+            db.collection('groups').removeAsync({tid: 'tid'}));
     }).cancellable().then(res.sendStatus.bind(res,200));
 };
 

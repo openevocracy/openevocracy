@@ -17,6 +17,7 @@ define([
         tagName: 'section',
         className: "content",
         id: "proposal",
+        viewTitle: "My proposal",
         
         events: {
             'click .edit': function(e) {
@@ -53,7 +54,11 @@ define([
         
         onShow: function() {
             console.log(this.model.attributes);
-        }
+        },
+        
+        onBeforeRender: function() {
+            this.model.set('title', this.viewTitle);
+        },
     });
     
     return View;

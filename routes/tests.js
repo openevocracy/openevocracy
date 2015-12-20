@@ -14,18 +14,18 @@ var tid = ObjectId('54f646ccc3a414a60d40d660');
 /*
 standard test suite
 */
-exports.create_standard_suite = function(req, res) {
+exports.create_topic_consensus_stage = function(req, res) {
     var tid = ObjectId();
     var gid = ObjectId();
     
-    var u123 = ObjectId('553e912d04a3d9811b120fbf');
-    var ucarlo = ObjectId('553e911b04a3d9811b120fbe');
+    var u123 = ObjectId('561eac9846a2e86816ada238');
+    var ucarlo = ObjectId('561eac6546a2e86816ada237');
     
     // create topic
     var ONE_WEEK = 1000*60*60*24*7; // one week milliseconds
     db.collection('topics').insert({
         '_id': tid,
-        'name': 'TestTopic'+Date.now(),
+        'name': 'ConsensusTest'+Date.now(),
         'owner': ObjectId(req.signedCookies.uid),
         'pid': ObjectId(),
         'stage': C.STAGE_CONSENSUS,
@@ -58,6 +58,23 @@ exports.create_standard_suite = function(req, res) {
                   [{'tid':tid,'gid':gid,'uid':u123},
                    {'tid':tid,'gid':gid,'uid':ucarlo}],
                   function (){});
+    
+    res.sendStatus(200);
+};
+
+exports.create_topic_proposal_stage = function(req, res) {
+    
+    // create topic
+    var ONE_WEEK = 1000*60*60*24*7; // one week milliseconds
+    db.collection('topics').insert({
+        '_id': ObjectId(),
+        'name': 'ProposalTest'+Date.now(),
+        'owner': ObjectId(req.signedCookies.uid),
+        'pid': ObjectId(),
+        'stage': C.STAGE_PROPOSAL,
+        'level': 0,
+        'nextDeadline': Date.now() + 1000*ONE_WEEK
+    }, function (){});
     
     res.sendStatus(200);
 };

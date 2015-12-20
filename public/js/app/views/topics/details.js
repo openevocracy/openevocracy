@@ -37,8 +37,8 @@ define([
                     // etherpad
                     $('#editor').find('iframe').remove();
                     // title
-                    this.model.set('name', $('#titleInput').val());
-                    var titleHeading = '<h1 id="title">'+this.model.get('name')+'</h1>';
+                    this.model.set('title', $('#titleInput').val());
+                    var titleHeading = '<h2 id="topic-title">'+this.model.get('title')+'</h2>';
                     $('#titleInput').replaceWith(titleHeading);
                     
                     // bidirectional server-sync
@@ -60,12 +60,12 @@ define([
                         'showControls' : true
                     });
                     // title
-                    var inputField = '<input id="titleInput" class="simple-input" type="text" value="'+this.model.get('name')+'"></input>';
-                    $('#title').replaceWith(inputField);
+                    var inputField = '<input id="titleInput" class="simple-input" type="text" value="'+this.model.get('title')+'"></input>';
+                    $('#topic-title').replaceWith(inputField);
                 }
             },
             'click .del': function(e) {
-                var warning = 'Delete topic "'+this.model.get('name')+'"?';
+                var warning = 'Delete topic "'+this.model.get('title')+'"?';
                 if (confirm(warning)) {
                     this.model.destroy({
                         wait: true,
@@ -91,9 +91,9 @@ define([
         
         initialize: function() {
             this.model.set(C);
+            this.model.set('title', this.model.get('name'));
             // render on change
             this.model.on('change', this.render, this);
-            this.setSubtitle();
             
             var body = this.model.get('body');
             var error = 'Error';
@@ -103,9 +103,22 @@ define([
                 this.model.set('message-type','alert alert-danger');
             }
             
-            if( typeof this.model.get('ppid') !== undefined &&
-                typeof this.model.get('gid' ) !== undefined )
-                this.model.set('showTabs');
+            // FIXME is the following correct?
+            
+            var stage = this.model.get('stage');
+            if( stage == C.STAGE_PROPOSAL || (stage == C.STAGE_CONSENSUS &&
+            typeof this.model.get('ppid') !== undefined)) {
+                this.model.set('showTabs', true);
+                this.model.set('showProp', true);
+            }
+            
+            if( stage == C.STAGE_CONSENSUS &&
+            (typeof this.model.get('gid' ) !== undefined ||
+            typeof this.model.get('gid' ) !== null)) {
+                this.model.set('showTabs', true);
+                this.model.set('showProp', true);
+            }
+                
         },
 
         onRender: function() {
