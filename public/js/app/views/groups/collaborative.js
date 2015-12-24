@@ -1,11 +1,13 @@
 define([
     'jquery',
+    'underscore',
     'Marionette',
     'etherpad',
     'views/partials/group_events',
     'hbs!templates/groups/collaborative'
 ], function(
     $,
+    _,
     Marionette,
     etherpad,
     Events,
@@ -26,6 +28,8 @@ define([
         },
         
         onShow: function() {
+            setActive('ourprop');
+            
             $('#editor').pad({
                 'padId': this.model.get('pid'),
                 'height' : 400,

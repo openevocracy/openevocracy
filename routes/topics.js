@@ -37,26 +37,29 @@ function getDeadline(nextStage, prevDeadline, levelDuration) {
 
 function manageConsensusStage(topic,levelDuration) {
     return groups.remixGroupsAsync(topic).then(function(nextStage) {
-        var updateSet;
+        var update_set_proposal;
         switch(nextStage) {
         case C.STAGE_CONSENSUS:
             // updates below are only required while we are in consensus stage
-            updateSet = {
+            update_set_proposal = {
                 'level': (++topic.level),
                 'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,undefined,levelDuration))
             };
             break;
         case C.STAGE_PASSED:
             // updates below are only required if consensus stage is over
-            updateSet = {
+            update_set_proposal = {
                 'stage': (topic.stage = C.STAGE_PASSED),
                 'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_PASSED)),
-                'stagePassedStarted': Date.now()
+                'stagePassedStarted': Date.now(),
+                'finalDocument': db.collection('groups').
+                    findOneAsync({'tid': topic._id, 'level': topic.level},{'ppid': true}).
+                    get('ppid').then(utils.getPadBodyAsync)
             };
             break;
         case C.STAGE_REJECTED:
             // updates below are only required if topic was rejected
-            updateSet = {
+            update_set_proposal = {
                 'stage': (topic.stage = C.STAGE_REJECTED),
                 'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_REJECTED)),
                 'stageRejectedStarted': Date.now()
@@ -67,8 +70,11 @@ function manageConsensusStage(topic,levelDuration) {
         }
         
         // update database
-        return db.collection('topics').updateAsync(
-            { '_id': topic._id }, { $set: updateSet }, {}).return(topic);
+        return Promise.props(update_set_proposal).then(function(update_set) {
+            return db.collection('topics').updateAsync(
+                _.pick(topic, '_id'), { $set: update_set }, {}).
+                return(_.extend(topic,update_set));
+        });
     });
 }
 exports.manageConsensusStage = manageConsensusStage;
@@ -107,8 +113,8 @@ function manageTopicState(topic) {
             topic[stageStartedEntryName] = Date.now();
             
             return Promise.join(groups.createGroups(topic),
-                                updateTopicState(topic,stageStartedEntryName))
-                          .return(topic);
+                                updateTopicState(topic,stageStartedEntryName)).
+                   return(topic);
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
             return manageConsensusStage(topic,C.DURATION_LEVEL);
     }
@@ -155,26 +161,27 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
         pad_body_promise = utils.getPadBodyAsync(topic.pid);
     
     var topic_votes_promise = db.collection('topic_votes').
-        find({'tid': tid}, {'uid': 1}).toArrayAsync();
+        find({'tid': tid}, {'uid': true}).toArrayAsync();
     var topic_participants_promise = db.collection('topic_participants').
-        find({'tid': tid}, {'uid': 1}).toArrayAsync();
+        find({'tid': tid}, {'uid': true}).toArrayAsync();
     
     // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
     
     // get groups with highest level
-    var find_user_proup_promise = db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
+    var find_user_proup_promise =
+    db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
         //map(function (group) {return group._id;}).
         toArrayAsync().then(function(groups) {
             if(_.isEmpty(groups))
                 return null;
             
             // TODO use mongodb map for better performance
-            var gids = _.map(groups, function (group) {return group._id;});
+            var gids = _.pluck(groups, '_id');
             
             // find the group out of previously found groups
             // that the current user is part of
             return db.collection('group_participants').findOneAsync(
-                {'gid': { $in: gids }, 'uid': uid}, {'gid': 1}).
+                {'gid': { $in: gids }, 'uid': uid}, {'gid': true}).
                 then(function(group_participant) {
                     return group_participant ? group_participant.gid : null;
                 });
@@ -226,7 +233,7 @@ exports.update = function(req, res) {
     }).cancellable().then(function(topic) {
         topic.name = topicNew.name;
         return db.collection('topics').updateAsync(
-                { '_id': tid }, { $set: {name: topicNew.name} }, {}).return(topic);
+                { '_id': tid }, { $set: _.pick(topic,'name') }, {}).return(topic);
     }).then(manageTopicState)
       .then(_.partial(appendTopicInfoAsync,_,uid,true))
       .then(res.json.bind(res));
@@ -234,7 +241,7 @@ exports.update = function(req, res) {
 
 function updateTopicState(topic,stageStartedEntryName) {
     return db.collection('topics').updateAsync(
-        { '_id': topic._id },
+        _.pick(topic, '_id'),
         { $set: _.pick(topic, 'stage', 'nextDeadline', stageStartedEntryName) },
         {});
 }
@@ -265,10 +272,7 @@ exports.create = function(req, res) {
     }
     
     // only allow new topics if they do not exist yet
-    db.collection('topics').count( { name: topic.name }, function(err, count) {
-        console.log(JSON.stringify(topic));
-        console.log(count);
-        
+    db.collection('topics').count( _.pick(topic,'name'), function(err, count) {
         // topic already exists
         if(count > 0) {
             console.log("Couldn't create new topic! - topic already exists");
@@ -300,7 +304,7 @@ exports.delete = function(req,res) {
     var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.signedCookies.uid);
     
-    db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': 1 }).
+    db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': true }).
     then(function(topic) {
         // only the owner can delete the topic
         if(topic.owner.toString() != uid.toString()) {
@@ -310,9 +314,9 @@ exports.delete = function(req,res) {
         
         return Promise.join(
             db.collection('topics').removeByIdAsync(tid),
-            db.collection('topic_votes').removeAsync({tid: 'tid'}),
-            db.collection('topic_participants').removeAsync({tid: 'tid'}),
-            db.collection('groups').removeAsync({tid: 'tid'}));
+            db.collection('topic_votes').removeAsync({'tid': tid}),
+            db.collection('topic_participants').removeAsync({'tid': tid}),
+            db.collection('groups').removeAsync({'tid': tid}));
     }).cancellable().then(res.sendStatus.bind(res,200));
 };
 
@@ -332,7 +336,7 @@ exports.vote = function(req, res) {
     
     // TODO use findAndModify as in proposal
     db.collection('topic_votes').
-    find(_.pick(topic_vote, 'tid'), {'uid': 1}).toArrayAsync().
+    find(_.pick(topic_vote, 'tid'), {'uid': true}).toArrayAsync().
     then(function(topic_votes) {
         var count = _.size(topic_votes);
         
@@ -367,7 +371,7 @@ exports.join = function(req, res) {
     
     // TODO use findAndModify as in proposal
     db.collection('topic_participants').
-    find(_.pick(topic_participant, 'tid'), {'uid': 1}).toArrayAsync().
+    find(_.pick(topic_participant, 'tid'), {'uid': true}).toArrayAsync().
     then(function(topic_participants) {
         var count = _.size(topic_participants);
         
@@ -375,7 +379,7 @@ exports.join = function(req, res) {
         // do not allow user to vote twice for the same topic
         if(!utils.checkArrayEntryExists(topic_participants, _.pick(topic_participant, 'uid')))
             return db.collection('topic_participants').insertAsync(topic_participant).return(++count);
-            
+        
         return count;
     }).then(res.json.bind(res));
 };

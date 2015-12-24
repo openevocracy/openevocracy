@@ -24,7 +24,6 @@ define([
         route_group_index: function(id) {
             this.group = new Model({'_id': id});
             
-            /* ### LEFT ### */
             var naviView = new NaviView();
             App.layout.sidebar.show(naviView);
             

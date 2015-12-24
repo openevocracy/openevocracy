@@ -18,7 +18,8 @@
       etherpad: '../vendor/etherpad',
       bootstrap: '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
       bootstrapcustom: '../vendor/bootstrap.custom',
-      ratyfa: '../vendor/jquery.raty-fa'
+      ratyfa: '../vendor/jquery.raty-fa',
+      isactive: '../vendor/isactive'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for
@@ -87,7 +88,7 @@
     $(document).on('DOMNodeInserted','[data-toggle="tooltip"]',
       function(e) {e.target.tooltip();});*/
 
-    require(['application'], function(Application) {
+    require(['application','isactive'], function(Application) {
       App = new Application();
       App.start();
     });
