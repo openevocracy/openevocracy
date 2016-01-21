@@ -90,8 +90,10 @@ define([
         },
         
         initialize: function() {
+            
             this.model.set(C);
             this.model.set('title', this.model.get('name'));
+            this.setSubtitle();
             // render on change
             this.model.on('change', this.render, this);
             
@@ -155,6 +157,8 @@ define([
             
             // set model
             this.model.set('subtitle',subtitle);
+            
+            console.log(this.model);
         }
     });
     

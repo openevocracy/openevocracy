@@ -79,6 +79,14 @@ function manageConsensusStage(topic,levelDuration) {
 }
 exports.manageConsensusStage = manageConsensusStage;
 
+function participantsHaveValidProposals(topic) {
+    return db.collection('topic_participants').find({'tid': topic._id},{'uid': true}).
+    toArrayAsync().then(function(participants) {
+        return db.collection('proposals').
+            countAsync({'source': {$in: _.pluck(participants,'uid')}});
+    }).then(function(count) {return count > 0;});
+}
+
 function manageTopicState(topic) {
     // exit this funtion if stage transition is not due yet
     if(Date.now()<topic.nextDeadline)
@@ -88,23 +96,25 @@ function manageTopicState(topic) {
     var prevDeadline = topic.nextDeadline;
     switch (topic.stage) {
         case C.STAGE_SELECTION: // we are currently in selection stage
-            if(topic.participants < C.MIN_PARTICIPANTS_PER_TOPIC) {
-                // topic has been rejected
-                // move to rejection stage
-                topic.stage = C.STAGE_REJECTED;
-                var stageStartedEntryName = 'stageRejectedStarted';
-                topic[stageStartedEntryName] = Date.now();
-            } else {
-                // topic does meet the minimum requirements for the next stage
-                // move to next stage
-                topic.stage = C.STAGE_PROPOSAL;
-                topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
-                var stageStartedEntryName = 'stageProposalStarted';
-                topic[stageStartedEntryName] = Date.now();
-            }
-            
-            return updateTopicState(topic,stageStartedEntryName).
-                   return(topic);
+            return participantsHaveValidProposals(topic).then(function(condition) {
+                if(condition) {
+                    // topic does meet the minimum requirements for the next stage
+                    // move to next stage
+                    topic.stage = C.STAGE_PROPOSAL;
+                    topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
+                    var stageStartedEntryName = 'stageProposalStarted';
+                    topic[stageStartedEntryName] = Date.now();
+                } else {
+                    // topic has been rejected
+                    // move to rejection stage
+                    topic.stage = C.STAGE_REJECTED;
+                    var stageStartedEntryName = 'stageRejectedStarted';
+                    topic[stageStartedEntryName] = Date.now();
+                }
+                
+                return updateTopicState(topic,stageStartedEntryName).
+                       return(topic);
+            });
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
             // update topic
             topic.stage = C.STAGE_CONSENSUS;
@@ -123,6 +133,7 @@ function manageTopicState(topic) {
 }
 exports.manageTopicState = manageTopicState;
 
+// appends timeCreated and stageName
 function appendBasicTopicInfo(topic) {
     // append timeCreated
     topic.timeCreated = topic._id.getTimestamp();
@@ -160,6 +171,11 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     if(with_details)
         pad_body_promise = utils.getPadBodyAsync(topic.pid);
     
+    // get owner name
+    var owner_name_promise = db.collection('users').
+        findOneAsync({'_id': topic.owner}, {'name': true}).get('name');
+    
+    // get number of participants and votes in this topic
     var topic_votes_promise = db.collection('topic_votes').
         find({'tid': tid}, {'uid': true}).toArrayAsync();
     var topic_participants_promise = db.collection('topic_participants').
@@ -193,6 +209,7 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     
     return Promise.props(_.extend(topic,{
         'body': pad_body_promise,
+        'ownerName': owner_name_promise,
         'votes': topic_votes_promise.then(_.size),
         'participants': topic_participants_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
@@ -317,7 +334,7 @@ exports.delete = function(req,res) {
             db.collection('topic_votes').removeAsync({'tid': tid}),
             db.collection('topic_participants').removeAsync({'tid': tid}),
             db.collection('groups').removeAsync({'tid': tid}));
-    }).cancellable().then(res.sendStatus.bind(res,200));
+    }).cancellable().then(_.partial(res.sendStatus,200));
 };
 
 function countVotes(tid) {

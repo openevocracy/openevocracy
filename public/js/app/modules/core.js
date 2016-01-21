@@ -10,6 +10,7 @@ define([
     'text!templates/partials/views/header.html',
     'text!templates/partials/views/buttons.html',
     'text!templates/partials/views/messages.html',
+    'text!templates/partials/views/lightbox.html',
     'text!templates/partials/blocks/topic_statistics.html',
     'text!templates/partials/blocks/topic_tabs.html',
     'text!templates/partials/blocks/topic_author.html',
@@ -28,6 +29,7 @@ define([
     HeaderPartial,
     ButtonsPartial,
     MessagesPartials,
+    LightboxPartials,
     StatBlockPartials,
     TopicTabsBlockPartials,
     TopicAuthorBlockPartials,
@@ -56,6 +58,7 @@ define([
     Handlebars.registerPartial('header', HeaderPartial);
     Handlebars.registerPartial('buttons', ButtonsPartial);
     Handlebars.registerPartial('messages', MessagesPartials);
+    Handlebars.registerPartial('lightbox', LightboxPartials);
     Handlebars.registerPartial('topic_statistics', StatBlockPartials);
     Handlebars.registerPartial('topic_tabs', TopicTabsBlockPartials);
     Handlebars.registerPartial('topic_author', TopicAuthorBlockPartials);

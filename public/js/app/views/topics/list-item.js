@@ -47,7 +47,11 @@ define([
                 this.$(".topic-desc").val("");
             },
             'click .link': function(e) {
-                window.location.href='/#/topic/'+this.model.get('_id');
+                if(this.model.get('stage') != C.STAGE_PASSED) {
+                    window.location.href='/#/topic/'+this.model.get('_id');
+                } else {
+                    // TODO link to pdf
+                }
             }
         },
         
