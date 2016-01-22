@@ -19,12 +19,12 @@ define([
         events: Events,
         
         initialize: function() {
-            var title = this.model.get('participant').name + '\'s proposal';
+            var title = this.model.get('member').name + '\'s proposal';
             this.model.set('title', title);
         },
         
         onShow: function() {
-            setActive('grpmem-'+this.model.get('participant')._id);
+            setActive('grpmem-'+this.model.get('member')._id);
         }
     });
     

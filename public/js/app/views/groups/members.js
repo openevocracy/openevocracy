@@ -24,9 +24,9 @@ define([
         events: Events,
         
         initialize: function() {
-            _.each(this.model.get('participants'), function(participant) {
-                if(App.session.user.get('_id') == participant._id)
-                    participant.is_me = true;
+            _.each(this.model.get('members'), function(member) {
+                if(App.session.user.get('_id') == member._id)
+                    member.is_me = true;
             });
         },
         
@@ -46,15 +46,15 @@ define([
                 starOn  : 'fa fa-fw fa-heart'
             };
             
-            _.each(this.model.get('participants'), function(participant) {
+            _.each(this.model.get('members'), function(member) {
                 // TODO partcipants => members
-                $('[data-rate-type="participant"][data-rate-id="'+participant._id+'"]').
+                $('[data-rate-type="member"][data-rate-id="'+member._id+'"]').
                     raty(_.extend(ratySettings,
-                         { score: participant.participant_rating,
+                         { score: member.member_rating,
                            click: _.partial(this.saveRating, this.model, 'user') }));
-                $('[data-rate-type="proposal"][data-rate-id="'+participant.ppid+'"]').
+                $('[data-rate-type="proposal"][data-rate-id="'+member.ppid+'"]').
                     raty(_.extend(ratySettings,
-                         { score: participant.proposal_rating,
+                         { score: member.proposal_rating,
                            click: _.partial(this.saveRating, this.model, 'proposal') }));
             }.bind(this));
         },
@@ -64,9 +64,9 @@ define([
             
             // modify internal model
             if(type == 'user')
-                _.findWhere(model.get('participants'),{'_id': id}).participant_rating = score;
+                _.findWhere(model.get('members'),{'_id': id}).member_rating = score;
             else if(type == 'proposal')
-                _.findWhere(model.get('participants'),{'ppid': id}).proposal_rating = score;
+                _.findWhere(model.get('members'),{'ppid': id}).proposal_rating = score;
             
             // send to server
             $.post('/json/ratings/'+type+'/rate',

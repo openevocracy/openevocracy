@@ -49,10 +49,10 @@ define([
         },
         
         show_member_proposal: function(member_id) {
-            var participant = _.findWhere(this.group.get('participants'), {'_id': member_id});
+            var member = _.findWhere(this.group.get('members'), {'_id': member_id});
             
             var model = this.group;
-            model.set('participant',participant);
+            model.set('member',member);
             
             App.layout.view.show(
                 new MembersProposalView({'model': model}),

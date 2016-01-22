@@ -9,7 +9,7 @@ var C = requirejs('public/js/app/constants');
 var ratings = require('./ratings');
 var utils = require('../utils');
 
-function calculateNumberOfGroups(numParticipants) {
+function calculateNumberOfGroups(numTopicParticipants) {
     
     // constants
     var groupSize = 4.5; // group size is 4 or 5
@@ -19,10 +19,10 @@ function calculateNumberOfGroups(numParticipants) {
     var groupMaxSize = (groupSize+0.5);
     
     var numGroups;
-    if(numParticipants>limitSimpleRule)
-        numGroups = numParticipants/groupSize; // simple rule, ideally all groups are 5, group size 4 only exception
+    if(numTopicParticipants>limitSimpleRule)
+        numGroups = numTopicParticipants/groupSize; // simple rule, ideally all groups are 5, group size 4 only exception
     else
-        numGroups = numParticipants/groupMaxSize; // complex rule, 4 and 5 uniformly distributed
+        numGroups = numTopicParticipants/groupMaxSize; // complex rule, 4 and 5 uniformly distributed
     numGroups = Math.ceil(numGroups); // round up to next integer
     console.log('rounded groups: '+numGroups);
     
@@ -49,7 +49,7 @@ function assignGroupMembers(members) {
     });
     
     // TODO log with logging library
-    // log group participant distribution
+    // log group member distribution
     var counts = _.countBy(groups, function(group) {return _.size(group);});
     console.log('groups filled: ' + JSON.stringify(counts));
     
@@ -70,9 +70,9 @@ function storeGroup(gid,tid,level,group) {
         '_id': ppid, 'source': gid,
         'pid': ObjectId()});
     
-    // insert group participant
+    // insert group member
     var insert_members_promise =
-    db.collection('group_participants').insertAsync(
+    db.collection('group_members').insertAsync(
         _.map(group, function(uid) {return { 'gid': gid, 'uid': uid }; }));
     
     return Promise.join(create_group_promise,
@@ -138,9 +138,9 @@ exports.remixGroupsAsync = function(topic) {
             // register as sink for source proposals
             // find previous gids corresponding uids in group_out (current group)
             var update_source_proposals_promise =
-            db.collection('group_participants').findAsync({'uid': { $in: group }}).
-            then(function(group_participants) {
-                var gids = _.pluck(group_participants,'gid');
+            db.collection('group_members').findAsync({'uid': { $in: group }}).
+            then(function(members) {
+                var gids = _.pluck(members,'gid');
                 
                 // filter out only previous level proposals
                 var prevLevel = topic.level;
@@ -165,9 +165,9 @@ exports.list = function(req, res) {
     db.collection('groups').find().toArrayAsync().then(_.bind(res.json,res));
 };
 
-function getParticipantProposalBodyAndRating(participant,gid,uid) {
+function getMemberProposalBodyAndRating(member,gid,uid) {
     return db.collection('proposals').findOneAsync(
-        { 'uid': participant._id, 'gid': gid }).then(function(proposal) {
+        { 'uid': member._id, 'gid': gid }).then(function(proposal) {
         // get proposal body
         var proposal_body_promise = utils.getPadBodyAsync(proposal.pid);
         
@@ -202,41 +202,40 @@ exports.query = function(req, res) {
         { $setOnInsert: {pid: ObjectId()}},
         { 'new': true, 'upsert': true }).get(0);
     
-    // get all participants
-    var participants_promise =
-    db.collection('group_participants').find({'gid': gid}, {'uid': 1}).
-    //map(function (group_participant) {return group_participant.uid;}).
-    toArrayAsync().map(function(group_participant) {
-        return group_participant.uid;
+    // get all group members
+    var members_promise =
+    db.collection('group_members').find({'gid': gid}, {'uid': 1}).
+    //map(function(member) {return member.uid;}).
+    toArrayAsync().map(function(member) {
+        return member.uid;
     }).then(function(uids) {
         return db.collection('users').
             find({'_id': { $in: uids }},{'_id': 1,'name': 1}).
             toArrayAsync();
-    }).map(function (participant) {
-        // get participant's proposal body and rating
+    }).map(function (member) {
+        // get member's proposal body and rating
         var proposal_body_and_rating_promise =
-            getParticipantProposalBodyAndRating(participant,gid,uid);
+            getMemberProposalBodyAndRating(member,gid,uid);
         
-        // get participant rating
-        var participant_rating_promise =
+        // get member rating
+        var member_rating_promise =
         db.collection('ratings').findOneAsync(
-            { 'ruid': participant._id, 'gid': gid, 'uid': uid },{ 'score': 1 }).
+            { 'ruid': member._id, 'gid': gid, 'uid': uid },{ 'score': 1 }).
         then(function(rating) {
             return rating ? rating.score : 0;
         });
         
         return Promise.join(proposal_body_and_rating_promise,
-                            participant_rating_promise).
+                            member_rating_promise).
         spread(function(proposal_body_and_rating,
-                        participant_rating) {
-            return _.extend(participant,
-                            proposal_body_and_rating,
-                            {'participant_rating': participant_rating});
+                        member_rating) {
+            return _.extend(member,proposal_body_and_rating,
+                            {'member_rating': member_rating});
         });
     });
     
-    Promise.join(group_promise,participants_promise).
-    spread(function(group,participants) {
-        return _.extend(group,{'participants': participants});}).
+    Promise.join(group_promise,members_promise).
+    spread(function(group,members) {
+        return _.extend(group,{'members': members});}).
     then(res.json.bind(res));
 };

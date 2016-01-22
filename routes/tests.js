@@ -33,7 +33,7 @@ exports.create_topic_consensus_stage = function(req, res) {
         'nextDeadline': Date.now() + 1000*ONE_WEEK
     }, function (){});
     
-    // create participants for this group
+    // create participants for this topic
     db.collection('topic_participants').insert(
                   [{'tid':tid,'uid':u123},
                    {'tid':tid,'uid':ucarlo}],
@@ -47,8 +47,8 @@ exports.create_topic_consensus_stage = function(req, res) {
         'level': 0
     },function (){});
     
-    // create participants for this group
-    db.collection('group_participants').insert(
+    // create members for this group
+    db.collection('group_members').insert(
                   [{'gid':gid,'uid':u123},
                    {'gid':gid,'uid':ucarlo}],
                   function (){});
@@ -91,26 +91,22 @@ function fill_topic_user_ratings(topic) {
     // get all groups of topic with current level
     return db.collection('groups').find(
         {'tid': topic._id, 'level': topic.level}, {'_id': true}).
-    // get the corresponding group participants
+    // get the corresponding group members
     toArrayAsync().then(function(groups) {
-        return db.collection('group_participants').
+        return db.collection('group_members').
             find({'gid': { $in: _.pluck(groups,'_id') }}, {'_id': false}).
             toArrayAsync();
-    // create a rating for each participant
-    }).map(function(group_participant) {
-        return {'ruid': group_participant.uid, 'gid': group_participant.gid, 'score': 3};
+    // create a rating for each member
+    }).map(function(group_member) {
+        return {'ruid': group_member.uid, 'gid': group_member.gid, 'score': 3};
     // insert all ratings into database
     }).then(db.collection('ratings').insertAsync.bind(db.collection('ratings')));
 }
 
 exports.create_groups = function(req, res) {
-    db.collection('groups').remove({'tid':tid},true,
-        function(topic_participant,err) {
-        });
-    var topic = {'_id':tid};
-    topics.createGroups(topic);
-
-    res.sendStatus(200);
+    Promise.join(db.collection('groups').removeAsync({'tid':tid},true),
+                 topics.createGroups({'_id':tid})).
+            then(_.partial(res.sendStatus,200));
 };
 
 // see http://stackoverflow.com/a/24660323
@@ -157,7 +153,7 @@ exports.remix_groups = function(req, res) {
                     response_text += "<br/>level: " + topic.level + ", number of groups: " + _.size(groups) + ", sizes of each group: ";
                     return groups;
                 }).map(function(group) {
-                    return db.collection('group_participants').countAsync({'gid': group._id}).
+                    return db.collection('group_members').countAsync({'gid': group._id}).
                     then(function(count) {
                         response_text += count + " ";
                     });

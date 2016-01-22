@@ -79,7 +79,10 @@ function manageConsensusStage(topic,levelDuration) {
 }
 exports.manageConsensusStage = manageConsensusStage;
 
-function participantsHaveValidProposals(topic) {
+/*
+checks if a minimum of one proposal exists
+*/
+function checkForExistingProposal(topic) {
     return db.collection('topic_participants').find({'tid': topic._id},{'uid': true}).
     toArrayAsync().then(function(participants) {
         return db.collection('proposals').
@@ -96,7 +99,7 @@ function manageTopicState(topic) {
     var prevDeadline = topic.nextDeadline;
     switch (topic.stage) {
         case C.STAGE_SELECTION: // we are currently in selection stage
-            return participantsHaveValidProposals(topic).then(function(condition) {
+            return checkForExistingProposal(topic).then(function(condition) {
                 if(condition) {
                     // topic does meet the minimum requirements for the next stage
                     // move to next stage
@@ -196,10 +199,10 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
             
             // find the group out of previously found groups
             // that the current user is part of
-            return db.collection('group_participants').findOneAsync(
+            return db.collection('group_members').findOneAsync(
                 {'gid': { $in: gids }, 'uid': uid}, {'gid': true}).
-                then(function(group_participant) {
-                    return group_participant ? group_participant.gid : null;
+                then(function(group_member) {
+                    return group_member ? group_member.gid : null;
                 });
         });
     
@@ -289,7 +292,7 @@ exports.create = function(req, res) {
     }
     
     // only allow new topics if they do not exist yet
-    db.collection('topics').count( _.pick(topic,'name'), function(err, count) {
+    db.collection('topics').countAsync(_.pick(topic,'name')).then(function(count) {
         // topic already exists
         if(count > 0) {
             console.log("Couldn't create new topic! - topic already exists");
@@ -304,16 +307,15 @@ exports.create = function(req, res) {
         topic.nextDeadline = getDeadline(topic.stage);
         
         // insert into database
-        db.collection('topics').insert(topic, function(err, topics) {
-            var topic = topics[0];
-            
-            topic.votes = 0;
-            topic.participants = 0;
-            appendBasicTopicInfo(topic);
-            
-            res.json(topic);
-            console.log('new topic');
-        });
+        return db.collection('topics').insertAsync(topic);
+    }).then(function(topics) {
+        var topic = _.first(topics);
+        
+        topic.votes = 0;
+        topic.participants = 0;
+        appendBasicTopicInfo(topic);
+        
+        res.json(topic);
     });
 };
 

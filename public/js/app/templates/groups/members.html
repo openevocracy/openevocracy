@@ -14,11 +14,11 @@
 				</tr>
 			</thead>
 			<tbody>
-				{{#each participants}}
+				{{#each members}}
 		        <tr {{#if this.is_me}}class="active"{{/if}}>
 	        		<td class="memb-name">{{this.name}}</td>
 	        		<td class="memb-repu"><span class="fa fa-trophy"></span> 0.58/3.412</td>
-	        		<td><div class="rate" data-rate-type="participant" data-rate-id="{{this._id}}"></div></td>
+	        		<td><div class="rate" data-rate-type="member" data-rate-id="{{this._id}}"></div></td>
 	        		<td class="memb-prop-show"><a data-member-id="{{this._id}}"><span class="fa fa-file-text"></span> 8/59</a></td>
 	        		<td><div class="rate" data-rate-type="proposal" data-rate-id="{{this.ppid}}"></div></td>
 		        </tr>

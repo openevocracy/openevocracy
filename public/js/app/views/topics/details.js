@@ -157,8 +157,6 @@ define([
             
             // set model
             this.model.set('subtitle',subtitle);
-            
-            console.log(this.model);
         }
     });
     

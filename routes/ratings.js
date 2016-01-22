@@ -58,7 +58,7 @@ function rate(req, res, type) {
         ratingHead,
         { $set: { 'score': score } },
         { upsert: true }).
-    then(res.sendStatus.bind(res,200));
+    then(_.partial(res.sendStatus,200));
 };
 
 exports.rate_user_rating = _.partial(rate, _, _, 'ruid');
