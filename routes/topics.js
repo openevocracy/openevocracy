@@ -207,7 +207,7 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
         });
     
     // delete pad id if user is not owner, pid is removed from response
-    if(topic.owner.toString() != uid.toString())
+    if(!_.isEqual(topic.owner,uid))
         delete topic.pid;
     
     return Promise.props(_.extend(topic,{
@@ -244,7 +244,7 @@ exports.update = function(req, res) {
     
     db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
         // only the owner can update the topic
-        if(!topic || topic.owner.toString() != uid.toString()) {
+        if(!topic || !_.isEqual(topic.owner,uid)) {
             res.sendStatus(403);
             return Promise.reject();
         }
@@ -278,15 +278,14 @@ exports.query = function(req, res) {
             return appendTopicInfoAsync(topic,uid,true);
     }).
     then(res.json.bind(res)).
-    catch(res.sendStatus.bind(res,404));
+    catch(_.partial(res.sendStatus,404));
 };
 
 exports.create = function(req, res) {
     var topic = req.body;
     
     // reject empty topic names
-    if(topic.name == "") {
-        console.log("Couldn't create new topic: Topic name is empty.");
+    if(_.isEmpty(topic.name)) {
         res.sendStatus(400);
         return;
     }
@@ -295,9 +294,8 @@ exports.create = function(req, res) {
     db.collection('topics').countAsync(_.pick(topic,'name')).then(function(count) {
         // topic already exists
         if(count > 0) {
-            console.log("Couldn't create new topic! - topic already exists");
             res.sendStatus(409);
-            return;
+            return Promise.reject();
         }
         
         topic.owner = ObjectId(req.signedCookies.uid);
@@ -326,7 +324,7 @@ exports.delete = function(req,res) {
     db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': true }).
     then(function(topic) {
         // only the owner can delete the topic
-        if(topic.owner.toString() != uid.toString()) {
+        if(!_.isEqual(topic.owner,uid)) {
             res.sendStatus(401);
             return Promise.reject();
         }
