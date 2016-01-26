@@ -4,10 +4,17 @@ var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var requirejs = require('requirejs');
+var fs = Promise.promisifyAll(require("fs"));
+var appRoot = require('app-root-path');
 
 var C = requirejs('public/js/app/constants');
 var groups = require('./groups');
 var utils = require('../utils');
+
+fs.existsAsync = Promise.promisify
+(function exists2(path, exists2callback) {
+    fs.exists(path, function callbackWrapper(exists) { exists2callback(null, exists); });
+});
 
 function getDeadline(nextStage, prevDeadline, levelDuration) {
     
@@ -47,6 +54,11 @@ function manageConsensusStage(topic,levelDuration) {
             };
             break;
         case C.STAGE_PASSED:
+            // save pad as pdf
+            var tid = topic._id;
+            var filename = appRoot.path + '/files/documents/' + tid + '.pdf';
+            utils.getPadPDFAsync(tid).then(function(data) {return fs.writeFileAsync(filename,data);});
+            
             // updates below are only required if consensus stage is over
             update_set_proposal = {
                 'stage': (topic.stage = C.STAGE_PASSED),
@@ -412,4 +424,10 @@ exports.unjoin = function(req, res) {
     db.collection('topic_participants').removeAsync(topic_participant,true).
         then(_.partial(countParticipants,topic_participant.tid)).
         call('toString').then(res.json.bind(res));
+};
+
+exports.final = function(req, res) {
+    var tid = req.params.id;
+    var filename = appRoot.path + '/files/documents/' + tid + '.pdf';
+    res.sendFile(filename);
 };

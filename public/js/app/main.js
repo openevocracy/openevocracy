@@ -18,6 +18,7 @@
       etherpad: '../vendor/etherpad',
       bootstrap: '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
       bootstrapcustom: '../vendor/bootstrap.custom',
+      moment: '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min',
       ratyfa: '../vendor/jquery.raty-fa',
       isactive: '../vendor/isactive'
     },

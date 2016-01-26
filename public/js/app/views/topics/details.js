@@ -3,6 +3,7 @@ define([
     'jquery',
     'Marionette',
     'etherpad',
+    'moment',
     'hbs!templates/topics/details',
     'constants',
     'jquerycookie',
@@ -12,6 +13,7 @@ define([
     $,
     Marionette,
     etherpad,
+    moment,
     Template,
     C
     ) {
@@ -135,6 +137,7 @@ define([
         
         onShow: function() {
             this.onAction();
+            setActive('topics');
         },
         
         onAction: function() {
@@ -151,9 +154,15 @@ define([
             var subtitle_begin = this.model.get('stageName') + ' stage';
             var subtitle_level = ' in level ' + this.model.get('level');
             var subtitle_remaining = ' in <span id="timeremaining"></span>';
+            var subtitle_next = '';
             
             // evaluate conditions
-            var subtitle = subtitle_begin + ((stage == C.STAGE_CONSENSUS) ? subtitle_level : '' ) + ', next ' + ((stage == C.STAGE_CONSENSUS) ? 'level' : 'stage') + subtitle_remaining;
+            if(stage != C.STAGE_PASSED)
+                subtitle_next = ', next ' + ((stage == C.STAGE_CONSENSUS) ? 'level' : 'stage') + subtitle_remaining;
+            else
+                subtitle_next = ', finished at ' + moment(this.model.get('stagePassedStarted')).format('YYYY-MM-DD');
+            
+            var subtitle = subtitle_begin + ((stage == C.STAGE_CONSENSUS) ? subtitle_level : '' ) + subtitle_next;
             
             // set model
             this.model.set('subtitle',subtitle);

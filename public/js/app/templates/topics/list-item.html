@@ -13,7 +13,9 @@
         
         {{else}}
             {{#ifis stage STAGE_PASSED}}
-            
+            <div class="buttons">
+                <a class="btn btn-sm btn-default doc" title="Final document" href="file/topic/final/{{_id}}" target="_blank"><span class="fa fa-file-text-o"></span> Final document</a>
+            </div>
             {{else}}
             <div class="time-remaining">
                 <div>

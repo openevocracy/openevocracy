@@ -1,6 +1,6 @@
 var _ = require('underscore');
 var rp = require('request-promise');
-        
+
 var ObjectIdToStringMapper = exports.ObjectIdToStringMapper = function(obj) {
     return _.mapObject(obj,function(val) {
         return val.toString();
@@ -27,6 +27,14 @@ exports.getPadBodyAsync = function(pid) {
         
         return body;
     }).timeout(1000).catch(function (err) {
+        return err.message;
+    });
+};
+
+exports.getPadPDFAsync = function(pid) {
+    // get pdf export
+    var padurl = 'https://beta.etherpad.org/p/'+pid+'/export/pdf';
+    return rp.get(padurl, {encoding: null}).catch(function (err) {
         return err.message;
     });
 };

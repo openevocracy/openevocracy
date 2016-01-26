@@ -68,6 +68,7 @@ app.post('/json/topic-vote', function(req, res) { auth(req, res, topics.vote); }
 app.post('/json/topic-unvote', function(req, res) { auth(req, res, topics.unvote); });
 app.post('/json/topic-join', function(req, res) { auth(req, res, topics.join); });
 app.post('/json/topic-unjoin', function(req, res) { auth(req, res, topics.unjoin); });
+app.get('/file/topic/final/:id', function(req, res) { auth(req, res, topics.final); } );
 
 // #########################
 // ### P R O P O S A L S ###

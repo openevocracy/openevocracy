@@ -14,6 +14,7 @@ define([
     'text!templates/partials/blocks/topic_statistics.html',
     'text!templates/partials/blocks/topic_tabs.html',
     'text!templates/partials/blocks/topic_author.html',
+    'text!templates/partials/blocks/topic_final.html',
     'text!templates/partials/blocks/group_tabs.html',
     'text!templates/partials/blocks/group_proposals.html',
     'text!templates/partials/blocks/proposal_tabs.html'
@@ -33,6 +34,7 @@ define([
     StatBlockPartials,
     TopicTabsBlockPartials,
     TopicAuthorBlockPartials,
+    TopicFinalBlockPartials,
     GroupTabsBlockPartials,
     GroupProposalsBlockPartials,
     ProposalTabsBlockPartials
@@ -62,6 +64,7 @@ define([
     Handlebars.registerPartial('topic_statistics', StatBlockPartials);
     Handlebars.registerPartial('topic_tabs', TopicTabsBlockPartials);
     Handlebars.registerPartial('topic_author', TopicAuthorBlockPartials);
+    Handlebars.registerPartial('topic_final', TopicFinalBlockPartials);
     Handlebars.registerPartial('group_tabs', GroupTabsBlockPartials);
     Handlebars.registerPartial('group_proposals', GroupProposalsBlockPartials);
     Handlebars.registerPartial('proposal_tabs', ProposalTabsBlockPartials);

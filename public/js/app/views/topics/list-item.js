@@ -34,6 +34,9 @@ define([
                 e.stopPropagation();
                 e.preventDefault();
             },
+            'click .doc': function(e) {
+                e.stopPropagation();
+            },
             'click .edit': function(e) {
                 $(".topic-id").val(this.model.get('_id'));
                 $(".topic-name").val(this.model.get('name'));
@@ -47,11 +50,7 @@ define([
                 this.$(".topic-desc").val("");
             },
             'click .link': function(e) {
-                if(this.model.get('stage') != C.STAGE_PASSED) {
-                    window.location.href='/#/topic/'+this.model.get('_id');
-                } else {
-                    // TODO link to pdf
-                }
+                window.location.href='/#/topic/'+this.model.get('_id');
             }
         },
         

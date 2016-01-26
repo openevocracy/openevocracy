@@ -10,6 +10,7 @@
     
     <aside class="col-md-4">
         {{#if showTabs}}<div class="block">{{> topic_tabs}}</div>{{/if}}
+        {{#ifis stage STAGE_PASSED}}<div class="block">{{> topic_final}}</div>{{/ifis}}
         <div class="block">{{> topic_author}}</div>
         <div class="block last">{{> topic_statistics}}</div>
     </aside>
