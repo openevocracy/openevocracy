@@ -6,15 +6,11 @@ var Promise = require('bluebird');
 var requirejs = require('requirejs');
 var fs = Promise.promisifyAll(require("fs"));
 var appRoot = require('app-root-path');
+var CronJob = require('cron').CronJob;
 
 var C = requirejs('public/js/app/constants');
 var groups = require('./groups');
 var utils = require('../utils');
-
-fs.existsAsync = Promise.promisify
-(function exists2(path, exists2callback) {
-    fs.exists(path, function callbackWrapper(exists) { exists2callback(null, exists); });
-});
 
 function getDeadline(nextStage, prevDeadline, levelDuration) {
     
@@ -290,7 +286,7 @@ exports.query = function(req, res) {
             return appendTopicInfoAsync(topic,uid,true);
     }).
     then(res.json.bind(res)).
-    catch(_.partial(res.sendStatus,404));
+    catch(res.sendStatus.bind(res,404));
 };
 
 exports.create = function(req, res) {
@@ -333,10 +329,11 @@ exports.delete = function(req,res) {
     var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.signedCookies.uid);
     
-    db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': true }).
+    db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': true, 'stage': true }).
     then(function(topic) {
         // only the owner can delete the topic
-        if(!_.isEqual(topic.owner,uid)) {
+        // and if the selection stage has passed, nobody can
+        if(!_.isEqual(topic.owner,uid) || topic.stage > C.STAGE_SELECTION) {
             res.sendStatus(401);
             return Promise.reject();
         }
@@ -346,7 +343,7 @@ exports.delete = function(req,res) {
             db.collection('topic_votes').removeAsync({'tid': tid}),
             db.collection('topic_participants').removeAsync({'tid': tid}),
             db.collection('groups').removeAsync({'tid': tid}));
-    }).cancellable().then(_.partial(res.sendStatus,200));
+    }).cancellable().then(res.sendStatus.bind(res,200));
 };
 
 function countVotes(tid) {
@@ -431,3 +428,13 @@ exports.final = function(req, res) {
     var filename = appRoot.path + '/files/documents/' + tid + '.pdf';
     res.sendFile(filename);
 };
+
+// setup cronjob to run every minute
+var job = new CronJob({
+  cronTime: '*/1 * * * *',
+  onTick: function() {
+      db.collection('topics').find().toArrayAsync().map(manageTopicState);
+  },
+  start: true
+});
+job.start();

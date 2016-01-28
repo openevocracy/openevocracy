@@ -10,6 +10,8 @@
         "cookie": "*",
         "cookie-session": "*",
         "cookie-signature": "*",
+        "cron": "*",
+        "node-crontab": "*",
         "debug": "*",
         "ejs": "*",
         "errorhandler": "*",
