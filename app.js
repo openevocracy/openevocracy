@@ -15,6 +15,7 @@ var errorHandler = require('errorhandler');
 var http = require('http');
 var cookieParser = require('cookie-parser');
 //var cookieSession = require('cookie-session');
+var utils = require('./server/utils');
 
 var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
@@ -31,13 +32,16 @@ Object.keys(mongoskin).forEach(function(key) {
 });
 Promise.promisifyAll(mongoskin);
 
+// initilize mail
+utils.initializeMail();
+
 // import routes
-var users = require('./routes/users');
-var topics = require('./routes/topics');
-var groups = require('./routes/groups');
-var proposals = require('./routes/proposals');
-var ratings = require('./routes/ratings');
-var tests = require('./routes/tests');
+var users = require('./server/routes/users');
+var topics = require('./server/routes/topics');
+var groups = require('./server/routes/groups');
+var proposals = require('./server/routes/proposals');
+var ratings = require('./server/routes/ratings');
+var tests = require('./server/routes/tests');
 var auth = users.auth_wrapper;
 
 // all environments

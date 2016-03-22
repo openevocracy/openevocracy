@@ -20,7 +20,10 @@
       bootstrapcustom: '../vendor/bootstrap.custom',
       moment: '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min',
       ratyfa: '../vendor/jquery.raty-fa',
-      isactive: '../vendor/isactive'
+      isactive: '../vendor/isactive',
+      constants: '../setup/constants',
+      configs: '../setup/configs',
+      parsley: '//cdnjs.cloudflare.com/ajax/libs/parsley.js/2.3.5/parsley.min'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for

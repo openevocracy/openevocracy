@@ -55,9 +55,10 @@ define([
                     success: function(model,res) {
                         topic.set(res);
                         this.collection.add(topic);
+                        window.location.hash = '/topic/'+topic.id;
                     }.bind(this),
                     error:  function(model,res) {
-                        alert("Topic creation failed!");
+                        $('.message').html('<div class="alert alert-danger">Topic creation failed!</div>');
                     }
                 });
                 
