@@ -118,6 +118,8 @@ app.post("/json/auth/logout", users.logout );
 /*// POST /json/auth/remove_account
 // @desc: deletes a user
 app.post("/json/auth/remove_account", users.delete );*/
+// POST /json/auth/verifyEmail
+app.get("/auth/verifyEmail/:id", users.verifyEmail );
 
 // ###################
 // ###   T E S T   ###

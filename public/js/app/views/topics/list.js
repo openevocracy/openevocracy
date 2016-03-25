@@ -1,19 +1,24 @@
 define([
     'underscore',
+    'constants',
     'Marionette',
     'hbs!templates/topics/list',
     'views/topics/list-item',
     'models/topic',
     ], function(
     _,
+    C,
     Marionette,
     Template,
     ChildView,
     Model
     ) {
-
+    
     var View = Marionette.CompositeView.extend({
         template: Template,
+        tagName: 'section',
+        id: "topics-list",
+        model: new Backbone.Model(_.extend(C, {checked: {0: true, 1: false, 2: false, 3: false, -1: false}})),
         
         //viewComparator: 'stage',
         viewComparator: function(t0,t1) {
@@ -68,23 +73,27 @@ define([
             'click .cancel': function(e) {
                 if(e) e.preventDefault();
                 this.$('.lightbox').fadeOut(500);
-            }/*,
-            'click .lightbox': function(e) {
-                this.$(".lightbox").fadeOut(500);
             },
-            'click .inner-lightbox': function(e) {
-                event.stopPropagation();
-            }*/
+            'click [name="stage"]': function(e) {
+                for(i=0; i<5; ++i)
+                    this.stageSelected[i] = $("input.stage-"+i).is(':checked');
+                this.render();
+            }
         },
         
         initialize: function() {
             _.bindAll.apply(_, [this].concat(_.functions(this)));
             App.eventAggregator.bind('destroyTopic', this.onDestroyTopic);
-            $('#nav-tpc').addClass('active'); /* FIXME more general solution? */
+            //$('#nav-tpc').addClass('active'); /* FIXME more general solution? */
         },
         
         onDestroyTopic: function(topic) {
             this.collection.remove(topic);
+        },
+        
+        stageSelected: [true, true, true, true, true],
+        filter: function (child, index, collection) {
+            return this.stageSelected[child.get('stage')];
         }
     });
     

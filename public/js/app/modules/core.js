@@ -17,7 +17,8 @@ define([
     'text!templates/partials/blocks/topic_final.html',
     'text!templates/partials/blocks/group_tabs.html',
     'text!templates/partials/blocks/group_proposals.html',
-    'text!templates/partials/blocks/proposal_tabs.html'
+    'text!templates/partials/blocks/proposal_tabs.html',
+    'text!templates/partials/blocks/topiclist_filter.html'
 ], function(
     Marionette,
     Handlebars,
@@ -37,7 +38,8 @@ define([
     TopicFinalBlockPartials,
     GroupTabsBlockPartials,
     GroupProposalsBlockPartials,
-    ProposalTabsBlockPartials
+    ProposalTabsBlockPartials,
+    TopiclistFilterBlockPartials
     ) {
 
     var login = new Login();
@@ -68,6 +70,7 @@ define([
     Handlebars.registerPartial('group_tabs', GroupTabsBlockPartials);
     Handlebars.registerPartial('group_proposals', GroupProposalsBlockPartials);
     Handlebars.registerPartial('proposal_tabs', ProposalTabsBlockPartials);
+    Handlebars.registerPartial('topiclist_filter', TopiclistFilterBlockPartials);
     
     return Module;
 });

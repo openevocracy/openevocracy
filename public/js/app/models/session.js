@@ -71,8 +71,6 @@ define([
          * updating the user and session after receiving an API response
          */
         postAuth: function(opts, callback, args){
-            var postData = _.omit(opts, 'method');
-            //if(DEBUG) console.log(postData);
             $.ajax({
                 url: this.url() + '/' + opts.method,
                 contentType: 'application/json',
@@ -85,19 +83,13 @@ define([
                 },
                 data:  JSON.stringify( _.omit(opts, 'method') ),
                 success: function(res){
-                    
-                    //if( !res.error ){
                     if(_.indexOf(['login', 'signup'], opts.method) !== -1){
                         this.updateSessionUser( res.user || {} );
                         this.set({ logged_in: true });
-                    } else {
+                    } else
                         this.set({ logged_in: false });
-                    }
                     
                     if( callback && 'success' in callback ) callback.success(res);
-                    /*} else {
-                        if( callback && 'error' in callback ) callback.error(res);
-                    }*/
                 }.bind(this),
                 error: function(xhr, err){
                     if(callback && 'error' in callback ) callback.error(xhr, err);

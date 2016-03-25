@@ -16,7 +16,7 @@ define([
         
         before: function( route, params ){
             if(App.session.isLoggedIn() ||
-               route == '' || route == 'login' || route == 'register')
+               route == '' || route == 'login' || route == 'verified' || route == 'register')
                 return true;
             
             App.eventAggregator.trigger('App:logged_out');

@@ -20,22 +20,23 @@ define([
         events: {
             'click #signup': function(e) {
                 $('.welcome-message').remove();
-                if(this.$("#signup-form").parsley().validate()){
+                if($("#signup-form").parsley().validate()){
                     App.session.signup({
-                        pass: this.$("#pass").val(),
-                        email: this.$("#email").val()
+                        email: this.$("#email").val(),
+                        pass: this.$("#pass").val()
                     }, {
                     success: function(res){
-                        App.eventAggregator.trigger('App:logged_in');
+                        $('.message').addClass("alert alert-success").html(res.responseJSON.message);
+                        $("#signup-form").remove();
+                        $("#signup").remove();
                     },
                     error: function(xhr, err){
-                        // Serverside validation invalid
+                        $('.message').addClass("alert alert-danger").html(xhr.responseJSON.message);
                         e.preventDefault();
-                        $('.message').html('<div class="alert alert-danger">'+xhr.responseText+'</div>');
                     }});
                 } else {
                     // Clientside validation invalid
-                    $('.message').html('<div class="alert alert-danger">Please check the form for mistakes.</div>');
+                    $('.message').addClass("alert alert-danger").html("Please check the form for mistakes.");
                 }
             }
         }

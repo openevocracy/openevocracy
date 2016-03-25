@@ -3,7 +3,7 @@ var ONE_WEEK = 1000*60*60*24*7;
 
 define({
     DEBUG : true,
-    MAIL: true,
+    MAIL: false,
     
     MIN_PARTICIPANTS_PER_TOPIC : 2,
     
@@ -12,6 +12,7 @@ define({
     DURATION_LEVEL     : ONE_WEEK,
     DURATION_NONE      : -1,
     
+    EVOCRACY_HOST : 'https://mind-about-sagacitysite.c9.io',
     ETHERPAD_HOST : 'https://beta.etherpad.org/p/'
 });
 

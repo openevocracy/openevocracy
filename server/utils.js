@@ -15,7 +15,7 @@ exports.isOwnError = function(error) {
 }
 exports.handleOwnError = function(res) {
     return function(error) {
-        res.status(error.status).send(error.message);
+        res.status(error.status).send(error);
     };
 }
 

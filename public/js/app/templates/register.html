@@ -1,10 +1,7 @@
 <section class="content" id="register">
     
-    <div class="page-header">
-        <h2>Register</h2>
-    </div>
-    
-    <div class="message"></div>
+    {{> header title='Register'}}
+    {{> messages}}
     
     <p class="welcome-message">Nice to have you with us!</p>
     
@@ -17,7 +14,7 @@
             
             <div class="form-group">
                 <label for="pass">Your password:</label>
-                <input class="form-control" type="password" id="pass" required name="pass" placeholder="choose password" />
+                <input class="form-control" type="password" id="pass" required name="pass" placeholder="choose password" data-parsley-trigger="change" />
             </div>
         </fieldset>
     </form>

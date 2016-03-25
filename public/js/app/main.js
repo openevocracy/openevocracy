@@ -72,25 +72,31 @@
   require(['underscore','backbone','handlebars'], function(_, Backbone, Handlebars) {
     // register handlebars helper for equality conditions
     Handlebars.registerHelper('ifis', function(a, b, opts) {
-          if(a == b) {
-              return opts.fn(this);
-          } else {
-              return opts.inverse(this);
-          }
+      if(a == b) {
+          return opts.fn(this);
+      } else {
+          return opts.inverse(this);
+      }
     });
     Handlebars.registerHelper('ifisOr', function(a, b, c, opts) {
-          if(a == b || a == c) {
-              return opts.fn(this);
-          } else {
-              return opts.inverse(this);
-          }
+      if(a == b || a == c) {
+          return opts.fn(this);
+      } else {
+          return opts.inverse(this);
+      }
     });
     Handlebars.registerHelper('ifisAnd', function(a, b, c, opts) {
-          if(a == b && a == c) {
-              return opts.fn(this);
-          } else {
-              return opts.inverse(this);
-          }
+      if(a == b && a == c) {
+          return opts.fn(this);
+      } else {
+          return opts.inverse(this);
+      }
+    });
+    Handlebars.registerHelper('ifIn', function(value, list, options) {
+      if(_.contains(list,value)) {
+        return options.fn(this);
+      }
+      return options.inverse(this);
     });
     // force ajax call on all browsers
     $.ajaxSetup({ cache: false });

@@ -1,14 +1,19 @@
 {{> lightbox}}
 
-<section class="content" id="topics-list">
+<!-- include in buttons? -->
+<div class="button-group pull-right">
+    <button class="btn btn-default add" title="add topic"><span class="fa fa-plus"></span> Add topic</button>
+</div>
+{{> header title='Current Topics'}}
+
+<div class="row">
+    <section class="col-md-8">
+        {{> messages}}
+        <div id="topic-list" class="list-group"></div>
+    </section>
+    <aside class="col-md-4">
+        <div class="block first last">{{> topiclist_filter}}</div>
+    </aside>
+</div>
     
-    <div class="button-group pull-right">
-        <button class="btn btn-default add" title="add topic"><span class="fa fa-plus"></span> Add topic</button>
-    </div>
     
-    <div class="page-header">
-        <h2>Current Topics</h2>
-    </div>
-    
-    <div id="topic-list" class="list-group"></div>
-</section>
