@@ -282,12 +282,12 @@ exports.query = function(req, res) {
     db.collection('topics').findOneAsync({ '_id': tid }).
     then(function(topic) {
         if(null == topic)
-            return Promise.reject(404);
+            return Promise.reject({status: 404, message: "Topic not found!"});
         else
             return appendTopicInfoAsync(topic,uid,true);
     }).
     then(res.json.bind(res)).
-    catch(res.sendStatus.bind(res,404));
+    catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
 exports.create = function(req, res) {
@@ -295,17 +295,15 @@ exports.create = function(req, res) {
     
     // reject empty topic names
     if(_.isEmpty(topic.name)) {
-        res.sendStatus(400);
+        res.status(400).send("Empty topic name not allowed!");
         return;
     }
     
     // only allow new topics if they do not exist yet
     db.collection('topics').countAsync(_.pick(topic,'name')).then(function(count) {
         // topic already exists
-        if(count > 0) {
-            res.sendStatus(409);
-            return Promise.reject();
-        }
+        if(count > 0)
+            return Promise.reject({status: 409, message: "Topic already exists!"});
         
         topic.owner = ObjectId(req.signedCookies.uid);
         topic.pid = ObjectId(); // create random pad id
@@ -323,7 +321,7 @@ exports.create = function(req, res) {
         appendBasicTopicInfo(topic);
         
         res.json(topic);
-    });
+    }).catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
 exports.delete = function(req,res) {

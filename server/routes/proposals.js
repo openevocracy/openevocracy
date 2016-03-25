@@ -17,7 +17,7 @@ exports.query = function(req, res) {
     then(function(topic) {
         // check if topic is at least in proposal stage
         if(topic.stage < C.STAGE_PROPOSAL)
-            return Promise.reject('Topic must be at least in proposal stage!');
+            return Promise.reject({status: 400, message: 'Topic must be at least in proposal stage!'});
         return topic;
     });
     // check if user has joined topic
@@ -25,7 +25,7 @@ exports.query = function(req, res) {
     db.collection('topic_participants').countAsync({'tid': tid, 'uid': uid}).
     then(function(count) {
         if(count == 0)
-            return Promise.reject();
+            return Promise.reject({status: 400, message: 'User has not joined topic!'});
     });
     
     Promise.join(get_topic_promise, check_user_joined_promise, function(topic) {
@@ -47,5 +47,6 @@ exports.query = function(req, res) {
         
         // append pad body
         return Promise.props(_.extend(proposal,{'body': get_pad_body_promise}));
-    }).then(_.bind(res.json,res)).catch(_.bind(res.sendStatus,res,400));
+    }).then(_.bind(res.json,res))
+      .catch(utils.isOwnError,utils.handleOwnError(res));
 };
