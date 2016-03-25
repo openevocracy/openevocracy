@@ -106,22 +106,6 @@ define([
                 this.model.set('message', body);
                 this.model.set('message-type','alert alert-danger');
             }
-            
-            // FIXME is the following correct?
-            
-            var stage = this.model.get('stage');
-            if( stage == C.STAGE_PROPOSAL || (stage == C.STAGE_CONSENSUS &&
-            typeof this.model.get('ppid') !== undefined)) {
-                this.model.set('showTabs', true);
-                this.model.set('showProp', true);
-            }
-            
-            if( stage == C.STAGE_CONSENSUS &&
-            (typeof this.model.get('gid' ) !== undefined ||
-            typeof this.model.get('gid' ) !== null)) {
-                this.model.set('showTabs', true);
-                this.model.set('showProp', true);
-            }
                 
         },
 
@@ -146,6 +130,21 @@ define([
             $('#timeremaining').countdown(date, function(event) {
                 $(this).html(event.strftime('%D:%H:%M:%S'));
             });
+            
+            var stage = this.model.get('stage');
+            var showTabs =
+                (stage == C.STAGE_PROPOSAL && this.model.get('joined')) ||
+                (stage == C.STAGE_CONSENSUS && typeof this.model.get('ppid') !== undefined);
+            this.model.set('showTabs', showTabs);
+            
+            // FIXME what's this?
+            /*if( stage == C.STAGE_CONSENSUS &&
+            (typeof this.model.get('gid') !== undefined ||
+             typeof this.model.get('gid') !== null)) {
+                this.model.set('showTabs', true);
+            } else {
+                this.model.set('showTabs', false);
+            }*/
         },
         
         setSubtitle: function() {
@@ -167,6 +166,8 @@ define([
             // set model
             this.model.set('subtitle',subtitle);
         }
+        
+        
     });
     
     return View;

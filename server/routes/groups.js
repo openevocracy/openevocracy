@@ -89,6 +89,23 @@ exports.createGroups = function(topic) {
         // create new group id
         var gid = ObjectId();
         
+        // send mail to notify new group users
+        var send_mail_promise =
+        db.collection('users').find({'_id': { $in: group }},{'email': true}).
+        toArrayAsync().then(function(emails) {
+            utils.sendMail(emails.join(),
+                'Consensus stage has started!',
+                'Dear participant,\n\n \
+                 The consensus stage of the topic '+topic.name+
+                ' has just started and you are part of it.\n \
+                 You have been assigned to the group '+gid.toString+'.\n \
+                 You and four other team members will be working on a joint proposal.\n\n \
+                 Please find the group\'s link here:\n \
+                 http://mind-about-sagacitysite.c9.io/group/'+gid.toString()+'\n\n \
+                 Thank you for your help!\n \
+                 Evocracy - Democracy Evolved');
+        });
+        
         // store group in database
         var store_group_promise = storeGroup(gid,tid,0,group);
         
@@ -99,6 +116,7 @@ exports.createGroups = function(topic) {
             { 'tid': tid, 'uid': { $in: group } }, { $set: { 'sink': gid } });
         
         return Promise.join(
+                send_mail_promise,
                 store_group_promise,
                 update_source_proposals_promise);
     });
@@ -134,6 +152,23 @@ exports.remixGroupsAsync = function(topic) {
             
             // store group in database
             var store_group_promise = storeGroup(gid,tid,nextLevel,group);
+                    
+            // send mail to notify new group users
+            var send_mail_promise =
+            db.collection('users').find({'_id': { $in: group }},{'email': true}).
+            toArrayAsync().then(function(emails) {
+                utils.sendMail(emails.join(),
+                    'Consensus stage has started!',
+                    'Dear participant,\n\n \
+                     The consensus stage of the topic '+topic.name+
+                    ' has reached a new level and so have you.\n \
+                     You have been assigned to the group '+gid.toString()+'.\n \
+                     You and four other new team members will be working on a joint proposal.\n\n \
+                     Please find the group\'s link here:\n \
+                     http://mind-about-sagacitysite.c9.io/group/'+gid.toString()+'\n\n \
+                     Thank you for your help!\n \
+                     Evocracy - Democracy Evolved');
+            });
             
             // register as sink for source proposals
             // find previous gids corresponding uids in group_out (current group)
@@ -155,6 +190,7 @@ exports.remixGroupsAsync = function(topic) {
             });
             
             return Promise.join(
+                send_mail_promise,
                 store_group_promise,
                 update_source_proposals_promise);
         }).return(C.STAGE_CONSENSUS); // we stay in consensus stage

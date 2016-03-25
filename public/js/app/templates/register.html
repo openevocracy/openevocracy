@@ -6,21 +6,10 @@
     
     <div class="message"></div>
     
-    <p>Nice to have you with us!</p>
+    <p class="welcome-message">Nice to have you with us!</p>
     
     <form id="signup-form" class="well" data-parsley-validate>
         <fieldset>
-            <div class="form-group">
-                <label for="name">Your ID:</label>
-                <div class="row">
-                    <!--<div class="col-md-10"><input class="form-control disabled" type="text" id="name" name="name" value="" readonly /></div>-->
-                    <div class="col-md-8">
-                        <input class="form-control" type="text" required minlength="8" maxlength="8" id="name" name="name" value="" data-parsley-trigger="change" />
-                    </div>
-                    <button class="btn btn-info" id="again">Generate another ID!</button>
-                </div>
-            </div>
-            
             <div class="form-group">
                 <label for="email">Your email-address:</label>
                 <input class="form-control" type="email" required id="email" name="email" placeholder="your e-mail" data-parsley-trigger="change" />

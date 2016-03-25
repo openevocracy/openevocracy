@@ -1,11 +1,23 @@
 var _ = require('underscore');
 var rp = require('request-promise');
 var requirejs = require('requirejs');
+var Promise = require('bluebird');
 var nodemailer = require('nodemailer');
+var mongoskin = require('mongoskin');
+var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 
 var cfg = requirejs('public/js/setup/configs');
 
 var transporter;
+
+exports.isOwnError = function(error) {
+    return _.has(error,'status') && _.has(error,'message');
+}
+exports.handleOwnError = function(res) {
+    return function(error) {
+        res.status(error.status).send(error.message);
+    };
+}
 
 var ObjectIdToStringMapper = exports.ObjectIdToStringMapper = function(obj) {
     return _.mapObject(obj,function(val) {
@@ -55,13 +67,13 @@ exports.initializeMail = function() {
         tls: {
             rejectUnauthorized: false // allow self signed certificate
         },
-        auth: {
-            user: 'noreply@openevocracy.org',
-            pass: 'hpbqmigjdo'
-        }
+        
+        auth: db.collection('configs').findOneAsync({'type': 'mailauth'},{'user': true, 'pass': true})
     };
     
-    this.transporter = nodemailer.createTransport(smtpConfig);
+    Promise.props(smtpConfig).then(function(smtpConfig) {
+        this.transporter = nodemailer.createTransport(smtpConfig);
+    }.bind(this));
 }
 
 exports.sendMail = function(mailTo, mailSubject, mailText) {
@@ -73,9 +85,13 @@ exports.sendMail = function(mailTo, mailSubject, mailText) {
         //html: '<b>Welcome/b>' // html body
     };
     
-    this.transporter.sendMail(mailOptions, function(error, info){
-        if(error)
-            return console.log(error);
-        console.log('Message sent: ' + info.response);
-    });
+    if(cfg.MAIL) {
+        this.transporter.sendMail(mailOptions, function(error, info){
+            if(error)
+                return console.log(error);
+            console.log('Message sent: ' + info.response);
+        });
+    } else {
+        console.log('Message was NOT sent: Configurations flag MAIL was set to false');
+    }
 }

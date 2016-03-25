@@ -3,10 +3,10 @@
     <button class="btn btn-default btn-sm vote{{#if voted}} active{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-heart"></span></button>
     {{/ifis}}
     
-    {{#ifis2 stage STAGE_SELECTION STAGE_PROPOSAL}}
+    {{#ifisOr stage STAGE_SELECTION STAGE_PROPOSAL}}
     <button class="btn btn-default btn-sm join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
     <!-- TODO in v0.2 <button class="btn btn-default btn-sm merge" title="merge request"><span class="fa"></span></button>-->
-    {{/ifis2}}
+    {{/ifisOr}}
     
     {{#if pid}}
     <button class="btn btn-default btn-sm edit" title="edit"><span class="fa fa-pencil"></span></button>

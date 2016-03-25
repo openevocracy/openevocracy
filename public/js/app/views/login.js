@@ -15,12 +15,12 @@ define([
                     name: this.$("#name").val(),
                     pass: this.$("#pass").val()
                 }, {
-                    success: function(mod, res){
+                    success: function(res){
                         App.eventAggregator.trigger('App:logged_in');
                     },
-                    error: function(mod, res){
+                    error: function(xhr, err){
                         e.preventDefault();
-                        $('.message').html('<div class="alert alert-danger">Wrong ID or password.</div>');
+                        $('.message').html('<div class="alert alert-danger">'+xhr.responseText+'</div>');
                     }
                 });
             } else {

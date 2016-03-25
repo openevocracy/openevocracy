@@ -184,9 +184,9 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     if(with_details)
         pad_body_promise = utils.getPadBodyAsync(topic.pid);
     
-    // get owner name
-    var owner_name_promise = db.collection('users').
-        findOneAsync({'_id': topic.owner}, {'name': true}).get('name');
+    // get owner name TODO delete this part, "name" does not exists any more
+    /*var owner_name_promise = db.collection('users').
+        findOneAsync({'_id': topic.owner}, {'name': true}).get('name');*/
     
     // get number of participants and votes in this topic
     var topic_votes_promise = db.collection('topic_votes').
@@ -222,7 +222,7 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     
     return Promise.props(_.extend(topic,{
         'body': pad_body_promise,
-        'ownerName': owner_name_promise,
+        //'ownerName': owner_name_promise, TODO delete this line, "name" does not exist any longer
         'votes': topic_votes_promise.then(_.size),
         'participants': topic_participants_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
@@ -254,19 +254,18 @@ exports.update = function(req, res) {
     
     db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
         // only the owner can update the topic
-        if(!topic || !_.isEqual(topic.owner,uid)) {
-            res.sendStatus(403);
-            return Promise.reject();
-        }
+        if(!topic || !_.isEqual(topic.owner,uid))
+            return Promise.reject({status: 403, message: "Only the owner can update the topic!"});
         
         return topic;
-    }).cancellable().then(function(topic) {
+    }).then(function(topic) {
         topic.name = topicNew.name;
         return db.collection('topics').updateAsync(
                 { '_id': tid }, { $set: _.pick(topic,'name') }, {}).return(topic);
     }).then(manageTopicState)
       .then(_.partial(appendTopicInfoAsync,_,uid,true))
-      .then(res.json.bind(res));
+      .then(res.json.bind(res))
+      .catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
 function updateTopicState(topic,stageStartedEntryName) {
@@ -335,17 +334,16 @@ exports.delete = function(req,res) {
     then(function(topic) {
         // only the owner can delete the topic
         // and if the selection stage has passed, nobody can
-        if(!_.isEqual(topic.owner,uid) || topic.stage > C.STAGE_SELECTION) {
-            res.sendStatus(401);
-            return Promise.reject();
-        }
+        if(!_.isEqual(topic.owner,uid) || topic.stage > C.STAGE_SELECTION)
+            return Promise.reject({status: 401, message: "Only the owner can delete the topic!"});
         
         return Promise.join(
             db.collection('topics').removeByIdAsync(tid),
             db.collection('topic_votes').removeAsync({'tid': tid}),
             db.collection('topic_participants').removeAsync({'tid': tid}),
             db.collection('groups').removeAsync({'tid': tid}));
-    }).cancellable().then(res.sendStatus.bind(res,200));
+    }).then(res.sendStatus.bind(res,200))
+      .catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
 function countVotes(tid) {

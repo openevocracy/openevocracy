@@ -52,32 +52,34 @@ exports.auth = function(req, res) {
 // POST /api/auth/login
 // @desc: logs in a user
 exports.login = function(req, res) {
-    db.collection('users').findOne({ 'name': req.body.name }, function(err, user){
-        if(user){
-            // Compare the POSTed password with the encrypted db password
-            if( bcrypt.compareSync( req.body.pass, user.pass) ){
-                res.cookie('uid', user._id, { signed: true, maxAge: config.cookieMaxAge });
-                res.cookie('name', user.name, { signed: true, maxAge: config.cookieMaxAge });
-                res.cookie('auth_token', user.auth_token, { signed: true, maxAge: config.cookieMaxAge });
-                
-                // Correct credentials, return the user object
-                res.json({ 'user': clean_user_data(user) });
-                
-                console.log('User login valid ' + JSON.stringify(user));
-                
-            } else {
-                // Username did not match password given
-                res.sendStatus(403);
-                
-                console.log('Userpassword invalid ' + JSON.stringify(user));
-            }
-        } else {
-            // Could not find the username
-            res.sendStatus(403);
+    try {
+        // Try to create ObjectID, if it works, search for ObjectID
+        db.collection('users').findOne({ '_id': ObjectId(req.body.name) }, _.partial(loginUser, req, res));
+    } catch(err) {
+        // Fall back to using email for login
+        db.collection('users').findOne({ 'email': req.body.name }, _.partial(loginUser, req, res));
+    }
+};
+
+function loginUser(req, res, err, user) {
+    if(user) {
+        // Compare the POSTed password with the encrypted db password
+        if( bcrypt.compareSync( req.body.pass, user.pass) ){
+            res.cookie('uid', user._id, { signed: true, maxAge: config.cookieMaxAge });
+            res.cookie('auth_token', user.auth_token, { signed: true, maxAge: config.cookieMaxAge });
             
-            console.log('Username invalid ' + JSON.stringify(req.body.name));
+            // Correct credentials, return the user object
+            res.json({ 'user': clean_user_data(user) });
+            
+            console.log('User login valid ' + JSON.stringify(user));
+        } else {
+            // Username did not match password given
+            res.status(403).send('Password is not correct.');
         }
-    });
+    } else {
+        // Could not find the username
+        res.status(403).send('User "'+req.body.name+'" does not exist.');
+    }
 };
 
 // creates a user
@@ -85,18 +87,15 @@ exports.signup = function(req, res) {
     var user = req.body;
     
     var constraints = {
-        name: { presence: true, format: /^[0-9A-F]{8}$/ },
         email: { presence: true, email: true },
         pass: { presence: true, format: /^\S+$/ } // no whitespace
     };
-    var form = {name: user.name, email: user.email, pass: user.pass};
+    var form = {email: user.email, pass: user.pass};
     
     // check if values are valid
     if(validate(form, constraints) !== undefined) {
         // values are NOT valid
-        user.validation_error = 'Please check the form for mistakes.';
-        res.json(user);
-        // FIXME: in register.js (view) res is undefined ??
+        res.status(400).send("An error occured, please check the form.");
     } else {
         // assemble user
         user.pass = bcrypt.hashSync(user.pass, 8);
@@ -104,15 +103,11 @@ exports.signup = function(req, res) {
         
         // check if user already exist
         // url: https://www.npmjs.org/package/bcrypt-nodejs
-        db.collection('users').countAsync(_.pick(user, 'name')).then(function(count) {
-            // user already exists
-            if(count > 0) {
-                //user.validation_error = 'User ID already exists, try another one.';
-                //res.json(user);
-                res.sendStatus(403);
-                return Promise.reject(); // FIXME "Unhandled rejection Error"
-            }
-        }).cancellable().then(function() {
+        db.collection('users').countAsync(_.pick(user, 'email')).then(function(count) {
+            // check if user already exists
+            if(count > 0)
+                return Promise.reject({status: 400, message: "Account already exists."});
+        }).then(function() {
             return db.collection('users').insertAsync(user);
         }).then(function(user){
             // get first element
@@ -120,17 +115,16 @@ exports.signup = function(req, res) {
             
             console.log('Saved user ' + JSON.stringify(user));
             res.cookie('uid', user._id, { signed: true, maxAge: config.cookieMaxAge });
-            res.cookie('name', user.name, { signed: true, maxAge: config.cookieMaxAge });
             res.cookie('auth_token', user.auth_token, { signed: true, maxAge: config.cookieMaxAge  });
             res.json( {'user': clean_user_data(user)} );
             
             // send mail
-            /*var subject = 'Your registration at Evocracy';
-            var text =  'Welcome '+ user.name +' at Evocracy,\r\n\r\n'+
+            var subject = 'Your registration at Evocracy';
+            var text =  'Welcome '+ user._id +' at Evocracy,\r\n\r\n'+
                         'you just created an account at https://mind-about-sagacitysite.c9.io, '+
                         'if you were not the one doing this, just ignore this message.\r\n';
-            utils.sendMail(user.email, subject, text);*/
-        });
+            utils.sendMail(user.email, subject, text);
+        }).catch(utils.isOwnError,utils.handleOwnError(res));
     }
 };
 

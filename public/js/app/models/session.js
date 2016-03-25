@@ -86,24 +86,24 @@ define([
                 data:  JSON.stringify( _.omit(opts, 'method') ),
                 success: function(res){
                     
-                    if( !res.error ){
-                        if(_.indexOf(['login', 'signup'], opts.method) !== -1){
-                            this.updateSessionUser( res.user || {} );
-                            this.set({ logged_in: true });
-                        } else {
-                            this.set({ logged_in: false });
-                        }
-                        
-                        if( callback && 'success' in callback ) callback.success(res);
+                    //if( !res.error ){
+                    if(_.indexOf(['login', 'signup'], opts.method) !== -1){
+                        this.updateSessionUser( res.user || {} );
+                        this.set({ logged_in: true });
                     } else {
-                        if( callback && 'error' in callback ) callback.error(res);
+                        this.set({ logged_in: false });
                     }
+                    
+                    if( callback && 'success' in callback ) callback.success(res);
+                    /*} else {
+                        if( callback && 'error' in callback ) callback.error(res);
+                    }*/
                 }.bind(this),
-                error: function(mod, res){
-                    if(callback && 'error' in callback ) callback.error(res);
+                error: function(xhr, err){
+                    if(callback && 'error' in callback ) callback.error(xhr, err);
                 }.bind(this)
-            }).complete( function(res){
-                if(callback && 'complete' in callback ) callback.complete(res);
+            }).complete( function(xhr){
+                if(callback && 'complete' in callback ) callback.complete(xhr);
             });
         },
         

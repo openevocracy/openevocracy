@@ -1,8 +1,8 @@
 <h2>Take action</h2>
 <div class="block-content tabs-block">
-    {{#ifis stage STAGE_PROPOSAL}} <!-- #if ppid -->
+    {{#ifisAnd stage STAGE_PROPOSAL joined}} <!-- #if ppid -->
         <a class="btn btn-default btn-md btn-block" href="/#/proposal/{{_id}}" id="myprop"><span class="fa fa-file-text"></span> My proposal</a>
-    {{/ifis}}
+    {{/ifisAnd}}
     {{#if gid}}
         <a class="btn btn-default btn-md btn-block" href="/#/group/{{gid}}"><span class="fa fa-users"></span> Our group</a>
     {{/if}}

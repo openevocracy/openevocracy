@@ -3,6 +3,7 @@ var ONE_WEEK = 1000*60*60*24*7;
 
 define({
     DEBUG : true,
+    MAIL: true,
     
     MIN_PARTICIPANTS_PER_TOPIC : 2,
     

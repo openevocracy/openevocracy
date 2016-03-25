@@ -78,8 +78,15 @@
               return opts.inverse(this);
           }
     });
-    Handlebars.registerHelper('ifis2', function(a, b, c, opts) {
+    Handlebars.registerHelper('ifisOr', function(a, b, c, opts) {
           if(a == b || a == c) {
+              return opts.fn(this);
+          } else {
+              return opts.inverse(this);
+          }
+    });
+    Handlebars.registerHelper('ifisAnd', function(a, b, c, opts) {
+          if(a == b && a == c) {
               return opts.fn(this);
           } else {
               return opts.inverse(this);
