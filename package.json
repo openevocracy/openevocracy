@@ -2,6 +2,7 @@
   "name": "OpenEvocracy",
   "version": "0.1.0",
   "dependencies": {
+    "app-root-path": "*",
     "collections": "*",
     "bcrypt": "*",
     "bluebird": "*",
@@ -11,6 +12,7 @@
     "cookie": "*",
     "cookie-session": "*",
     "cookie-signature": "*",
+    "cookie-parser": "*",
     "cron": "*",
     "node-crontab": "*",
     "debug": "*",
@@ -24,6 +26,7 @@
     "mongodb": "2.4.9",
     "mongoskin": "*",
     "multer": "*",
+    "nodemailer": "*",
     "range-parser": "*",
     "request": "*",
     "request-promise": "*",
