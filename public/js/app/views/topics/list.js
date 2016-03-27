@@ -18,7 +18,7 @@ define([
         template: Template,
         tagName: 'section',
         id: "topics-list",
-        model: new Backbone.Model(_.extend(C, {checked: {0: true, 1: false, 2: false, 3: false, -1: false}})),
+        model: new Backbone.Model(C),
         
         //viewComparator: 'stage',
         viewComparator: function(t0,t1) {
@@ -62,8 +62,8 @@ define([
                         this.collection.add(topic);
                         window.location.hash = '/topic/'+topic.id;
                     }.bind(this),
-                    error:  function(model,res) {
-                        $('.message').html('<div class="alert alert-danger">Topic creation failed!</div>');
+                    error: function(model,res) {
+                        $('.message').addClass('alert alert-danger').html('Topic creation failed!');
                     }
                 });
                 
@@ -73,11 +73,6 @@ define([
             'click .cancel': function(e) {
                 if(e) e.preventDefault();
                 this.$('.lightbox').fadeOut(500);
-            },
-            'click [name="stage"]': function(e) {
-                for(i=0; i<5; ++i)
-                    this.stageSelected[i] = $("input.stage-"+i).is(':checked');
-                this.render();
             }
         },
         
@@ -91,9 +86,9 @@ define([
             this.collection.remove(topic);
         },
         
-        stageSelected: [true, true, true, true, true],
         filter: function (child, index, collection) {
-            return this.stageSelected[child.get('stage')];
+            return true;
+            //return this.stageSelected[child.get('stage')];
         }
     });
     
