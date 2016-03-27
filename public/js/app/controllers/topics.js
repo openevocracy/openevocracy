@@ -1,6 +1,5 @@
 define([
     'Marionette',
-    //'collections/set',
     'constants',
     'hbs!templates/layouts/topics',
     'hbs!templates/partials/blocks/topiclist_filter',
@@ -9,7 +8,6 @@ define([
     'collections/topics'
 ], function(
         Marionette,
-        //Set,
         C,
         TopicsLayoutTemplate,
         FilterTemplate,
@@ -29,14 +27,10 @@ define([
         var FilterView = Backbone.View.extend({
             template: FilterTemplate,
             
-            //selected: new Set(),
             events: {
                 'click .stage': function(e) {
                     var $el = this.$(e.target);
-                    /*if($el.attr('checked'))
-                        this.selected.add($el.val());
-                    else
-                        this.selected.remove($el.val());*/
+                    this.view.selectStage($el.val(), $el.is(":checked"));
                 }
             },
             
@@ -56,12 +50,14 @@ define([
                 
                 var topicsLayoutView = new TopicsLayoutView();
                 App.layout.view.show(topicsLayoutView);
-                topicsLayoutView.showChildView('filter', new FilterView());
                 
                 topics.fetch().done(function () {
                     /* ### CONTENT RIGHT ### */
                     var view = new TopicsView({collection: topics});
                     topicsLayoutView.showChildView('view', view);
+                    var filter = new FilterView();
+                    filter.view = view;
+                    topicsLayoutView.showChildView('filter', filter);
                 });
             }
         });

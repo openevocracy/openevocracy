@@ -86,9 +86,13 @@ define([
             this.collection.remove(topic);
         },
         
+        stageSelected: {"-1": true, "0": true, "1": true, "2": true, "3": true},
+        selectStage: function(stage, val) {
+            this.stageSelected[stage] = val;
+            this.render();
+        },
         filter: function (child, index, collection) {
-            return true;
-            //return this.stageSelected[child.get('stage')];
+            return this.stageSelected[child.get('stage')];
         }
     });
     
