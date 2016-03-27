@@ -1,10 +1,10 @@
 <h2>Filter</h2>
 <div class="block-content">
     <form id="stagefilter">
-        <input type="checkbox" name="stage" class="stage-{{STAGE_SELECTION}}" value="{{STAGE_SELECTION}}"{{#ifIn STAGE_SELECTION checked}} checked{{/ifIn}}/> Selection<br/>
-        <input type="checkbox" name="stage" class="stage-{{STAGE_PROPOSAL}}" value="{{STAGE_PROPOSAL}}"{{#ifIn STAGE_PROPOSAL checked}} checked{{/ifIn}}/> Proposal<br/>
-        <input type="checkbox" name="stage" class="stage-{{STAGE_CONSENSUS}}" value="{{STAGE_CONSENSUS}}"{{#ifIn STAGE_CONSENSUS checked}} checked{{/ifIn}}/> Consensus<br/>
-        <input type="checkbox" name="stage" class="stage-{{STAGE_PASSED}}" value="{{STAGE_PASSED}}"{{#ifIn STAGE_PASSED checked}} checked{{/ifIn}}/> Passed<br/>
-        <input type="checkbox" name="stage" class="stage-{{STAGE_REJECTED}}" value="{{STAGE_REJECTED}}"{{#ifIn STAGE_REJECTED checked}} checked{{/ifIn}}/> Rejected<br/>
+        <input type="checkbox" class="stage" id="stage-{{STAGE_SELECTION}}" value="{{STAGE_SELECTION}}"{{#ifIn STAGE_SELECTION checked}} checked{{/ifIn}}/> Selection<br/>
+        <input type="checkbox" class="stage" id="stage-{{STAGE_PROPOSAL}}" value="{{STAGE_PROPOSAL}}"{{#ifIn STAGE_PROPOSAL checked}} checked{{/ifIn}}/> Proposal<br/>
+        <input type="checkbox" class="stage" id="stage-{{STAGE_CONSENSUS}}" value="{{STAGE_CONSENSUS}}"{{#ifIn STAGE_CONSENSUS checked}} checked{{/ifIn}}/> Consensus<br/>
+        <input type="checkbox" class="stage" id="stage-{{STAGE_PASSED}}" value="{{STAGE_PASSED}}"{{#ifIn STAGE_PASSED checked}} checked{{/ifIn}}/> Passed<br/>
+        <input type="checkbox" class="stage" id="stage-{{STAGE_REJECTED}}" value="{{STAGE_REJECTED}}"{{#ifIn STAGE_REJECTED checked}} checked{{/ifIn}}/> Rejected<br/>
     </form>
 </div>
