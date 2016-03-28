@@ -26,7 +26,7 @@ define([
                         pass: this.$("#pass").val()
                     }, {
                     success: function(res){
-                        $('.message').addClass("alert alert-success").html(res.responseJSON.message);
+                        $('.message').addClass("alert alert-success").html(res.message);
                         $("#signup-form").remove();
                         $("#signup").remove();
                     },

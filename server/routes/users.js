@@ -64,13 +64,24 @@ exports.login = function(req, res) {
     }
 };
 
+function sendVerificationMail(user) {
+    var subject = 'Your registration at Evocracy';
+    var text =  'Welcome '+ user._id.toString() +' at Evocracy,\n'+
+                'You just created an account at '+cfg.EVOCRACY_HOST+'.\n\n'+
+                'Please verify your email by visiting:\n'+
+                cfg.EVOCRACY_HOST+'/auth/verifyEmail/'+user._id.toString()+'\n\n'+
+                'If you did not register, just ignore this message.\n';
+    utils.sendMail(user.email, subject, text);
+}
+
 function loginUser(req, res, err, user) {
     if(user) {
         // Compare the POSTed password with the encrypted db password
         if( bcrypt.compareSync( req.body.pass, user.pass) ) {
             // Check email verification
             if(!user.verified) {
-                res.status(401).send({message: 'You have not verified your email-address, please check your inbox.'});
+                res.status(401).send({message: 'You have not verified your email-address. Verification email has been sent again. Please check your inbox.'});
+                sendVerificationMail(user);
                 return;
             }
             
@@ -127,15 +138,7 @@ exports.signup = function(req, res) {
         }).then(function(user) {
             console.log('Saved user ' + JSON.stringify(user));
             res.send({message: "To verify your email address, we\'ve sent an email to you. Please check your inbox and click the link."});
-            
-            // send mail
-            var subject = 'Your registration at Evocracy';
-            var text =  'Welcome '+ user._id +' at Evocracy,\n'+
-                        'You just created an account at '+cfg.EVOCRACY_HOST+'.\n\n'+
-                        'Please verify your email by visiting:\n'+
-                        cfg.EVOCRACY_HOST+'/auth/verifyEmail/'+user._id.toString()+'\n\n'+
-                        'If you did not register, just ignore this message.\n';
-            utils.sendMail(user.email, subject, text);
+            sendVerificationMail(user);
         }).catch(utils.isOwnError,utils.handleOwnError(res));
     }
 };
