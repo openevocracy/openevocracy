@@ -19,19 +19,17 @@ define([
                 },
                 error: function(xhr, err){
                     $('.message').addClass("alert alert-danger").html(xhr.responseJSON.message);
-                    e.preventDefault();
+                    if(e) e.preventDefault();
                 }
             });
         },
         
         events: {
             'keypress #pass': function(e) {
-                if (e.which == 13) {
+                if (e.which == 13)
                     this.login(e);
-                }
             },
             'click #login-btn': function(e) {
-                //if(e) e.preventDefault();
                 this.login(e);
             }
         }
