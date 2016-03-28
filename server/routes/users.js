@@ -145,6 +145,7 @@ exports.signup = function(req, res) {
 exports.logout = function(req, res) {
     res.clearCookie('uid');
     res.clearCookie('auth_token');
+    res.send();
 };
 
 // POST /api/auth/verifyEmail
