@@ -3,7 +3,7 @@ define([
     'constants',
     'Marionette',
     'hbs!templates/topics/list',
-    'views/topics/list-item',
+    'views/topics/list_item',
     'models/topic',
     ], function(
     _,
@@ -63,12 +63,11 @@ define([
                         window.location.hash = '/topic/'+topic.id;
                     }.bind(this),
                     error: function(model,res) {
-                        this.$('.message').addClass('alert alert-danger').html('Topic creation failed!');
+                        this.$('.message').addClass('alert alert-danger').html(res.responseText.message);
                     }.bind(this)
                 });
                 
                 this.$('.lightbox').fadeOut(500);
-                this.render();
             },
             'click .cancel': function(e) {
                 if(e) e.preventDefault();
@@ -85,7 +84,7 @@ define([
             this.collection.remove(topic);
         },
         
-        stageSelected: {"-1": true, "0": true, "1": true, "2": true, "3": true},
+        stageSelected: {"-1": false, "0": true, "1": true, "2": true, "3": true},
         selectStage: function(stage, val) {
             this.stageSelected[stage] = val;
             this.render();

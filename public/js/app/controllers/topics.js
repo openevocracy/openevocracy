@@ -2,7 +2,7 @@ define([
     'Marionette',
     'constants',
     'hbs!templates/layouts/topics',
-    'hbs!templates/partials/blocks/topiclist_filter',
+    'hbs!templates/topics/list_filter',
     'views/blocks/navigation',
     'views/topics/list',
     'collections/topics'
@@ -20,8 +20,8 @@ define([
             template: TopicsLayoutTemplate,
             
             regions: {
-                view: "#view",
-                filter: "#filter"
+                list: "#list",
+                right: "#right"
             }
         });
         var FilterView = Backbone.View.extend({
@@ -30,7 +30,7 @@ define([
             events: {
                 'click .stage': function(e) {
                     var $el = this.$(e.target);
-                    this.view.selectStage($el.val(), $el.is(":checked"));
+                    this.listView.selectStage($el.val(), $el.is(":checked"));
                 }
             },
             
@@ -53,11 +53,11 @@ define([
                 
                 topics.fetch().done(function () {
                     /* ### CONTENT RIGHT ### */
-                    var view = new TopicsView({collection: topics});
-                    topicsLayoutView.showChildView('view', view);
-                    var filter = new FilterView();
-                    filter.view = view;
-                    topicsLayoutView.showChildView('filter', filter);
+                    var listView = new TopicsView({collection: topics});
+                    topicsLayoutView.showChildView('list', listView);
+                    var filterView = new FilterView();
+                    filterView.listView = listView;
+                    topicsLayoutView.showChildView('right', filterView);
                 });
             }
         });

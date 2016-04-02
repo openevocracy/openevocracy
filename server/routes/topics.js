@@ -255,7 +255,7 @@ exports.update = function(req, res) {
     db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
         // only the owner can update the topic
         if(!topic || !_.isEqual(topic.owner,uid))
-            return Promise.reject({status: 403, message: "Only the owner can update the topic!"});
+            return utils.rejectPromiseWithNotification(403, "Only the owner can update the topic!");
         
         return topic;
     }).then(function(topic) {
@@ -282,7 +282,7 @@ exports.query = function(req, res) {
     db.collection('topics').findOneAsync({ '_id': tid }).
     then(function(topic) {
         if(null == topic)
-            return Promise.reject({status: 404, message: "Topic not found!"});
+            return utils.rejectPromiseWithNotification(404, "Topic not found!");
         else
             return appendTopicInfoAsync(topic,uid,true);
     }).
@@ -295,7 +295,7 @@ exports.create = function(req, res) {
     
     // reject empty topic names
     if(_.isEmpty(topic.name)) {
-        res.status(400).send("Empty topic name not allowed!");
+        utils.sendNotification(res, 400, "Empty topic name not allowed.");
         return;
     }
     
@@ -303,7 +303,7 @@ exports.create = function(req, res) {
     db.collection('topics').countAsync(_.pick(topic,'name')).then(function(count) {
         // topic already exists
         if(count > 0)
-            return Promise.reject({status: 409, message: "Topic already exists!"});
+            return utils.rejectPromiseWithNotification(409, "Topic already exists.");
         
         topic.owner = ObjectId(req.signedCookies.uid);
         topic.pid = ObjectId(); // create random pad id
@@ -312,10 +312,8 @@ exports.create = function(req, res) {
         topic.nextDeadline = getDeadline(topic.stage);
         
         // insert into database
-        return db.collection('topics').insertAsync(topic);
+        return db.collection('topics').insertAsync(topic).return(topic);
     }).then(function(topics) {
-        var topic = _.first(topics);
-        
         topic.votes = 0;
         topic.participants = 0;
         appendBasicTopicInfo(topic);
@@ -333,7 +331,7 @@ exports.delete = function(req,res) {
         // only the owner can delete the topic
         // and if the selection stage has passed, nobody can
         if(!_.isEqual(topic.owner,uid) || topic.stage > C.STAGE_SELECTION)
-            return Promise.reject({status: 401, message: "Only the owner can delete the topic!"});
+            return utils.rejectPromiseWithNotification(401, "Only the owner can delete the topic!");
         
         return Promise.join(
             db.collection('topics').removeByIdAsync(tid),

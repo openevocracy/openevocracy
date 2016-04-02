@@ -10,6 +10,12 @@ var cfg = requirejs('public/js/setup/configs');
 
 var transporter;
 
+exports.sendNotification = function(res,status,message) {
+    res.status(status).send({'status': status, 'message': message});
+}
+exports.rejectPromiseWithNotification = function(status,message) {
+    return Promise.reject({'status': status, 'message': message});
+}
 exports.isOwnError = function(error) {
     return _.has(error,'status') && _.has(error,'message');
 }

@@ -1,6 +1,6 @@
 define([
     'Marionette',
-    'hbs!templates/topics/list-item',
+    'hbs!templates/topics/list_item',
     'constants'
 ], function(
     Marionette,

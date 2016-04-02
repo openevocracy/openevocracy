@@ -80,7 +80,7 @@ function loginUser(req, res, err, user) {
         if( bcrypt.compareSync( req.body.pass, user.pass) ) {
             // Check email verification
             if(!user.verified) {
-                res.status(401).send({message: 'You have not verified your email-address. Verification email has been sent again. Please check your inbox.'});
+                utils.sendNotification(res, 401, "You have not verified your email-address. Verification email has been sent again. Please check your inbox.");
                 sendVerificationMail(user);
                 return;
             }
@@ -95,11 +95,11 @@ function loginUser(req, res, err, user) {
             console.log('User login valid ' + JSON.stringify(user));
         } else {
             // Username did not match password given
-            res.status(401).send({message: 'Password is not correct.'});
+            utils.sendNotification(res, 401, "Password is not correct.");
         }
     } else {
         // Could not find the username
-        res.status(401).send({message: 'User "'+req.body.name+'" does not exist.'});
+        utils.sendNotification(res, 401, 'User "'+req.body.name+'" does not exist.');
     }
 };
 
@@ -117,7 +117,7 @@ exports.signup = function(req, res) {
     // check if values are valid
     if(validate(form, constraints) !== undefined) {
         // values are NOT valid
-        res.status(400).send({message: "An error occured, please check the form."});
+        utils.sendNotification(res, 400, "An error occured, please check the form.");
     } else {
         // assemble user
         user = {
@@ -132,12 +132,12 @@ exports.signup = function(req, res) {
         db.collection('users').countAsync(_.pick(user, 'email')).then(function(count) {
             // check if user already exists
             if(count > 0)
-                return Promise.reject({status: 400, message: "Account already exists."});
+                return utils.rejectPromiseWithNotification(400, "Account already exists.");
         }).then(function() {
             return db.collection('users').insertAsync(user).return(user);
         }).then(function(user) {
             console.log('Saved user ' + JSON.stringify(user));
-            res.send({message: "To verify your email address, we\'ve sent an email to you. Please check your inbox and click the link."});
+            utils.sendNotification(res, 200, "To verify your email address, we\'ve sent an email to you. Please check your inbox and click the link.");
             sendVerificationMail(user);
         }).catch(utils.isOwnError,utils.handleOwnError(res));
     }
