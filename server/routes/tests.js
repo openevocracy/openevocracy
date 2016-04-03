@@ -18,7 +18,7 @@ exports.create_topic_consensus_stage = function(req, res) {
     var tid = ObjectId();
     var gid = ObjectId();
     
-    var u123 = ObjectId('561eac9846a2e86816ada238');
+    var upatrick = ObjectId('56f54aad389ff3b433a212f3');
     var ucarlo = ObjectId('561eac6546a2e86816ada237');
     
     // create topic
@@ -35,7 +35,7 @@ exports.create_topic_consensus_stage = function(req, res) {
     
     // create participants for this topic
     db.collection('topic_participants').insert(
-                  [{'tid':tid,'uid':u123},
+                  [{'tid':tid,'uid':upatrick},
                    {'tid':tid,'uid':ucarlo}],
                   function (){});
     
@@ -49,13 +49,13 @@ exports.create_topic_consensus_stage = function(req, res) {
     
     // create members for this group
     db.collection('group_members').insert(
-                  [{'gid':gid,'uid':u123},
+                  [{'gid':gid,'uid':upatrick},
                    {'gid':gid,'uid':ucarlo}],
                   function (){});
     
     // create proposals for this group
     db.collection('proposals').insert(
-                  [{'tid':tid,'gid':gid,'uid':u123},
+                  [{'tid':tid,'gid':gid,'uid':upatrick},
                    {'tid':tid,'gid':gid,'uid':ucarlo}],
                   function (){});
     

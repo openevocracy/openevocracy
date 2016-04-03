@@ -32,8 +32,9 @@ define([
             
             $('#editor').pad({
                 'padId': this.model.get('pid'),
+                'userName' : App.session.user.get('name'),
+                'userColor' : App.session.user.get('color'),
                 'height' : 400,
-                'noColors' : true,
                 'borderStyle' : 'none',
                 'showControls' : true
             });

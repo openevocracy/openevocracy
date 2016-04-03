@@ -1,7 +1,7 @@
 <h2>Member's documents</h2>
 <div class="block-content members-pads-block">
     {{#each members}}
-    <a class="btn btn-default btn-md btn-block member-proposal" data-link="grpmem-{{this._id}}" data-link-parents="topics" data-member-id="{{this._id}}">{{this.name}}</a>
+    <a class="btn btn-default btn-md btn-block member-proposal" data-link="grpmem-{{this._id}}" data-link-parents="topics" data-member-id="{{this._id}}"><font color={{this.color}}>{{this.name}}</font></a>
     <!--<input type="hidden">-->
     {{/each}}
 </div>

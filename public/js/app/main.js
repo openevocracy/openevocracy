@@ -3,7 +3,8 @@
     paths: {
       // CDN POLICY use "http://osscdn.com/#/"
       text: '//oss.maxcdn.com/requirejs.text/2.0.12/text.min',
-      hbs: '../vendor/hbs', // FIXME
+      hbs: '../vendor/hbs',
+      //hbs: '../bower_components/hbs/hbs',
       jquery: '//oss.maxcdn.com/jquery/2.1.4/jquery.min',
       jquerycookie: '../vendor/jquery.cookie.min',
       jquerycountdown: '../vendor/jquery.countdown.min',
@@ -14,6 +15,7 @@
       BackboneRouteFilter: '../vendor/backbone.routefilter.min',
       Marionette: '//oss.maxcdn.com/backbone.marionette/2.4.2/backbone.marionette.min',
       handlebars: '//oss.maxcdn.com/handlebarsjs/3.0.3/handlebars.min',
+      ColorHash: '../bower_components/color-hash/dist/color-hash',
       ember: '//oss.maxcdn.com/emberjs/2.0.0/ember.min',
       etherpad: '../vendor/etherpad',
       bootstrap: '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
@@ -21,9 +23,9 @@
       moment: '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min',
       ratyfa: '../vendor/jquery.raty-fa',
       isactive: '../vendor/isactive',
+      parsley: '//cdnjs.cloudflare.com/ajax/libs/parsley.js/2.3.5/parsley.min',
       constants: '../setup/constants',
-      configs: '../setup/configs',
-      parsley: '//cdnjs.cloudflare.com/ajax/libs/parsley.js/2.3.5/parsley.min'
+      configs: '../setup/configs'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for
@@ -64,8 +66,8 @@
       }
     },
     hbs: {
-      disableI18n: true,
-      templateExtension: '.html'
+      templateExtension: '.html',
+      partialsUrl: 'templates/partials'
     }
   });
   

@@ -3,6 +3,7 @@ var mongoskin = require('mongoskin');
 var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
+var Chance = require('chance');
 var requirejs = require('requirejs');
 
 var C = requirejs('public/js/setup/constants');
@@ -236,7 +237,7 @@ exports.query = function(req, res) {
         { '_id': gid },
         [],
         { $setOnInsert: {pid: ObjectId()}},
-        { 'new': true, 'upsert': true }).get(0);
+        { 'new': true, 'upsert': true }).get('value');
     
     // get all group members
     var members_promise =
@@ -249,6 +250,11 @@ exports.query = function(req, res) {
             find({'_id': { $in: uids }},{'_id': 1,'name': 1}).
             toArrayAsync();
     }).map(function (member) {
+        // generate member name
+        var chance = new Chance(gid+member._id);
+        member.name = chance.name();
+        member.color = chance.color();
+        
         // get member's proposal body and rating
         var proposal_body_and_rating_promise =
             getMemberProposalBodyAndRating(member,gid,uid);
