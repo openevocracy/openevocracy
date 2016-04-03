@@ -23,7 +23,7 @@
     "json": "*",
     "method-override": "*",
     "methods": "*",
-    "mongodb": "2.4.9",
+    "mongodb": "~2.0",
     "mongoskin": "*",
     "multer": "*",
     "nodemailer": "*",
