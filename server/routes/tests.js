@@ -19,7 +19,7 @@ exports.create_topic_consensus_stage = function(req, res) {
     var gid = ObjectId();
     
     var upatrick = ObjectId('56f54aad389ff3b433a212f3');
-    var ucarlo = ObjectId('561eac6546a2e86816ada237');
+    var ucarlo = ObjectId('56f54b01389ff3b433a212f4');
     
     // create topic
     var ONE_WEEK = 1000*60*60*24*7; // one week milliseconds

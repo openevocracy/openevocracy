@@ -252,8 +252,8 @@ exports.query = function(req, res) {
     }).map(function (member) {
         // generate member name
         var chance = new Chance(gid+member._id);
-        member.name = chance.name();
-        member.color = chance.color();
+        member.name = chance.first();
+        member.color = chance.color({format: 'shorthex'});
         
         // get member's proposal body and rating
         var proposal_body_and_rating_promise =

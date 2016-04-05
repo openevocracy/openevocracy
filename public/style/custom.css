@@ -1,5 +1,6 @@
 body { padding: 50px 0; }
 a { cursor: pointer; }
+.fa { margin-right: 0.1em; }
 .btn.active .fa { color: #5cb85c; }
 .tr.active .fa { color: #aaa; }
 .btn-block { text-align: left; }
@@ -10,15 +11,6 @@ a { cursor: pointer; }
     padding-left: 45px;
     background: transparent url(../img/logo-white-trans_24.png) 15px center no-repeat;
 }
-
-/*#textlogo {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    height: 20px;
-    width: 20px;
-    background: transparent url(../img/logo20px.png) center center no-repeat;
-}*/
 
 #loading {
     position: fixed;
@@ -40,7 +32,6 @@ a { cursor: pointer; }
 
 .page-header { margin-top: 0; }
 .subtitle { margin-bottom: -5px; }
-/*.subtitle { min-height: 1px; margin-top: -18px; margin-bottom: 15px; }*/
 
 /* ####################### */
 /* ##### B L O C K S ##### */
@@ -63,8 +54,6 @@ footer { font-size: 0.8em; text-align: center; }
 /* ############## */
 /* ### TOPICS ### */
 /* ############## */
-
-/* ### TOPICS-LIST ### */
 
 #topic-list .list-group-item { padding: 0; height: 41px; }
 #topic-list .link { padding: 3px 0; cursor: pointer; }
@@ -90,34 +79,22 @@ footer { font-size: 0.8em; text-align: center; }
 #topic-list .stage2 { background-color: #d9534f; } /* consensus */
 #topic-list .stage3 { background-color: #5cb85c; } /* passed */
 
-/* ### TOPICS-DETAILS ### */
-
-/*#topic-details .desc {
-    overflow: hidden;
-    height: auto;
-}
-
-#topic-details .open-desc {
-    display: none;
-    position: relative;
-    height: 15px;
-    line-height: 15px;
-    font-size: 12px;
-    cursor: pointer;
-    text-align: center;
-    box-shadow: 0 -15px 50px 15px #fff;
-    background: #eeeeee url('../img/arrow-down.png') no-repeat center center;
-}
-
-#topic-details .open-desc:hover { background-color: #dddddd; }
-#topic-details .open-desc span { display: none; }*/
-
 /* ############## */
 /* ### GROUPS ### */
 /* ############## */
 
 #members table a { text-decoration: none; }
+.user-color {
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+    margin-right:
+    0.35em;
+    border: 1px solid #ebebeb;
+}
 
-/* MISC */
+/* ############ */
+/* ### MISC ### */
+/* ############ */
 
 .parsley-error { background-color: #d9534f; opacity: 0.65; }
