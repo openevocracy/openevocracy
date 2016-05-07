@@ -139,76 +139,78 @@ server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
+var _ = require('underscore');
 var gulf = require('gulf');
 var mongoose = require('mongoose');
 var MongoDBAdapter = require('gulf-mongodb');
-var ottype = require('rich-text');
+var richText = require('rich-text');
+var ottype = richText.type;
+var Delta = richText.Delta;
 var docId;
 
+// masterDoc -> slaveLink <-> masterLink <- slaveDoc <-> quill
 function gulfIO(masterDoc) {
-  var slave = masterDoc.slaveLink();
-  
   var streamBuffers = require('stream-buffers');
   var io = require('socket.io')(server, {secure: true});
-  io.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('delta', function (slaveDelta) {
-      var writeableStreamBuffer = new streamBuffers.WritableStreamBuffer({});
-      writeableStreamBuffer.on('pipe',function() {
-      //slave.on('pipe',function() {
-        var masterDelta = writeableStreamBuffer.getContentsAsString();
-        console.log(masterDelta);
-        if(masterDelta)
-          socket.emit('delta',masterDelta);
+  
+  io.on('connection', function (slaveSocket) {
+    // create slaveDoc and slaveToMasterLink
+    var slaveDoc = new gulf.EditableDocument(new gulf.MemoryAdapter, ottype);
+    var slaveToMasterLink = slaveDoc.masterLink();
+    
+    // masterDoc -> slaveLink <-> masterLink <- slaveDoc
+    {
+      var masterToSlaveLink = masterDoc.slaveLink();
+      slaveToMasterLink.pipe(masterToSlaveLink);
+      masterToSlaveLink.pipe(slaveToMasterLink);
+    }
+    
+    // quill -> slaveDoc
+    {
+      slaveSocket.on('change', function (slaveToMasterChange) {
+        if(_.isEmpty(slaveToMasterChange.ops))
+          return;
+        
+        console.log('slaveToMasterChange', slaveToMasterChange);
+        slaveDoc.update(new Delta(slaveToMasterChange));
       });
+    }
+    
+    // slaveDoc -> quill
+    slaveDoc._setContents = function(contents, cb) {
+      slaveSocket.emit('setContents',contents);
       
-      var readableStreamBuffer = new streamBuffers.ReadableStreamBuffer({});
-      //readableStreamBuffer.pipe(slave).pipe(process.stdout);//.pipe(writeableStreamBuffer);
-      var s = readableStreamBuffer.pipe(slave);
-      s.pipe(writeableStreamBuffer);
+      cb();
+    };
+    slaveDoc._change = function(masterToSlaveChange, cb) {
+      console.log('masterToSlaveChange', JSON.stringify(masterToSlaveChange));
+      slaveSocket.emit('change',masterToSlaveChange);
       
-      readableStreamBuffer.put(JSON.stringify(slaveDelta));
-      //readableStreamBuffer.stop();
-    });
+      cb();
+    };
+    slaveDoc._collectChanges = function(cb) { cb(); }
   });
 }
 
 var dbConnection = mongoose.createConnection('mongodb://'+process.env.IP+'/mindabout');
-var mongoAdapter = new MongoDBAdapter(dbConnection);
+//var adapter = new MongoDBAdapter(dbConnection);
+var adapter = new gulf.MemoryAdapter();
 // load or create gulf document
 var masterDoc;
-gulf.Document.load(mongoAdapter, ottype, docId, function(err, doc) {
+/*gulf.Document.load(adapter, ottype, docId, function(err, doc) {
   masterDoc = doc;
   if(err)
-    gulf.Document.create(mongoAdapter, ottype, 'Hello world!', function(err, doc) {
+    gulf.Document.create(adapter, ottype, 'Hello bright world!', function(err, doc) {
       masterDoc = doc;
       docId = doc.id;
       gulfIO(masterDoc);
     });
   else
     gulfIO(masterDoc);
-});
-
-/*var io = require('socket.io')(server, {secure: true});
-var ss = require('socket.io-stream');
-io.on('connection', function (socket) {
-  socket.on('delta', function (data) {
-    console.log(data);
-  });
-  ss(socket).on('delta', function (stream, data) {
-    console.log(data);
-    slave.pipe(stream).pipe(slave);
-  });
 });*/
 
-/*// Set up a server
-net.createServer(function(socket) {
-    // ... and create a slave link for each socket that connects
-    var slave = doc.slaveLink()
-
-    // now, add the new client as a slave
-    // of alice's document
-    socket.pipe(slave).pipe(socket)
-})
-// listen for connections
-.listen(8081)*/
+gulf.Document.create(adapter, ottype, 'Hello bright world!', function(err, doc) {
+  masterDoc = doc;
+  docId = doc.id;
+  gulfIO(masterDoc);
+});

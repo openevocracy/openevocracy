@@ -55,16 +55,24 @@ define([
             });
             
             var socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
-            
-            editor.on('text-change', function(delta, source) {
-                console.log('Editor contents have changed', delta);
-                socket.emit('delta', delta);
+            //socket.on('setContents', editor.setContents.bind(editor));
+            socket.on('setContents', function(contents) {
+                console.log(JSON.stringify(contents));
+                editor.setText(contents);
             });
             
-            /*socket.on('news', function (data) {
-                console.log(data);
-                socket.emit('my other event', { my: 'data' });
-            });*/
+            socket.on('change', function(change) {
+                console.log(JSON.stringify(change));
+                editor.updateContents(change);
+            });
+            
+            editor.on('text-change', function(change, source) {
+                if(source != 'user')
+                    return;
+                
+                console.log('Editor contents have changed', JSON.stringify(change));
+                socket.emit('change', change);
+            });
         }
     });
     

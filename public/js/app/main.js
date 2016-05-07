@@ -26,7 +26,8 @@
       parsley: '//cdnjs.cloudflare.com/ajax/libs/parsley.js/2.3.5/parsley.min',
       constants: '../setup/constants',
       configs: '../setup/configs',
-      quill: '//cdn.quilljs.com/1.0.0-beta.0/quill.js',
+      quill: '//cdn.quilljs.com/latest/quill.min',
+      //quill: '//cdn.quilljs.com/1.0.0-beta.0/quill',
       socketio: '//cdn.socket.io/socket.io-1.4.5'
     },
     /*
