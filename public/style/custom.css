@@ -98,3 +98,10 @@ footer { font-size: 0.8em; text-align: center; }
 /* ############ */
 
 .parsley-error { background-color: #d9534f; opacity: 0.65; }
+.editor-wrapper { background-color: #fff; color: #000; }
+.editor-wrapper button { border: none; background: none; }
+.ql-toolbar { border-bottom: 1px solid #ccc; }
+.ql-toolbar button { height: 25px; width: 25px; }
+.ql-toolbar .ql-active { color: #fff; background-color: #4e5d6c;}
+/*#collaborative .well { padding: 0; }
+#collaborative hr { margin: 0; }*/

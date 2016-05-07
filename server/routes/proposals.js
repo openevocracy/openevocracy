@@ -17,7 +17,7 @@ exports.query = function(req, res) {
     then(function(topic) {
         // check if topic is at least in proposal stage
         if(topic.stage < C.STAGE_PROPOSAL)
-            return utils.rejectPromiseWithNotification(400, "Topic must be at least in proposal stage!");
+            return utils.rejectPromiseWithNotification(400, "Topic must be at least in proposal stage.");
         return topic;
     });
     // check if user has joined topic
@@ -25,7 +25,7 @@ exports.query = function(req, res) {
     db.collection('topic_participants').countAsync({'tid': tid, 'uid': uid}).
     then(function(count) {
         if(count == 0)
-            return utils.rejectPromiseWithNotification(400, "User has not joined topic!");
+            return utils.rejectPromiseWithNotification(400, "User has not joined topic.");
     });
     
     Promise.join(get_topic_promise, check_user_joined_promise, function(topic) {
@@ -35,7 +35,7 @@ exports.query = function(req, res) {
         db.collection('proposals').findAndModifyAsync(
             { 'tid':tid, 'source':uid },[],
             { $setOnInsert: {pid: ObjectId()}},
-            { new: true, upsert: true }).get(0);
+            { new: true, upsert: true }).get('value');
         
         return Promise.join(topic, get_proposal_promise);
     }).spread(function(topic, proposal) {

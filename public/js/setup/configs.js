@@ -12,7 +12,8 @@ define({
     DURATION_LEVEL     : ONE_WEEK,
     DURATION_NONE      : -1,
     
-    EVOCRACY_HOST : 'https://mind-about-sagacitysite.c9.io',
+    EVOCRACY_HOST : 'http://mind-about-sagacitysite.c9.io',
+    EVOCRACY_HOST_SECURE : 'https://mind-about-sagacitysite.c9.io',
     ETHERPAD_HOST : 'https://beta.etherpad.org/p/'
 });
 

@@ -134,6 +134,81 @@ app.get('/test/remix_groups', tests.remix_groups );
 // ### S E R V E R ###
 // ###################
 
-http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app);
+server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+var gulf = require('gulf');
+var mongoose = require('mongoose');
+var MongoDBAdapter = require('gulf-mongodb');
+var ottype = require('rich-text');
+var docId;
+
+function gulfIO(masterDoc) {
+  var slave = masterDoc.slaveLink();
+  
+  var streamBuffers = require('stream-buffers');
+  var io = require('socket.io')(server, {secure: true});
+  io.on('connection', function (socket) {
+    socket.emit('news', { hello: 'world' });
+    socket.on('delta', function (slaveDelta) {
+      var writeableStreamBuffer = new streamBuffers.WritableStreamBuffer({});
+      writeableStreamBuffer.on('pipe',function() {
+      //slave.on('pipe',function() {
+        var masterDelta = writeableStreamBuffer.getContentsAsString();
+        console.log(masterDelta);
+        if(masterDelta)
+          socket.emit('delta',masterDelta);
+      });
+      
+      var readableStreamBuffer = new streamBuffers.ReadableStreamBuffer({});
+      //readableStreamBuffer.pipe(slave).pipe(process.stdout);//.pipe(writeableStreamBuffer);
+      var s = readableStreamBuffer.pipe(slave);
+      s.pipe(writeableStreamBuffer);
+      
+      readableStreamBuffer.put(JSON.stringify(slaveDelta));
+      //readableStreamBuffer.stop();
+    });
+  });
+}
+
+var dbConnection = mongoose.createConnection('mongodb://'+process.env.IP+'/mindabout');
+var mongoAdapter = new MongoDBAdapter(dbConnection);
+// load or create gulf document
+var masterDoc;
+gulf.Document.load(mongoAdapter, ottype, docId, function(err, doc) {
+  masterDoc = doc;
+  if(err)
+    gulf.Document.create(mongoAdapter, ottype, 'Hello world!', function(err, doc) {
+      masterDoc = doc;
+      docId = doc.id;
+      gulfIO(masterDoc);
+    });
+  else
+    gulfIO(masterDoc);
+});
+
+/*var io = require('socket.io')(server, {secure: true});
+var ss = require('socket.io-stream');
+io.on('connection', function (socket) {
+  socket.on('delta', function (data) {
+    console.log(data);
+  });
+  ss(socket).on('delta', function (stream, data) {
+    console.log(data);
+    slave.pipe(stream).pipe(slave);
+  });
+});*/
+
+/*// Set up a server
+net.createServer(function(socket) {
+    // ... and create a slave link for each socket that connects
+    var slave = doc.slaveLink()
+
+    // now, add the new client as a slave
+    // of alice's document
+    socket.pipe(slave).pipe(socket)
+})
+// listen for connections
+.listen(8081)*/

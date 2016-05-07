@@ -23,6 +23,7 @@
     "json": "*",
     "method-override": "*",
     "methods": "*",
+    "morgan": "*",
     "mongodb": "~2.0",
     "mongoskin": "*",
     "multer": "*",
@@ -34,6 +35,8 @@
     "requirejs": "*",
     "send": "*",
     "serve-favicon": "*",
+    "socket.io": "*",
+    "stream-buffers": "^3.0.0",
     "underscore": "*",
     "underscore.string": "*",
     "validate.js": "*"

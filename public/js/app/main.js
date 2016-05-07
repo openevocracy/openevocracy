@@ -25,7 +25,9 @@
       isactive: '../vendor/isactive',
       parsley: '//cdnjs.cloudflare.com/ajax/libs/parsley.js/2.3.5/parsley.min',
       constants: '../setup/constants',
-      configs: '../setup/configs'
+      configs: '../setup/configs',
+      quill: '//cdn.quilljs.com/1.0.0-beta.0/quill.js',
+      socketio: '//cdn.socket.io/socket.io-1.4.5'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for
