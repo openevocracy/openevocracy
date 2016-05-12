@@ -17,7 +17,6 @@
       handlebars: '//oss.maxcdn.com/handlebarsjs/3.0.3/handlebars.min',
       ColorHash: '../bower_components/color-hash/dist/color-hash',
       ember: '//oss.maxcdn.com/emberjs/2.0.0/ember.min',
-      etherpad: '../vendor/etherpad',
       bootstrap: '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
       bootstrapcustom: '../vendor/bootstrap.custom',
       moment: '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min',

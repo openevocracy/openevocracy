@@ -3,7 +3,8 @@
   "description": "",
   "main": "public/js/app.js",
   "authors": [
-    "patrick.charrier@gmail.com"
+    "patrick.charrier@gmail.com",
+    "carlo.michaelis@gmail.com"
   ],
   "license": "MIT",
   "homepage": "https://github.com/openevocracy/openevocracy",

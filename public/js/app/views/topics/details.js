@@ -2,7 +2,6 @@ define([
     'underscore_string',
     'jquery',
     'Marionette',
-    'etherpad',
     'moment',
     'hbs!templates/topics/details',
     'constants',
@@ -12,7 +11,6 @@ define([
     _,
     $,
     Marionette,
-    etherpad,
     moment,
     Template,
     C

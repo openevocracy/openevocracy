@@ -2,13 +2,11 @@ define([
     'jquery',
     'application',
     'Marionette',
-    'etherpad',
     'hbs!templates/proposal'
 ], function(
     $,
     app,
     Marionette,
-    etherpad,
     Template
     ) {
     
