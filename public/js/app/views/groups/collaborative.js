@@ -2,7 +2,6 @@ define([
     'jquery',
     'underscore',
     'Marionette',
-    'etherpad',
     'quill',
     'socketio',
     'configs',
@@ -12,7 +11,6 @@ define([
     $,
     _,
     Marionette,
-    etherpad,
     Quill,
     socketio,
     conf,
@@ -64,9 +62,6 @@ define([
                 
                 console.log('Editor contents have changed', JSON.stringify(delta));
                 socket.emit('change', delta);
-                
-                //console.log(readingease);
-                console.log(syllable);
             });
         },
         
