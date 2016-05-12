@@ -40,25 +40,13 @@ define([
         onShow: function() {
             setActive('ourprop');
             
-            /*$('#editor').pad({
-                'padId': this.model.get('pid'),
-                'userName' : App.session.user.get('name'),
-                'userColor' : App.session.user.get('color'),
-                'height' : 400,
-                'borderStyle' : 'none',
-                'showControls' : true
-            });*/
-            
-            var editor = new Quill('#editor', {
-                modules: { toolbar: '#toolbar' },
-                theme: 'snow'
-            });
-            
             var socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
-            //socket.on('setContents', editor.setContents.bind(editor));
             socket.on('setContents', function(contents) {
                 console.log(JSON.stringify(contents));
-                editor.setText(contents);
+                if(contents.ops)
+                    editor.updateContents(contents);
+                else
+                    editor.setText(contents);
             });
             
             socket.on('change', function(change) {
@@ -66,13 +54,24 @@ define([
                 editor.updateContents(change);
             });
             
-            editor.on('text-change', function(change, source) {
+            var editor = new Quill('#editor', {
+                theme: 'snow'
+            });
+            
+            editor.on('text-change', function(delta, oldDelta, source) {
                 if(source != 'user')
                     return;
                 
-                console.log('Editor contents have changed', JSON.stringify(change));
-                socket.emit('change', change);
+                console.log('Editor contents have changed', JSON.stringify(delta));
+                socket.emit('change', delta);
+                
+                //console.log(readingease);
+                console.log(syllable);
             });
+        },
+        
+        onDestroy: function() {
+            
         }
     });
     
