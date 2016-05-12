@@ -17,20 +17,9 @@ var cookieParser = require('cookie-parser');
 //var cookieSession = require('cookie-session');
 var utils = require('./server/utils');
 
-var mongoskin = require('mongoskin');
-var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
+var db = require('./database');
 var path = require('path');
 var app = express();
-
-// promisify mongoskin
-Object.keys(mongoskin).forEach(function(key) {
-  var value = mongoskin[key];
-  if (typeof value === "function") {
-    Promise.promisifyAll(value);
-    Promise.promisifyAll(value.prototype);
-  }
-});
-Promise.promisifyAll(mongoskin);
 
 // initilize mail
 utils.initializeMail();

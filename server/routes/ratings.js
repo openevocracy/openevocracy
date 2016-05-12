@@ -1,6 +1,5 @@
 var _ = require('underscore');
-var mongoskin = require('mongoskin');
-var db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
+var db = require('../../database');
 var ObjectId = require('mongodb').ObjectID;
 var requirejs = require('requirejs');
 var C = requirejs('public/js/setup/constants');
