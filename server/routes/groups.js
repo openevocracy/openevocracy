@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var db = require('../../database');
+var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var Chance = require('chance');

@@ -17,7 +17,7 @@ var cookieParser = require('cookie-parser');
 //var cookieSession = require('cookie-session');
 var utils = require('./server/utils');
 
-var db = require('./database');
+var db = require('./server/database').db;
 var path = require('path');
 var app = express();
 

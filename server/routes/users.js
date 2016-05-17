@@ -1,6 +1,6 @@
 var _ = require('underscore');
 var bcrypt = require('bcrypt');
-var db = require('../../database');
+var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var requirejs = require('requirejs');

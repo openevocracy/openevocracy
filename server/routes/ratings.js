@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var db = require('../../database');
+var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var requirejs = require('requirejs');
 var C = requirejs('public/js/setup/constants');

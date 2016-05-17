@@ -11,4 +11,4 @@ Object.keys(mongoskin).forEach(function(key) {
 });
 Promise.promisifyAll(mongoskin);
 
-exports = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
+exports.db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
