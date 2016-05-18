@@ -1,5 +1,6 @@
 body { padding: 50px 0; }
 a { cursor: pointer; }
+small { font-size: 11px; }
 .fa { margin-right: 0.1em; }
 .btn.active .fa { color: #5cb85c; }
 .tr.active .fa { color: #aaa; }
@@ -26,34 +27,25 @@ a { cursor: pointer; }
 
 #loading .fa { font-size: 40px; }
 
-/* ##################### */
-/* ##### V I E W S ##### */
-/* ##################### */
+/* ### VIEWS ### */
 
 .page-header { margin-top: 0; }
 .subtitle { margin-bottom: -5px; }
 
-/* ####################### */
-/* ##### B L O C K S ##### */
-/* ####################### */
+/* ### BLOCKS ### */
 
-.block h2 { margin-top: 0; }
-.block { padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #4e5d6c; }
-.block.last { padding: 0; margin: 0; border: none; }
+.docstate-block .state-stars { margin-bottom: 5px; }
+main aside div:first-child h3 { margin-top: 0; }
+.levels-block .label { line-height: 15px; }
 
-/* ######################### */
-/* ###### F O O T E R ###### */
-/* ######################### */
+/* #### FOOTER #### */
 
 footer { font-size: 0.8em; text-align: center; }
 #footmenu { display: inline-block; margin: 0; }
 #footmenu li { list-style: none; float: left; }
 #footmenu a { display: inline-block; padding: 0 0.3em; line-height: 40px; }
 
-
-/* ############## */
 /* ### TOPICS ### */
-/* ############## */
 
 #topic-list .list-group-item { padding: 0; height: 41px; }
 #topic-list .link { padding: 3px 0; cursor: pointer; }
@@ -79,29 +71,34 @@ footer { font-size: 0.8em; text-align: center; }
 #topic-list .stage2 { background-color: #d9534f; } /* consensus */
 #topic-list .stage3 { background-color: #5cb85c; } /* passed */
 
-/* ############## */
 /* ### GROUPS ### */
-/* ############## */
 
 #members table a { text-decoration: none; }
 .user-color {
     display: inline-block;
     height: 1em;
     width: 1em;
-    margin-right:
-    0.35em;
+    margin-right: 0.35em;
     border: 1px solid #ebebeb;
 }
 
-/* ############ */
 /* ### MISC ### */
-/* ############ */
+
+#editor { height: 400px; }
 
 .parsley-error { background-color: #d9534f; opacity: 0.65; }
 .editor-wrapper { background-color: #fff; color: #000; }
 .editor-wrapper button { border: none; background: none; }
-/*.ql-toolbar { border-bottom: 1px solid #ccc; }
-.ql-toolbar button { height: 25px; width: 25px; }
-.ql-toolbar .ql-active { color: #fff; background-color: #4e5d6c;}*/
-/*#collaborative .well { padding: 0; }
-#collaborative hr { margin: 0; }*/
+
+/* ### BOOTSTRAP EXTENSIONS ### */
+
+.nav-pills-sm > li > a { line-height: 1.1em; }
+
+.nav-pills > li > a { background-color: #4e5d6c; }
+.nav-pills > li > a:focus, .nav-pills > li > a:hover { background-color: #485563; }
+
+.nav-pills > li > a.pill-danger { background-color: #d9534f; }
+.nav-pills > li > a.pill-danger:focus, .nav-pills > li > a.pill-danger:hover { background-color: #c9302c; }
+
+.nav-pills > li > a.pill-success { background-color: #5cb85c; }
+.nav-pills > li > a.pill-success:focus, .nav-pills > li > a.pill-success:hover { background-color: #449d44; }

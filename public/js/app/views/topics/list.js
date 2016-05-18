@@ -84,6 +84,10 @@ define([
             this.collection.remove(topic);
         },
         
+        onShow: function() {
+            setActive('topics');
+        },
+        
         stageSelected: {"-1": false, "0": true, "1": true, "2": true, "3": true},
         selectStage: function(stage, val) {
             this.stageSelected[stage] = val;

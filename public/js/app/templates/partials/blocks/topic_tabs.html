@@ -1,9 +1,15 @@
-<h2>Take action</h2>
+<h3>Take action</h3>
 <div class="block-content tabs-block">
+    <ul  class="nav nav-pills nav-stacked">
     {{#ifisAnd stage STAGE_PROPOSAL joined}} <!-- #if ppid -->
-        <a class="btn btn-default btn-md btn-block" href="/#/proposal/{{_id}}" id="myprop"><span class="fa fa-file-text"></span> My proposal</a>
+        <li>
+            <a href="/#/proposal/{{_id}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> My proposal</a>
+        </li>
     {{/ifisAnd}}
     {{#if gid}}
-        <a class="btn btn-default btn-md btn-block" href="/#/group/{{gid}}"><span class="fa fa-users"></span> Our group</a>
+        <li>
+            <a href="/#/group/{{gid}}"><i class="fa fa-users" aria-hidden="true"></i> Our group</a>
+        </li>
     {{/if}}
+    </ul>
 </div>

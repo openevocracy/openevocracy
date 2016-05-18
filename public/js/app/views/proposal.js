@@ -51,7 +51,6 @@ define([
         },
         
         onShow: function() {
-            setActive('topics');
             console.log(this.model.attributes);
         },
         

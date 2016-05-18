@@ -1,7 +1,10 @@
-<h2>Member's documents</h2>
+<h3>Member's docs</h3>
 <div class="block-content members-pads-block">
-    {{#each members}}
-    <a class="btn btn-default btn-md btn-block member-proposal" data-link="grpmem-{{this._id}}" data-link-parents="topics" data-member-id="{{this._id}}"><span class="user-color" style="background-color: {{this.color}};"></span>{{this.name}}</a>
-    <!--<input type="hidden">-->
-    {{/each}}
+    <ul class="nav nav-pills nav-stacked">
+        {{#each members}}
+        <li data-link="grpmem-{{this._id}}" data-link-parents="">
+            <a class="member-proposal" data-member-id="{{this._id}}"><span class="user-color" style="background-color: {{this.color}};"></span>{{this.name}}</a>
+        </li>
+        {{/each}}
+    </ul>
 </div>

@@ -119,7 +119,6 @@ define([
         
         onShow: function() {
             this.onAction();
-            setActive('topics');
         },
         
         onAction: function() {

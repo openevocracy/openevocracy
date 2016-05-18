@@ -16,6 +16,7 @@ var http = require('http');
 var cookieParser = require('cookie-parser');
 //var cookieSession = require('cookie-session');
 var utils = require('./server/utils');
+var pads = require('./server/pads');
 
 var db = require('./server/database').db;
 var path = require('path');
@@ -123,93 +124,8 @@ app.get('/test/remix_groups', tests.remix_groups );
 // ### S E R V E R ###
 // ###################
 
-var server = http.createServer(app);
-server.listen(app.get('port'), function(){
+var httpServer = http.createServer(app);
+httpServer.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
-
-var _ = require('underscore');
-var gulf = require('gulf');
-var mongoose = require('mongoose');
-var MongoDBAdapter = require('gulf-mongodb');
-var richText = require('rich-text');
-var ottype = richText.type;
-var Delta = richText.Delta;
-
-var docId;
-var starttext = 'Hello World!'
-
-// masterDoc -> slaveLink <-> masterLink <- slaveDoc <-> quill
-function gulfIO(masterDoc) {
-  var io = require('socket.io')(server, {secure: true});
-  
-  io.on('connection', function (slaveSocket) {
-    slaveSocket.emit('setContents',starttext);
-    
-    // create slaveDoc and slaveToMasterLink
-    var slaveDoc = new gulf.EditableDocument(new gulf.MemoryAdapter, ottype);
-    var slaveToMasterLink = slaveDoc.masterLink();
-    
-    // masterDoc -> slaveLink <-> masterLink <- slaveDoc
-    {
-      var masterToSlaveLink = masterDoc.slaveLink();
-      slaveToMasterLink.pipe(masterToSlaveLink);
-      masterToSlaveLink.pipe(slaveToMasterLink);
-    }
-    
-    // quill -> slaveDoc
-    {
-      slaveSocket.on('change', function (slaveToMasterChange) {
-        if(_.isEmpty(slaveToMasterChange.ops))
-          return;
-        
-        console.log('slaveToMasterChange', slaveToMasterChange);
-        slaveDoc.update(new Delta(slaveToMasterChange));
-      });
-    }
-    
-    // slaveDoc -> quill
-    slaveDoc._setContents = function(contents, cb) {
-      console.log('setContents', JSON.stringify(contents));
-      slaveSocket.emit('setContents',contents);
-      
-      cb();
-    };
-    slaveDoc._change = function(masterToSlaveChange, cb) {
-      console.log('masterToSlaveChange', JSON.stringify(masterToSlaveChange));
-      slaveSocket.emit('change',masterToSlaveChange);
-      
-      cb();
-    };
-    slaveDoc._collectChanges = function(cb) { cb(); }
-    
-    slaveSocket.on('disconnect', function () {
-      console.log('disconnect');
-      // remove link from master doc
-      masterDoc.links.splice(masterDoc.links.indexOf(slaveToMasterLink),1);
-    });
-  });
-}
-
-var dbConnection = mongoose.createConnection('mongodb://'+process.env.IP+'/mindabout');
-//var adapter = new MongoDBAdapter(dbConnection);
-var adapter = new gulf.MemoryAdapter();
-// load or create gulf document
-var masterDoc;
-/*gulf.Document.load(adapter, ottype, docId, function(err, doc) {
-  masterDoc = doc;
-  if(err)
-    gulf.Document.create(adapter, ottype, 'Hello bright world!', function(err, doc) {
-      masterDoc = doc;
-      docId = doc.id;
-      gulfIO(masterDoc);
-    });
-  else
-    gulfIO(masterDoc);
-});*/
-
-gulf.Document.create(adapter, ottype, starttext, function(err, doc) {
-  masterDoc = doc;
-  docId = doc.id;
-  gulfIO(masterDoc);
-});
+var padServer = pads.startPadServer(httpServer);

@@ -1,6 +1,14 @@
-<h2>Group</h2>
+<h3>Group</h3>
 <div class="block-content tabs-block">
-    <a class="btn btn-default btn-md btn-block" data-link="ourprop" data-link-parents="topics"><span class="fa fa-file-text"></span> Our proposal</a>
-    <a class="btn btn-default btn-md btn-block" data-link="grpmem" data-link-parents="topics"><span class="fa fa-users"></span> Group members</a>
-    <a class="btn btn-default btn-md btn-block" href="/#/topic/{{tid}}"><span class="fa fa-chevron-left"></span> Topic</a>
+    <ul class="nav nav-pills nav-stacked">
+        <li data-link="ourprop" data-link-parents="">
+            <a><i class="fa fa-lightbulb-o" aria-hidden="true"></i> Our proposal</a>
+        </li>
+        <li data-link="grpmem" data-link-parents="">
+            <a><i class="fa fa-users" aria-hidden="true"></i> Group members</a>
+        </li>
+        <li>
+            <a href="/#/topic/{{tid}}"><i class="fa fa-chevron-left" aria-hidden="true"></i> Back to topic</a>
+        </li>
+    </ul>
 </div>
