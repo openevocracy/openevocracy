@@ -5,6 +5,8 @@ var MongoDBAdapter = require('gulf-mongodb');
 var richText = require('rich-text');
 var ottype = richText.type;
 var Delta = richText.Delta;
+var ObjectId = require('mongodb').ObjectID;
+var db = require('./database').db;
 
 // promisify gulf
 var Promise = require('bluebird');
@@ -18,11 +20,12 @@ Object.keys(gulf).forEach(function(key) {
 Promise.promisifyAll(gulf);
 
 // all pads will be initialized with this
-var starttext = 'Hello World!';
+// TODO bring this text to config file
+var starttext = {"ops":[{"insert": "Hello World!"}]};
 
 // masterDoc -> slaveLink <-> masterLink <- slaveDoc <-> quill
 function gulfIO(masterDoc, slaveSocket) {
-  slaveSocket.emit('setContents',starttext);
+  //slaveSocket.emit('setContents',starttext);
   
   // create slaveDoc and slaveToMasterLink
   var slaveDoc = new gulf.EditableDocument(new gulf.MemoryAdapter, ottype);
@@ -68,40 +71,54 @@ function gulfIO(masterDoc, slaveSocket) {
   });
 }
 
+/*var adapter = new gulf.MemoryAdapter();
+var padIdToDocMap = {};
+function getPadDocAsync(pid) {
+  // check if document is in map first
+  var doc = padIdToDocMap[pid];
+  if(!_.isUndefined(doc))
+    return Promise.resolve(doc);
+  
+  return gulf.Document.createAsync(adapter, ottype, starttext).
+  then(function(doc) {
+    padIdToDocMap[pid] = doc;
+    return Promise.resolve(doc);
+  });
+}*/
+
 var dbConnection = mongoose.createConnection('mongodb://'+process.env.IP+'/mindabout');
 var adapter = new MongoDBAdapter(dbConnection);
-//var adapter = new gulf.MemoryAdapter();
-function getDocAsync(docId) {
-  // load or create gulf document
-  if(_.isUndefined(docId))
-    return gulf.Document.createAsync(adapter, ottype, starttext);
-  else
-    return gulf.Document.loadAsync(adapter, ottype, docId);
-}
-
 var padIdToDocMap = {};
-var padIdToDocIdMap = {}; // TODO must be saved in database
-function getPadAsync(padId) {
+function getPadDocAsync(pid) {
   // check if document is in map first
-  var doc = padIdToDocMap[padId];
+  var doc = padIdToDocMap[pid];
   if(!_.isUndefined(doc))
     return Promise.resolve(doc);
   
   // if not in map, load or create document
-  var docId = padIdToDocIdMap[padId];
-  return getDocAsync(docId).then(function(doc) {
-    padIdToDocMap[padId] = doc;
-    padIdToDocIdMap[padId] = doc.id;
-    
-    return doc;
+  return db.collection('pads').findOneAsync({'_id': pid},{'did': true}).
+  then(function(pad) {
+    // load or create gulf document
+    if(_.isNull(pad))
+      return gulf.Document.createAsync(adapter, ottype, starttext).
+        then(function(doc) {
+          // if newly created, save in database
+          return db.collection('pads').insertAsync(
+            {'_id': pid,'did': doc.id}).return(doc);
+        });
+    else
+      return gulf.Document.loadAsync(adapter, ottype, pad.did);
+  }).then(function(doc) {
+    padIdToDocMap[pid] = doc;
+    return Promise.resolve(doc);
   });
 }
 
 exports.startPadServer = function(httpServer) {
   var io = require('socket.io')(httpServer, {secure: true});
-  io.on('connection', function (slaveSocket) {
+  io.on('connection', function(slaveSocket) {
     slaveSocket.on('identity', function(identity) {
-      getPadAsync(identity.pid).then(function (masterDoc) {
+      getPadDocAsync(ObjectId(identity.pid)).then(function(masterDoc) {
         gulfIO(masterDoc, slaveSocket);
       });
     });

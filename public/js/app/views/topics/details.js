@@ -130,8 +130,8 @@ define([
             
             var stage = this.model.get('stage');
             var showTabs =
-                (stage == C.STAGE_PROPOSAL && this.model.get('joined')) ||
-                (stage == C.STAGE_CONSENSUS && typeof this.model.get('ppid') !== undefined);
+                (this.model.get('joined')) &&
+                (stage == C.STAGE_PROPOSAL || stage == C.STAGE_CONSENSUS);
             this.model.set('showTabs', showTabs);
             
             // FIXME what's this?
