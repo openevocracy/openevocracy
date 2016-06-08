@@ -2,12 +2,14 @@ define([
     'jquery',
     'application',
     'Marionette',
-    'hbs!templates/proposal'
+    'hbs!templates/proposal',
+    'views/pad'
 ], function(
     $,
     app,
     Marionette,
-    Template
+    Template,
+    Pad
     ) {
     
     var View = Marionette.ItemView.extend({
@@ -24,8 +26,7 @@ define([
                     $('.edit span').removeClass('fa-floppy-o');
                     $('.edit span').addClass('fa-pencil');
                     $('.edit').prop('title', 'edit');
-                    // etherpad
-                    $('#editor').find('iframe').remove();
+                    Pad.remove();
                     this.model.fetch().done(function () {
                         $('.body').html(this.model.get('body'));
                         $('.body').show();
@@ -38,14 +39,14 @@ define([
                     $('.edit').prop('title', 'leave editor mode and save changes');
                     // etherpad
                     $('.body').hide();
-                    $('#editor').pad({
-                        'padId': this.model.get('pid'),
-                        'height' : 400,
-                        'noColors' : true,
-                        'borderStyle' : 'none',
-                        'showControls' : true
-                    });
-                    
+                    // $('#editor').pad({
+                    //     'padId': this.model.get('pid'),
+                    //     'height' : 400,
+                    //     'noColors' : true,
+                    //     'borderStyle' : 'none',
+                    //     'showControls' : true
+                    // });
+                    Pad.onShow.bind(this)();
                 }
             }
         },

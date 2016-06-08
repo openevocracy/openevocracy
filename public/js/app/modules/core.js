@@ -3,6 +3,7 @@ define([
     'handlebars',
     'controllers/login',
     'controllers/register',
+    'controllers/navigation',
     'controllers/topics',
     'controllers/topic',
     'controllers/proposal',
@@ -25,6 +26,7 @@ define([
     Handlebars,
     Login,
     Register,
+    Navi,
     Topics,
     Topic,
     Proposal,
@@ -46,12 +48,15 @@ define([
     
     var login = new Login();
     var register = new Register();
+    var navi = new Navi();
     var topics = new Topics();
     var topic = new Topic();
     var proposal = new Proposal();
     var group = new Group();
     
     var Module = function(module, App) {
+        App.eventAggregator.on('App:routechange', navi.route_navi_index.bind(navi), true);
+        
         App.router.route('', 'topics_index', topics.route_topics_index.bind(topics));
         App.router.route('login', 'login_index', login.route_login_index.bind(login));
         App.router.route('register', 'register_index', register.route_register_index.bind(register));

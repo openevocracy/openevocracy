@@ -5,15 +5,17 @@ define([
     'moment',
     'hbs!templates/topics/details',
     'constants',
+    'views/pad',
     'jquerycookie',
-    'jquerycountdown'
+    'jquerycountdown',
 ], function(
     _,
     $,
     Marionette,
     moment,
     Template,
-    C
+    C,
+    Pad
     ) {
     
     var View = Marionette.ItemView.extend({
@@ -52,13 +54,14 @@ define([
                     // etherpad
                     $('#body').hide();
                     //$('.open-desc').hide();
-                    $('#editor').pad({
-                        'padId': this.model.get('pid'),
-                        'height' : 400,
-                        'noColors' : true,
-                        'borderStyle' : 'none',
-                        'showControls' : true
-                    });
+                    // $('#editor').pad({
+                    //     'padId': this.model.get('pid'),
+                    //     'height' : 400,
+                    //     'noColors' : true,
+                    //     'borderStyle' : 'none',
+                    //     'showControls' : true
+                    // });
+                    Pad.onShow.bind(this)();
                     // title
                     var inputField = '<input id="titleInput" class="simple-input" type="text" value="'+this.model.get('title')+'"></input>';
                     $('#topic-title').replaceWith(inputField);

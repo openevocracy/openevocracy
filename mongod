@@ -1,1 +1,2 @@
+rm data/mongod.lock
 mongod --bind_ip=$IP --dbpath=data --nojournal --rest "$@"

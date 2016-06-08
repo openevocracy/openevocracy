@@ -25,8 +25,6 @@ var starttext = {"ops":[{"insert": "Hello World!"}]};
 
 // masterDoc -> slaveLink <-> masterLink <- slaveDoc <-> quill
 function gulfIO(masterDoc, slaveSocket) {
-  //slaveSocket.emit('setContents',starttext);
-  
   // create slaveDoc and slaveToMasterLink
   var slaveDoc = new gulf.EditableDocument(new gulf.MemoryAdapter, ottype);
   var slaveToMasterLink = slaveDoc.masterLink();

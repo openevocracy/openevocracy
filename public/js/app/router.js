@@ -21,6 +21,10 @@ define([
             
             App.eventAggregator.trigger('App:logged_out');
             return false;
+        },
+        
+        onRoute: function( name, path, args) {
+            App.eventAggregator.trigger('App:routechange', name, path, args );
         }
     });
 

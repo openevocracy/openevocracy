@@ -1,7 +1,6 @@
 define([
     'underscore',
     'Marionette',
-    'views/blocks/navigation',
     'views/groups/collaborative',
     'views/groups/members',
     'views/groups/member_proposal',
@@ -9,7 +8,6 @@ define([
 ], function(
     _,
     Marionette,
-    NaviView,
     CollabView,
     MembersView,
     MembersProposalView,
@@ -23,10 +21,6 @@ define([
         
         route_group_index: function(id) {
             this.group = new Model({'_id': id});
-            
-            var naviView = new NaviView();
-            App.layout.sidebar.show(naviView);
-            
             this.group.fetch().done(function () {
                 this.collabView = new CollabView({model:this.group});
                 this.membersView = new MembersView({model:this.group});

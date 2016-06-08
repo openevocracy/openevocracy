@@ -3,7 +3,6 @@ define([
     'constants',
     'hbs!templates/layouts/topics',
     'hbs!templates/topics/list_filter',
-    'views/blocks/navigation',
     'views/topics/list',
     'collections/topics'
 ], function(
@@ -11,7 +10,6 @@ define([
         C,
         TopicsLayoutTemplate,
         FilterTemplate,
-        NaviView,
         TopicsView,
         Collection
         ) {
@@ -42,15 +40,11 @@ define([
         
         var Controller = Marionette.Controller.extend({
             route_topics_index: function() {
-                var topics = new Collection();
-                
-                /* ### LEFT ### */
-                var naviView = new NaviView();
-                App.layout.sidebar.show(naviView);
                 
                 var topicsLayoutView = new TopicsLayoutView();
                 App.layout.view.show(topicsLayoutView);
                 
+                var topics = new Collection();
                 topics.fetch().done(function () {
                     /* ### CONTENT RIGHT ### */
                     var listView = new TopicsView({collection: topics});
