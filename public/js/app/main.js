@@ -80,6 +80,13 @@
           return opts.inverse(this);
       }
     });
+    Handlebars.registerHelper('ifisnot', function(a, b, opts) {
+      if(a != b) {
+          return opts.fn(this);
+      } else {
+          return opts.inverse(this);
+      }
+    });
     Handlebars.registerHelper('ifisOr', function(a, b, c, opts) {
       if(a == b || a == c) {
           return opts.fn(this);

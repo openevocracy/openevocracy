@@ -44,7 +44,8 @@ define([
          * and return a user object if authenticated
          */
         checkAuth: function(callback, args) {
-            this.fetch({                                                                          // Check if there are tokens in localstorage
+            // Check if there are tokens in localstorage
+            this.fetch({
                 success: function(mod, res){
                     if(!res.error && res.user){
                         this.updateSessionUser( res.user );

@@ -5,7 +5,7 @@ define([
     ) {
     var Model = Backbone.Model.extend({
         idAttribute: '_id',
-        urlRoot: '/json/group'
+        urlRoot: '/json/user/navi'
     });
     
     return Model;

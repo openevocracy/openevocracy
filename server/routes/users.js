@@ -68,7 +68,7 @@ function sendVerificationMail(user) {
     var text =  'Welcome '+ user._id.toString() +' at Evocracy,\n'+
                 'You just created an account at '+cfg.EVOCRACY_HOST+'.\n\n'+
                 'Please verify your email by visiting:\n'+
-                cfg.EVOCRACY_HOST+'/auth/verifyEmail/'+user._id.toString()+'\n\n'+
+                cfg.EVOCRACY_HOST+'/json/auth/verifyEmail/'+user._id.toString()+'\n\n'+
                 'If you did not register, just ignore this message.\n';
     utils.sendMail(user.email, subject, text);
 }
@@ -142,7 +142,7 @@ exports.signup = function(req, res) {
     }
 };
 
-// POST /api/auth/logout
+// POST /json/auth/logout
 // @desc: logs out a user, clearing the signed cookies
 exports.logout = function(req, res) {
     res.clearCookie('uid');
@@ -150,7 +150,7 @@ exports.logout = function(req, res) {
     res.send();
 };
 
-// POST /api/auth/verifyEmail
+// POST /json/auth/verifyEmail
 exports.verifyEmail = function(req, res) {
     db.collection('users').updateAsync(
         {'_id': ObjectId(req.params.id)}, { $set: {verified: true} }, {}
@@ -172,3 +172,32 @@ app.post("/api/auth/remove_account", function(req, res) {
         }
     });
 });*/
+
+// GET /json/user/navi
+exports.navigation = function(req, res) {
+    var uid = ObjectId(req.signedCookies.uid);
+    
+    var topicsPromise = db.collection('topic_participants').
+        find({'uid': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
+            return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
+                {'name': true, 'stage': true, 'level': true}).toArrayAsync();
+        }); // TODO append basic topic info
+        
+    var groupsPromise = db.collection('group_members').
+        find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(gids) {
+            return db.collection('groups').find({'_id': { $in: _.pluck(gids, 'gid') }},
+                {'name': true}).toArrayAsync();
+        }); // TODO (1) add topic name, (2) add time remaining
+        
+    /*var proposalsPromise = db.collection('').
+        find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(gids) {
+            return db.collection('groups').find({'_id': { $in: gids }},
+                {'title': true}).toArrayAsync();
+        });*/ // TODO (1) add topic name, (2) add time remaining
+    
+    Promise.props({
+        'topics': topicsPromise,
+        'groups': groupsPromise
+    }).then(res.json.bind(res)).
+    catch(utils.isOwnError,utils.handleOwnError(res));
+};

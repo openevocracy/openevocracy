@@ -109,7 +109,13 @@ app.post("/json/auth/logout", users.logout );
 // @desc: deletes a user
 app.post("/json/auth/remove_account", users.delete );*/
 // POST /json/auth/verifyEmail
-app.get("/auth/verifyEmail/:id", users.verifyEmail );
+app.get("/json/auth/verifyEmail/:id", users.verifyEmail );
+
+// ###################
+// ###   U S E R   ###
+// ###################
+
+app.get('/json/user/navi', function(req, res) { auth(req, res, users.navigation); });
 
 // ###################
 // ###   T E S T   ###

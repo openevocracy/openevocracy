@@ -14,6 +14,7 @@ define([
             _.bindAll.apply(_, [this].concat(_.functions(this)));
         },
         
+        // decides whether or not a route should be allowed to trigger
         before: function( route, params ){
             if(App.session.isLoggedIn() ||
                route == '' || route == 'login' || route == 'verified' || route == 'register')

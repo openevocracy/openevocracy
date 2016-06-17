@@ -68,8 +68,8 @@ define([
     loadCoreModule: function(callback) {
         require(['modules/core'],
           function(CoreModule) {
-            this.module('core',CoreModule);
             this.setAppLayout();
+            this.module('core',CoreModule);
             
             callback();
           }.bind(this));
@@ -78,8 +78,8 @@ define([
     loadSplashModule: function(callback) {
         require(['modules/splash'],
           function(SplashModule) {
-            this.module('splash',SplashModule);
             this.setSplashLayout();
+            this.module('splash',SplashModule);
             
             callback();
             

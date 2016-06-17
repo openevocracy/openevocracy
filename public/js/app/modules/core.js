@@ -55,7 +55,9 @@ define([
     var group = new Group();
     
     var Module = function(module, App) {
-        App.eventAggregator.on('App:routechange', navi.route_navi_index.bind(navi), true);
+        App.eventAggregator.on('App:user_action',  navi.route_navi_index.bind(navi), true);
+        //App.eventAggregator.on('App:logged_in',  navi.route_navi_index.bind(navi), true);
+        navi.route_navi_index(navi);
         
         App.router.route('', 'topics_index', topics.route_topics_index.bind(topics));
         App.router.route('login', 'login_index', login.route_login_index.bind(login));

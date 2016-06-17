@@ -8,17 +8,32 @@
 
 <h3>Topics</h3>
 <ul class="nav nav-pills nav-stacked nav-pills-sm">
+{{#each topics}}
+    <li><a href="/#/topic/{{this._id}}"><i class="fa fa-question-circle" aria-hidden="true"></i> {{this.name}}<br/><small>{{this.stageName}} stage{{#ifisnot this.level 0}}, level {{this.level}}{{/ifisnot}}</small></a></li>
+{{/each}}
+</ul>
+
+<h3>Groups</h3>
+<ul class="nav nav-pills nav-stacked nav-pills-sm">
+{{#each groups}}
+    <li><a href="/#/group/{{this._id}}"><i class="fa fa-users" aria-hidden="true"></i> topic name<br/><small>17 hours remaining</small></a></li>
+{{/each}}
+</ul>
+
+<h3>Topics</h3>
+<ul class="nav nav-pills nav-stacked nav-pills-sm">
     <li><a href="/#/topic/57290f9e6c3699a306d63bf7"><i class="fa fa-question-circle" aria-hidden="true"></i> Innenhof gestalten<br/><small>consensus stage, level 2</small></a></li>
     <li><a href=""><i class="fa fa-question-circle" aria-hidden="true"></i> Eine andere Topic<br/><small>proposal stage</small></a></li>
     <li><a href=""><i class="fa fa-question-circle" aria-hidden="true"></i> Weitere Diskussion<br/><small>proposal stage</small></a></li>
     <!-- show max 3, 4 or 5 groups, use "read more" like link -->
-</ul>
+
 <h3>Groups</h3>
 <ul class="nav nav-pills nav-stacked nav-pills-sm">
     <!-- Popoup mit Namen der members -->
     <li><a class="pill-danger" href=""><i class="fa fa-users" aria-hidden="true"></i> Innenhof gestalten<br/><small>17 hours remaining</small></a></li>
     <!-- show max 3, 4 or 5 groups, use "read more" like link -->
 </ul>
+
 <h3>Proposals</h3>
 <ul class="nav nav-pills nav-stacked nav-pills-sm">
     <li><a class="pill-danger" href=""><i class="fa fa-lightbulb-o" aria-hidden="true"></i> Eine andere Topic<br/><small>2 hours remaining</small></a></li>

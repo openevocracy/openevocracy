@@ -8,16 +8,18 @@ define([
     Model
     ) {
     var Controller = Marionette.Controller.extend({
+        naviModel: new Model(),
+        
         route_navi_index: function() {
+            
             // skip if no sidebar is defined
             if(_.isUndefined(App.layout.sidebar))
                 return;
             
-            var naviModel = new Model();
-            //naviModel.fetch().done(function () {
-                var naviView = new NaviView({model: naviModel});
+            this.naviModel.fetch().done(function () {
+                var naviView = new NaviView({model: this.naviModel});
                 App.layout.sidebar.show(naviView);
-            //});
+            }.bind(this));
         }
     });
     
