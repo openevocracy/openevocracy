@@ -174,6 +174,7 @@ function appendBasicTopicInfo(topic) {
     
     return topic;
 }
+exports.appendBasicTopicInfo = appendBasicTopicInfo;
 
 function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     var tid = topic._id;
@@ -183,10 +184,6 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     if(with_details)
         pad_body_promise = utils.getPadBodyAsync(topic.pid);
     
-    // get owner name TODO delete this part, "name" does not exists any more
-    /*var owner_name_promise = db.collection('users').
-        findOneAsync({'_id': topic.owner}, {'name': true}).get('name');*/
-    
     // get number of participants and votes in this topic
     var topic_votes_promise = db.collection('topic_votes').
         find({'tid': tid}, {'uid': true}).toArrayAsync();
@@ -195,25 +192,68 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     
     // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
     
-    // get groups with highest level
-    var find_user_proup_promise =
-    db.collection('groups').find({ 'tid': tid }).sort({ 'level': -1 }).
-        //map(function (group) {return group._id;}).
-        toArrayAsync().then(function(groups) {
-            if(_.isEmpty(groups))
-                return null;
-            
-            // TODO use mongodb map for better performance
-            var gids = _.pluck(groups, '_id');
-            
-            // find the group out of previously found groups
-            // that the current user is part of
-            return db.collection('group_members').findOneAsync(
-                {'gid': { $in: gids }, 'uid': uid}, {'gid': true}).
-                then(function(group_member) {
-                    return group_member ? group_member.gid : null;
-                });
+    // get groups and sort by level
+    var groups_promise = db.collection('groups').find({ 'tid': tid }).
+        sort({ 'level': -1 }).toArrayAsync();
+    
+    var participants_per_levels_promise = groups_promise.then(function(groups) {
+        var member_counts_per_groups_promise =
+        db.collection('group_members').aggregateAsync( [
+            { $match: { 'gid': { $in: _.pluck(groups, '_id') } } },
+            { $group: { '_id': '$gid', member_count: { $sum : 1 } } } ] );
+        
+        return Promise.join(groups, member_counts_per_groups_promise);
+    }).spread(function (groups, member_counts_per_groups) {
+        var member_counts_per_groups_sorted_by_levels =
+        _.groupBy(member_counts_per_groups, function(member_count) {
+            var groups_with_string_ids = _.map(groups, function(group) {
+                group._id = group._id.toString();
+                return group;
+            });
+            var gid_as_string = member_count._id.toString();
+            // NOTE: findWhere does not work with ObjectIds
+            var group = _.findWhere(groups_with_string_ids, {'_id': gid_as_string});
+            return group.level;
         });
+        
+        var member_counts_per_levels =
+        _.mapObject(member_counts_per_groups_sorted_by_levels,
+        function(member_counts_per_groups, level) {
+            var member_counts_per_level = _.reduce(member_counts_per_groups,
+                function(memo, member_counts_per_group) {
+                    return memo + member_counts_per_group.member_count;
+                }, 0);
+            return member_counts_per_level;
+        });
+        
+        return member_counts_per_levels;
+    });
+    
+    var groups_per_levels_promise = groups_promise.then(function(groups) {
+        if(_.isEmpty(groups))
+            return null;
+            
+        // count groups by level
+        return _.countBy(groups, function(group) {return group.level;});
+    });
+    
+    var levels_promise =
+        Promise.join(participants_per_levels_promise, groups_per_levels_promise).
+        spread(function(participants_per_levels, groups_per_levels) {
+            var levels_object = _.mapObject(participants_per_levels,function(participants_per_level, level){
+                return { 'participants': participants_per_level, 'groups': groups_per_levels[level] };
+            });
+            return _.toArray(levels_object);
+        });
+    
+    
+    // find the group that the current user is part of
+    var find_user_group_promise = groups_promise.then(function(groups) {
+        return db.collection('group_members').findOneAsync(
+            {'gid': { $in: _.pluck(groups, '_id') }, 'uid': uid}, {'gid': true});
+    }).then(function(group_member) {
+        return group_member ? group_member.gid : null;
+    });
     
     // delete pad id if user is not owner, pid is removed from response
     if(!_.isEqual(topic.owner,uid))
@@ -221,14 +261,14 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     
     return Promise.props(_.extend(topic,{
         'body': pad_body_promise,
-        //'ownerName': owner_name_promise, TODO delete this line, "name" does not exist any longer
         'votes': topic_votes_promise.then(_.size),
         'participants': topic_participants_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
             return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
         'joined': topic_participants_promise.then(function(topic_participants) {
             return utils.checkArrayEntryExists(topic_participants, {'uid': uid});}),
-        'gid': find_user_proup_promise,
+        'levels': levels_promise,
+        'gid': find_user_group_promise,
         'timeCreated': tid.getTimestamp()
     }));
 }

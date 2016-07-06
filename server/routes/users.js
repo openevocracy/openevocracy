@@ -5,8 +5,10 @@ var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var requirejs = require('requirejs');
 var validate = require('validate.js');
+var topics = require('./topics');
 var utils = require('../utils');
 
+var C = requirejs('public/js/setup/constants');
 var cfg = requirejs('public/js/setup/configs');
 
 // cookie config
@@ -173,6 +175,8 @@ app.post("/api/auth/remove_account", function(req, res) {
     });
 });*/
 
+var groupsPromise;
+
 // GET /json/user/navi
 exports.navigation = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
@@ -181,23 +185,40 @@ exports.navigation = function(req, res) {
         find({'uid': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
             return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
                 {'name': true, 'stage': true, 'level': true}).toArrayAsync();
-        }); // TODO append basic topic info
-        
-    var groupsPromise = db.collection('group_members').
-        find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(gids) {
-            return db.collection('groups').find({'_id': { $in: _.pluck(gids, 'gid') }},
-                {'name': true}).toArrayAsync();
-        }); // TODO (1) add topic name, (2) add time remaining
-        
-    /*var proposalsPromise = db.collection('').
-        find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(gids) {
-            return db.collection('groups').find({'_id': { $in: gids }},
-                {'title': true}).toArrayAsync();
-        });*/ // TODO (1) add topic name, (2) add time remaining
+        }).map(function(topic) {
+            return topics.appendBasicTopicInfo(topic);
+        });
     
+    var groupsPromise = db.collection('group_members').
+        find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
+            return db.collection('groups').find(
+                {'_id': { $in: _.pluck(group_members, 'gid') }},
+                {'tid': true}).toArrayAsync();
+        }).then(function(groups) {
+            var topicsPromise = db.collection('topics').
+                find({'_id': { $in: _.pluck(groups, 'tid') }},
+                {'name': true, 'nextDeadline': true}).toArrayAsync();
+            
+            return Promise.join(topicsPromise, groups);
+        }).spread(function (topics, groups) {
+            return _.zip(topics, groups);
+        }).map(function (tg) {
+            return _.extend(_.pick(tg[0],'name','nextDeadline'),
+                            _.pick(tg[1],'_id'));
+        });
+    
+    var proposalsPromise = db.collection('proposals').
+        find({'source': uid}, {'tid': true}).toArrayAsync().then(function(proposals) {
+            return db.collection('topics').find(
+                {'_id': { $in: _.pluck(proposals, 'tid') },
+                'stage': C.STAGE_PROPOSAL},
+                {'name': true, 'nextDeadline': true}).toArrayAsync();
+        });
+
     Promise.props({
         'topics': topicsPromise,
-        'groups': groupsPromise
+        'groups': groupsPromise,
+        'proposals': proposalsPromise
     }).then(res.json.bind(res)).
     catch(utils.isOwnError,utils.handleOwnError(res));
 };

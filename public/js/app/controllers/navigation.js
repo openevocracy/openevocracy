@@ -15,7 +15,7 @@ define([
             // skip if no sidebar is defined
             if(_.isUndefined(App.layout.sidebar))
                 return;
-            
+                
             this.naviModel.fetch().done(function () {
                 var naviView = new NaviView({model: this.naviModel});
                 App.layout.sidebar.show(naviView);

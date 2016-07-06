@@ -1,7 +1,13 @@
 define([
+    'underscore',
+    'constants',
+    'moment',
     'Marionette',
     'hbs!templates/blocks/navigation'
 ], function(
+    _,
+    C,
+    moment,
     Marionette,
     Template
     ) {
@@ -11,14 +17,23 @@ define([
         id: 'navigation',
         
         initialize: function() {
-            //_.each(this.model.get('groups'), function(group) {
-                // get topic title
-                // if group timeremaining < 24h -> danger
-            //});
+            this.model.set(C); // append constants to model
+            
+            this.extendTimeRemaining(this.model.get('groups'));
+            this.extendTimeRemaining(this.model.get('proposals'));
         },
         
-        onShow: function() {
-            console.log(this.model.get('topics'));
+        extendTimeRemaining: function(objs) {
+            _.each(objs, function(obj) {
+                var daysDiff = moment(obj.nextDeadline).diff(moment(), 'days');
+                if(daysDiff > 0) {
+                    obj.timeRemaining = daysDiff + " days";
+                    obj.danger = 0;
+                } else {
+                    obj.timeRemaining = moment(obj.nextDeadline).diff(moment(), 'hours') + " hours";
+                    obj.danger = 1;
+                }
+            });
         }
     });
     

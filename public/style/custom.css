@@ -97,8 +97,8 @@ footer { font-size: 0.8em; text-align: center; }
 .nav-pills > li > a { background-color: #4e5d6c; }
 .nav-pills > li > a:focus, .nav-pills > li > a:hover { background-color: #485563; }
 
-.nav-pills > li > a.pill-danger { background-color: #d9534f; }
-.nav-pills > li > a.pill-danger:focus, .nav-pills > li > a.pill-danger:hover { background-color: #c9302c; }
+.nav-pills > li > .pill-danger { background-color: #d9534f; }
+.nav-pills > li > .pill-danger:focus, .nav-pills > li > .pill-danger:hover { background-color: #c9302c; }
 
-.nav-pills > li > a.pill-success { background-color: #5cb85c; }
-.nav-pills > li > a.pill-success:focus, .nav-pills > li > a.pill-success:hover { background-color: #449d44; }
+.nav-pills > li > .pill-success { background-color: #5cb85c; }
+.nav-pills > li > .pill-success:focus, .nav-pills > li > .pill-success:hover { background-color: #449d44; }

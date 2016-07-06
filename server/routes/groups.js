@@ -203,7 +203,7 @@ exports.list = function(req, res) {
 
 function getMemberProposalBodyAndRating(member,gid,uid) {
     return db.collection('proposals').findOneAsync(
-        { 'uid': member._id, 'gid': gid }).then(function(proposal) {
+        { 'source': member._id, 'gid': gid }).then(function(proposal) {
         // get proposal body
         var proposal_body_promise = utils.getPadBodyAsync(proposal.pid);
         

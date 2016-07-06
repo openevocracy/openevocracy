@@ -11,7 +11,7 @@
     <aside class="col-md-4">
         {{#ifis showTabs 1}}<div class="block">{{> topic_tabs}}</div>{{/ifis}}
         {{#ifis stage STAGE_PASSED}}<div class="block">{{> topic_final}}</div>{{/ifis}}
-        {{#ifis stage STAGE_CONSENSUS}}<div class="block">{{> topic_levels}}</div>{{/ifis}}
+        {{#ifisOr stage STAGE_CONSENSUS STAGE_PASSED}}<div class="block">{{> topic_levels}}</div>{{/ifisOr}}
         <div class="block">{{> topic_author}}</div>
         <div class="block">{{> topic_statistics}}</div>
     </aside>

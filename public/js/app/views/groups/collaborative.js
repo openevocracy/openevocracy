@@ -44,6 +44,7 @@ define([
         
         onShow: function() {
             setActive('ourprop');
+            //setActive('nav-'+this.model.get('_id'));
             
             Pad.onShow.bind(this)();
         },

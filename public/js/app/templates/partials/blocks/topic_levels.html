@@ -2,17 +2,10 @@
 
 <div class="block-content levels-block">
     <ul  class="nav nav-pills nav-stacked">
-        <li data-link="level-4">
-            <a class="pill-success" href=""><i class="fa fa-align-justify" aria-hidden="true"></i> Level 4 <span class="label pull-right">1/2</span></a>
+        {{#each levels}}
+        <li data-link="level-{{math ../maxlevel "-" @index}}">
+            <a class="{{#ifis ../stage ../STAGE_CONSENSUS}}{{#ifis @index 0}}pill-success{{/ifis}}{{/ifis}}" href="#"><i class="fa fa-align-justify" aria-hidden="true"></i> Level {{math ../maxlevel "-" @index}}<span class="label pull-right">{{this.groups}} groups / {{this.participants}} users</span></a>
         </li>
-        <li data-link="level-3">
-            <a href=""><i class="fa fa-align-justify" aria-hidden="true"></i> Level 3 <span class="label pull-right">2/6</span></a>
-        </li>
-        <li data-link="level-2">
-            <a href=""><i class="fa fa-align-justify" aria-hidden="true"></i> Level 2 <span class="label pull-right">6/27</span></a>
-        </li>
-        <li data-link="level-1">
-            <a href=""><i class="fa fa-align-justify" aria-hidden="true"></i> Level 1 <span class="label pull-right">27/121</span></a>
-        </li>
+        {{/each}}
     </ul>
 </div>

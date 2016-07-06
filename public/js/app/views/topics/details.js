@@ -1,4 +1,5 @@
 define([
+    'underscore',
     'underscore_string',
     'jquery',
     'Marionette',
@@ -10,6 +11,7 @@ define([
     'jquerycountdown',
 ], function(
     _,
+    __,
     $,
     Marionette,
     moment,
@@ -25,11 +27,6 @@ define([
         id: "topic-details",
         
         events: {
-            /*'click .open-desc': function(e) {
-                //alert(ht);
-                $('#body').animate({height: ht + 'px'}, 500 );
-                $('.open-desc').slideUp(250);
-            },*/
             'click .edit': function(e) {
                 if($('.edit').hasClass('active')) {
                     $('.edit').removeClass('active');
@@ -53,14 +50,6 @@ define([
                     $('.edit').prop('title', 'leave editor mode and save changes');
                     // etherpad
                     $('#body').hide();
-                    //$('.open-desc').hide();
-                    // $('#editor').pad({
-                    //     'padId': this.model.get('pid'),
-                    //     'height' : 400,
-                    //     'noColors' : true,
-                    //     'borderStyle' : 'none',
-                    //     'showControls' : true
-                    // });
                     Pad.onShow.bind(this)();
                     // title
                     var inputField = '<input id="titleInput" class="simple-input" type="text" value="'+this.model.get('title')+'"></input>';
@@ -93,35 +82,34 @@ define([
         },
         
         initialize: function() {
-            
             this.model.set(C);
             this.model.set('title', this.model.get('name'));
             this.setSubtitle();
+            
+            // levels
+            var levels = this.model.get('levels');
+            this.model.set('levels', levels.reverse());
+            this.model.set('maxlevel', _.size(levels));
+            
             // render on change
             this.model.on('change', this.render, this);
             
             var body = this.model.get('body');
             var error = 'Error';
-            if(_.startsWith(body, error)) {
+            if(__.startsWith(body, error)) {
                 this.model.set('body', '');
                 this.model.set('message', body);
                 this.model.set('message-type','alert alert-danger');
             }
-                
         },
 
         onRender: function() {
             this.onAction();
-            
-            /*ht = $('#body').height();
-            if(ht > 300) {
-                $('#body').height(200);
-                $('.open-desc').css("display", "block");
-            }*/
         },
         
         onShow: function() {
             this.onAction();
+            //setActive('nav-'+this.model.get('_id'));
         },
         
         onAction: function() {
@@ -151,7 +139,7 @@ define([
             // set variables
             var stage = this.model.get('stage');
             var subtitle_begin = this.model.get('stageName') + ' stage';
-            var subtitle_level = ' in level ' + this.model.get('level');
+            var subtitle_level = ' in level ' + (this.model.get('level') + 1);
             var subtitle_remaining = ' in <span id="timeremaining"></span>';
             var subtitle_next = '';
             

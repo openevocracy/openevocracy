@@ -36,6 +36,7 @@ define([
         
         onShow: function() {
             setActive('grpmem');
+            //setActive('nav-'+this.model.get('_id'));
             
             /*$('[data-toggle="popover"]').popover();*/
             $('[data-toggle="tooltip"]').tooltip();

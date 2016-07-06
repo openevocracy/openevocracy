@@ -54,8 +54,8 @@ exports.create_topic_consensus_stage = function(req, res) {
     
     // create proposals for this group
     db.collection('proposals').insert(
-                  [{'tid':tid,'gid':gid,'uid':upatrick},
-                   {'tid':tid,'gid':gid,'uid':ucarlo}],
+                  [{'tid':tid,'gid':gid,'source':upatrick},
+                   {'tid':tid,'gid':gid,'source':ucarlo}],
                   function (){});
     
     res.sendStatus(200);
@@ -133,7 +133,7 @@ exports.remix_groups = function(req, res) {
         'stage': C.STAGE_CONSENSUS,
         'level': 0,
         'nextDeadline': Date.now()}).
-    then(_.partial(fill_topic_participants,tid,53)).
+    then(_.partial(fill_topic_participants,tid,1500)).
     then(_.partial(groups.createGroups,{'_id':tid})).
     then(_.partial(promiseWhile,
         function condition() {

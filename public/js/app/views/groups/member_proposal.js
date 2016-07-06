@@ -25,6 +25,7 @@ define([
         
         onShow: function() {
             setActive('grpmem-'+this.model.get('member')._id);
+            //setActive('nav-'+this.model.get('_id'));
         }
     });
     

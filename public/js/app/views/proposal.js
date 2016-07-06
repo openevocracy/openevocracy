@@ -39,20 +39,13 @@ define([
                     $('.edit').prop('title', 'leave editor mode and save changes');
                     // etherpad
                     $('.body').hide();
-                    // $('#editor').pad({
-                    //     'padId': this.model.get('pid'),
-                    //     'height' : 400,
-                    //     'noColors' : true,
-                    //     'borderStyle' : 'none',
-                    //     'showControls' : true
-                    // });
                     Pad.onShow.bind(this)();
                 }
             }
         },
         
         onShow: function() {
-            console.log(this.model.attributes);
+            //setActive('nav-'+this.model.get('_id'));
         },
         
         onBeforeRender: function() {
