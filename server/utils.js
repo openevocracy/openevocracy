@@ -40,29 +40,6 @@ exports.checkArrayEntryExists = function(objs,obj) {
                        ObjectIdToStringMapper(obj)) != undefined;
 };
 
-exports.getPadBodyAsync = function(pid) {
-    // get html export
-    var padurl = cfg.ETHERPAD_HOST+pid+'/export/html';
-    return rp.get(padurl).then(function(data) {
-        
-        //var body = data.statusCode;
-        var str = data.replace(/\r?\n/g, "");
-        var body = str.replace(/^.*?<body[^>]*>(.*?)<\/body>.*?$/i,"$1");
-        
-        return body;
-    }).timeout(1000).catch(function (err) {
-        return err.message;
-    });
-};
-
-exports.getPadPDFAsync = function(pid) {
-    // get pdf export
-    var padurl = cfg.ETHERPAD_HOST+pid+'/export/pdf';
-    return rp.get(padurl, {encoding: null}).catch(function (err) {
-        return err.message;
-    });
-};
-
 exports.initializeMail = function() {
     var smtpConfig = {
         host: 'smtp.openevocracy.org',
@@ -80,7 +57,7 @@ exports.initializeMail = function() {
     Promise.props(smtpConfig).then(function(smtpConfig) {
         this.transporter = nodemailer.createTransport(smtpConfig);
     }.bind(this));
-}
+};
 
 exports.sendMail = function(mailTo, mailSubject, mailText) {
     var mailOptions = {
@@ -100,4 +77,4 @@ exports.sendMail = function(mailTo, mailSubject, mailText) {
     } else {
         console.log('Message was NOT sent: Configurations flag MAIL was set to false');
     }
-}
+};

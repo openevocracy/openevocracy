@@ -21,6 +21,13 @@ define([
             
             this.extendTimeRemaining(this.model.get('groups'));
             this.extendTimeRemaining(this.model.get('proposals'));
+            
+            var showTopicsHeader = false;
+            _.each(this.model.get('topics'), function(topic){
+                if(topic.stage != C.STAGE_REJECTED)
+                    showTopicsHeader = true;
+            });
+            this.model.set('showTopicsHeader', showTopicsHeader);
         },
         
         extendTimeRemaining: function(objs) {

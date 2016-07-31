@@ -133,7 +133,7 @@ exports.remix_groups = function(req, res) {
         'stage': C.STAGE_CONSENSUS,
         'level': 0,
         'nextDeadline': Date.now()}).
-    then(_.partial(fill_topic_participants,tid,1500)).
+    then(_.partial(fill_topic_participants,tid,10)).
     then(_.partial(groups.createGroups,{'_id':tid})).
     then(_.partial(promiseWhile,
         function condition() {

@@ -5,8 +5,8 @@
 <div class="pull-right">
     {{#ifis stage STAGE_SELECTION}}
     <div class="buttons">
-        <button class="btn btn-sm btn-default vote{{#if voted}} active{{/if}}" title="{{#if joined}}unvote{{else}}vote{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
-        <button class="btn btn-sm btn-default join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
+        <button class="btn btn-sm btn-default vote{{#if voted}} active{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
+        <button class="btn btn-sm btn-default join{{#if joined}} active{{/if}}{{#unless voted}} hidden{{/unless}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
     </div>
     {{else}}
         {{#ifis stage STAGE_REJECTED}}

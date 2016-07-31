@@ -4,7 +4,7 @@
     {{/ifis}}
     
     {{#ifisOr stage STAGE_SELECTION STAGE_PROPOSAL}}
-    <button class="btn btn-default btn-sm join{{#if joined}} active{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
+    <button class="btn btn-default btn-sm join{{#if joined}} active{{/if}}{{#unless voted}} hidden{{/unless}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
     <!-- TODO in v0.2 <button class="btn btn-default btn-sm merge" title="merge request"><span class="fa"></span></button>-->
     {{/ifisOr}}
     

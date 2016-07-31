@@ -33,8 +33,10 @@ define([
                     $('.edit span').removeClass('fa-floppy-o');
                     $('.edit span').addClass('fa-pencil');
                     $('.edit').prop('title', 'edit');
-                    // etherpad
-                    $('#editor').find('iframe').remove();
+                    // pad
+                    $('#body').removeClass("hidden");
+                    $('.editor-wrapper').addClass("hidden");
+                    //$('#editor').find('iframe').remove();
                     // title
                     this.model.set('title', $('#titleInput').val());
                     var titleHeading = '<h2 id="topic-title">'+this.model.get('title')+'</h2>';
@@ -48,9 +50,9 @@ define([
                     $('.edit span').addClass('fa-floppy-o');
                     $('.edit span').removeClass('fa-pencil');
                     $('.edit').prop('title', 'leave editor mode and save changes');
-                    // etherpad
-                    $('#body').hide();
-                    Pad.onShow.bind(this)();
+                    // pad
+                    $('.editor-wrapper').removeClass("hidden");
+                    $('#body').addClass("hidden");
                     // title
                     var inputField = '<input id="titleInput" class="simple-input" type="text" value="'+this.model.get('title')+'"></input>';
                     $('#topic-title').replaceWith(inputField);
@@ -109,6 +111,9 @@ define([
         
         onShow: function() {
             this.onAction();
+            
+            // initalize pad
+            Pad.onShow.bind(this)(); // binding gives access to the pad id
             //setActive('nav-'+this.model.get('_id'));
         },
         
@@ -153,9 +158,11 @@ define([
             
             // set model
             this.model.set('subtitle',subtitle);
+        },
+        
+        updateDocumentState: function() {
+            Pad.updateDocumentState.bind(this)();
         }
-        
-        
     });
     
     return View;

@@ -42,6 +42,9 @@
     "stream-buffers": "^3.0.0",
     "underscore": "*",
     "underscore.string": "*",
-    "validate.js": "*"
+    "validate.js": "*",
+    "jsdom": "*",
+    "quill": "*",
+    "phantom-html2pdf": "*"
   }
 }

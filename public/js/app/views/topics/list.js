@@ -78,6 +78,9 @@ define([
         initialize: function() {
             _.bindAll.apply(_, [this].concat(_.functions(this)));
             App.eventAggregator.bind('destroyTopic', this.onDestroyTopic);
+            
+            // initialize filter settings
+            this.stageSelected = {"-1": false, "0": true, "1": true, "2": true, "3": true};
         },
         
         onDestroyTopic: function(topic) {
@@ -88,8 +91,8 @@ define([
             setActive('topics');
         },
         
-        stageSelected: {"-1": false, "0": true, "1": true, "2": true, "3": true},
         selectStage: function(stage, val) {
+            console.log(this.model.get("stageSelected"));
             this.stageSelected[stage] = val;
             this.render();
         },

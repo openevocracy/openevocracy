@@ -11,6 +11,7 @@ var CronJob = require('cron').CronJob;
 var C = requirejs('public/js/setup/constants');
 var cfg = requirejs('public/js/setup/configs');
 var groups = require('./groups');
+var pads = require('../pads');
 var utils = require('../utils');
 
 function getDeadline(nextStage, prevDeadline, levelDuration) {
@@ -41,34 +42,41 @@ function getDeadline(nextStage, prevDeadline, levelDuration) {
 
 function manageConsensusStage(topic,levelDuration) {
     return groups.remixGroupsAsync(topic).then(function(nextStage) {
-        var update_set_proposal;
+        var update_set_promise;
         switch(nextStage) {
         case C.STAGE_CONSENSUS:
             // updates below are only required while we are in consensus stage
-            update_set_proposal = {
+            update_set_promise = {
                 'level': (++topic.level),
                 'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,undefined,levelDuration))
             };
             break;
         case C.STAGE_PASSED:
-            // save pad as pdf
             var tid = topic._id;
-            var filename = path.join(appRoot.path,'files/documents',tid+'.pdf');
-            utils.getPadPDFAsync(tid).then(function(data) {return fs.writeFileAsync(filename,data);});
+            
+            // get the pad id of final document
+            // e.g. the proposal pad id of the group in the last level
+            var finalDocumentPadIdPromise = db.collection('groups').
+                findOneAsync({'tid': tid, 'level': topic.level},{'ppid': true}).
+                get('ppid');
+            
+            // get pad pdf and save it
+            finalDocumentPadIdPromise.then(pads.getPadPDFAsync).then(function(data) {
+                var filename = path.join(appRoot.path,'files/documents',tid+'.pdf');
+                return fs.writeFileAsync(filename,data);
+            });
             
             // updates below are only required if consensus stage is over
-            update_set_proposal = {
+            update_set_promise = {
                 'stage': (topic.stage = C.STAGE_PASSED),
                 'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_PASSED)),
                 'stagePassedStarted': Date.now(),
-                'finalDocument': db.collection('groups').
-                    findOneAsync({'tid': topic._id, 'level': topic.level},{'ppid': true}).
-                    get('ppid').then(utils.getPadBodyAsync)
+                'finalDocument': finalDocumentPadIdPromise.then(pads.getPadHTMLAsync)
             };
             break;
         case C.STAGE_REJECTED:
             // updates below are only required if topic was rejected
-            update_set_proposal = {
+            update_set_promise = {
                 'stage': (topic.stage = C.STAGE_REJECTED),
                 'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_REJECTED)),
                 'stageRejectedStarted': Date.now()
@@ -79,7 +87,7 @@ function manageConsensusStage(topic,levelDuration) {
         }
         
         // update database
-        return Promise.props(update_set_proposal).then(function(update_set) {
+        return Promise.props(update_set_promise).then(function(update_set) {
             return db.collection('topics').updateAsync(
                 _.pick(topic, '_id'), { $set: update_set }, {}).
                 return(_.extend(topic,update_set));
@@ -182,7 +190,7 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     // get pad body if asked for
     var pad_body_promise = null;
     if(with_details)
-        pad_body_promise = utils.getPadBodyAsync(topic.pid);
+        pad_body_promise = pads.getPadHTMLAsync(topic.pid);
     
     // get number of participants and votes in this topic
     var topic_votes_promise = db.collection('topic_votes').
