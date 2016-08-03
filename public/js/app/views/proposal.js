@@ -26,31 +26,43 @@ define([
                     $('.edit span').removeClass('fa-floppy-o');
                     $('.edit span').addClass('fa-pencil');
                     $('.edit').prop('title', 'edit');
-                    Pad.remove();
+                    // pad
+                    $('#body').removeClass("hidden");
+                    $('.editor-wrapper').addClass("hidden");
+                    $('.docstate').addClass("hidden");
                     this.model.fetch().done(function () {
-                        $('.body').html(this.model.get('body'));
-                        $('.body').show();
+                        $('#body').html(this.model.get('body'));
+                        //$('#body').show();
                     }.bind(this));
+                    //this.render();
                     
                 } else {
                     $('.edit').addClass('active');
                     $('.edit span').addClass('fa-floppy-o');
                     $('.edit span').removeClass('fa-pencil');
                     $('.edit').prop('title', 'leave editor mode and save changes');
-                    // etherpad
-                    $('.body').hide();
-                    Pad.onShow.bind(this)();
+                    // pad
+                    $('.editor-wrapper').removeClass("hidden");
+                    $('#body').addClass("hidden");
+                    $('.docstate').removeClass("hidden");
                 }
             }
         },
         
         onShow: function() {
             //setActive('nav-'+this.model.get('_id'));
+            
+            // initalize pad
+            Pad.onShow.bind(this)();
         },
         
         onBeforeRender: function() {
             this.model.set('title', this.viewTitle);
         },
+        
+        updateDocumentState: function() {
+            Pad.updateDocumentState.bind(this)();
+        }
     });
     
     return View;

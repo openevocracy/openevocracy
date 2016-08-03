@@ -1,9 +1,9 @@
-<h3>Member's docs</h3>
+<h3 class="members-docs-heading">Member's docs <span class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="These are the proposal from the members of your group. All names were randomly generated and will be different in every group."></span></h3>
 <div class="block-content members-pads-block">
     <ul class="nav nav-pills nav-stacked">
         {{#each members}}
         <li data-link="grpmem-{{this._id}}" data-link-parents="">
-            <a class="member-proposal" data-member-id="{{this._id}}"><span class="user-color" style="background-color: {{this.color}};"></span>{{this.name}}</a>
+            <a class="member-proposal{{#if this.is_me}} member-me-proposal{{/if}}" data-member-id="{{this._id}}"><span class="user-color" style="background-color: {{this.color}};"></span>{{this.name}}</a>
         </li>
         {{/each}}
     </ul>

@@ -46,6 +46,8 @@ define([
             setActive('ourprop');
             //setActive('nav-'+this.model.get('_id'));
             
+            $('[data-toggle="tooltip"]').tooltip();
+            
             Pad.onShow.bind(this)();
         },
         

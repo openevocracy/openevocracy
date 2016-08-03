@@ -7,6 +7,7 @@ var richText = require('rich-text');
 var ottype = richText.type;
 var Delta = richText.Delta;
 var dom = require('jsdom');
+var Quill = require('quill');
 var pdf = require('phantom-html2pdf');
 var ObjectId = require('mongodb').ObjectID;
 var db = require('./database').db;
@@ -136,7 +137,6 @@ function getDocHTMLAsync(doc) {
       navigator = window.navigator;
       document.getSelection = function() {return null};
       
-      var Quill = require('quill');
       var editor = new Quill("#editor");
       console.log(doc.content);
       editor.updateContents(doc.content);

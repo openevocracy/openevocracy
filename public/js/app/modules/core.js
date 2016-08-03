@@ -17,7 +17,7 @@ define([
     'text!templates/partials/blocks/topic_levels.html',
     'text!templates/partials/blocks/topic_author.html',
     'text!templates/partials/blocks/topic_final.html',
-    'text!templates/partials/blocks/group_docstate.html',
+    'text!templates/partials/blocks/block_docstate.html',
     'text!templates/partials/blocks/group_tabs.html',
     'text!templates/partials/blocks/group_proposals.html',
     'text!templates/partials/blocks/proposal_tabs.html',
@@ -77,7 +77,7 @@ define([
     Handlebars.registerPartial('topic_levels', TopicLevelsBlockPartials);
     Handlebars.registerPartial('topic_author', TopicAuthorBlockPartials);
     Handlebars.registerPartial('topic_final', TopicFinalBlockPartials);
-    Handlebars.registerPartial('group_docstate', GroupDocStateBlockPartials);
+    Handlebars.registerPartial('block_docstate', GroupDocStateBlockPartials);
     Handlebars.registerPartial('group_tabs', GroupTabsBlockPartials);
     Handlebars.registerPartial('group_proposals', GroupProposalsBlockPartials);
     Handlebars.registerPartial('proposal_tabs', ProposalTabsBlockPartials);

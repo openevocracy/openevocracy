@@ -4,9 +4,22 @@ small { font-size: 11px; }
 .fa { margin-right: 0.1em; }
 .btn.active .fa { color: #5cb85c; }
 .tr.active .fa { color: #aaa; }
+.block { margin-bottom: 5px; }
 .btn-block { text-align: left; }
 .table a { display: block; }
 .table th { cursor: default; }
+
+.h2-edit {
+    background-color: #485563;
+    border: 0;
+    color: inherit;
+    font-size: 32px;
+    padding: 2px;
+    margin-top: 21px;
+    margin-bottom: 10.5px;
+    font-weight: 300;
+    line-height: 1.1;
+}
 
 #logo {
     padding-left: 45px;
@@ -27,6 +40,14 @@ small { font-size: 11px; }
 
 #loading .fa { font-size: 40px; }
 
+/* ### CONTAINER WIDTH ### */
+
+@media (min-width: 1600px) {
+  .container {
+    width: 1270px;
+  }
+}
+
 /* ### VIEWS ### */
 
 .page-header { margin-top: 0; }
@@ -37,6 +58,8 @@ small { font-size: 11px; }
 .docstate-block .state-stars { margin-bottom: 5px; }
 main aside div:first-child h3 { margin-top: 0; }
 .levels-block .label { line-height: 15px; }
+.members-docs-heading span { font-size: 12px; }
+.nav-pills > li > a.member-me-proposal { background-color: #3d4954; }
 
 /* #### FOOTER #### */
 

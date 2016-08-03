@@ -68,10 +68,18 @@
     hbs: {
       templateExtension: '.html',
       partialsUrl: 'templates/partials'
-    }
+    },
+    config: {i18n: {locale: 'de'}}
   });
   
-  require(['underscore','backbone','handlebars'], function(_, Backbone, Handlebars) {
+  require(['underscore','backbone','handlebars','i18n!nls/lang'], function(_, Backbone, Handlebars, i18n) {
+    // register handlebars i18n helper
+    Handlebars.registerHelper('i18n',
+        function(str) {
+            return (i18n != undefined ? (i18n[str] != undefined ? i18n[str] : str) : str);
+        }
+    );
+    
     // register handlebars helper for equality conditions
     Handlebars.registerHelper('ifis', function(a, b, opts) {
       if(a == b) {
@@ -125,7 +133,7 @@
     /*$('[data-toggle="popover"]').on('DOMNodeInserted') popover();
     $(document).on('DOMNodeInserted','[data-toggle="tooltip"]',
       function(e) {e.target.tooltip();});*/
-
+    
     require(['application','isactive'], function(Application) {
       App = new Application();
       App.start();

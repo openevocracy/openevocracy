@@ -6,6 +6,7 @@ var requirejs = require('requirejs');
 
 var C = requirejs('public/js/setup/constants');
 var utils = require('../utils');
+var pads = require('../pads');
 
 exports.query = function(req, res) {
     var tid = ObjectId(req.params.id);
@@ -39,13 +40,13 @@ exports.query = function(req, res) {
         return Promise.join(topic, get_proposal_promise);
     }).spread(function(topic, proposal) {
         // get pad_body
-        var get_pad_body_promise = utils.getPadBodyAsync(proposal.pid);
+        var get_pad_html_promise = pads.getPadHTMLAsync(proposal.pid);
         // pad can only be edited in proposal stage
         if(topic.stage != C.STAGE_PROPOSAL)
             delete proposal.pid;
         
         // append pad body
-        return Promise.props(_.extend(proposal,{'body': get_pad_body_promise}));
+        return Promise.props(_.extend(proposal,{'body': get_pad_html_promise}));
     }).then(_.bind(res.json,res))
       .catch(utils.isOwnError,utils.handleOwnError(res));
 };

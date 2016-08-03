@@ -14,14 +14,14 @@
         {{else}}
             {{#ifis stage STAGE_PASSED}}
             <div class="buttons">
-                <a class="btn btn-sm btn-default btn-success doc" title="Final document" href="file/topic/final/{{_id}}" target="_blank"><span class="fa fa-file-text-o"></span> Final document</a>
+                <a class="btn btn-sm btn-default btn-success doc" title="{{i18n 'Final document'}}" href="file/topic/final/{{_id}}" target="_blank"><span class="fa fa-file-text-o"></span>{{i18n 'Final document'}}</a>
             </div>
             {{else}}
             <div class="time-remaining">
                 <div>
                     Completion of 
                     {{#ifis stage STAGE_CONSENSUS}}
-                        level {{level}}
+                        level {{math level "+" 1}}
                     {{else}}
                         {{stageName}} stage
                     {{/ifis}}
@@ -45,9 +45,9 @@
             {{#ifis stage STAGE_CONSENSUS}}started: {{consensusDate}}{{/ifis}}
             {{#ifis stage STAGE_PASSED}}passed: {{passedDate}}{{/ifis}}
             
-            {{#ifis stage STAGE_SELECTION}}, {{votes}} votes{{/ifis}},
-            {{participants}} participants
-            {{#ifis stage STAGE_PROPOSAL}}, X proposals{{/ifis}}
+            {{#ifis stage STAGE_SELECTION}}, {{votes}} {{i18n "votes"}}{{/ifis}},
+            {{participants}} {{i18n "participants"}}
+            {{#ifis stage STAGE_PROPOSAL}}, X {{i18n "proposals"}}{{/ifis}}
         {{/ifis}}
     </div>
 </div>

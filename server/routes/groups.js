@@ -7,6 +7,7 @@ var requirejs = require('requirejs');
 
 var C = requirejs('public/js/setup/constants');
 var ratings = require('./ratings');
+var pads = require('../pads');
 var utils = require('../utils');
 
 function calculateNumberOfGroups(numTopicParticipants) {
@@ -205,7 +206,7 @@ function getMemberProposalBodyAndRating(member,gid,uid) {
     return db.collection('proposals').findOneAsync(
         { 'source': member._id, 'gid': gid }).then(function(proposal) {
         // get proposal body
-        var proposal_body_promise = utils.getPadBodyAsync(proposal.pid);
+        var proposal_body_promise = pads.getPadHTMLAsync(proposal.pid);
         
         // get proposal rating
         var proposal_rating_promise = 

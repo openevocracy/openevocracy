@@ -1,14 +1,14 @@
 <div class="page-header">
-    <h2>Navigation</h2>
+    <h2>{{i18n "Navigation"}}</h2>
 </div>
 
 <ul class="nav nav-pills nav-stacked">
-    <li id="nav-tpc" data-link="topics"><a href="/#/topics">Home</a></li>
+    <li id="nav-tpc" data-link="topics"><a href="/#/topics">{{i18n "Home"}}</a></li>
 </ul>
 
 <!-- TODO: show max 3, 4 or 5 groups, use "read more" like link -->
 {{#if showTopicsHeader}}
-<h3>Topics</h3>
+<h3>{{i18n "Topics"}}</h3>
 <ul class="nav nav-pills nav-stacked nav-pills-sm">
 {{#each topics}}
     {{#ifisnot stage ../STAGE_REJECTED}}
@@ -20,7 +20,7 @@
 
 {{#if groups}}
 <!-- TODO: Popoup mit Namen der members -->
-<h3>Groups</h3>
+<h3>{{i18n "Groups"}}</h3>
 <ul class="nav nav-pills nav-stacked nav-pills-sm">
 {{#each groups}}
     <li><a class="{{#ifis this.danger 1}}pill-danger{{/ifis}}" href="/#/group/{{this._id}}"><i class="fa fa-users" aria-hidden="true"></i> {{this.name}}<br/><small>{{this.timeRemaining}} remaining</small></a></li>

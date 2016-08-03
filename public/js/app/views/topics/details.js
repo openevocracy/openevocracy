@@ -7,6 +7,7 @@ define([
     'hbs!templates/topics/details',
     'constants',
     'views/pad',
+    'i18n!nls/lang',
     'jquerycookie',
     'jquerycountdown',
 ], function(
@@ -17,7 +18,8 @@ define([
     moment,
     Template,
     C,
-    Pad
+    Pad,
+    lang
     ) {
     
     var View = Marionette.ItemView.extend({
@@ -36,7 +38,6 @@ define([
                     // pad
                     $('#body').removeClass("hidden");
                     $('.editor-wrapper').addClass("hidden");
-                    //$('#editor').find('iframe').remove();
                     // title
                     this.model.set('title', $('#titleInput').val());
                     var titleHeading = '<h2 id="topic-title">'+this.model.get('title')+'</h2>';
@@ -54,7 +55,7 @@ define([
                     $('.editor-wrapper').removeClass("hidden");
                     $('#body').addClass("hidden");
                     // title
-                    var inputField = '<input id="titleInput" class="simple-input" type="text" value="'+this.model.get('title')+'"></input>';
+                    var inputField = '<input id="titleInput" class="h2-edit" type="text" value="'+this.model.get('title')+'"></input>';
                     $('#topic-title').replaceWith(inputField);
                 }
             },
@@ -129,15 +130,6 @@ define([
                 (this.model.get('joined')) &&
                 (stage == C.STAGE_PROPOSAL || stage == C.STAGE_CONSENSUS);
             this.model.set('showTabs', showTabs);
-            
-            // FIXME what's this?
-            /*if( stage == C.STAGE_CONSENSUS &&
-            (typeof this.model.get('gid') !== undefined ||
-             typeof this.model.get('gid') !== null)) {
-                this.model.set('showTabs', true);
-            } else {
-                this.model.set('showTabs', false);
-            }*/
         },
         
         setSubtitle: function() {
