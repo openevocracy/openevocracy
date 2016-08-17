@@ -15,5 +15,12 @@ define({
     "Save": "Speichern",
     "Cancel": "Abbrechen",
     
-    "Final document": "Finales Dokument"
+    "Final document": "Finales Dokument",
+    
+    "Filter by stage": "Stufe filtern",
+    "Order by time": "Zeitliche Sortierung",
+    "Oldest topics first": "Älteste Themen zuerst",
+    "Newest topics first": "Neuste Themen zuerst",
+    
+    "%D days and %H:%M:%S": "%D Tage und %H:%M:%S",
 });

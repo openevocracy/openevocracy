@@ -1,10 +1,12 @@
 define([
     'Marionette',
     'hbs!templates/topics/list_item',
+    'i18n!nls/lang',
     'constants'
 ], function(
     Marionette,
     Template,
+    i18n,
     C
     ) {
     var View = Marionette.ItemView.extend({
@@ -85,7 +87,8 @@ define([
             if(this.model.get('stage') != C.STAGE_SELECTION) {
                 var date = this.model.get('nextDeadline');
                 $("#timeremaining-"+this.model.get('_id')).countdown(date)
-                .on('update.countdown', function(event) { $(this).html(event.strftime('%D:%H:%M:%S')); });
+                .on('update.countdown', function(event) { $(this)
+                .html(event.strftime(i18n["%D days and %H:%M:%S"])); });
                 //.on('finish.countdown', function(event) { this.model.fetch(); }.bind(this));
                 // FIXME Register model on-change event handler that resets the countdown when a new model is loaded.
             }

@@ -5,26 +5,39 @@ define([
     'hbs!templates/topics/list',
     'views/topics/list_item',
     'models/topic',
+    'i18n!nls/lang'
     ], function(
     _,
     C,
     Marionette,
     Template,
     ChildView,
-    Model
+    Model,
+    i18n
     ) {
+    
+    var ListModel = Backbone.Spark.Model.extend({
+        sparks: {
+            title: function() {
+                return i18n['Current Topics'];
+            }
+        }
+    });
     
     var View = Marionette.CompositeView.extend({
         template: Template,
         tagName: 'section',
         id: "topics-list",
-        model: new Backbone.Model(C),
+        model: new ListModel(C),
         
         //viewComparator: 'stage',
         viewComparator: function(t0,t1) {
             // sort by stage number
             var s0 = t0.get('stage');
             var s1 = t1.get('stage');
+            // sort by dea
+            var d0 = t0.get('nextDeadline');
+            var d1 = t1.get('nextDeadline');
             
             // special cases
             if(s0 < 0 && s1 >= 0)
@@ -33,7 +46,14 @@ define([
                 return -1;
             
             // normal comparison
-            return (s0 < s1) ? -1 : (s0 > s1) ? 1 : 0;
+            var stageComparison = (s0 < s1) ? -1 : (s0 > s1) ? 1 : 0;
+            
+            if(stageComparison != 0)
+                return stageComparison;
+            else {
+                var deadlineComparison = (d0 < d1) ? -1 : (d0 > d1) ? 1 : 0;
+                return this.deadlineSortFactor*deadlineComparison;
+            };
         },
         
         childView: ChildView,
@@ -79,8 +99,9 @@ define([
             _.bindAll.apply(_, [this].concat(_.functions(this)));
             App.eventAggregator.bind('destroyTopic', this.onDestroyTopic);
             
-            // initialize filter settings
+            // initialize filter/sort settings
             this.stageSelected = {"-1": false, "0": true, "1": true, "2": true, "3": true};
+            this.deadlineSortFactor = 1;
         },
         
         onDestroyTopic: function(topic) {
@@ -91,8 +112,12 @@ define([
             setActive('topics');
         },
         
+        setSortOldestFirst: function(sortOldestFirst) {
+            this.deadlineSortFactor = sortOldestFirst ? 1 : -1; 
+            this.render();
+        },
+        
         selectStage: function(stage, val) {
-            console.log(this.model.get("stageSelected"));
             this.stageSelected[stage] = val;
             this.render();
         },

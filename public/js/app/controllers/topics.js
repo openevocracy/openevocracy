@@ -29,6 +29,10 @@ define([
                 'click .stage': function(e) {
                     var $el = this.$(e.target);
                     this.listView.selectStage($el.val(), $el.is(":checked"));
+                },
+                'click .deadline': function(e) {
+                    var $el = this.$(e.target);
+                    this.listView.setSortOldestFirst($el.val() == "oldfirst");
                 }
             },
             

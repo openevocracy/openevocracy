@@ -13,8 +13,10 @@
       backbone: '//oss.maxcdn.com/backbonejs/1.2.1/backbone-min',
       BackboneDeepmodel: '//oss.maxcdn.com/backbone.deepmodel/0.10.4/deep-model.min',
       BackboneRouteFilter: '../vendor/backbone.routefilter.min',
+      BackboneSparks: '../vendor/backbone.spark',
       Marionette: '//oss.maxcdn.com/backbone.marionette/2.4.2/backbone.marionette.min',
-      handlebars: '//oss.maxcdn.com/handlebarsjs/3.0.3/handlebars.min',
+      //handlebars: '//oss.maxcdn.com/handlebarsjs/3.0.3/handlebars.min',
+      handlebars: 'https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min',
       ColorHash: '../bower_components/color-hash/dist/color-hash',
       bootstrap: '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
       bootstrapcustom: '../vendor/bootstrap.custom',
@@ -51,8 +53,12 @@
         deps: ['backbone'],
         exports: 'BackboneRouteFilter'
       },
+      BackboneSparks: {
+        deps: ['backbone'],
+        exports: 'BackboneSparks'
+      },
       Marionette: {
-        deps: ['jquery', 'underscore', 'BackboneRouteFilter'],
+        deps: ['jquery', 'underscore', 'BackboneRouteFilter', 'BackboneSparks'],
         exports: 'Marionette'
       },
       handlebars: {

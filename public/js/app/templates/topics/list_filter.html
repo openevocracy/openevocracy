@@ -1,6 +1,6 @@
-{{> header title='Filter'}}
+{{> header title='Filter and Sorting'}}
 
-<h3>Filter by stage</h2>
+<h3>{{i18n "Filter by stage"}}</h3>
 <div class="block-content">
     <form id="stagefilter">
         <input type="checkbox" class="stage" value="{{STAGE_SELECTION}}" checked /> Selection<br/>
@@ -9,4 +9,20 @@
         <input type="checkbox" class="stage" value="{{STAGE_PASSED}}" checked /> Passed<br/>
         <input type="checkbox" class="stage" value="{{STAGE_REJECTED}}" /> Rejected<br/>
     </form>
+</div>
+
+<hr/>
+
+<h3>{{i18n "Order by time"}}</h3>
+<div class="radio">
+  <label>
+    <input type="radio" name="deadline" class="deadline" id="oldfirst" value="oldfirst" checked>
+    {{i18n "Oldest topics first"}}
+  </label>
+</div>
+<div class="radio">
+  <label>
+    <input type="radio" name="deadline" class="deadline" id="newfirst" value="newfirst">
+    {{i18n "Newest topics first"}}
+  </label>
 </div>

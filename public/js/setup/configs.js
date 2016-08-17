@@ -1,5 +1,5 @@
 /* system values, later mainly replaced by user values or user means */
-var ONE_WEEK = 1000*60*60*24*7;
+var ONE_DAY = 1000*60*60*24;
 
 define({
     DEBUG : true,
@@ -7,9 +7,11 @@ define({
     
     MIN_PARTICIPANTS_PER_TOPIC : 2,
     
-    DURATION_SELECTION : ONE_WEEK,
-    DURATION_PROPOSAL  : ONE_WEEK,
-    DURATION_LEVEL     : ONE_WEEK,
+    LIMIT_SELECTION: 1, // default 20
+    
+    DURATION_SELECTION : 5*ONE_DAY,
+    DURATION_PROPOSAL  : 10*ONE_DAY,
+    DURATION_LEVEL     : 14*ONE_DAY,
     DURATION_NONE      : -1,
     
     EVOCRACY_HOST : 'https://mind-about-sagacitysite.c9.io',

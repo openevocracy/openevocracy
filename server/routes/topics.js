@@ -99,12 +99,10 @@ exports.manageConsensusStage = manageConsensusStage;
 /*
 checks if a minimum of one proposal exists
 */
-function checkForExistingProposal(topic) {
-    return db.collection('topic_participants').find({'tid': topic._id},{'uid': true}).
-    toArrayAsync().then(function(participants) {
-        return db.collection('proposals').
-            countAsync({'source': {$in: _.pluck(participants,'uid')}});
-    }).then(function(count) {return count > 0;});
+function isAccepted(topic) {
+    return db.collection('topic_participants').
+        countAsync({'tid': topic._id},{'uid': true}).
+        then(function(count) {return count >= C.LIMIT_SELECTION;});
 }
 
 function manageTopicState(topic) {
@@ -116,8 +114,8 @@ function manageTopicState(topic) {
     var prevDeadline = topic.nextDeadline;
     switch (topic.stage) {
         case C.STAGE_SELECTION: // we are currently in selection stage
-            return checkForExistingProposal(topic).then(function(condition) {
-                if(condition) {
+            return isAccepted(topic).then(function(isAccepted) {
+                if(isAccepted) {
                     // topic does meet the minimum requirements for the next stage
                     // move to next stage
                     topic.stage = C.STAGE_PROPOSAL;
@@ -472,11 +470,120 @@ exports.final = function(req, res) {
     res.sendFile(filename);
 };
 
+function sendEmailToAllTopicParticipants(topic, mailSubject, mailText) {
+    return db.collection('topic_participants').find({}, {'uid': true}).
+    toArrayAsync().then(function(participants) {
+        return db.collection('users').
+            find({ '_id': { $in: _.pluck(participants, 'uid') } }, {'email': true}).
+            toArrayAsync();
+    }).map(function(user) {
+        utils.sendMail(user.mailTo, mailSubject, mailText);
+        return Promise.resolve();
+    });
+}
+
+function sendEmailToAllActiveGroupMembers(topic, mailSubject, mailText) {
+    return db.collection('groups').find({ 'tid': topic.id, 'level': topic.level }).
+    toArrayAsync().then(function(groups) {
+        return db.collection('group_members').
+            find({ 'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
+    }).then(function(members) {
+        return db.collection('users').
+            find({ '_id': { $in: _.pluck(members, 'uid') } }, {'email': true}).
+            toArrayAsync();
+    }).map(function(user) {
+        utils.sendMail(user.mailTo, mailSubject, mailText);
+        return Promise.resolve();
+    });
+}
+
+function sendEmailToAllLazyGroupMembers(topic, mailSubject, mailText) {
+    return db.collection('groups').find({ 'tid': topic.id, 'level': topic.level }).
+    toArrayAsync().then(function(groups) {
+        return db.collection('group_members').
+            find({ 'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
+    }).filter(function(member) {
+        // filter out group members with timestamps older than five days
+        return Date.now() >= member.lastActivity + 5*C.DAY;
+    }).then(function(members) {
+        // update last activity timestamp
+        return db.collection('group_members').
+            updateAsync(
+                { 'uid': { $in: _.pluck(members, 'uid') } },
+                { $set: {'lastActivity': Date.now()} },
+                { multi: true }
+            ).return(members);
+    }).then(function(members) {
+        // get the users
+        return db.collection('users').
+            find({ '_id': { $in: _.pluck(members, 'uid') } }, {'email': true}).
+            toArrayAsync();
+    }).map(function(user) {
+        utils.sendMail(user.mailTo, mailSubject, mailText);
+        return Promise.resolve();
+    });
+}
+
+function sendTopicReminderMessages(topic) {
+    switch (topic.stage) {
+        case C.STAGE_PROPOSAL: // we are currently in proposal stage
+            if(Date.now() >= topic.nextDeadline-1*C.DAY) {
+                return sendEmailToAllTopicParticipants(
+                    'Proposal reminder: ' + topic.name,
+                    'You are participant of topic ' + topic.name + '. ' +
+                    'The topic will enter consensus stage in 24 hours.\n' +
+                    'We suggest to read your proposal once again at that time,' +
+                    'to eliminate last mistakes in your text.'
+                );
+            } else if(Date.now() >= topic.nextDeadline-3*C.DAY) {
+                return sendEmailToAllTopicParticipants(
+                    'Proposal reminder: ' + topic.name,
+                    'You are a participant of topic ' + topic.name + '. ' +
+                    'The topic will enter consensus stage in 3 days.\n' +
+                    'We highly suggest to check your proposal for final corrections.'
+                );
+            }
+            break;
+        case C.STAGE_CONSENSUS: // we are currently in consensus stage
+            sendEmailToAllLazyGroupMembers(
+                'Group inactivity reminder: ' + topic.name,
+                'You are a member of a group in ' + topic.name + '. ' +
+                'You were not active for 5 days in your group.\n' +
+                'Let\'s have a look at your common document, ' +
+                'probably someone added something new.'
+            );
+            if(Date.now() >= topic.nextDeadline-1*C.DAY) {
+                return sendEmailToAllActiveGroupMembers(
+                    'Group reminder: ' + topic.name,
+                    'You are a member of a group in ' + topic.name + '. ' +
+                    'The topic will enter consensus stage in 24 hours.\n' +
+                    'We suggest to read your collaborative document once again ' +
+                    'at that time, to eliminate last mistakes in your common text.'
+                );
+            } else if(Date.now() >= topic.nextDeadline-3*C.DAY) {
+                return sendEmailToAllActiveGroupMembers(
+                    'Group reminder: ' + topic.name,
+                    'You are a member of a group in ' + topic.name + '. ' +
+                    'The current level will end in 3 days.\n' +
+                    'We highly suggest to check your collaborative document ' +
+                    'for final corrections.'
+                );
+            }
+            break;
+    }
+    
+    return Promise.resolve();
+}
+
 // setup cronjob to run every minute
 var job = new CronJob({
   cronTime: '*/1 * * * *',
   onTick: function() {
-      db.collection('topics').find().toArrayAsync().map(manageTopicState);
+      db.collection('topics').find().toArrayAsync().map(function(topic) {
+        return sendEmailToAllLazyGroupMembers(topic, '', '').
+        then(_.partial(sendTopicReminderMessages,topic)).
+        then(_.partial(manageTopicState,topic));
+      });
   },
   start: true
 });
