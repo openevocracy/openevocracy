@@ -6,6 +6,7 @@ var Promise = require('bluebird');
 var requirejs = require('requirejs');
 var validate = require('validate.js');
 var topics = require('./topics');
+var mail = require('../mail');
 var utils = require('../utils');
 
 var C = requirejs('public/js/setup/constants');
@@ -67,12 +68,12 @@ exports.login = function(req, res) {
 
 function sendVerificationMail(user) {
     var subject = 'Your registration at Evocracy';
-    var text =  'Welcome '+ user._id.toString() +' at Evocracy,\n'+
-                'You just created an account at '+cfg.EVOCRACY_HOST+'.\n\n'+
-                'Please verify your email by visiting:\n'+
-                cfg.EVOCRACY_HOST+'/json/auth/verifyEmail/'+user._id.toString()+'\n\n'+
-                'If you did not register, just ignore this message.\n';
-    utils.sendMail(user.email, subject, text);
+    var text =  'Welcome '+ user._id.toString() +' at Evocracy,\r\n'+
+                'You just created an account at '+cfg.EVOCRACY_HOST+'.\r\n\r\n'+
+                'Please verify your email by visiting:\r\n'+
+                cfg.EVOCRACY_HOST+'/json/auth/verifyEmail/'+user._id.toString()+'\r\n\r\n'+
+                'If you did not register, just ignore this message.\r\n';
+    mail.sendMail(user.email, subject, text);
 }
 
 function loginUser(req, res, err, user) {
@@ -175,7 +176,13 @@ app.post("/api/auth/remove_account", function(req, res) {
     });
 });*/
 
-var groupsPromise;
+exports.query = function(req, res) {
+    var uid = ObjectId(req.params.id);
+    
+    db.collection('users').findOneAsync(
+        {'_id':uid},{'email':false,'pass':false,'auth_token':false}).
+        then(res.send.bind(res));
+};
 
 // GET /json/user/navi
 exports.navigation = function(req, res) {

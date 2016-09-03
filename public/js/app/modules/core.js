@@ -4,6 +4,7 @@ define([
     'controllers/login',
     'controllers/register',
     'controllers/navigation',
+    'controllers/user',
     'controllers/topics',
     'controllers/topic',
     'controllers/proposal',
@@ -27,6 +28,7 @@ define([
     Login,
     Register,
     Navi,
+    User,
     Topics,
     Topic,
     Proposal,
@@ -49,6 +51,7 @@ define([
     var login = new Login();
     var register = new Register();
     var navi = new Navi();
+    var user = new User();
     var topics = new Topics();
     var topic = new Topic();
     var proposal = new Proposal();
@@ -62,6 +65,7 @@ define([
         App.router.route('', 'topics_index', topics.route_topics_index.bind(topics));
         App.router.route('login', 'login_index', login.route_login_index.bind(login));
         App.router.route('register', 'register_index', register.route_register_index.bind(register));
+        App.router.route('user/:id', 'user_index', user.route_user_index.bind(user));
         App.router.route('topics', 'topics_index', topics.route_topics_index.bind(topics));
         App.router.route('topic/:id', 'topic_index', topic.route_topic_index.bind(topic));
         App.router.route('proposal/:id', 'proposal_index', proposal.route_proposal_index.bind(proposal));

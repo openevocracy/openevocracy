@@ -22,6 +22,8 @@ define([
             this.extendTimeRemaining(this.model.get('groups'));
             this.extendTimeRemaining(this.model.get('proposals'));
             
+            console.log(this.model.get('proposals'));
+            
             var showTopicsHeader = false;
             _.each(this.model.get('topics'), function(topic){
                 if(topic.stage != C.STAGE_REJECTED)

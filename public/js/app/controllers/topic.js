@@ -10,8 +10,8 @@ define([
     C
     ) {
     var Controller = Marionette.Controller.extend({
-        route_topic_index: function(id) {
-            var topic = new Model({_id:id});
+        route_topic_index: function(tid) {
+            var topic = new Model({'_id':tid});
             topic.fetch().done(function () {
                 var topicView = new TopicView({model:topic});
                 App.layout.view.show(topicView);

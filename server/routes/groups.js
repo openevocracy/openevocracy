@@ -8,7 +8,7 @@ var requirejs = require('requirejs');
 var C = requirejs('public/js/setup/constants');
 var ratings = require('./ratings');
 var pads = require('../pads');
-var utils = require('../utils');
+var mail = require('../mail');
 
 function calculateNumberOfGroups(numTopicParticipants) {
     
@@ -93,18 +93,18 @@ exports.createGroups = function(topic) {
         // send mail to notify new group users
         var send_mail_promise =
         db.collection('users').find({'_id': { $in: group }},{'email': true}).
-        toArrayAsync().then(function(emails) {
-            utils.sendMail(emails.join(),
-                'Consensus stage has started!',
-                'Dear participant,\n\n \
-                 The consensus stage of the topic '+topic.name+
-                ' has just started and you are part of it.\n \
-                 You have been assigned to the group '+gid.toString+'.\n \
-                 You and four other team members will be working on a joint proposal.\n\n \
-                 Please find the group\'s link here:\n \
-                 http://mind-about-sagacitysite.c9.io/group/'+gid.toString()+'\n\n \
-                 Thank you for your help!\n \
-                 Evocracy - Democracy Evolved');
+        toArrayAsync().then(function(users) {
+            mail.sendMail(_.pluck(users,'email').join(),
+                topic.name + ' reached consensus stage',
+                'Dear participant,\r\n\r\n' +
+                'The consensus stage of the topic ' + topic.name +
+                ' has just started and you are part of it.\r\n' +
+                'You have been assigned to the group '+gid.toString()+'.\r\n' +
+                'You and four other team members will be working on a joint proposal.\r\n\r\n' +
+                'Please find the group\'s link here:\r\n' +
+                'http://mind-about-sagacitysite.c9.io/group/'+gid.toString()+'\r\n\r\n' +
+                'Thank you for your help!\r\n' +
+                'Evocracy - Democracy Evolved');
         });
         
         // store group in database
@@ -114,7 +114,8 @@ exports.createGroups = function(topic) {
         // append gid to proposal so we can identify it later
         var update_source_proposals_promise =
         db.collection('proposals').updateAsync(
-            { 'tid': tid, 'uid': { $in: group } }, { $set: { 'sink': gid } });
+            { 'tid': tid, 'source': { $in: group } },
+            { $set: { 'sink': gid } }, {'multi': true});
         
         return Promise.join(
                 send_mail_promise,
@@ -154,21 +155,21 @@ exports.remixGroupsAsync = function(topic) {
             // store group in database
             var store_group_promise = storeGroup(gid,tid,nextLevel,group);
                     
-            // send mail to notify new group users
+            // send mail to notify level change
             var send_mail_promise =
             db.collection('users').find({'_id': { $in: group }},{'email': true}).
-            toArrayAsync().then(function(emails) {
-                utils.sendMail(emails.join(),
-                    'Consensus stage has started!',
-                    'Dear participant,\n\n \
-                     The consensus stage of the topic '+topic.name+
-                    ' has reached a new level and so have you.\n \
-                     You have been assigned to the group '+gid.toString()+'.\n \
-                     You and four other new team members will be working on a joint proposal.\n\n \
-                     Please find the group\'s link here:\n \
-                     http://mind-about-sagacitysite.c9.io/group/'+gid.toString()+'\n\n \
-                     Thank you for your help!\n \
-                     Evocracy - Democracy Evolved');
+            toArrayAsync().then(function(users) {
+                mail.sendMail(_.pluck(users,'email').join(),
+                    topic.name + ' reached next level',
+                    'Dear participant,\r\n\r\n' +
+                    'The consensus stage of the topic ' + topic.name +
+                    ' has reached a new level and so have you.\r\n' +
+                    'You have been assigned to the group '+gid.toString()+'.\r\n' +
+                    'You and four other new team members will be working on a joint proposal.\r\n\r\n' +
+                    'Please find the group\'s link here:\r\n' +
+                    'http://mind-about-sagacitysite.c9.io/group/'+gid.toString()+'\r\n\r\n' +
+                    'Thank you for your help!\r\n' +
+                    'Evocracy - Democracy Evolved');
             });
             
             // register as sink for source proposals
@@ -187,7 +188,8 @@ exports.remixGroupsAsync = function(topic) {
                 
                 // update sink of previous proposals
                 return db.collection('proposals').updateAsync(
-                    { 'tid': tid, 'source': { $in: sources } }, { $set: { 'sink': gid } });
+                    { 'tid': tid, 'source': { $in: sources } },
+                    { $set: { 'sink': gid } }, {'multi': true});
             });
             
             return Promise.join(
@@ -202,16 +204,16 @@ exports.list = function(req, res) {
     db.collection('groups').find().toArrayAsync().then(_.bind(res.json,res));
 };
 
-function getMemberProposalBodyAndRating(member,gid,uid) {
+function getMemberProposalBodyAndRating(member, gid, uid) {
     return db.collection('proposals').findOneAsync(
-        { 'source': member._id, 'gid': gid }).then(function(proposal) {
+        {'source': member._id, 'sink': gid}).then(function(proposal) {
         // get proposal body
         var proposal_body_promise = pads.getPadHTMLAsync(proposal.pid);
         
         // get proposal rating
         var proposal_rating_promise = 
         db.collection('ratings').findOneAsync(
-            { 'rppid': proposal._id, 'gid': gid, 'uid': uid },{ 'score': 1 }).
+            {'rppid': proposal._id, 'gid': gid, 'uid': uid},{'score': 1}).
         then(function(rating) {
             return rating ? rating.score : 0;
         });
@@ -234,20 +236,20 @@ exports.query = function(req, res) {
     // from http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
     var group_promise =
     db.collection('groups').findAndModifyAsync(
-        { '_id': gid },
+        {'_id': gid},
         [],
-        { $setOnInsert: {pid: ObjectId()}},
-        { 'new': true, 'upsert': true }).get('value');
+        {$setOnInsert: {pid: ObjectId()}},
+        {'new': true, 'upsert': true}).get('value');
     
     // get all group members
     var members_promise =
-    db.collection('group_members').find({'gid': gid}, {'uid': 1}).
+    db.collection('group_members').find({'gid': gid}, {'uid': true}).
     //map(function(member) {return member.uid;}).
     toArrayAsync().map(function(member) {
         return member.uid;
     }).then(function(uids) {
         return db.collection('users').
-            find({'_id': { $in: uids }},{'_id': 1,'name': 1}).
+            find({'_id': { $in: uids }},{'_id': true, 'name': true}).
             toArrayAsync();
     }).map(function (member) {
         // generate member name
@@ -262,7 +264,7 @@ exports.query = function(req, res) {
         // get member rating
         var member_rating_promise =
         db.collection('ratings').findOneAsync(
-            { 'ruid': member._id, 'gid': gid, 'uid': uid },{ 'score': 1 }).
+            {'ruid': member._id, 'gid': gid, 'uid': uid},{'score': true}).
         then(function(rating) {
             return rating ? rating.score : 0;
         });
@@ -276,7 +278,13 @@ exports.query = function(req, res) {
         });
     });
     
-    Promise.join(group_promise,members_promise).
+    // set the timestamp for the member just querying the group
+    var set_member_timestamp_promise =
+    db.collection('group_members').updateAsync(
+        {'gid': gid, 'uid': uid},
+        {$set: {'lastActivity': Date.now()}});
+    
+    Promise.join(group_promise,members_promise,set_member_timestamp_promise).
     spread(function(group,members) {
         return _.extend(group,{'members': members});}).
     then(res.json.bind(res));

@@ -9,7 +9,7 @@ define([
     'views/pad',
     'i18n!nls/lang',
     'jquerycookie',
-    'jquerycountdown',
+    'jquerycountdown'
 ], function(
     _,
     __,
@@ -39,8 +39,8 @@ define([
                     $('#body').removeClass("hidden");
                     $('.editor-wrapper').addClass("hidden");
                     // title
-                    this.model.set('title', $('#titleInput').val());
-                    var titleHeading = '<h2 id="topic-title">'+this.model.get('title')+'</h2>';
+                    this.model.set('name', $('#titleInput').val());
+                    var titleHeading = '<h2 id="topic-title">'+this.model.get('name')+'</h2>';
                     $('#titleInput').replaceWith(titleHeading);
                     
                     // bidirectional server-sync
@@ -55,12 +55,12 @@ define([
                     $('.editor-wrapper').removeClass("hidden");
                     $('#body').addClass("hidden");
                     // title
-                    var inputField = '<input id="titleInput" class="h2-edit" type="text" value="'+this.model.get('title')+'"></input>';
+                    var inputField = '<input id="titleInput" class="h2-edit" type="text" value="'+this.model.get('name')+'"></input>';
                     $('#topic-title').replaceWith(inputField);
                 }
             },
             'click .del': function(e) {
-                var warning = 'Delete topic "'+this.model.get('title')+'"?';
+                var warning = 'Delete topic "'+this.model.get('name')+'"?';
                 if (confirm(warning)) {
                     this.model.destroy({
                         wait: true,
@@ -86,7 +86,6 @@ define([
         
         initialize: function() {
             this.model.set(C);
-            this.model.set('title', this.model.get('name'));
             this.setSubtitle();
             
             // levels

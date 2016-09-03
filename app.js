@@ -3,6 +3,7 @@
  * Module dependencies.
  */
 
+var _ = require('underscore');
 var Promise = require('bluebird');
 var express = require('express');
 var favicon = require('serve-favicon');
@@ -17,13 +18,15 @@ var cookieParser = require('cookie-parser');
 //var cookieSession = require('cookie-session');
 var utils = require('./server/utils');
 var pads = require('./server/pads');
+var CronJob = require('cron').CronJob;
 
 var db = require('./server/database').db;
+var mail = require('./server/mail');
 var path = require('path');
 var app = express();
 
 // initilize mail
-utils.initializeMail();
+mail.initializeMail();
 
 // import routes
 var users = require('./server/routes/users');
@@ -48,6 +51,21 @@ app.use(cookieParser('secret'));
 //app.use(cookieSession('secret'));
 app.use(session({ secret: 'secret', key: 'uid', cookie: { secure: true }, resave: true, saveUninitialized: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// setup cronjob to run every minute
+var job = new CronJob({
+  cronTime: '*/1 * * * *',
+  onTick: function() {
+      db.collection('topics').find().toArrayAsync().map(function(topic) {
+        return mail.sendEmailToAllLazyGroupMembers(topic, '', '').
+        then(_.partial(mail.sendTopicReminderMessages,topic)).
+        then(_.partial(topics.manageTopicState,topic));
+      });
+  },
+  start: true
+});
+job.start();
+
 
 // ###################
 // ### T O P I C S ###
@@ -115,6 +133,7 @@ app.get("/json/auth/verifyEmail/:id", users.verifyEmail );
 // ###   U S E R   ###
 // ###################
 
+app.get('/json/user/profile/:id', function(req, res) { auth(req, res, users.query); });
 app.get('/json/user/navi', function(req, res) { auth(req, res, users.navigation); });
 
 // ###################
