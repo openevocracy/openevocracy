@@ -88,7 +88,7 @@ define([
                 var date = this.model.get('nextDeadline');
                 $("#timeremaining-"+this.model.get('_id')).countdown(date)
                 .on('update.countdown', function(event) { $(this)
-                .html(event.strftime(i18n["%D days and %H:%M:%S"])); });
+                .html(event.strftime(i18n["%D days, %H:%M:%S"])); });
                 //.on('finish.countdown', function(event) { this.model.fetch(); }.bind(this));
                 // FIXME Register model on-change event handler that resets the countdown when a new model is loaded.
             }

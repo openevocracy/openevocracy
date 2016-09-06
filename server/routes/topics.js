@@ -14,6 +14,9 @@ var pads = require('../pads');
 var utils = require('../utils');
 
 function getDeadline(nextStage, prevDeadline, levelDuration) {
+    // define standard parameter
+    if(_.isUndefined(levelDuration))
+        levelDuration = cfg.DURATION_LEVEL;
     
     //var nextDeadline = prevDeadline || Date.now();
     var nextDeadline = Date.now();
@@ -36,7 +39,7 @@ function getDeadline(nextStage, prevDeadline, levelDuration) {
     return nextDeadline;
 }
 
-function manageConsensusStage(topic,levelDuration) {
+function manageConsensusStage(topic, levelDuration) {
     return groups.remixGroupsAsync(topic).then(function(nextStage) {
         var update_set_promise;
         switch(nextStage) {
@@ -103,7 +106,7 @@ function isAccepted(topic) {
 
 function manageTopicState(topic) {
     // exit this funtion if stage transition is not due yet
-    if(Date.now()<topic.nextDeadline)
+    if(Date.now() < topic.nextDeadline)
         return Promise.resolve(topic);
     
     // move to next stage
@@ -132,7 +135,7 @@ function manageTopicState(topic) {
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
             // update topic
             topic.stage = C.STAGE_CONSENSUS;
-            topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline);
+            topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,prevDeadline);
             var stageStartedEntryName = 'stageConsensusStarted';
             topic[stageStartedEntryName] = Date.now();
             
@@ -140,7 +143,7 @@ function manageTopicState(topic) {
                                 updateTopicState(topic,stageStartedEntryName)).
                    return(topic);
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
-            return manageConsensusStage(topic,cfg.DURATION_LEVEL);
+            return manageConsensusStage(topic);
     }
     
     return Promise.resolve(topic);

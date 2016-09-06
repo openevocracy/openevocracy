@@ -28,6 +28,11 @@ var ObjectIdToStringMapperArray = exports.ObjectIdToStringMapperArray = function
     return _.map(objs,ObjectIdToStringMapper);
 };
 
+exports.findWhereArrayEntryExists = function(objs,obj) {
+    return _.findWhere(ObjectIdToStringMapperArray(objs),
+                       ObjectIdToStringMapper(obj));
+};
+
 exports.checkArrayEntryExists = function(objs,obj) {
     return _.findWhere(ObjectIdToStringMapperArray(objs),
                        ObjectIdToStringMapper(obj)) != undefined;

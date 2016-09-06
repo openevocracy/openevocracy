@@ -21,6 +21,7 @@ define([
             
             this.extendTimeRemaining(this.model.get('groups'));
             this.extendTimeRemaining(this.model.get('proposals'));
+            this.extendShowStatus(this.model.get('topics'));
             
             console.log(this.model.get('proposals'));
             
@@ -39,8 +40,23 @@ define([
                     obj.timeRemaining = daysDiff + " days";
                     obj.danger = 0;
                 } else {
-                    obj.timeRemaining = moment(obj.nextDeadline).diff(moment(), 'hours') + " hours";
+                    var hoursDiff = moment(obj.nextDeadline).diff(moment(), 'hours');
                     obj.danger = 1;
+                    if(hoursDiff > 0) {
+                        obj.timeRemaining = hoursDiff + " hours";
+                    } else {
+                        obj.timeRemaining = "less than 1 hour";
+                    }
+                }
+            });
+        },
+        
+        extendShowStatus: function(topics) {
+            _.each(topics, function(topic) {
+                if(topic.stage == C.STAGE_REJECTED || topic.stage == C.STAGE_PASSED) {
+                    topic.show = false;
+                } else {
+                    topic.show = true;
                 }
             });
         }

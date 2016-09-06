@@ -209,6 +209,9 @@ exports.navigation = function(req, res) {
             return Promise.join(topicsPromise, groups);
         }).spread(function (topics, groups) {
             return _.zip(topics, groups);
+        }).filter(function(tg) {
+            // only accept active groups
+            return tg[0].nextDeadline >= Date.now();
         }).map(function (tg) {
             return _.extend(_.pick(tg[0],'name','nextDeadline'),
                             _.pick(tg[1],'_id'));

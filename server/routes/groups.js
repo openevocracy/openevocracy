@@ -6,9 +6,11 @@ var Chance = require('chance');
 var requirejs = require('requirejs');
 
 var C = requirejs('public/js/setup/constants');
+var cfg = requirejs('public/js/setup/configs');
 var ratings = require('./ratings');
 var pads = require('../pads');
 var mail = require('../mail');
+var utils = require('../utils');
 
 function calculateNumberOfGroups(numTopicParticipants) {
     
@@ -74,11 +76,17 @@ function storeGroup(gid,tid,level,group) {
     // insert group member
     var insert_members_promise =
     db.collection('group_members').insertAsync(
-        _.map(group, function(uid) {return { 'gid': gid, 'uid': uid }; }));
+        _.map(group, function(uid) {
+            return { 'gid': gid, 'uid': uid, 'lastActivity': -1 };
+        }));
     
     return Promise.join(create_group_promise,
                         create_proposal_promise,
                         insert_members_promise);
+}
+
+function isProposalValid(proposal) {
+    return proposal.body.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length >= cfg.MIN_WORDS_PROPOSAL;
 }
 
 exports.createGroups = function(topic) {
@@ -86,7 +94,20 @@ exports.createGroups = function(topic) {
     
     // find topic_participants
     return db.collection('topic_participants').find({ 'tid': tid }).
-    toArrayAsync().then(assignGroupMembers).map(function(group) {
+    toArrayAsync().then(function(participants) {
+        return db.collection('proposals').find({'tid': tid}).toArrayAsync().
+            map(function(proposal) {
+                proposal.body = pads.getPadHTMLAsync(proposal.pid);
+                return Promise.props(proposal);
+            }).then(function(proposals) {
+                // accept only participants that have a corresponding proposal
+                // and it is valid
+                return _.filter(participants, function(participant) {
+                    var proposal = utils.findWhereArrayEntryExists(proposals, {'source': participant.uid});
+                    return _.isUndefined(proposal) ? false : isProposalValid(proposal);
+                });
+            });
+    }).then(assignGroupMembers).map(function(group) {
         // create new group id
         var gid = ObjectId();
         

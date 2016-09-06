@@ -101,8 +101,9 @@ function sendEmailToAllLazyGroupMembers(topic, mailSubject, mailText) {
         return db.collection('group_members').
             find({ 'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
     }).filter(function(member) {
-        // filter out group members with timestamps older than five days
-        return Date.now() >= member.lastActivity + cfg.REMINDER_GROUP_LAZY;
+        // only notify group members with timestamps older than five days or -1 (never logged in)
+        var lastActivity = member.lastActivity == -1 ? member._id.getTimestamp() : member.lastActivity;
+        return Date.now() >= lastActivity + cfg.REMINDER_GROUP_LAZY;
     }).then(function(members) {
         // update last activity timestamp
         return db.collection('group_members').
@@ -117,7 +118,7 @@ function sendEmailToAllLazyGroupMembers(topic, mailSubject, mailText) {
             find({ '_id': { $in: _.pluck(members, 'uid') } }, {'email': true}).
             toArrayAsync();
     }).map(function(user) {
-        sendMail(user.email, mailSubject, mailText); // FIXME mailSubject and mailText are empty!
+        sendMail(user.email, mailSubject, mailText);
         return Promise.resolve();
     });
 }

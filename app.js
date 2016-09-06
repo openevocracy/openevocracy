@@ -57,9 +57,8 @@ var job = new CronJob({
   cronTime: '*/1 * * * *',
   onTick: function() {
       db.collection('topics').find().toArrayAsync().map(function(topic) {
-        return mail.sendEmailToAllLazyGroupMembers(topic, '', '').
-        then(_.partial(mail.sendTopicReminderMessages,topic)).
-        then(_.partial(topics.manageTopicState,topic));
+        return mail.sendTopicReminderMessages(topic).
+          then(_.partial(topics.manageTopicState,topic));
       });
   },
   start: true

@@ -11,9 +11,9 @@
 <h3>{{i18n "Topics"}}</h3>
 <ul class="nav nav-pills nav-stacked nav-pills-sm">
 {{#each topics}}
-    {{#ifisnot stage ../STAGE_REJECTED}}
+    {{#if this.show}}
     <li data-link="nav-{{this._id}}"><a href="/#/topic/{{this._id}}"><i class="fa fa-question-circle" aria-hidden="true"></i> {{this.name}}<br/><small>{{this.stageName}} stage{{#ifis stage ../STAGE_CONSENSUS}}, level {{math this.level "+" 1}}{{/ifis}}</small></a></li>
-    {{/ifisnot}}
+    {{/if}}
 {{/each}}
 </ul>
 {{/if}}
@@ -28,7 +28,6 @@
 </ul>
 {{/if}}
 
-{{proposals}}
 {{#if proposals}}
 <h3>Proposals</h3>
 <ul class="nav nav-pills nav-stacked nav-pills-sm">

@@ -22,5 +22,5 @@ define({
     "Oldest topics first": "Älteste Themen zuerst",
     "Newest topics first": "Neuste Themen zuerst",
     
-    "%D days and %H:%M:%S": "%D Tage und %H:%M:%S",
+    "%D days, %H:%M:%S": "%D Tage, %H:%M:%S",
 });
