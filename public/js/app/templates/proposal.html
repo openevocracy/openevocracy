@@ -1,9 +1,10 @@
-{{#if pid}}
 <div class="btn-group pull-right" role="group">
+    {{#if pid}}
     <button class="btn btn-default btn-sm edit" title="edit"><span class="fa fa-pencil"></span></button>
     <!-- TODO <button class="ico del" title="delete"><span></span></button> -->
+    {{/if}}
+    <button class="btn btn-default btn-sm disabled valid" title=""><span class="fa fa-ban"></span></button>
 </div>
-{{/if}}
 <!-- TODO include in partials/views/buttons.html > buttons -->
 
 {{> header}}

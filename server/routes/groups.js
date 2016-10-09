@@ -128,8 +128,24 @@ exports.createGroups = function(topic) {
                 'Evocracy - Democracy Evolved');
         });
         
+        // create notifications for users
+        // FIXME correct?? kann man das mit oben kombinieren?
+        /*var save_notification_promise =
+        db.collection('users').find({'_id': { $in: group }},{'uid': true}).
+        toArrayAsync().then(function(users) {
+            return db.collection('user_notifications').insertAsync(
+                _.map(group, function(uid) {
+                    return {
+                    'uid': uid,
+                    'type': 'info',
+                    'text': 'You entered a new <a href="http://mind-about-sagacitysite.c9.io/group/'+
+                                    gid.toString()+'">group</a>'
+                    }}));
+        });*/
+        
+        
         // store group in database
-        var store_group_promise = storeGroup(gid,tid,0,group);
+        var store_group_promise = storeGroup(gid, tid, 0, group);
         
         // create members for this group
         // append gid to proposal so we can identify it later
@@ -143,26 +159,52 @@ exports.createGroups = function(topic) {
                 store_group_promise,
                 update_source_proposals_promise);
     });
-}
+};
 
 exports.remixGroupsAsync = function(topic) {
     var tid = topic._id;
     
     // get groups with highest level
     return db.collection('groups').find({ 'tid': tid, 'level': topic.level }).
-    toArrayAsync().map(function(group_in) {
+    toArrayAsync().filter(function (group) {
+        return db.collection('proposals').findOneAsync({'source': group._id}).
+        then(function(proposal) {
+            proposal.body = pads.getPadHTMLAsync(proposal.pid);
+            return Promise.props(proposal);
+        }).then(function(proposal) {
+            return isProposalValid(proposal);
+        });
+    }).then(function (groups) {
+        if(_.empty(groups))
+            return Promise.reject('REJECTED_NO_VALID_GROUP_PROPOSAL');
+        else
+            return groups;
+    }).map(function(group_in) {
         return ratings.getGroupLeader(group_in._id);
     }).then(function(leaders) {
         // remove all undefined leaders
         leaders = _.compact(leaders);
         var numLeaders = _.size(leaders);
         
-        if(1 == numLeaders)
+        if(1 == numLeaders) {
             // if there is only ONE leader, then the topic is finished/passed.
-            return C.STAGE_PASSED;
-        else if(0 == numLeaders)
+            // send mail to notifiy about finished topic and return stage
+            return db.collection('topic_participants').find({ 'tid': topic._id }).
+            toArrayAsync().then(function(participants) {
+                return db.collection('users').find({'_id': { $in: _.pluck(participants, 'uid') }},{'email': true}).
+                toArrayAsync().then(function(users) {
+                    mail.sendMail(_.pluck(users,'email').join(),
+                        topic.name + ' finished last level',
+                        'Dear participant,\r\n\r\n' +
+                        'The topic '+ topic.name +' you were participating has finished right now.\r\n' +
+                        'Have a look at the final result:\r\n' +
+                        'http://mind-about-sagacitysite.c9.io/file/topic/final/' + topic._id);
+                });
+            }).return({'nextStage': C.STAGE_PASSED});
+        } else if(0 == numLeaders) {
             // if there is NO leader, then the consensus stage has failed.
-            return C.STAGE_REJECTED;
+            return Promise.reject('REJECTED_UNSUFFICIENT_RATINGS');
+        }
         
         // assign members to groups
         var groups = assignGroupMembers(leaders);
@@ -217,7 +259,12 @@ exports.remixGroupsAsync = function(topic) {
                 send_mail_promise,
                 store_group_promise,
                 update_source_proposals_promise);
-        }).return(C.STAGE_CONSENSUS); // we stay in consensus stage
+        }).return({'nextStage': C.STAGE_CONSENSUS}); // we stay in consensus stage
+    }).catch(function(reason) {
+        return {
+            'nextStage': C.STAGE_REJECTED,
+            'rejectedReason': reason
+        };
     });
 }
 

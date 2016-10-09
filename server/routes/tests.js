@@ -83,7 +83,14 @@ function fill_topic_participants(tid, num_participants) {
     for(var i = 0; i < num_participants; ++i)
         topic_participants.push({'tid':tid,'uid':ObjectId()});
     
-    return db.collection('topic_participants').insertAsync(topic_participants);
+    var topic_participants_promise =
+        db.collection('topic_participants').insertAsync(topic_participants);
+    
+    // FIXME must create proposals too!
+    //var topic_proposals_promise =
+    //    db.collection('proposals').insertAsync(function ()
+    
+    return topic_participants_promise;
 }
 
 function fill_topic_user_ratings(topic) {

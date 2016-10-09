@@ -1,11 +1,13 @@
 define([
     'jquery',
+    'configs',
     'application',
     'Marionette',
     'hbs!templates/proposal',
     'views/pad'
 ], function(
     $,
+    cfg,
     app,
     Marionette,
     Template,
@@ -49,6 +51,10 @@ define([
             }
         },
         
+        initialize: function() {
+            this.model.set('minwords', cfg.MIN_WORDS_PROPOSAL)
+        },
+        
         onShow: function() {
             //setActive('nav-'+this.model.get('_id'));
             
@@ -62,6 +68,19 @@ define([
         
         updateDocumentState: function() {
             Pad.updateDocumentState.bind(this)();
+            
+            var words = this.editor.getText().split(/\s+\b/).length;
+            if(words >= cfg.MIN_WORDS_PROPOSAL) {
+                $('.valid').addClass('accepted').attr("title", "proposal requirements fulfilled");
+                $('.valid span').removeClass('fa-ban');
+                $('.valid span').addClass('fa-check');
+            } else { 
+                $('.valid').removeClass('accepted')
+                           .attr("title", "proposal requirements not fulfilled, " +
+                           (cfg.MIN_WORDS_PROPOSAL-words) + " more words required");
+                $('.valid span').removeClass('fa-check');
+                $('.valid span').addClass('fa-ban');
+            }
         }
     });
     

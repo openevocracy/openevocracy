@@ -20,13 +20,13 @@ define([
             this.editor = new Quill('#editor', {theme: 'snow'});
             
             this.socket.on('setContents', function(contents) {
-                console.log(JSON.stringify(contents));
+                //console.log(JSON.stringify(contents));
                 this.editor.updateContents(contents);
             
                 this.updateDocumentState();
             }.bind(this));
             this.socket.on('change', function(change) {
-                console.log(JSON.stringify(change));
+                //console.log(JSON.stringify(change));
                 this.editor.updateContents(change);
                 
                 this.updateDocumentState();
@@ -36,7 +36,7 @@ define([
                 if(source != 'user')
                     return;
 
-                console.log('Editor contents have changed', JSON.stringify(delta));
+                //console.log('Editor contents have changed', JSON.stringify(delta));
                 this.socket.emit('change', delta);
                 
                 this.updateDocumentState();

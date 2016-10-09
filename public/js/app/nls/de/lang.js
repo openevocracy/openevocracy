@@ -22,5 +22,10 @@ define({
     "Oldest topics first": "Älteste Themen zuerst",
     "Newest topics first": "Neuste Themen zuerst",
     
+    "REJECTED_NOT_ENOUGH_VOTES": "Nicht genügend Teilnehmer in der Selektionsphase",
+    "REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Nicht genügend gültige Entwürfe in der Vorschlagsphase",
+    "REJECTED_UNSUFFICIENT_RATINGS": "Keine gültigen Bewertungen in den Gruppen",
+    "REJECTED_NO_VALID_GROUP_PROPOSAL": "Keine gültigen Entwürfe in den Gruppen",
+    
     "%D days, %H:%M:%S": "%D Tage, %H:%M:%S",
 });

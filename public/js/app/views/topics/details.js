@@ -140,10 +140,13 @@ define([
             var subtitle_next = '';
             
             // evaluate conditions
-            if(stage != C.STAGE_PASSED)
-                subtitle_next = ', next ' + ((stage == C.STAGE_CONSENSUS) ? 'level' : 'stage') + subtitle_remaining;
-            else
+            if(stage == C.STAGE_PASSED)
                 subtitle_next = ', finished at ' + moment(this.model.get('stagePassedStarted')).format('YYYY-MM-DD');
+            else if(stage == C.STAGE_REJECTED) {
+                var rejectedReason = this.model.get('rejectedReason');
+                subtitle_next = ', ' + (lang[rejectedReason] != undefined ? lang[rejectedReason] : rejectedReason);
+            } else
+                subtitle_next = ', next ' + ((stage == C.STAGE_CONSENSUS) ? 'level' : 'stage') + subtitle_remaining;
             
             var subtitle = subtitle_begin + ((stage == C.STAGE_CONSENSUS) ? subtitle_level : '' ) + subtitle_next;
             

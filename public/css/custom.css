@@ -9,6 +9,9 @@ small { font-size: 11px; }
 .table a { display: block; }
 .table th { cursor: default; }
 
+#proposal .valid { color: #ff0000; cursor: default; }
+#proposal .valid.accepted { color: #00ff00; }
+
 .h2-edit {
     background-color: #485563;
     border: 0;

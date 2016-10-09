@@ -38,7 +38,7 @@
     <div class="name">{{name}} <strong class="body">{{#if body}}#body{{/if}}</strong></div>
     <div class="stats">
         {{#ifis stage STAGE_REJECTED}}
-            rejected: {{rejectedDate}}
+            rejected: {{rejectedDate}}, {{i18n (lookup . "rejectedReason")}}
         {{else}}
             {{#ifis stage STAGE_SELECTION}}created: {{creationDate}}{{/ifis}}
             {{#ifis stage STAGE_PROPOSAL}}started: {{proposalDate}}{{/ifis}}

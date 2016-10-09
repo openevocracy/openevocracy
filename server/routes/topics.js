@@ -12,6 +12,7 @@ var cfg = requirejs('public/js/setup/configs');
 var groups = require('./groups');
 var pads = require('../pads');
 var utils = require('../utils');
+var mail = require('../mail');
 
 function getDeadline(nextStage, prevDeadline, levelDuration) {
     // define standard parameter
@@ -40,9 +41,9 @@ function getDeadline(nextStage, prevDeadline, levelDuration) {
 }
 
 function manageConsensusStage(topic, levelDuration) {
-    return groups.remixGroupsAsync(topic).then(function(nextStage) {
+    return groups.remixGroupsAsync(topic).then(function(result) {
         var update_set_promise;
-        switch(nextStage) {
+        switch(result.nextStage) {
         case C.STAGE_CONSENSUS:
             // updates below are only required while we are in consensus stage
             update_set_promise = {
@@ -78,7 +79,8 @@ function manageConsensusStage(topic, levelDuration) {
             update_set_promise = {
                 'stage': (topic.stage = C.STAGE_REJECTED),
                 'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_REJECTED)),
-                'stageRejectedStarted': Date.now()
+                'stageRejectedStarted': Date.now(),
+                'rejectedReason': result.rejectedReason
             };
             break;
         default:
@@ -96,7 +98,7 @@ function manageConsensusStage(topic, levelDuration) {
 exports.manageConsensusStage = manageConsensusStage;
 
 /*
-checks if a minimum of one proposal exists
+checks if a minimum of MIN_PARTICIPANTS_PER_TOPIC proposal exists
 */
 function isAccepted(topic) {
     return db.collection('topic_participants').
@@ -125,6 +127,7 @@ function manageTopicState(topic) {
                     // topic has been rejected
                     // move to rejection stage
                     topic.stage = C.STAGE_REJECTED;
+                    topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VOTES';
                     var stageStartedEntryName = 'stageRejectedStarted';
                     topic[stageStartedEntryName] = Date.now();
                 }
@@ -133,15 +136,22 @@ function manageTopicState(topic) {
                        return(topic);
             });
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
-            // update topic
-            topic.stage = C.STAGE_CONSENSUS;
-            topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,prevDeadline);
-            var stageStartedEntryName = 'stageConsensusStarted';
-            topic[stageStartedEntryName] = Date.now();
-            
-            return Promise.join(groups.createGroups(topic),
-                                updateTopicState(topic,stageStartedEntryName)).
-                   return(topic);
+            var stageStartedEntryName;
+            return groups.createGroups(topic).then(function (groups) {
+                if(_.size(groups) >= C.MIN_GROUPS_PER_TOPIC) {
+                    topic.stage = C.STAGE_CONSENSUS;
+                    topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,prevDeadline);
+                    stageStartedEntryName = 'stageConsensusStarted';
+                } else {
+                    topic.stage = C.STAGE_REJECTED;
+                    topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS';
+                    stageStartedEntryName = 'stageRejectedStarted';
+                }
+                
+                topic[stageStartedEntryName] = Date.now();
+                return Promise.resolve();
+            }).then(_.partial(updateTopicState,topic,stageStartedEntryName)).
+                return(topic);
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
             return manageConsensusStage(topic);
     }
@@ -315,7 +325,7 @@ exports.update = function(req, res) {
 function updateTopicState(topic,stageStartedEntryName) {
     return db.collection('topics').updateAsync(
         _.pick(topic, '_id'),
-        { $set: _.pick(topic, 'stage', 'nextDeadline', stageStartedEntryName) },
+        { $set: _.pick(topic, 'stage', 'nextDeadline', 'rejectedReason', stageStartedEntryName) },
         {});
 }
 
