@@ -1,13 +1,16 @@
 define([
+    'i18n!nls/lang',
     'Marionette',
     'hbs!templates/login'
     ], function(
+    i18n,
     Marionette,
     Template
     ) {
 
     var View = Marionette.CompositeView.extend({
         template: Template,
+        viewTitle: i18n["Login"],
         
         login: function (e) {
             App.session.login({
@@ -32,6 +35,10 @@ define([
             'click #login-btn': function(e) {
                 this.login(e);
             }
+        },
+        
+        onBeforeRender: function() {
+            this.model.set('title', this.viewTitle);
         }
     });
     

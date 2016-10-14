@@ -40,7 +40,7 @@ function getDeadline(nextStage, prevDeadline, levelDuration) {
     return nextDeadline;
 }
 
-function manageConsensusStage(topic, levelDuration) {
+function manageConsensusStageAsync(topic, levelDuration) {
     return groups.remixGroupsAsync(topic).then(function(result) {
         var update_set_promise;
         switch(result.nextStage) {
@@ -95,7 +95,7 @@ function manageConsensusStage(topic, levelDuration) {
         });
     });
 }
-exports.manageConsensusStage = manageConsensusStage;
+exports.manageConsensusStage = manageConsensusStageAsync;
 
 /*
 checks if a minimum of MIN_PARTICIPANTS_PER_TOPIC proposal exists
@@ -106,7 +106,7 @@ function isAccepted(topic) {
         then(function(count) {return count >= cfg.MIN_PARTICIPANTS_PER_TOPIC;});
 }
 
-function manageTopicState(topic) {
+function manageTopicStateAsync(topic) {
     // exit this funtion if stage transition is not due yet
     if(Date.now() < topic.nextDeadline)
         return Promise.resolve(topic);
@@ -132,13 +132,14 @@ function manageTopicState(topic) {
                     topic[stageStartedEntryName] = Date.now();
                 }
                 
-                return updateTopicState(topic,stageStartedEntryName).
+                return updateTopicStateAsync(topic,stageStartedEntryName).
                        return(topic);
             });
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
-            var stageStartedEntryName;
-            return groups.createGroups(topic).then(function (groups) {
-                if(_.size(groups) >= C.MIN_GROUPS_PER_TOPIC) {
+            return groups.createGroupsAsync(topic).then(function(groups) {
+                var stageStartedEntryName;
+                
+                if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {
                     topic.stage = C.STAGE_CONSENSUS;
                     topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,prevDeadline);
                     stageStartedEntryName = 'stageConsensusStarted';
@@ -149,16 +150,18 @@ function manageTopicState(topic) {
                 }
                 
                 topic[stageStartedEntryName] = Date.now();
-                return Promise.resolve();
-            }).then(_.partial(updateTopicState,topic,stageStartedEntryName)).
-                return(topic);
+                return Promise.join(topic,stageStartedEntryName);
+            }).spread(function(topic,stageStartedEntryName) {
+                return updateTopicStateAsync(topic,stageStartedEntryName).
+                       return(topic);
+            });
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
-            return manageConsensusStage(topic);
+            return manageConsensusStageAsync(topic);
     }
     
     return Promise.resolve(topic);
 }
-exports.manageTopicState = manageTopicState;
+exports.manageTopicState = manageTopicStateAsync;
 
 // appends timeCreated and stageName
 function appendBasicTopicInfo(topic) {
@@ -297,7 +300,7 @@ exports.list = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
     
     db.collection('topics').find().toArrayAsync().map(function(topic) {
-        return manageTopicState(topic).then(_.partial(appendTopicInfoAsync,_,uid,false));
+        return manageTopicStateAsync(topic).then(_.partial(appendTopicInfoAsync,_,uid,false));
     }).then(res.json.bind(res));
 };
 
@@ -316,13 +319,13 @@ exports.update = function(req, res) {
         topic.name = topicNew.name;
         return db.collection('topics').updateAsync(
                 { '_id': tid }, { $set: _.pick(topic,'name') }, {}).return(topic);
-    }).then(manageTopicState)
+    }).then(manageTopicStateAsync)
       .then(_.partial(appendTopicInfoAsync,_,uid,true))
       .then(res.json.bind(res))
       .catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
-function updateTopicState(topic,stageStartedEntryName) {
+function updateTopicStateAsync(topic,stageStartedEntryName) {
     return db.collection('topics').updateAsync(
         _.pick(topic, '_id'),
         { $set: _.pick(topic, 'stage', 'nextDeadline', 'rejectedReason', stageStartedEntryName) },

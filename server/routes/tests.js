@@ -111,7 +111,7 @@ function fill_topic_user_ratings(topic) {
 
 exports.create_groups = function(req, res) {
     Promise.join(db.collection('groups').removeAsync({'tid':tid},true),
-                 topics.createGroups({'_id':tid})).
+                 topics.createGroupsAsync({'_id':tid})).
             then(_.partial(res.sendStatus,200));
 };
 
@@ -141,7 +141,7 @@ exports.remix_groups = function(req, res) {
         'level': 0,
         'nextDeadline': Date.now()}).
     then(_.partial(fill_topic_participants,tid,10)).
-    then(_.partial(groups.createGroups,{'_id':tid})).
+    then(_.partial(groups.createGroupsAsync,{'_id':tid})).
     then(_.partial(promiseWhile,
         function condition() {
             return db.collection('topics').findOneAsync({ '_id': tid }, { 'stage': true}).

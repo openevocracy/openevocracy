@@ -32,12 +32,12 @@ function calculateNumberOfGroups(numTopicParticipants) {
     return numGroups;
 }
 
-function assignGroupMembers(members) {
+function assignParticipantsToGroups(participants) {
     // shuffle topic_participants
-    _.shuffle(members);
+    _.shuffle(participants);
     
     // compute number of groups
-    var numGroups = calculateNumberOfGroups(_.size(members));
+    var numGroups = calculateNumberOfGroups(_.size(participants));
     
     // initialize empty groups
     var groups = new Array(numGroups);
@@ -45,10 +45,10 @@ function assignGroupMembers(members) {
         groups[i] = [];
     
     // push topic_participants into groups
-    _.each(members, function(member) {
+    _.each(participants, function(participant) {
         // find first smallest group
         var group = _.min(groups, function(group) {return _.size(group);});
-        group.push(member.uid);
+        group.push(participant.uid);
     });
     
     // TODO log with logging library
@@ -59,19 +59,20 @@ function assignGroupMembers(members) {
     return groups;
 }
 
-function storeGroup(gid,tid,level,group) {
+function storeGroupAsync(gid,tid,level,group) {
+    var ppid = ObjectId();
+    
+    // create group's proposal
+    var create_proposal_promise =
+    db.collection('proposals').insertAsync({
+        '_id': ppid, 'source': gid,
+        'pid': ObjectId()});
+    
     // create group itself
     var create_group_promise =
     db.collection('groups').insertAsync({
         '_id': gid, 'tid': tid,
         'ppid': ppid, 'level': level});
-    
-    // create group's proposal
-    var ppid = ObjectId();
-    var create_proposal_promise =
-    db.collection('proposals').insertAsync({
-        '_id': ppid, 'source': gid,
-        'pid': ObjectId()});
     
     // insert group member
     var insert_members_promise =
@@ -80,8 +81,8 @@ function storeGroup(gid,tid,level,group) {
             return { 'gid': gid, 'uid': uid, 'lastActivity': -1 };
         }));
     
-    return Promise.join(create_group_promise,
-                        create_proposal_promise,
+    return Promise.join(create_proposal_promise,
+                        create_group_promise,
                         insert_members_promise);
 }
 
@@ -89,7 +90,7 @@ function isProposalValid(proposal) {
     return proposal.body.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length >= cfg.MIN_WORDS_PROPOSAL;
 }
 
-exports.createGroups = function(topic) {
+exports.createGroupsAsync = function(topic) {
     var tid = topic._id;
     
     // find topic_participants
@@ -107,7 +108,7 @@ exports.createGroups = function(topic) {
                     return _.isUndefined(proposal) ? false : isProposalValid(proposal);
                 });
             });
-    }).then(assignGroupMembers).map(function(group) {
+    }).then(assignParticipantsToGroups).map(function(group) {
         // create new group id
         var gid = ObjectId();
         
@@ -145,7 +146,7 @@ exports.createGroups = function(topic) {
         
         
         // store group in database
-        var store_group_promise = storeGroup(gid, tid, 0, group);
+        var store_group_promise = storeGroupAsync(gid, tid, 0, group);
         
         // create members for this group
         // append gid to proposal so we can identify it later
@@ -157,7 +158,7 @@ exports.createGroups = function(topic) {
         return Promise.join(
                 send_mail_promise,
                 store_group_promise,
-                update_source_proposals_promise);
+                update_source_proposals_promise).return(group);
     });
 };
 
@@ -175,8 +176,8 @@ exports.remixGroupsAsync = function(topic) {
             return isProposalValid(proposal);
         });
     }).then(function (groups) {
-        if(_.empty(groups))
-            return Promise.reject('REJECTED_NO_VALID_GROUP_PROPOSAL');
+        if(_.isEmpty(groups))
+            return Promise.reject({reason: 'REJECTED_NO_VALID_GROUP_PROPOSAL'});
         else
             return groups;
     }).map(function(group_in) {
@@ -203,11 +204,11 @@ exports.remixGroupsAsync = function(topic) {
             }).return({'nextStage': C.STAGE_PASSED});
         } else if(0 == numLeaders) {
             // if there is NO leader, then the consensus stage has failed.
-            return Promise.reject('REJECTED_UNSUFFICIENT_RATINGS');
+            return Promise.reject({reason: 'REJECTED_UNSUFFICIENT_RATINGS'});
         }
         
         // assign members to groups
-        var groups = assignGroupMembers(leaders);
+        var groups = assignParticipantsToGroups(leaders);
         
         // insert all groups into database
         var nextLevel = topic.level+1;
@@ -216,7 +217,7 @@ exports.remixGroupsAsync = function(topic) {
             var gid = ObjectId();
             
             // store group in database
-            var store_group_promise = storeGroup(gid,tid,nextLevel,group);
+            var store_group_promise = storeGroupAsync(gid,tid,nextLevel,group);
                     
             // send mail to notify level change
             var send_mail_promise =
@@ -260,13 +261,13 @@ exports.remixGroupsAsync = function(topic) {
                 store_group_promise,
                 update_source_proposals_promise);
         }).return({'nextStage': C.STAGE_CONSENSUS}); // we stay in consensus stage
-    }).catch(function(reason) {
+    }).catch(utils.isOwnError,function(error) {
         return {
             'nextStage': C.STAGE_REJECTED,
-            'rejectedReason': reason
+            'rejectedReason': error.reason
         };
     });
-}
+};
 
 exports.list = function(req, res) {
     db.collection('groups').find().toArrayAsync().then(_.bind(res.json,res));
@@ -300,14 +301,14 @@ exports.query = function(req, res) {
     var gid = ObjectId(req.params.id);
     var uid = ObjectId(req.signedCookies.uid);
     
-    // get group pad or create group pad if it does not exist
-    // from http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
-    var group_promise =
-    db.collection('groups').findAndModifyAsync(
-        {'_id': gid},
-        [],
-        {$setOnInsert: {pid: ObjectId()}},
-        {'new': true, 'upsert': true}).get('value');
+    // get group
+    var group_promise = db.collection('groups').findOneAsync({'_id': gid});
+    
+    // get group proposal pad id
+    var pid_promise = group_promise.then(function(group) {
+        return db.collection('proposals').findOneAsync(
+            {'_id': group.ppid},{'pid': true});
+    });
     
     // get all group members
     var members_promise =
@@ -352,8 +353,11 @@ exports.query = function(req, res) {
         {'gid': gid, 'uid': uid},
         {$set: {'lastActivity': Date.now()}});
     
-    Promise.join(group_promise,members_promise,set_member_timestamp_promise).
-    spread(function(group,members) {
-        return _.extend(group,{'members': members});}).
+    Promise.join(group_promise,
+                 pid_promise,
+                 members_promise,
+                 set_member_timestamp_promise).
+    spread(function(group,pid,members) {
+        return _.extend(group,pid,{'members': members});}).
     then(res.json.bind(res));
 };

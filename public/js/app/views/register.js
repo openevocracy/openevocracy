@@ -1,10 +1,12 @@
 define([
+    'i18n!nls/lang',
     'Marionette',
     'hbs!templates/register',
     'collections/users',
     'jquery',
     'parsley'
     ], function(
+    i18n,
     Marionette,
     Template,
     Collection,
@@ -13,9 +15,18 @@ define([
     ) {
     var users = new Collection();
     
+    var Model = Backbone.Spark.Model.extend({
+        sparks: {
+            title: function() {
+                return i18n['Register'];
+            }
+        }
+    });
+    
     var View = Marionette.CompositeView.extend({
         template: Template,
         collection: users,
+        model: new Model(),
         
         events: {
             'click #signup': function(e) {
@@ -39,7 +50,7 @@ define([
                     $('.message').addClass("alert alert-danger").html("Please check the form for mistakes.");
                 }
             }
-        }
+        },
     });
     
     return View;

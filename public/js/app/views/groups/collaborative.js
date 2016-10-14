@@ -1,9 +1,8 @@
 define([
     'jquery',
     'underscore',
+    'i18n!nls/lang',
     'Marionette',
-    'quill',
-    'socketio',
     'configs',
     'views/pad',
     'views/partials/group_events',
@@ -11,9 +10,8 @@ define([
 ], function(
     $,
     _,
+    i18n,
     Marionette,
-    Quill,
-    socketio,
     conf,
     Pad,
     Events,
@@ -25,12 +23,10 @@ define([
         tagName: 'section',
         className: 'content',
         id: 'collaborative',
-        viewTitle: 'Our proposal',
-        //pad: new Pad,
+        viewTitle: i18n['Our proposal'],
         
         events: Events,
-        //socket: socketio.connect(conf.EVOCRACY_HOST, {secure: true}),
-
+        
         initialize: function() {
             //this.model.set('subtitle', '#');
         },

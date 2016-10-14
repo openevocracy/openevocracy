@@ -1,13 +1,33 @@
 define({
+    "Login": "Login",
+    "Register": "Registrieren",
+    "Welcome to the OpenEvocracy project!": "Willkommen bei OpenEvocracy!",
+    "Your email-address:": "Deine E-Mail-Adresse:",
+    "Your password:": "Dein Passwort",
+    "Need an account? Just <a href='/#/register'>register</a>": "Du bist noch nicht angemeldet? Zur <a href='/#/register'>Registrierung</a>",
+    "Nice to have you with us!": "Schön, dass du dabei bist!",
+    "You already have an account? Just <a href='/#/login'>login</a>": "Du bist schon registriert? <a href='/#/login'>Melde dich an.</a>",
+    
     "Navigation": "Navigation",
+    "Topic": "Thema",
     "Topics": "Themen",
+    "Group": "Gruppe",
     "Groups": "Gruppen",
+    
+    "Our group": "Unsere Gruppe",
+    "Our proposal": "Gemeinsamer Entwurf",
+    "Group members": "Gruppenmitglieder",
+    "Back to topic": "Zurück zur Themenansicht",
+    "Visit author's profile": "Zum Profil des Autors",
+    "Statistics": "Statistiken",
     
     "Current Topics": "Aktuelle Themen",
     "Add Topic": "Thema hinzufügen",
     
     "votes": "Stimmen",
+    "Votes": "Stimmen",
     "participants": "Teilnehmer",
+    "Participants": "Teilnehmer",
     "proposals": "Entwürfe",
     
     "Create new Topic": "Neues Thema erstellen",
@@ -15,7 +35,11 @@ define({
     "Save": "Speichern",
     "Cancel": "Abbrechen",
     
-    "Final document": "Finales Dokument",
+    "My proposal": "Mein Entwurf",
+    "Document status": "Status des Dokuments",
+    "Time remaining: ###": "Verbleibende Zeit: ###",
+    
+    "Final document": "Fertiges Dokument",
     
     "Filter by stage": "Stufe filtern",
     "Order by time": "Zeitliche Sortierung",

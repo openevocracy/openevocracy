@@ -3,12 +3,12 @@
     <ul  class="nav nav-pills nav-stacked">
     {{#ifisAnd stage STAGE_PROPOSAL joined}} <!-- #if ppid -->
         <li>
-            <a href="/#/proposal/{{_id}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> My proposal</a>
+            <a href="/#/proposal/{{_id}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> {{i18n "My proposal"}}</a>
         </li>
     {{/ifisAnd}}
     {{#if gid}}
         <li>
-            <a href="/#/group/{{gid}}"><i class="fa fa-users" aria-hidden="true"></i> Our group</a>
+            <a href="/#/group/{{gid}}"><i class="fa fa-users" aria-hidden="true"></i> {{i18n "Our group"}}</a>
         </li>
     {{/if}}
     </ul>

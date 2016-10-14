@@ -140,11 +140,13 @@ define([
             var subtitle_next = '';
             
             // evaluate conditions
-            if(stage == C.STAGE_PASSED)
+            if(stage == C.STAGE_PASSED) {
                 subtitle_next = ', finished at ' + moment(this.model.get('stagePassedStarted')).format('YYYY-MM-DD');
-            else if(stage == C.STAGE_REJECTED) {
+            } else if(stage == C.STAGE_REJECTED) {
                 var rejectedReason = this.model.get('rejectedReason');
                 subtitle_next = ', ' + (lang[rejectedReason] != undefined ? lang[rejectedReason] : rejectedReason);
+            } else if(stage == C.STAGE_SELECTION) {
+                subtitle_next = ', check for enough participants ' + subtitle_remaining;
             } else
                 subtitle_next = ', next ' + ((stage == C.STAGE_CONSENSUS) ? 'level' : 'stage') + subtitle_remaining;
             

@@ -1,25 +1,25 @@
 <section class="content" id="login">
     
-    {{> header title='Login'}}
+    {{> header}}
     {{> messages}}
     
-    <p>Welcome to the OpenEvocracy project!</p>
+    <p>{{i18n "Welcome to the OpenEvocracy project!"}}</p>
     
     <form id="login-form" data-validate="parsley" class="well">
         <fieldset>
             <div class="form-group">
-                <label class="control-label" for="name">Your ID or email-address:</label>
+                <label class="control-label" for="name">{{i18n "Your email-address:"}}</label>
                 <input class="form-control" type="text" id="name" name="name" placeholder="your id or email" />
             </div>
             <div class="form-group">
-                <label class="control-label" for="pass">Your password:</label>
+                <label class="control-label" for="pass">{{i18n "Your password:"}}</label>
                 <input class="form-control" type="password" id="pass" name="pass" placeholder="your password" />
             </div>
         </fieldset>
     </form>
     
-    <button id="login-btn" class="btn btn-primary">Login</button>
+    <button id="login-btn" class="btn btn-primary">{{i18n "Login"}}</button>
     
     <hr/>
-    <p>Need an account? Just <a href="/#/register">register</a>.</p>
+    <p>{{{i18n "Need an account? Just <a href='/#/register'>register</a>"}}}.</p>
 </section>

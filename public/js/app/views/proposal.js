@@ -4,6 +4,7 @@ define([
     'application',
     'Marionette',
     'hbs!templates/proposal',
+    'i18n!nls/lang',
     'views/pad'
 ], function(
     $,
@@ -11,6 +12,7 @@ define([
     app,
     Marionette,
     Template,
+    i18n,
     Pad
     ) {
     
@@ -19,7 +21,7 @@ define([
         tagName: 'section',
         className: "content",
         id: "proposal",
-        viewTitle: "My proposal",
+        viewTitle: i18n["My proposal"],
         
         events: {
             'click .edit': function(e) {

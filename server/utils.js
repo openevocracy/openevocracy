@@ -5,18 +5,18 @@ var db = require('./database').db;
 
 exports.sendNotification = function(res,status,message) {
     res.status(status).send({'status': status, 'message': message});
-}
+};
 exports.rejectPromiseWithNotification = function(status,message) {
     return Promise.reject({'status': status, 'message': message});
-}
+};
 exports.isOwnError = function(error) {
-    return _.has(error,'status') && _.has(error,'message');
-}
+    return _.has(error,'status') && _.has(error,'message') || _.has(error,'reason');
+};
 exports.handleOwnError = function(res) {
     return function(error) {
         res.status(error.status).send(error);
     };
-}
+};
 
 var ObjectIdToStringMapper = exports.ObjectIdToStringMapper = function(obj) {
     return _.mapObject(obj,function(val) {

@@ -7,7 +7,7 @@ define([
     ) {
     var Controller = Marionette.Controller.extend({
         route_login_index: function() {
-            var loginView = new LoginView();
+            var loginView = new LoginView({model: new Backbone.Model({})});
             App.layout.form.show(loginView);
         },
         route_verified_index: function() {
