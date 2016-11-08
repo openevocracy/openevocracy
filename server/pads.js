@@ -7,7 +7,6 @@ var richText = require('rich-text');
 var ottype = richText.type;
 var Delta = richText.Delta;
 var dom = require('jsdom');
-var Quill = require('quill');
 var pdf = require('phantom-html2pdf');
 var ObjectId = require('mongodb').ObjectID;
 var db = require('./database').db;
@@ -133,15 +132,16 @@ exports.startPadServer = function(httpServer) {
 
 function getDocHTMLAsync(doc) {
   return envAsync('<div id="editor"></div>').then(function (window) {
-      document = window.document;
-      navigator = window.navigator;
-      document.getSelection = function() {return null};
-      
-      var editor = new Quill("#editor");
-      console.log(doc.content);
-      editor.updateContents(doc.content);
-      
-      return editor.getHTML();
+        document = window.document;
+        navigator = window.navigator;
+        document.getSelection = function() {return null};
+        
+        var Quill = require('quill');
+        var editor = new Quill("#editor");
+        console.log(doc.content);
+        editor.updateContents(doc.content);
+        
+        return editor.getHTML();
   });
 }
 

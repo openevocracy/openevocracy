@@ -5,6 +5,7 @@ define([
     'hbs!templates/topics/list',
     'views/topics/list_item',
     'models/topic',
+    '../../utils',
     'i18n!nls/lang'
     ], function(
     _,
@@ -13,6 +14,7 @@ define([
     Template,
     ChildView,
     Model,
+    utils,
     i18n
     ) {
     
@@ -60,6 +62,9 @@ define([
         childViewContainer: '#topic-list',
         
         events: {
+            'click .refresh': function(e) {
+                this.collection.fetch();
+            },
             'click .add': function(e) {
                 if(e) e.preventDefault();
                 this.$('.topic-id').val("");
@@ -69,25 +74,13 @@ define([
             },
             'click .save': function(e) {
                 if(e) e.preventDefault();
-                
-                var Model = this.collection.model;
-                var topic = new Model({
-                    name: this.$('.topic-name').val()
-                });
-                
-                topic.save({}, {
-                    wait: true,
-                    success: function(model,res) {
-                        topic.set(res);
-                        this.collection.add(topic);
-                        window.location.hash = '/topic/'+topic.id;
-                    }.bind(this),
-                    error: function(model,res) {
-                        this.$('.message').addClass('alert alert-danger').html(res.responseText.message);
-                    }.bind(this)
-                });
-                
-                this.$('.lightbox').fadeOut(500);
+                this.addTopic(this.$('.topic-name').val());
+            },
+            'keydown .topic-name': function(e) {
+                if(e.keyCode == 13) {
+                    this.addTopic(this.$('.topic-name').val());
+                    if(e) e.preventDefault();
+                }
             },
             'click .cancel': function(e) {
                 if(e) e.preventDefault();
@@ -102,6 +95,15 @@ define([
             // initialize filter/sort settings
             this.stageSelected = {"-1": false, "0": true, "1": true, "2": true, "3": true};
             this.deadlineSortFactor = 1;
+            
+            // create timer for automatic refreshing of list
+            this.timer = setInterval(function() {
+                this.collection.fetch();
+            }.bind(this), 10000);
+        },
+        
+        onDestroy: function() {
+            clearInterval(this.timer);
         },
         
         onDestroyTopic: function(topic) {
@@ -121,8 +123,33 @@ define([
             this.stageSelected[stage] = val;
             this.render();
         },
+        
         filter: function (child, index, collection) {
             return this.stageSelected[child.get('stage')];
+        },
+        
+        addTopic: function(topicName) {
+            if(topicName == null || topicName.trim() == "")
+                return;
+            
+            var Model = this.collection.model;
+            var topic = new Model({
+                name: topicName.trim()
+            });
+            
+            topic.save({}, {
+                wait: true,
+                success: function(model,res) {
+                    topic.set(res);
+                    this.collection.add(topic);
+                    window.location.hash = '/topic/'+topic.id;
+                }.bind(this),
+                error: function(model,res) {
+                    this.$('.message').addClass('alert alert-danger').html(utils.decodeServerMessage(res.responseJSON));
+                }.bind(this)
+            });
+            
+            this.$('.lightbox').fadeOut(500);
         }
     });
     

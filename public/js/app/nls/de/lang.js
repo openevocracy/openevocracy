@@ -52,4 +52,6 @@ define({
     "REJECTED_NO_VALID_GROUP_PROPOSAL": "Keine gültigen Entwürfe in den Gruppen",
     
     "%D days, %H:%M:%S": "%D Tage, %H:%M:%S",
+    
+    "Empty topic name not allowed.": "Wähle einen Namen für das Thema."
 });

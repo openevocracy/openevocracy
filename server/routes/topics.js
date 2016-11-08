@@ -349,15 +349,16 @@ exports.query = function(req, res) {
 
 exports.create = function(req, res) {
     var topic = req.body;
+    var topicName = topic.name;
     
     // reject empty topic names
-    if(_.isEmpty(topic.name)) {
+    if(_.isEmpty(topicName)) {
         utils.sendNotification(res, 400, "Empty topic name not allowed.");
         return;
     }
     
     // only allow new topics if they do not exist yet
-    db.collection('topics').countAsync(_.pick(topic,'name')).then(function(count) {
+    db.collection('topics').countAsync({'name': topicName}).then(function(count) {
         // topic already exists
         if(count > 0)
             return utils.rejectPromiseWithNotification(409, "Topic already exists.");

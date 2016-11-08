@@ -4,14 +4,16 @@ define([
     'hbs!templates/register',
     'collections/users',
     'jquery',
-    'parsley'
+    'parsley',
+    '../utils'
     ], function(
     i18n,
     Marionette,
     Template,
     Collection,
     $,
-    Parsley
+    Parsley,
+    utils
     ) {
     var users = new Collection();
     
@@ -37,12 +39,12 @@ define([
                         pass: this.$("#pass").val()
                     }, {
                     success: function(res){
-                        $('.message').addClass("alert alert-success").html(res.message);
+                        $('.message').addClass("alert alert-success").html(utils.decodeServerMessage(res));
                         $("#signup-form").remove();
                         $("#signup").remove();
                     },
                     error: function(xhr, err){
-                        $('.message').addClass("alert alert-danger").html(xhr.responseJSON.message);
+                        $('.message').addClass("alert alert-danger").html(utils.decodeServerMessage(xhr.responseJSON));
                         e.preventDefault();
                     }});
                 } else {

@@ -85,7 +85,6 @@ define([
         },
         
         onShow: function() {
-            console.log(this.model.get('stageConsensusStarted'));
             //var date = Date.now() + (7*24*3600*1000);
             if(this.model.get('stage') != C.STAGE_SELECTION) {
                 var date = this.model.get('nextDeadline');

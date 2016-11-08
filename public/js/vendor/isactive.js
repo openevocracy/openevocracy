@@ -1,3 +1,8 @@
+/*
+ * TODO: Use utils.js instead of own library
+ *
+*/
+
 function handleActive(target) {
     /* reset everything */
     $("[data-link]").removeClass('active');
@@ -16,15 +21,3 @@ function handleActive(target) {
 function setActive(linkName) {
     handleActive($("[data-link=" + linkName + "]"));
 }
-
-// NOTE
-// Because a view change triggered in group_events.js and the group controller,
-// it recreates all buttons directly afterwards.
-// Therefore setActive MUST be called from the new view's onShow() method
-// in order for this to work.
-$(document.body).on('click', '[data-link]', function(event) {
-    var target = $(event.target);
-    if(target.is('span'))
-        target = target.parent();
-    handleActive(target);
-});

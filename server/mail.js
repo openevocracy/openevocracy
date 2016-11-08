@@ -3,9 +3,11 @@ var requirejs = require('requirejs');
 var Promise = require('bluebird');
 var nodemailer = require('nodemailer');
 var crypto = require('crypto');
+var strformat = require('strformat');
 
 var db = require('./database').db;
 var utils = require('./utils');
+var i18n = require('./i18n');
 
 var C = requirejs('public/js/setup/constants');
 var cfg = requirejs('public/js/setup/configs');
@@ -110,6 +112,7 @@ function sendEmailToAllLazyGroupMembers(topic, mailSubject, mailText) {
             updateAsync(
                 { 'uid': { $in: _.pluck(members, 'uid') } },
                 { $set: {'lastActivity': Date.now()} },
+                //{ $set: {'lastLazyMail': Date.now()} },
                 { multi: true }
             ).return(members);
     }).then(function(members) {
@@ -147,14 +150,17 @@ exports.sendTopicReminderMessages = function(topic) {
             }
             break;
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
-            sendEmailToAllLazyGroupMembers(
-                topic,
-                'Group inactivity reminder: ' + topic.name,
-                'You are a member of a group in ' + topic.name + '. ' +
-                'You were not active for 5 days in your group.\r\n' +
-                'Let\'s have a look at your common document, ' +
-                'probably someone added something new.'
-            );
+            i18n.initAsync.then(function() {
+                sendEmailToAllLazyGroupMembers(
+                    topic,i18n.t('SEND_EMAIL_TO_ALL_LAZY_GROUP_MEMBERS')
+                    // TODO use strfomat to insert topic.name
+                    /*'Group inactivity reminder: ' + topic.name,
+                    'You are a member of a group in ' + topic.name + '. ' +
+                    'You were not active for 5 days in your group.\r\n' +
+                    'Let\'s have a look at your common document, ' +
+                    'probably someone added something new.'*/
+                );
+            });
             if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_SECOND) {
                 return sendEmailToAllActiveGroupMembers(
                     topic,
