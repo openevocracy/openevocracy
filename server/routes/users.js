@@ -7,7 +7,7 @@ var requirejs = require('requirejs');
 var validate = require('validate.js');
 var strformat = require('strformat');
 
-var i18n = require('./i18n');
+var i18n = require('../i18n');
 var topics = require('./topics');
 var mail = require('../mail');
 var utils = require('../utils');

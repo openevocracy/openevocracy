@@ -7,7 +7,7 @@ define([
     _,
     i18n
     ) {
-        
+    
     // This needs to be on top, since it needs to run before functions are instanciated
     $(document.body).on('click', '[data-link]', function(event) {
         var target = $(event.target);
@@ -17,14 +17,14 @@ define([
     });
     
     var utils = {
-        decodeServerMessage: function(err) {
-            return (i18n != undefined ? (i18n[err.message] != undefined ? i18n[err.message] : err.message) : err.message);
-            // TODO return _.format(i18n[err.message],err.args);
-        },
-        
         i18n: function(str) {
             // for Handlebars implementation see main.js
             return (i18n != undefined ? (i18n[str] != undefined ? i18n[str] : str) : str);
+        },
+        
+        decodeServerMessage: function(err) {
+            return this.i18n(err.message);
+            // TODO return _.format(this.i18n(err.message),err.args);
         },
         
         handleActive: function(target) {

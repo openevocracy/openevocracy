@@ -7,7 +7,7 @@ define([
     'hbs!templates/topics/details',
     'constants',
     'views/pad',
-    '../utils',
+    '../../utils',
     'jquerycookie',
     'jquerycountdown'
 ], function(
@@ -144,7 +144,7 @@ define([
                 subtitle_next = ', finished at ' + moment(this.model.get('stagePassedStarted')).format('YYYY-MM-DD');
             } else if(stage == C.STAGE_REJECTED) {
                 var rejectedReason = this.model.get('rejectedReason');
-                subtitle_next = ', ' + u.i18n(rejectedReason;
+                subtitle_next = ', ' + u.i18n(rejectedReason);
             } else if(stage == C.STAGE_SELECTION) {
                 subtitle_next = ', check for enough participants ' + subtitle_remaining;
             } else

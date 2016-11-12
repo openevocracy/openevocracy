@@ -207,6 +207,8 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
         find({'tid': tid}, {'uid': true}).toArrayAsync();
     var topic_participants_promise = db.collection('topic_participants').
         find({'tid': tid}, {'uid': true}).toArrayAsync();
+    var topic_proposals_promise = db.collection('proposals').
+        countAsync({'tid': tid});  // NOTE: Also non-valid proposals are counted
     
     // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
     
@@ -281,6 +283,7 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
         'body': pad_body_promise,
         'votes': topic_votes_promise.then(_.size),
         'participants': topic_participants_promise.then(_.size),
+        'proposals': topic_proposals_promise,
         'voted': topic_votes_promise.then(function(topic_votes) {
             return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
         'joined': topic_participants_promise.then(function(topic_participants) {

@@ -4,15 +4,16 @@ define([
     'views/partials/group_events',
     'hbs!templates/groups/members',
     'jquery',
+    '../../utils',
     'bootstrap',
     'bootstrapcustom',
-    'ratyfa',
-    '../utils'
+    'ratyfa'
 ], function(
     _,
     Marionette,
     Events,
     Template,
+    $,
     u
     ) {
     

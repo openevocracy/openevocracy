@@ -3,7 +3,7 @@ define([
     'Marionette',
     'views/partials/group_events',
     'hbs!templates/groups/member_proposal',
-    '../utils'
+    '../../utils'
 ], function(
     $,
     Marionette,

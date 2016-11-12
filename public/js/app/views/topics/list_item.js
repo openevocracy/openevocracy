@@ -3,7 +3,7 @@ define([
     'Marionette',
     'hbs!templates/topics/list_item',
     'constants',
-    '../utils'
+    '../../utils'
 ], function(
     $,
     Marionette,

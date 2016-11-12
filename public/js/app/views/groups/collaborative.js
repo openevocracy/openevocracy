@@ -6,7 +6,7 @@ define([
     'views/pad',
     'views/partials/group_events',
     'hbs!templates/groups/collaborative',
-    '../utils'
+    '../../utils'
 ], function(
     $,
     _,

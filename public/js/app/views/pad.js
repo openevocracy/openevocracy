@@ -16,6 +16,10 @@ define([
     
     var Pad = {
         onShow: function() {
+            // close connection if it already exits to avoid multiple connections
+            if(this.socket)
+                this.socket.disconnect();
+            
             this.socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
             this.editor = new Quill('#editor', {theme: 'snow'});
             

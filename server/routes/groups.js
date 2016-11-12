@@ -8,7 +8,7 @@ var strformat = require('strformat');
 
 var C = requirejs('public/js/setup/constants');
 var cfg = requirejs('public/js/setup/configs');
-var i18n = require('./i18n');
+var i18n = require('../i18n');
 var ratings = require('./ratings');
 var pads = require('../pads');
 var mail = require('../mail');

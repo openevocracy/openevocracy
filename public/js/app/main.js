@@ -22,7 +22,7 @@
       bootstrapcustom: '../vendor/bootstrap.custom',
       moment: '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min',
       ratyfa: '../vendor/jquery.raty-fa',
-      isactive: '../vendor/isactive',
+      //isactive: '../vendor/isactive',
       parsley: '//cdnjs.cloudflare.com/ajax/libs/parsley.js/2.3.5/parsley.min',
       constants: '../setup/constants',
       configs: '../setup/configs',
@@ -142,7 +142,7 @@
     $(document).on('DOMNodeInserted','[data-toggle="tooltip"]',
       function(e) {e.target.tooltip();});*/
     
-    require(['application','isactive'], function(Application) {
+    require(['application'], function(Application) {
       App = new Application();
       App.start();
     });
