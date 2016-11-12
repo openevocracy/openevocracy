@@ -5,13 +5,13 @@ var requirejs = require('requirejs');
 var C = requirejs('public/js/setup/constants');
 
 /*
-Ratings can be either for proposals or users.
+Ratings can be either for knowledge or intigration skill.
 
 _id -> timestamp
 uid -> user who rated
 gid -> group
 ruid -> rated user
-rppid -> rated proposal
+rppid -> rated knowledge
 */
 
 function query(req, res, type) {
@@ -25,7 +25,7 @@ function query(req, res, type) {
 };
 
 exports.query_user_rating = _.partial(query, _, _, 'ruid');
-exports.query_proposal_rating = _.partial(query, _, _, 'rppid');
+exports.query_knowledge_rating = _.partial(query, _, _, 'rppid');
 
 function count(req, res, type) {
     var rid = ObjectId(req.body.id);
@@ -37,7 +37,7 @@ function count(req, res, type) {
 };
 
 exports.count_user_rating = _.partial(count, _, _, 'ruid');
-exports.count_proposal_rating = _.partial(count, _, _, 'rppid');
+exports.count_knowledge_rating = _.partial(count, _, _, 'rppid');
 
 function rate(req, res, type) {
     var rid = ObjectId(req.body.id);
@@ -61,7 +61,7 @@ function rate(req, res, type) {
 };
 
 exports.rate_user_rating = _.partial(rate, _, _, 'ruid');
-exports.rate_proposal_rating = _.partial(rate, _, _, 'rppid');
+exports.rate_knowledge_rating = _.partial(rate, _, _, 'rppid');
 
 /*
 return the user with the highest overall ratings

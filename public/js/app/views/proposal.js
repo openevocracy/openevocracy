@@ -4,16 +4,16 @@ define([
     'application',
     'Marionette',
     'hbs!templates/proposal',
-    'i18n!nls/lang',
-    'views/pad'
+    'views/pad',
+    '../utils'
 ], function(
     $,
     cfg,
     app,
     Marionette,
     Template,
-    i18n,
-    Pad
+    Pad,
+    u
     ) {
     
     var View = Marionette.ItemView.extend({
@@ -21,7 +21,7 @@ define([
         tagName: 'section',
         className: "content",
         id: "proposal",
-        viewTitle: i18n["My proposal"],
+        viewTitle: u.i18n("My proposal"),
         
         events: {
             'click .edit': function(e) {
@@ -58,7 +58,7 @@ define([
         },
         
         onShow: function() {
-            //setActive('nav-'+this.model.get('_id'));
+            //u.setActive('nav-'+this.model.get('_id'));
             
             // initalize pad
             Pad.onShow.bind(this)();

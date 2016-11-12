@@ -6,12 +6,14 @@ define([
     'jquery',
     'bootstrap',
     'bootstrapcustom',
-    'ratyfa'
+    'ratyfa',
+    '../utils'
 ], function(
     _,
     Marionette,
     Events,
-    Template
+    Template,
+    u
     ) {
     
     var View = Marionette.ItemView.extend({
@@ -35,8 +37,8 @@ define([
         },
         
         onShow: function() {
-            setActive('grpmem');
-            //setActive('nav-'+this.model.get('_id'));
+            u.setActive('grpmem');
+            //u.setActive('nav-'+this.model.get('_id'));
             
             $('[data-toggle="tooltip"]').tooltip();
             
@@ -52,10 +54,10 @@ define([
                     raty(_.extend(ratySettings,
                          { score: member.member_rating,
                            click: _.partial(this.saveRating, this.model, 'user') }));
-                $('[data-rate-type="proposal"][data-rate-id="'+member.ppid+'"]').
+                $('[data-rate-type="knowledge"][data-rate-id="'+member.ppid+'"]').
                     raty(_.extend(ratySettings,
-                         { score: member.proposal_rating,
-                           click: _.partial(this.saveRating, this.model, 'proposal') }));
+                         { score: member.knowledge_rating,
+                           click: _.partial(this.saveRating, this.model, 'knowledge') }));
             }.bind(this));
         },
         
@@ -65,8 +67,8 @@ define([
             // modify internal model
             if(type == 'user')
                 _.findWhere(model.get('members'),{'_id': id}).member_rating = score;
-            else if(type == 'proposal')
-                _.findWhere(model.get('members'),{'ppid': id}).proposal_rating = score;
+            else if(type == 'knowledge')
+                _.findWhere(model.get('members'),{'ppid': id}).knowledge_rating = score;
             
             // send to server
             $.post('/json/ratings/'+type+'/rate',

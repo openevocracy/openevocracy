@@ -7,6 +7,7 @@ define({
     "Need an account? Just <a href='/#/register'>register</a>": "Du bist noch nicht angemeldet? Zur <a href='/#/register'>Registrierung</a>",
     "Nice to have you with us!": "Schön, dass du dabei bist!",
     "You already have an account? Just <a href='/#/login'>login</a>": "Du bist schon registriert? <a href='/#/login'>Melde dich an.</a>",
+    "User": "Benutzer",
     
     "Navigation": "Navigation",
     "Topic": "Thema",
@@ -53,5 +54,12 @@ define({
     
     "%D days, %H:%M:%S": "%D Tage, %H:%M:%S",
     
-    "Empty topic name not allowed.": "Wähle einen Namen für das Thema."
+    "Empty topic name not allowed.": "Wähle einen Namen für das Thema.",
+    "Topic already exists.": "Ein Thema mit diesem Namen existiert bereits",
+    
+    "Integration skill": "Integrationsfähigkeit",
+    "Knowledge": "Wissen",
+    "Skill of user to unite varying positions to everyone's satisfaction.":
+    "Die Fähigkeit der Person verschiedene Position für alle zufrieden zusammen bringen zu können.",
+    "Assumed knowledge regarding this topic.": "Angenommenes Wissen der Person bezüglich des Themas."
 });

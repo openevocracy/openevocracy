@@ -1,21 +1,21 @@
 define([
     'jquery',
     'underscore',
-    'i18n!nls/lang',
     'Marionette',
     'configs',
     'views/pad',
     'views/partials/group_events',
-    'hbs!templates/groups/collaborative'
+    'hbs!templates/groups/collaborative',
+    '../utils'
 ], function(
     $,
     _,
-    i18n,
     Marionette,
     conf,
     Pad,
     Events,
-    Template
+    Template,
+    u
     ) {
     
     var View = Marionette.ItemView.extend({
@@ -23,7 +23,7 @@ define([
         tagName: 'section',
         className: 'content',
         id: 'collaborative',
-        viewTitle: i18n['Our proposal'],
+        viewTitle: u.i18n('Our proposal'),
         
         events: Events,
         
@@ -39,8 +39,8 @@ define([
         },
         
         onShow: function() {
-            setActive('ourprop');
-            //setActive('nav-'+this.model.get('_id'));
+            u.setActive('ourprop');
+            //u.setActive('nav-'+this.model.get('_id'));
             
             $('[data-toggle="tooltip"]').tooltip();
             

@@ -1,18 +1,16 @@
 define([
-    'i18n!nls/lang',
     'Marionette',
     'hbs!templates/login',
     '../utils'
     ], function(
-    i18n,
     Marionette,
     Template,
-    utils
+    u
     ) {
 
     var View = Marionette.CompositeView.extend({
         template: Template,
-        viewTitle: i18n["Login"],
+        viewTitle: u.i18n("Login"),
         
         login: function (e) {
             App.session.login({
@@ -23,7 +21,7 @@ define([
                     App.eventAggregator.trigger('App:logged_in');
                 },
                 error: function(xhr, err){
-                    $('.message').addClass("alert alert-danger").html(utils.decodeServerMessage(xhr.responseJSON));
+                    $('.message').addClass("alert alert-danger").html(u.decodeServerMessage(xhr.responseJSON));
                     if(e) e.preventDefault();
                 }
             });

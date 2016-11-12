@@ -1,5 +1,4 @@
 define([
-    'i18n!nls/lang',
     'Marionette',
     'hbs!templates/register',
     'collections/users',
@@ -7,20 +6,19 @@ define([
     'parsley',
     '../utils'
     ], function(
-    i18n,
     Marionette,
     Template,
     Collection,
     $,
     Parsley,
-    utils
+    u
     ) {
     var users = new Collection();
     
     var Model = Backbone.Spark.Model.extend({
         sparks: {
             title: function() {
-                return i18n['Register'];
+                return u.i18n('Register');
             }
         }
     });
@@ -39,12 +37,12 @@ define([
                         pass: this.$("#pass").val()
                     }, {
                     success: function(res){
-                        $('.message').addClass("alert alert-success").html(utils.decodeServerMessage(res));
+                        $('.message').addClass("alert alert-success").html(u.decodeServerMessage(res));
                         $("#signup-form").remove();
                         $("#signup").remove();
                     },
                     error: function(xhr, err){
-                        $('.message').addClass("alert alert-danger").html(utils.decodeServerMessage(xhr.responseJSON));
+                        $('.message').addClass("alert alert-danger").html(u.decodeServerMessage(xhr.responseJSON));
                         e.preventDefault();
                     }});
                 } else {

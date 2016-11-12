@@ -132,56 +132,36 @@ exports.sendTopicReminderMessages = function(topic) {
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
             if(Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_SECOND) {
                 return sendEmailToAllTopicParticipants(
-                    topic,
-                    'Proposal reminder: ' + topic.name,
-                    'You are participant of topic ' + topic.name + '. ' +
-                    'The topic will enter consensus stage in 24 hours.\r\n' +
-                    'We suggest to read your proposal once again at that time,' +
-                    'to eliminate last mistakes in your text.'
+                    topic,strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT'), topic.name),
+                    strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE'), topic.name)
                 );
             } else if(Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_FIRST) {
                 return sendEmailToAllTopicParticipants(
-                    topic,
-                    'Proposal reminder: ' + topic.name,
-                    'You are a participant of topic ' + topic.name + '. ' +
-                    'The topic will enter consensus stage in 3 days.\r\n' +
-                    'We highly suggest to check your proposal for final corrections.'
+                    topic,strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT'), topic.name),
+                    strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE'), topic.name)
                 );
             }
             break;
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
             i18n.initAsync.then(function() {
                 sendEmailToAllLazyGroupMembers(
-                    topic,i18n.t('SEND_EMAIL_TO_ALL_LAZY_GROUP_MEMBERS')
-                    // TODO use strfomat to insert topic.name
-                    /*'Group inactivity reminder: ' + topic.name,
-                    'You are a member of a group in ' + topic.name + '. ' +
-                    'You were not active for 5 days in your group.\r\n' +
-                    'Let\'s have a look at your common document, ' +
-                    'probably someone added something new.'*/
+                    topic,strformat(i18n.t('EMAIL_ALL_LAZY_GROUP_MEMBERS_SUBJECT'), topic.name),
+                    strformat(i18n.t('EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE'), topic.name)
                 );
             });
             if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_SECOND) {
                 return sendEmailToAllActiveGroupMembers(
-                    topic,
-                    'Group reminder: ' + topic.name,
-                    'You are a member of a group in ' + topic.name + '. ' +
-                    'The topic will enter consensus stage in 24 hours.\r\n' +
-                    'We suggest to read your collaborative document once again ' +
-                    'at that time, to eliminate last mistakes in your common text.'
+                    topic,strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_SUBJECT'), topic.name),
+                    strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_MESSAGE'), topic.name)
                 );
             } else if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_FIRST) {
                 return sendEmailToAllActiveGroupMembers(
-                    topic,
-                    'Group reminder: ' + topic.name,
-                    'You are a member of a group in ' + topic.name + '. ' +
-                    'The current level will end in 3 days.\r\n' +
-                    'We highly suggest to check your collaborative document ' +
-                    'for final corrections.'
+                    topic,strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_SUBJECT'), topic.name),
+                    strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_MESSAGE'), topic.name)
                 );
             }
             break;
     }
     
     return Promise.resolve();
-}
+};

@@ -7,7 +7,7 @@ define([
     'hbs!templates/topics/details',
     'constants',
     'views/pad',
-    'i18n!nls/lang',
+    '../utils',
     'jquerycookie',
     'jquerycountdown'
 ], function(
@@ -19,7 +19,7 @@ define([
     Template,
     C,
     Pad,
-    lang
+    u
     ) {
     
     var View = Marionette.ItemView.extend({
@@ -114,7 +114,7 @@ define([
             
             // initalize pad
             Pad.onShow.bind(this)(); // binding gives access to the pad id
-            //setActive('nav-'+this.model.get('_id'));
+            //u.setActive('nav-'+this.model.get('_id'));
         },
         
         onAction: function() {
@@ -144,7 +144,7 @@ define([
                 subtitle_next = ', finished at ' + moment(this.model.get('stagePassedStarted')).format('YYYY-MM-DD');
             } else if(stage == C.STAGE_REJECTED) {
                 var rejectedReason = this.model.get('rejectedReason');
-                subtitle_next = ', ' + (lang[rejectedReason] != undefined ? lang[rejectedReason] : rejectedReason);
+                subtitle_next = ', ' + u.i18n(rejectedReason;
             } else if(stage == C.STAGE_SELECTION) {
                 subtitle_next = ', check for enough participants ' + subtitle_remaining;
             } else

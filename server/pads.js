@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var $ = require('jquery');
 var requirejs = require('requirejs');
 var gulf = require('gulf');
 var mongoose = require('mongoose');
@@ -10,7 +11,7 @@ var dom = require('jsdom');
 var pdf = require('phantom-html2pdf');
 var ObjectId = require('mongodb').ObjectID;
 var db = require('./database').db;
-var $ = require('jquery');
+//var Quill = require('quill');
 
 // promisify gulf
 var Promise = require('bluebird');
@@ -132,6 +133,10 @@ exports.startPadServer = function(httpServer) {
 
 function getDocHTMLAsync(doc) {
   return envAsync('<div id="editor"></div>').then(function (window) {
+      
+        // FIXME use non-hacked variant:
+        // https://github.com/quilljs/quill/issues/993#issuecomment-249387907
+      
         document = window.document;
         navigator = window.navigator;
         document.getSelection = function() {return null};

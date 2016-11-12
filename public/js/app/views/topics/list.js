@@ -5,8 +5,7 @@ define([
     'hbs!templates/topics/list',
     'views/topics/list_item',
     'models/topic',
-    '../../utils',
-    'i18n!nls/lang'
+    '../../utils'
     ], function(
     _,
     C,
@@ -14,14 +13,13 @@ define([
     Template,
     ChildView,
     Model,
-    utils,
-    i18n
+    u
     ) {
     
     var ListModel = Backbone.Spark.Model.extend({
         sparks: {
             title: function() {
-                return i18n['Current Topics'];
+                return u.i18n('Current Topics');
             }
         }
     });
@@ -111,7 +109,7 @@ define([
         },
         
         onShow: function() {
-            setActive('topics');
+            u.setActive('topics');
         },
         
         setSortOldestFirst: function(sortOldestFirst) {
@@ -145,7 +143,7 @@ define([
                     window.location.hash = '/topic/'+topic.id;
                 }.bind(this),
                 error: function(model,res) {
-                    this.$('.message').addClass('alert alert-danger').html(utils.decodeServerMessage(res.responseJSON));
+                    this.$('.message').addClass('alert alert-danger').html(u.decodeServerMessage(res.responseJSON));
                 }.bind(this)
             });
             

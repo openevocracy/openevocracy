@@ -81,6 +81,7 @@
   
   require(['underscore','backbone','handlebars','i18n!nls/lang'], function(_, Backbone, Handlebars, i18n) {
     // register handlebars i18n helper
+    // for javascript implementation see utils.js
     Handlebars.registerHelper('i18n',
         function(str) {
             return (i18n != undefined ? (i18n[str] != undefined ? i18n[str] : str) : str);

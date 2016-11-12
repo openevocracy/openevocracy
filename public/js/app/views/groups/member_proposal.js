@@ -2,12 +2,14 @@ define([
     'jquery',
     'Marionette',
     'views/partials/group_events',
-    'hbs!templates/groups/member_proposal'
+    'hbs!templates/groups/member_proposal',
+    '../utils'
 ], function(
     $,
     Marionette,
     Events,
-    Template
+    Template,
+    u
     ) {
     
     var View = Marionette.ItemView.extend({
@@ -24,8 +26,8 @@ define([
         },
         
         onShow: function() {
-            setActive('grpmem-'+this.model.get('member')._id);
-            //setActive('nav-'+this.model.get('_id'));
+            u.setActive('grpmem-'+this.model.get('member')._id);
+            //u.setActive('nav-'+this.model.get('_id'));
         }
     });
     

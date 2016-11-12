@@ -7,6 +7,14 @@ define([
     _,
     i18n
     ) {
+        
+    // This needs to be on top, since it needs to run before functions are instanciated
+    $(document.body).on('click', '[data-link]', function(event) {
+        var target = $(event.target);
+        if(target.is('span'))
+            target = target.parent();
+        utils.handleActive(target);
+    });
     
     var utils = {
         decodeServerMessage: function(err) {
@@ -14,14 +22,17 @@ define([
             // TODO return _.format(i18n[err.message],err.args);
         },
         
+        i18n: function(str) {
+            // for Handlebars implementation see main.js
+            return (i18n != undefined ? (i18n[str] != undefined ? i18n[str] : str) : str);
+        },
+        
         handleActive: function(target) {
-            // TODO: Delete isactive.js some time
-            
-            /* reset everything */
+            // reset everything
             $("[data-link]").removeClass('active');
-            /* activate current element */
+            // activate current element
             target.addClass('active');
-            /* activate parent elements */
+            // activate parent elements
             var attr = target.attr('data-link-parents');
             if(typeof attr !== typeof undefined) {
                 var parents = attr.split(" ");
@@ -35,18 +46,6 @@ define([
             this.handleActive($("[data-link=" + linkName + "]"));
         }
     };
-    
-    // NOTE
-    // Because a view change triggered in group_events.js and the group controller,
-    // it recreates all buttons directly afterwards.
-    // Therefore setActive MUST be called from the new view's onShow() method
-    // in order for this to work.
-    $(document.body).on('click', '[data-link]', function(event) {
-        var target = $(event.target);
-        if(target.is('span'))
-            target = target.parent();
-        utils.handleActive(target);
-    });
 
     return utils;
 });

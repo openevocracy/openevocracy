@@ -4,9 +4,11 @@ var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var Chance = require('chance');
 var requirejs = require('requirejs');
+var strformat = require('strformat');
 
 var C = requirejs('public/js/setup/constants');
 var cfg = requirejs('public/js/setup/configs');
+var i18n = require('./i18n');
 var ratings = require('./ratings');
 var pads = require('../pads');
 var mail = require('../mail');
@@ -117,16 +119,9 @@ exports.createGroupsAsync = function(topic) {
         db.collection('users').find({'_id': { $in: group }},{'email': true}).
         toArrayAsync().then(function(users) {
             mail.sendMail(_.pluck(users,'email').join(),
-                topic.name + ' reached consensus stage',
-                'Dear participant,\r\n\r\n' +
-                'The consensus stage of the topic ' + topic.name +
-                ' has just started and you are part of it.\r\n' +
-                'You have been assigned to the group '+gid.toString()+'.\r\n' +
-                'You and four other team members will be working on a joint proposal.\r\n\r\n' +
-                'Please find the group\'s link here:\r\n' +
-                'http://mind-about-sagacitysite.c9.io/group/'+gid.toString()+'\r\n\r\n' +
-                'Thank you for your help!\r\n' +
-                'Evocracy - Democracy Evolved');
+                strformat(i18n.t('EMAIL_CONSENSUS_START_SUBJECT'), topic.name),
+                strformat(i18n.t('EMAIL_CONSENSUS_START_MESSAGE'), topic.name, gid.toString())
+            );
         });
         
         // create notifications for users
@@ -195,11 +190,9 @@ exports.remixGroupsAsync = function(topic) {
                 return db.collection('users').find({'_id': { $in: _.pluck(participants, 'uid') }},{'email': true}).
                 toArrayAsync().then(function(users) {
                     mail.sendMail(_.pluck(users,'email').join(),
-                        topic.name + ' finished last level',
-                        'Dear participant,\r\n\r\n' +
-                        'The topic '+ topic.name +' you were participating has finished right now.\r\n' +
-                        'Have a look at the final result:\r\n' +
-                        'http://mind-about-sagacitysite.c9.io/file/topic/final/' + topic._id);
+                        strformat(i18n.t('EMAIL_TOPIC_PASSED_SUBJECT'), topic.name),
+                        strformat(i18n.t('EMAIL_TOPIC_PASSED_MESSAGE'), topic.name, topic._id)
+                    );
                 });
             }).return({'nextStage': C.STAGE_PASSED});
         } else if(0 == numLeaders) {
@@ -224,16 +217,9 @@ exports.remixGroupsAsync = function(topic) {
             db.collection('users').find({'_id': { $in: group }},{'email': true}).
             toArrayAsync().then(function(users) {
                 mail.sendMail(_.pluck(users,'email').join(),
-                    topic.name + ' reached next level',
-                    'Dear participant,\r\n\r\n' +
-                    'The consensus stage of the topic ' + topic.name +
-                    ' has reached a new level and so have you.\r\n' +
-                    'You have been assigned to the group '+gid.toString()+'.\r\n' +
-                    'You and four other new team members will be working on a joint proposal.\r\n\r\n' +
-                    'Please find the group\'s link here:\r\n' +
-                    'http://mind-about-sagacitysite.c9.io/group/'+gid.toString()+'\r\n\r\n' +
-                    'Thank you for your help!\r\n' +
-                    'Evocracy - Democracy Evolved');
+                    strformat(i18n.t('EMAIL_LEVEL_CHANGE_SUBJECT'), topic.name),
+                    strformat(i18n.t('EMAIL_LEVEL_CHANGE_MESSAGE'), topic.name, gid.toString())
+                );
             });
             
             // register as sink for source proposals
@@ -280,7 +266,7 @@ function getMemberProposalBodyAndRating(member, gid, uid) {
         var proposal_body_promise = pads.getPadHTMLAsync(proposal.pid);
         
         // get proposal rating
-        var proposal_rating_promise = 
+        var proposal_knowledge_promise = 
         db.collection('ratings').findOneAsync(
             {'rppid': proposal._id, 'gid': gid, 'uid': uid},{'score': 1}).
         then(function(rating) {
@@ -290,7 +276,7 @@ function getMemberProposalBodyAndRating(member, gid, uid) {
         return Promise.props({
             'ppid': proposal._id,
             'proposal_body': proposal_body_promise,
-            'proposal_rating': proposal_rating_promise
+            'knowledge_rating': proposal_knowledge_promise
         });
     });
 }

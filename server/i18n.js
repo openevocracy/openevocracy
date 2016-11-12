@@ -1,16 +1,16 @@
 var i18next = require('i18next');
-var i18nextnodefsbackend = require('i18next-node-fs-backend');
 var Promise = require('bluebird');
+var requirejs = require('requirejs');
 
-i18next.use(i18nextnodefsbackend);
+// TODO replace "en" by language of specific user from database
+var en = requirejs('public/js/app/nls/en/mail');
+var de = requirejs('public/js/app/nls/de/mail');
 
 exports.initAsync = Promise.promisify(i18next.init).bind(i18next)({
     lng: 'en', // TODO de
-    backend: {
-        loadPath: 'lang/en/lang.json',
-        //loadPath: 'lang/{{lng}}/lang.json',
-        //addPath: 'lang/{{lng}}/lang.missing.json',
-        jsonIndent: 2
+    resources: {
+        en: { translation: en },
+        de: { translation: de }
     }
 });
 

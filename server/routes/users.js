@@ -5,6 +5,9 @@ var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var requirejs = require('requirejs');
 var validate = require('validate.js');
+var strformat = require('strformat');
+
+var i18n = require('./i18n');
 var topics = require('./topics');
 var mail = require('../mail');
 var utils = require('../utils');
@@ -67,13 +70,10 @@ exports.login = function(req, res) {
 };
 
 function sendVerificationMail(user) {
-    var subject = 'Your registration at Evocracy';
-    var text =  'Welcome '+ user._id.toString() +' at Evocracy,\r\n'+
-                'You just created an account at '+cfg.EVOCRACY_HOST+'.\r\n\r\n'+
-                'Please verify your email by visiting:\r\n'+
-                cfg.EVOCRACY_HOST+'/json/auth/verifyEmail/'+user._id.toString()+'\r\n\r\n'+
-                'If you did not register, just ignore this message.\r\n';
-    mail.sendMail(user.email, subject, text);
+    mail.sendMail(user.email,
+        i18n.t('EMAIL_REGISTRATION_SUBJECT'),
+        strformat(i18n.t('EMAIL_REGISTRATION_MESSAGE'), user._id.toString(), cfg.EVOCRACY_HOST)
+    );
 }
 
 function loginUser(req, res, err, user) {

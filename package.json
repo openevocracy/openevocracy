@@ -36,7 +36,7 @@
     "node-crontab": "*",
     "nodemailer": "*",
     "phantom-html2pdf": "*",
-    "quill": "*",
+    "quill": "1.0.0",
     "range-parser": "*",
     "request": "*",
     "request-promise": "*",
