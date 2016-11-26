@@ -92,6 +92,11 @@ function isProposalValid(proposal) {
     return proposal.body.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length >= cfg.MIN_WORDS_PROPOSAL;
 }
 
+/**
+ * initial creation of groups after proposal stage
+ * - check if user proposals are valid (filter participants)
+ * - randomly assign participants to groups
+ */
 exports.createGroupsAsync = function(topic) {
     var tid = topic._id;
     
@@ -110,7 +115,9 @@ exports.createGroupsAsync = function(topic) {
                     return _.isUndefined(proposal) ? false : isProposalValid(proposal);
                 });
             });
-    }).then(assignParticipantsToGroups).map(function(group) {
+    }).then(function(participants) {
+        return Promise.resolve(assignParticipantsToGroups(participants));
+    }).map(function(group) {
         // create new group id
         var gid = ObjectId();
         
@@ -157,6 +164,12 @@ exports.createGroupsAsync = function(topic) {
     });
 };
 
+/**
+ * create of groups after level is finished
+ * - check if group proposals are valid (filter groups)
+ * - find group leader (with highest rating)
+ * - randomly assign participants to new groups
+ */
 exports.remixGroupsAsync = function(topic) {
     var tid = topic._id;
     
@@ -201,11 +214,11 @@ exports.remixGroupsAsync = function(topic) {
         }
         
         // assign members to groups
-        var groups = assignParticipantsToGroups(leaders);
+        var groupsPromise = Promise.resolve(assignParticipantsToGroups(leaders));
         
         // insert all groups into database
         var nextLevel = topic.level+1;
-        return Promise.map(groups, function(group) {
+        return Promise.map(groupsPromise, function(group) {
             // create group new id
             var gid = ObjectId();
             
@@ -259,25 +272,11 @@ exports.list = function(req, res) {
     db.collection('groups').find().toArrayAsync().then(_.bind(res.json,res));
 };
 
-function getMemberProposalBodyAndRating(member, gid, uid) {
-    return db.collection('proposals').findOneAsync(
-        {'source': member._id, 'sink': gid}).then(function(proposal) {
-        // get proposal body
-        var proposal_body_promise = pads.getPadHTMLAsync(proposal.pid);
-        
-        // get proposal rating
-        var proposal_knowledge_promise = 
-        db.collection('ratings').findOneAsync(
-            {'rppid': proposal._id, 'gid': gid, 'uid': uid},{'score': 1}).
-        then(function(rating) {
-            return rating ? rating.score : 0;
-        });
-        
-        return Promise.props({
-            'ppid': proposal._id,
-            'proposal_body': proposal_body_promise,
-            'knowledge_rating': proposal_knowledge_promise
-        });
+function getMemberRating(ruid, gid, uid, type) {
+    return db.collection('ratings').findOneAsync(
+        {'ruid': ruid, 'gid': gid, 'uid': uid, 'type': type},{'score': true}).
+    then(function(rating) {
+        return rating ? rating.score : 0;
     });
 }
 
@@ -291,7 +290,7 @@ exports.query = function(req, res) {
     var group_promise = db.collection('groups').findOneAsync({'_id': gid});
     
     // get group proposal pad id
-    var pid_promise = group_promise.then(function(group) {
+    var proposal_promise = group_promise.then(function(group) {
         return db.collection('proposals').findOneAsync(
             {'_id': group.ppid},{'pid': true});
     });
@@ -312,24 +311,27 @@ exports.query = function(req, res) {
         member.name = chance.first();
         member.color = chance.color({format: 'shorthex'});
         
-        // get member's proposal body and rating
-        var proposal_body_and_rating_promise =
-            getMemberProposalBodyAndRating(member,gid,uid);
-        
-        // get member rating
-        var member_rating_promise =
-        db.collection('ratings').findOneAsync(
-            {'ruid': member._id, 'gid': gid, 'uid': uid},{'score': true}).
-        then(function(rating) {
-            return rating ? rating.score : 0;
+        // get member's body
+        var proposal_body = db.collection('proposals').findOneAsync(
+            {'source': member._id, 'sink': gid}).then(function(proposal) {
+            // get proposal body
+            return pads.getPadHTMLAsync(proposal.pid);
         });
         
-        return Promise.join(proposal_body_and_rating_promise,
-                            member_rating_promise).
-        spread(function(proposal_body_and_rating,
-                        member_rating) {
-            return _.extend(member,proposal_body_and_rating,
-                            {'member_rating': member_rating});
+        // get member rating
+        var member_rating_knowledge_promise = getMemberRating(member._id, gid, uid, C.RATING_KNOWLEDGE);
+        var member_rating_integration_promise = getMemberRating(member._id, gid, uid, C.RATING_INTEGRATION);
+        
+        return Promise.join(proposal_body,
+                            member_rating_knowledge_promise,
+                            member_rating_integration_promise).
+        spread(function(proposal_body,
+                        member_rating_knowledge,
+                        member_rating_integration) {
+            return _.extend(member,
+                            {'rating_knowledge': member_rating_knowledge},
+                            {'rating_integration': member_rating_integration},
+                            {'gid': gid});
         });
     });
     
@@ -340,10 +342,10 @@ exports.query = function(req, res) {
         {$set: {'lastActivity': Date.now()}});
     
     Promise.join(group_promise,
-                 pid_promise,
+                 proposal_promise,
                  members_promise,
                  set_member_timestamp_promise).
-    spread(function(group,pid,members) {
-        return _.extend(group,pid,{'members': members});}).
+    spread(function(group,proposal,members) {
+        return _.extend(group,{'pid': proposal.pid},{'members': members});}).
     then(res.json.bind(res));
 };

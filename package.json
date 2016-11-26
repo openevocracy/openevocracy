@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "dependencies": {
     "app-root-path": "*",
+    "async-lock": "^0.3.8",
     "bcrypt": "*",
     "bluebird": "*",
     "body-parser": "*",

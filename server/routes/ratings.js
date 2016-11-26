@@ -5,45 +5,46 @@ var requirejs = require('requirejs');
 var C = requirejs('public/js/setup/constants');
 
 /*
-Ratings can be either for knowledge or intigration skill.
+ * Ratings can be either for knowledge or intigration skill.
+ *
+ * _id -> timestamp
+ * uid -> user who rated
+ * gid -> group
+ * ruid -> rated user
+ */
 
-_id -> timestamp
-uid -> user who rated
-gid -> group
-ruid -> rated user
-rppid -> rated knowledge
-*/
-
-function query(req, res, type) {
+// NOTE Currently not in use
+// called if ratings are queried, responds with rating from database
+exports.query = function(req, res) {
     var rid = ObjectId(req.params.id);
     var gid = ObjectId(req.params.gid);
     var uid = ObjectId(req.signedCookies.uid);
+    var type = parseInt(req.params.type, 10);
     
-    var rating = { 'gid': gid, 'uid': uid };
-    rating[type] = rid;
-    db.collection('ratings').findOneAsync(rating).then(res.json.bind(res));
+    db.collection('ratings').
+        findOneAsync({ 'gid': gid, 'uid': uid, 'ruid': rid, 'type': type }).
+        then(res.json.bind(res));
 };
 
-exports.query_user_rating = _.partial(query, _, _, 'ruid');
-exports.query_knowledge_rating = _.partial(query, _, _, 'rppid');
-
-function count(req, res, type) {
+// NOTE Currently not in use
+// counts number of given ratings per group for specific type of rating
+exports.count = function(req, res) {
     var rid = ObjectId(req.body.id);
     var gid = ObjectId(req.body.gid);
+    var type = parseInt(req.params.type, 10);
     
-    var rating = { 'gid': gid };
-    rating[type] = rid;
-    db.collection('ratings').countAsync(rating).then(res.json.bind(res));
+    db.collection('ratings').
+        countAsync({ 'gid': gid, 'ruid': rid, 'type': type }).
+        then(res.json.bind(res));
 };
 
-exports.count_user_rating = _.partial(count, _, _, 'ruid');
-exports.count_knowledge_rating = _.partial(count, _, _, 'rppid');
-
-function rate(req, res, type) {
+// save rating
+exports.rate = function(req, res) {
     var rid = ObjectId(req.body.id);
     var gid = ObjectId(req.body.gid);
     var uid = ObjectId(req.signedCookies.uid);
-    var score = req.body.score;
+    var type = parseInt(req.body.type, 10);
+    var score = parseInt(req.body.score, 10);
     
     // return 404 score is not between 1 and 5
     if(score < 0 || score > 5) {
@@ -51,25 +52,20 @@ function rate(req, res, type) {
         return;
     }
     
-    var ratingHead = { 'gid': gid, 'uid': uid };
-    ratingHead[type] = rid;
     db.collection('ratings').updateAsync(
-        ratingHead,
+        { 'ruid': rid, 'gid': gid, 'uid': uid, 'type': type },
         { $set: { 'score': score } },
         { upsert: true }).
     then(res.sendStatus.bind(res,200));
 };
 
-exports.rate_user_rating = _.partial(rate, _, _, 'ruid');
-exports.rate_knowledge_rating = _.partial(rate, _, _, 'rppid');
-
 /*
-return the user with the highest overall ratings
-@param gid group id
-*/
+ * return the user with the highest overall ratings
+ * @param gid group id
+ */
 exports.getGroupLeader = function(gid) {
     return db.collection('ratings').find(
-        { 'gid': gid, 'ruid': { $exists: true }},
+        { 'gid': gid },
         { 'ruid': true, 'score': true }).
         toArrayAsync().then(function(ratings) {
             if(_.isEmpty(ratings))

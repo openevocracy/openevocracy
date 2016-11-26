@@ -6,6 +6,8 @@ var requirejs = require('requirejs');
 var fs = Promise.promisifyAll(require('fs'));
 var path = require('path');
 var appRoot = require('app-root-path');
+var AsyncLock = require('async-lock');
+var lock = new AsyncLock();
 
 var C = requirejs('public/js/setup/constants');
 var cfg = requirejs('public/js/setup/configs');
@@ -97,17 +99,39 @@ function manageConsensusStageAsync(topic, levelDuration) {
 }
 exports.manageConsensusStage = manageConsensusStageAsync;
 
-/*
-checks if a minimum of MIN_PARTICIPANTS_PER_TOPIC proposal exists
-*/
+/**
+ * checks if a minimum of MIN_PARTICIPANTS_PER_TOPIC proposal exists
+ */
 function isAccepted(topic) {
     return db.collection('topic_participants').
         countAsync({'tid': topic._id}).
         then(function(count) {return count >= cfg.MIN_PARTICIPANTS_PER_TOPIC;});
 }
 
+/**
+ * gets all topics from database, call management of topic states and retun all topics
+ * 
+ * @return {object} topics - all adjusted topics
+ */
+function manageAndListTopicsAsync() {
+    return lock.acquire('manageTopic', function() {
+        return db.collection('topics').find().toArrayAsync().
+            map(_.partial(manageTopicStateAsync));
+    });
+}
+exports.manageAndListTopicsAsync = manageAndListTopicsAsync;
+
+/**
+ * managment of topic states/levels
+ * if deadline of state/level is expired, change state/level in database
+ * and return changed topic
+ * 
+ * @param {object} topic - a topic from database
+ * @return {object} topic - adjusted topic
+ */
 function manageTopicStateAsync(topic) {
-    // exit this funtion if stage transition is not due yet
+    
+    // exit this function if stage transition is not due yet
     if(Date.now() < topic.nextDeadline)
         return Promise.resolve(topic);
     
@@ -161,7 +185,7 @@ function manageTopicStateAsync(topic) {
     
     return Promise.resolve(topic);
 }
-exports.manageTopicState = manageTopicStateAsync;
+//exports.manageTopicState = manageTopicStateAsync;
 
 // appends timeCreated and stageName
 function appendBasicTopicInfo(topic) {
@@ -302,9 +326,14 @@ function appendTopicInfoAsync(topic,uid,with_details) {
 exports.list = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
     
-    db.collection('topics').find().toArrayAsync().map(function(topic) {
+    manageAndListTopicsAsync().then(function(topics) {
+        Promise.map(topics, _.partial(appendTopicInfoAsync,_,uid,false)).
+        then(res.json.bind(res));
+    });
+    
+    /*db.collection('topics').find().toArrayAsync().map(function(topic) {
         return manageTopicStateAsync(topic).then(_.partial(appendTopicInfoAsync,_,uid,false));
-    }).then(res.json.bind(res));
+    }).then(res.json.bind(res));*/
 };
 
 exports.update = function(req, res) {

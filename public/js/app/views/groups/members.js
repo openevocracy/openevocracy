@@ -3,6 +3,7 @@ define([
     'Marionette',
     'views/partials/group_events',
     'hbs!templates/groups/members',
+    'constants',
     'jquery',
     '../../utils',
     'bootstrap',
@@ -13,6 +14,7 @@ define([
     Marionette,
     Events,
     Template,
+    C,
     $,
     u
     ) {
@@ -38,27 +40,30 @@ define([
         },
         
         onShow: function() {
+            // Set active links
             u.setActive('grpmem');
             //u.setActive('nav-'+this.model.get('_id'));
             
+            // Activate Bootstrap Tooltip
             $('[data-toggle="tooltip"]').tooltip();
             
+            // Set settings for raty library
             var ratySettings = {
                 /*half: true, FIXME: https://github.com/FortAwesome/Font-Awesome/issues/2301 */
                 starOff : 'fa fa-fw fa-heart-o',
                 starOn  : 'fa fa-fw fa-heart'
             };
             
+            // Create raty objects and connect them to DOM using jquery
             _.each(this.model.get('members'), function(member) {
-                // TODO partcipants => members
-                $('[data-rate-type="member"][data-rate-id="'+member._id+'"]').
+                $('[data-rate-type="integration"][data-rate-id="'+member._id+'"]').
                     raty(_.extend(ratySettings,
-                         { score: member.member_rating,
-                           click: _.partial(this.saveRating, this.model, 'user') }));
-                $('[data-rate-type="knowledge"][data-rate-id="'+member.ppid+'"]').
+                         { score: member.rating_integration,
+                           click: _.partial(this.saveRating, this.model, C.RATING_INTEGRATION) }));
+                $('[data-rate-type="knowledge"][data-rate-id="'+member._id+'"]').
                     raty(_.extend(ratySettings,
-                         { score: member.knowledge_rating,
-                           click: _.partial(this.saveRating, this.model, 'knowledge') }));
+                         { score: member.rating_knowledge,
+                           click: _.partial(this.saveRating, this.model, C.RATING_KNOWLEDGE) }));
             }.bind(this));
         },
         
@@ -66,14 +71,22 @@ define([
             var id = $(this).attr('data-rate-id');
             
             // modify internal model
-            if(type == 'user')
+            switch (type) {
+                case C.RATING_INTEGRATION:
+                    _.findWhere(model.get('members'),{'_id': id}).rating_integration = score;
+                    break;
+                case C.RATING_KNOWLEDGE:
+                    _.findWhere(model.get('members'),{'_id': id}).rating_knowledge = score;
+                    break;
+            }
+            /*if(type == 'user')
                 _.findWhere(model.get('members'),{'_id': id}).member_rating = score;
             else if(type == 'knowledge')
-                _.findWhere(model.get('members'),{'ppid': id}).knowledge_rating = score;
+                _.findWhere(model.get('members'),{'ppid': id}).knowledge_rating = score;*/
             
             // send to server
-            $.post('/json/ratings/'+type+'/rate',
-                {'id': id, 'gid': model.get('_id'), 'score': score},
+            $.post('/json/ratings/rate',
+                {'id': id, 'gid': model.get('_id'), 'type': type, 'score': score},
                 function(data) {});
         }
     });

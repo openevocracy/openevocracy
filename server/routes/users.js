@@ -187,7 +187,15 @@ exports.query = function(req, res) {
 // GET /json/user/navi
 exports.navigation = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
-    
+            
+    var proposalsPromise = db.collection('proposals').
+        find({'source': uid}, {'tid': true}).toArrayAsync().then(function(proposals) {
+            return db.collection('topics').find(
+                {'_id': { $in: _.pluck(proposals, 'tid') },
+                'stage': C.STAGE_PROPOSAL},
+                {'name': true, 'nextDeadline': true}).toArrayAsync();
+        });
+
     var topicsPromise = db.collection('topic_participants').
         find({'uid': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
             return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
@@ -201,34 +209,25 @@ exports.navigation = function(req, res) {
             return db.collection('groups').find(
                 {'_id': { $in: _.pluck(group_members, 'gid') }},
                 {'tid': true}).toArrayAsync();
-        }).then(function(groups) {
-            var topicsPromise = db.collection('topics').
-                find({'_id': { $in: _.pluck(groups, 'tid') }},
-                {'name': true, 'nextDeadline': true}).toArrayAsync();
+        }).map(function (group) {
+            var topicPromise = db.collection('topics').
+                findOneAsync({'_id': group.tid },
+                {'name': true, 'nextDeadline': true});
             
-            return Promise.join(topicsPromise, groups);
-        }).spread(function (topics, groups) {
-            return _.zip(topics, groups);
+            return Promise.props({
+                '_id': group._id,
+                'name': topicPromise.get('name'),
+                'nextDeadline': topicPromise.get('nextDeadline')
+                });
         }).filter(function(tg) {
             // only accept active groups
-            return tg[0].nextDeadline >= Date.now();
-        }).map(function (tg) {
-            return _.extend(_.pick(tg[0],'name','nextDeadline'),
-                            _.pick(tg[1],'_id'));
-        });
-    
-    var proposalsPromise = db.collection('proposals').
-        find({'source': uid}, {'tid': true}).toArrayAsync().then(function(proposals) {
-            return db.collection('topics').find(
-                {'_id': { $in: _.pluck(proposals, 'tid') },
-                'stage': C.STAGE_PROPOSAL},
-                {'name': true, 'nextDeadline': true}).toArrayAsync();
+            return tg.nextDeadline >= Date.now();
         });
 
     Promise.props({
+        'proposals': proposalsPromise,
         'topics': topicsPromise,
-        'groups': groupsPromise,
-        'proposals': proposalsPromise
+        'groups': groupsPromise
     }).then(res.json.bind(res)).
     catch(utils.isOwnError,utils.handleOwnError(res));
 };
