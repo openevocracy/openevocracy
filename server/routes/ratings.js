@@ -71,17 +71,17 @@ exports.getGroupLeader = function(gid) {
             if(_.isEmpty(ratings))
                 return undefined;
             
-            var grouped_ratings = _.groupBy(ratings,'ruid');
-            // should now have the form:
-            // {ruid1: [{'ruid': ruid1, 'score': x_1},...,{'ruid': ruid1, 'score': x_5}], ruid2: [{'ruid': ruid2, score: x_1},...,{'ruid': ruid2, score: x_5}], ...}
+            var grouped_ratings = _.groupBy(ratings, 'ruid');
+            // should now have the form: (where n is the number of ratings every user got)
+            // {ruid1: [{'ruid': ruid1, 'score': x_1},...,{'ruid': ruid1, 'score': x_n}], ruid2: [{'ruid': ruid2, score: x_1},...,{'ruid': ruid2, score: x_n}], ...}
             
-            var summed_ratings = _.map(grouped_ratings,function(array,ruid) {
+            var summed_ratings = _.map(grouped_ratings,function(array, ruid) {
                 // array contains multiple ratings, ruid contains the rated user
-                // array = [{'ruid': ruid1, 'score': x_1},...,{'ruid': ruid1, 'score': x_5}]
+                // array = [{'ruid': ruid1, 'score': x_1},...,{'ruid': ruid1, 'score': x_n}]
                 // ruid = ruid1
                 
-                var scores = _.pluck(array,'score');
-                // scores = [x_1,...,x_5]
+                var scores = _.pluck(array, 'score');
+                // scores = [x_1,...,x_n]
                 
                 return {'ruid': ruid, 'score': _.reduce(scores, function(memo, num){ return memo + num; }, 0)};
             });
@@ -90,6 +90,6 @@ exports.getGroupLeader = function(gid) {
             // TODO find better solution, if more than one have the same rating
             var best_rating = _.max(summed_ratings,function(rating) {return rating.score;});
             // best_rating = {'ruid': ruid_max, 'score': sum_max}
-            return best_rating.ruid;
+            return ObjectId(best_rating.ruid);
         });
 };

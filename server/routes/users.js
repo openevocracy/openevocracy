@@ -199,31 +199,29 @@ exports.navigation = function(req, res) {
     var topicsPromise = db.collection('topic_participants').
         find({'uid': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
             return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
-                {'name': true, 'stage': true, 'level': true}).toArrayAsync();
+                {'name': true, 'stage': true, 'level': true, 'nextDeadline': true}).toArrayAsync();
         }).map(function(topic) {
             return topics.appendBasicTopicInfo(topic);
         });
     
-    var groupsPromise = db.collection('group_members').
-        find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
-            return db.collection('groups').find(
-                {'_id': { $in: _.pluck(group_members, 'gid') }},
-                {'tid': true}).toArrayAsync();
-        }).map(function (group) {
-            var topicPromise = db.collection('topics').
-                findOneAsync({'_id': group.tid },
-                {'name': true, 'nextDeadline': true});
-            
-            return Promise.props({
-                '_id': group._id,
-                'name': topicPromise.get('name'),
-                'nextDeadline': topicPromise.get('nextDeadline')
-                });
-        }).filter(function(tg) {
-            // only accept active groups
-            return tg.nextDeadline >= Date.now();
-        });
-
+    var groupsPromise = topicsPromise.filter(function(topic) {
+        return topic.stage == C.STAGE_CONSENSUS;
+    }).map(function(topic){
+        return db.collection('group_members').
+            find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
+                return db.collection('groups').findOneAsync(
+                    {'_id': { $in: _.pluck(group_members, 'gid')}, 'tid': topic._id, 'level': topic.level },
+                    {'_id': true});
+            }).then(function(group) {
+                if(group)
+                    return {'_id': group._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
+                else
+                    return null;
+            });
+    }).filter(function(group) {
+        return _.isObject(group);
+    });
+    
     Promise.props({
         'proposals': proposalsPromise,
         'topics': topicsPromise,

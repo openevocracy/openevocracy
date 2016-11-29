@@ -29,6 +29,14 @@ define([
                     showTopicsHeader = true;
             });
             this.model.set('showTopicsHeader', showTopicsHeader);
+            
+            // // render on change
+            // this.model.on('change', this.render, this);
+            // // create timer for automatic refreshing of list
+            // this.timer = setInterval(function() {
+            //     this.model.fetch();
+            //     console.log(this.model.get('topics'))
+            // }.bind(this), 10000);
         },
         
         extendTimeRemaining: function(objs) {

@@ -185,7 +185,6 @@ function manageTopicStateAsync(topic) {
     
     return Promise.resolve(topic);
 }
-//exports.manageTopicState = manageTopicStateAsync;
 
 // appends timeCreated and stageName
 function appendBasicTopicInfo(topic) {
@@ -293,8 +292,11 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
     
     // find the group that the current user is part of
     var find_user_group_promise = groups_promise.then(function(groups) {
+        var highest_level = _.max(groups, function(group) {return group.level;}).level;
+        var highest_level_groups = _.filter(groups, function(group) {return group.level == highest_level;});
+        
         return db.collection('group_members').findOneAsync(
-            {'gid': { $in: _.pluck(groups, '_id') }, 'uid': uid}, {'gid': true});
+            {'gid': { $in: _.pluck(highest_level_groups, '_id') }, 'uid': uid}, {'gid': true});
     }).then(function(group_member) {
         return group_member ? group_member.gid : null;
     });
@@ -327,13 +329,10 @@ exports.list = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
     
     manageAndListTopicsAsync().then(function(topics) {
+        // Promise.map does not work above
         Promise.map(topics, _.partial(appendTopicInfoAsync,_,uid,false)).
         then(res.json.bind(res));
     });
-    
-    /*db.collection('topics').find().toArrayAsync().map(function(topic) {
-        return manageTopicStateAsync(topic).then(_.partial(appendTopicInfoAsync,_,uid,false));
-    }).then(res.json.bind(res));*/
 };
 
 exports.update = function(req, res) {

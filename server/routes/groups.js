@@ -50,7 +50,7 @@ function assignParticipantsToGroups(participants) {
     _.each(participants, function(participant) {
         // find first smallest group
         var group = _.min(groups, function(group) {return _.size(group);});
-        group.push(participant.uid);
+        group.push(participant);
     });
     
     // TODO log with logging library
@@ -67,8 +67,8 @@ function storeGroupAsync(gid,tid,level,group) {
     // create group's proposal
     var create_proposal_promise =
     db.collection('proposals').insertAsync({
-        '_id': ppid, 'source': gid,
-        'pid': ObjectId()});
+        '_id': ppid, 'tid': tid,
+        'source': gid, 'pid': ObjectId()});
     
     // create group itself
     var create_group_promise =
@@ -76,7 +76,7 @@ function storeGroupAsync(gid,tid,level,group) {
         '_id': gid, 'tid': tid,
         'ppid': ppid, 'level': level});
     
-    // insert group member
+    // insert group members
     var insert_members_promise =
     db.collection('group_members').insertAsync(
         _.map(group, function(uid) {
@@ -103,6 +103,8 @@ exports.createGroupsAsync = function(topic) {
     // find topic_participants
     return db.collection('topic_participants').find({ 'tid': tid }).
     toArrayAsync().then(function(participants) {
+        participants = _.pluck(participants, 'uid');
+        
         return db.collection('proposals').find({'tid': tid}).toArrayAsync().
             map(function(proposal) {
                 proposal.body = pads.getPadHTMLAsync(proposal.pid);
@@ -111,12 +113,12 @@ exports.createGroupsAsync = function(topic) {
                 // accept only participants that have a corresponding proposal
                 // and it is valid
                 return _.filter(participants, function(participant) {
-                    var proposal = utils.findWhereArrayEntryExists(proposals, {'source': participant.uid});
+                    var proposal = utils.findWhereArrayEntryExists(proposals, {'source': participant});
                     return _.isUndefined(proposal) ? false : isProposalValid(proposal);
                 });
             });
     }).then(function(participants) {
-        return Promise.resolve(assignParticipantsToGroups(participants));
+        return assignParticipantsToGroups(participants);
     }).map(function(group) {
         // create new group id
         var gid = ObjectId();
@@ -214,11 +216,11 @@ exports.remixGroupsAsync = function(topic) {
         }
         
         // assign members to groups
-        var groupsPromise = Promise.resolve(assignParticipantsToGroups(leaders));
+        var groups = assignParticipantsToGroups(leaders);
         
         // insert all groups into database
         var nextLevel = topic.level+1;
-        return Promise.map(groupsPromise, function(group) {
+        return Promise.map(groups, function(group) {
             // create group new id
             var gid = ObjectId();
             
@@ -311,24 +313,51 @@ exports.query = function(req, res) {
         member.name = chance.first();
         member.color = chance.color({format: 'shorthex'});
         
-        // get member's body
-        var proposal_body = db.collection('proposals').findOneAsync(
-            {'source': member._id, 'sink': gid}).then(function(proposal) {
-            // get proposal body
-            return pads.getPadHTMLAsync(proposal.pid);
+        // get proposal body
+        var proposal_body_promise = db.collection('proposals').findOneAsync(
+            {'source': member._id, 'sink': gid},{'pid': true}).then(function(proposal) {
+            
+            // proposal was found
+            // this means it was a user-created proposal
+            if(proposal)
+                return proposal.pid;
+            
+            // no proposal was found
+            // this means it was a group-created proposal
+            // so we must get the group first
+            group_promise.then(function(group) {
+                var prev_level = group.level-1;
+                
+                // get the all group_member entries for this member
+                return db.collection('group_members').
+                    find({'uid': member._id}, {'gid': true}).toArrayAsync().
+                    then(function(groups) {
+                        // get the all group_member entries for this member for specific level
+                        return db.collection('groups').
+                            findOneAsync({'_id': { $in: _.pluck(groups, 'gid') },
+                            'level': prev_level}, {'_id': true}).get('_id');
+                    });
+            }).then(function(source_gid) {
+                // get proposal where source is previous group
+                return db.collection('proposals').findOneAsync(
+                    {'source': source_gid, 'sink': gid},{'pid': true}).get('pid');
+            });
+        }).then(function(pid) {
+            return pads.getPadHTMLAsync(pid);
         });
         
         // get member rating
         var member_rating_knowledge_promise = getMemberRating(member._id, gid, uid, C.RATING_KNOWLEDGE);
         var member_rating_integration_promise = getMemberRating(member._id, gid, uid, C.RATING_INTEGRATION);
         
-        return Promise.join(proposal_body,
+        return Promise.join(proposal_body_promise,
                             member_rating_knowledge_promise,
                             member_rating_integration_promise).
         spread(function(proposal_body,
                         member_rating_knowledge,
                         member_rating_integration) {
             return _.extend(member,
+                            {'proposal_body': proposal_body},
                             {'rating_knowledge': member_rating_knowledge},
                             {'rating_integration': member_rating_integration},
                             {'gid': gid});

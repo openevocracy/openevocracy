@@ -4,16 +4,16 @@ var ONE_MIN = 1000*60;
 
 var DEBUG_CONFIG = {
     DEBUG: true,
-    MAIL: true,
+    MAIL: false,
     
     MIN_PARTICIPANTS_PER_TOPIC: 1,
     MIN_GROUPS_PER_TOPIC: 1,
     
     MIN_WORDS_PROPOSAL: 1,
     
-    DURATION_SELECTION : 0.5*ONE_MIN,
+    DURATION_SELECTION : 0.2*ONE_MIN,
     DURATION_PROPOSAL  : 1.5*ONE_MIN,
-    DURATION_LEVEL     : 8*ONE_MIN,
+    DURATION_LEVEL     : 3*ONE_MIN,
     DURATION_NONE      : -1,
     
     // Time before end

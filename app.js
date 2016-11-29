@@ -56,12 +56,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 var job = new CronJob({
   cronTime: '*/1 * * * *',
   onTick: function() {
-      /*db.collection('topics').find().toArrayAsync().map(function(topic) {
-        return mail.sendTopicReminderMessages(topic).
-          then(_.partial(topics.manageTopicState,topic));
-      });*/
       topics.manageAndListTopicsAsync().then(function(topics) {
-        _.map(topics, mail.sendTopicReminderMessages);
+        _.map(topics, mail.sendTopicReminderMessages); // Promise.map does not work above
       });
   },
   start: true
