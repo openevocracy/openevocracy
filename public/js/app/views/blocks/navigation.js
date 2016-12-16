@@ -1,12 +1,14 @@
 define([
     'underscore',
     'constants',
+    '../../utils',
     'moment',
     'Marionette',
     'hbs!templates/blocks/navigation'
 ], function(
     _,
     C,
+    u,
     moment,
     Marionette,
     Template
@@ -19,6 +21,14 @@ define([
         initialize: function() {
             this.model.set(C); // append constants to model
             
+            // Append topic stage names
+            _.each(this.model.get('topics'), u.appendStageName);
+            
+            // Reset proposal if no valid exists
+            if(!this.model.get('proposals')[0])
+                this.model.set('proposals', null);
+            
+            // Extend some more stuff
             this.extendTimeRemaining(this.model.get('groups'));
             this.extendTimeRemaining(this.model.get('proposals'));
             this.extendShowStatus(this.model.get('topics'));
@@ -43,15 +53,15 @@ define([
             _.each(objs, function(obj) {
                 var daysDiff = moment(obj.nextDeadline).diff(moment(), 'days');
                 if(daysDiff > 0) {
-                    obj.timeRemaining = daysDiff + " days";
+                    obj.timeRemaining = daysDiff + ' ' + u.i18n('days');
                     obj.danger = 0;
                 } else {
                     var hoursDiff = moment(obj.nextDeadline).diff(moment(), 'hours');
                     obj.danger = 1;
                     if(hoursDiff > 0) {
-                        obj.timeRemaining = hoursDiff + " hours";
+                        obj.timeRemaining = hoursDiff + ' ' + u.i18n('hours');
                     } else {
-                        obj.timeRemaining = "less than 1 hour";
+                        obj.timeRemaining = u.i18n('less than 1 hour');
                     }
                 }
             });

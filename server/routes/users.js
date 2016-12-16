@@ -21,7 +21,7 @@ var config = {
     sessionSecret: 'bb-login-secret',
     cookieSecret: 'bb-login-secret',
     cookieMaxAge: (1000 * 60 * 60 * 24 * 36)
-}
+};
 
 function clean_user_data(user) {
     return _.omit(user, ['pass', 'auth_token']);
@@ -42,7 +42,7 @@ exports.auth_wrapper = function(req, res, next) {
             console.log('User authentication invalid');
         }
     });
-}
+};
 
 // authentification
 // TODO use middleware, e.g. Passport?
@@ -103,7 +103,7 @@ function loginUser(req, res, err, user) {
         // Could not find the username
         utils.sendNotification(res, 401, 'User "'+req.body.name+'" does not exist.');
     }
-};
+}
 
 // creates a user
 exports.signup = function(req, res) {
@@ -187,26 +187,31 @@ exports.query = function(req, res) {
 // GET /json/user/navi
 exports.navigation = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
-            
-    var proposalsPromise = db.collection('proposals').
-        find({'source': uid}, {'tid': true}).toArrayAsync().then(function(proposals) {
-            return db.collection('topics').find(
-                {'_id': { $in: _.pluck(proposals, 'tid') },
-                'stage': C.STAGE_PROPOSAL},
-                {'name': true, 'nextDeadline': true}).toArrayAsync();
-        });
 
-    var topicsPromise = db.collection('topic_participants').
+    var topicsPrePromise = db.collection('topic_participants').
         find({'uid': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
             return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
                 {'name': true, 'stage': true, 'level': true, 'nextDeadline': true}).toArrayAsync();
         }).map(function(topic) {
             return topics.appendBasicTopicInfo(topic);
         });
-    
-    var groupsPromise = topicsPromise.filter(function(topic) {
-        return topic.stage == C.STAGE_CONSENSUS;
+        
+    var proposalsPromise = topicsPrePromise.filter(function(topic) {
+        return topic.stage == C.STAGE_PROPOSAL;
     }).map(function(topic){
+        return db.collection('proposals').
+            findOneAsync({'source': uid, 'tid': topic._id}, {'tid': true}).
+            then(function(proposal) {
+                if(proposal)
+                    return {'_id': proposal.tid, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
+                else
+                    return null;
+            });
+    });
+    
+    var groupsPromise = topicsPrePromise.filter(function(topic) {
+        return topic.stage == C.STAGE_CONSENSUS;
+    }).map(function(topic) {
         return db.collection('group_members').
             find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
                 return db.collection('groups').findOneAsync(
@@ -220,6 +225,10 @@ exports.navigation = function(req, res) {
             });
     }).filter(function(group) {
         return _.isObject(group);
+    });
+    
+    var topicsPromise = topicsPrePromise.filter(function(topic) {
+        return (topic.stage == C.STAGE_SELECTION || topic.stage == C.STAGE_PROPOSAL || topic.stage == C.STAGE_CONSENSUS);
     });
     
     Promise.props({

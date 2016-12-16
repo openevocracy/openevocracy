@@ -20,6 +20,7 @@
       ColorHash: '../bower_components/color-hash/dist/color-hash',
       bootstrap: '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
       bootstrapcustom: '../vendor/bootstrap.custom',
+      material: '../vendor/material',
       moment: '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min',
       ratyfa: '../vendor/jquery.raty-fa',
       //isactive: '../vendor/isactive',
@@ -69,6 +70,9 @@
         deps: ['jquery']
       },
       bootstrapcustom : {
+        deps: ['bootstrap']
+      },
+      material : {
         deps: ['bootstrap']
       }
     },

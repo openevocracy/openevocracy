@@ -5,6 +5,7 @@ define([
         Backbone,
         Model
     ) {
+    
     var Collection = Backbone.Collection.extend({
         url: '/json/topics',
         model: Model

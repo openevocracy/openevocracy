@@ -192,7 +192,7 @@ function appendBasicTopicInfo(topic) {
     topic.timeCreated = topic._id.getTimestamp();
     
     // append stage name
-    switch (topic.stage) {
+    /*switch (topic.stage) {
         case C.STAGE_REJECTED:
             topic.stageName = "rejected";
             break;
@@ -211,7 +211,7 @@ function appendBasicTopicInfo(topic) {
         default:
             topic.stageName = "unknown";
             break;
-    }
+    }*/
     
     return topic;
 }
@@ -316,7 +316,7 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
             return utils.checkArrayEntryExists(topic_participants, {'uid': uid});}),
         'levels': levels_promise,
         'gid': find_user_group_promise,
-        'timeCreated': tid.getTimestamp()
+        'timeCreated': tid.getTimestamp() // FIXME is this double with appendBasicTopicInfo ?
     }));
 }
 

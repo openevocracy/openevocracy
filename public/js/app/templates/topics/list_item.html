@@ -1,12 +1,12 @@
 <div class="stage stage{{stage}}"></div>
 
-<div class="link">
+<div id="link-{{_id}}" class="link">
 
 <div class="pull-right">
     {{#ifis stage STAGE_SELECTION}}
     <div class="buttons">
-        <button class="btn btn-sm btn-default vote{{#if voted}} active{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
-        <button class="btn btn-sm btn-default join{{#if joined}} active{{/if}}{{#unless voted}} hidden{{/unless}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
+        <button class="btn btn-sm btn-default btn-raised vote{{#if voted}} active{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
+        <button class="btn btn-sm btn-default btn-raised join{{#if joined}} active{{/if}}{{#unless voted}} hidden{{/unless}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
     </div>
     {{else}}
         {{#ifis stage STAGE_REJECTED}}
@@ -14,17 +14,15 @@
         {{else}}
             {{#ifis stage STAGE_PASSED}}
             <div class="buttons">
-                <a class="btn btn-sm btn-default btn-success doc" title="{{i18n 'Final document'}}" href="file/topic/final/{{_id}}" target="_blank"><span class="fa fa-file-text-o"></span>{{i18n 'Final document'}}</a>
+                <a class="btn btn-xs btn-raised btn-default btn-success doc" title="{{i18n 'Final document'}}" href="file/topic/final/{{_id}}" target="_blank"><span class="fa fa-file-text-o"></span>{{i18n 'Final document'}}</a>
             </div>
             {{else}}
             <div class="time-remaining">
                 <div>
-                    Completion of 
+                    {{ i18n "Completion of"}}
                     {{#ifis stage STAGE_CONSENSUS}}
-                        level {{math level "+" 1}}
-                    {{else}}
-                        {{stageName}} stage
-                    {{/ifis}}
+                        {{ i18n "level"}} {{math level "+" 1}}
+                    {{else}}{{stageName}}{{/ifis}}
                     in
                 </div>
                 <div id="timeremaining-{{_id}}"></div>
@@ -40,10 +38,10 @@
         {{#ifis stage STAGE_REJECTED}}
             rejected: {{rejectedDate}}, {{i18n (lookup . "rejectedReason")}}
         {{else}}
-            {{#ifis stage STAGE_SELECTION}}created: {{creationDate}}{{/ifis}}
-            {{#ifis stage STAGE_PROPOSAL}}started: {{proposalDate}}{{/ifis}}
-            {{#ifis stage STAGE_CONSENSUS}}started: {{consensusDate}}{{/ifis}}
-            {{#ifis stage STAGE_PASSED}}passed: {{passedDate}}{{/ifis}}
+            {{#ifis stage STAGE_SELECTION}}{{i18n "created"}}: {{creationDate}}{{/ifis}}
+            {{#ifis stage STAGE_PROPOSAL}}{{i18n "started"}}: {{proposalDate}}{{/ifis}}
+            {{#ifis stage STAGE_CONSENSUS}}{{i18n "started"}}: {{consensusDate}}{{/ifis}}
+            {{#ifis stage STAGE_PASSED}}{{i18n "passed"}}: {{passedDate}}{{/ifis}}
             
             {{#ifis stage STAGE_SELECTION}}, {{votes}} {{i18n "votes"}}{{/ifis}},
             {{participants}} {{i18n "participants"}}

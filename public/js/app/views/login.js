@@ -13,6 +13,8 @@ define([
         viewTitle: u.i18n("Login"),
         
         login: function (e) {
+            if(e) e.preventDefault();
+            console.log('login');
             App.session.login({
                 name: this.$("#name").val(),
                 pass: this.$("#pass").val()
@@ -22,7 +24,6 @@ define([
                 },
                 error: function(xhr, err){
                     $('.message').addClass("alert alert-danger").html(u.decodeServerMessage(xhr.responseJSON));
-                    if(e) e.preventDefault();
                 }
             });
         },

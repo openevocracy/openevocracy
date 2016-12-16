@@ -54,11 +54,12 @@ define([
         },
         
         initialize: function() {
-            this.model.set('minwords', cfg.MIN_WORDS_PROPOSAL)
+            this.model.set('minwords', cfg.MIN_WORDS_PROPOSAL);
         },
         
         onShow: function() {
-            //u.setActive('nav-'+this.model.get('_id'));
+            // Set link in navigation to active
+            u.setActive('nav-prp-'+this.model.get('tid'));
             
             // initalize pad
             Pad.onShow.bind(this)();

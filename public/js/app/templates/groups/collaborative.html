@@ -1,16 +1,39 @@
-{{> header}}
-
-<div class="row">
-    <div class="col-md-8">
-        {{> messages}}
-        <div class="editor-wrapper">
-            <div id="editor"></div>
+<div class="lightbox modal" id="box-proposal-source">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        
+            <div class="modal-header">
+                <button type="button" class="close cancel" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">{{i18n "Proposal of"}} <span class="name-of-user"></span></h4>
+            </div>
+                
+            <div class="modal-body proposal-of-user">
+                
+            </div>
+            
         </div>
     </div>
-    
+</div>
+
+{{> header}}
+{{> messages}}
+
+<div class="row-no-padding collab-wrap clearfix">
+    <div class="col-md-8">
+        <div id="editor"></div>
+    </div>
     <aside class="col-md-4">
-        <div class="block">{{> block_docstate}}</div>
-        <div class="block">{{> group_tabs}}</div>
-        <div class="block last">{{> group_proposals}}</div>
+        <div class="choose-tool">
+            <ul class="nav nav-pills">
+              <li class="collab-pill active"><a href="collab-doc">{{i18n 'Status'}}</a></li>
+              <li class="collab-pill"><a href="collab-members">{{i18n 'Members'}}</a></li>
+              <li class="collab-pill"><a href="collab-chat">{{i18n 'Chat'}}</a></li>
+            </ul>
+        </div>
+        <div class="collab-tool">
+            <div data-tool="collab-doc" class="block active">{{> group_state}}</div>
+            <div data-tool="collab-members" class="block">{{> group_members}}</div>
+            <div data-tool="collab-chat" class="block">{{> group_chat}}</div>
+        </div>
     </aside>
 </div>

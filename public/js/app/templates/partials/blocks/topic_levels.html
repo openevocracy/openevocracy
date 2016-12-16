@@ -4,7 +4,7 @@
     <ul  class="nav nav-pills nav-stacked">
         {{#each levels}}
         <li data-link="level-{{math ../maxlevel "-" @index}}">
-            <a class="{{#ifis ../stage ../STAGE_CONSENSUS}}{{#ifis @index 0}}pill-success{{/ifis}}{{/ifis}}" href="#"><i class="fa fa-align-justify" aria-hidden="true"></i> Level {{math ../maxlevel "-" @index}}<span class="label pull-right">{{this.groups}} groups / {{this.participants}} users</span></a>
+            <a class="{{#ifis ../stage ../STAGE_CONSENSUS}}{{#ifis @index 0}}pill-success{{/ifis}}{{/ifis}}" href="#"><i class="fa fa-align-justify" aria-hidden="true"></i> Level {{math ../maxlevel "-" @index}}<span class="label label-trans pull-right">{{this.groups}} groups / {{this.participants}} users</span></a>
         </li>
         {{/each}}
     </ul>

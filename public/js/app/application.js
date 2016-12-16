@@ -7,7 +7,8 @@ define([
   'layouts/splash',
   'layouts/application',
   'bootstrap',
-  'bootstrapcustom'
+  'bootstrapcustom',
+  'material'
 ], function (
   _,
   $,
@@ -31,11 +32,15 @@ define([
         else
             this.loadSplashModule(this.startHistory);
         
-        // load splash module on login
+        // Load splash module on login
         this.eventAggregator.on('App:logged_in',this.loadCoreModule.bind(this,this.onLogin), true);
         this.eventAggregator.on('App:logged_out',this.onLogout, true);
         
+        // Fade out loading wheel
         $('#loading').fadeOut(500);
+        
+        // Load material js functionality
+        $.material.init();
     },
     
     startHistory: function() {

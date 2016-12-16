@@ -86,14 +86,19 @@ define([
         
         initialize: function() {
             this.model.set(C);
-            this.setSubtitle();
             
-            // levels
+            // Levels
             var levels = this.model.get('levels');
             this.model.set('levels', levels.reverse());
             this.model.set('maxlevel', _.size(levels));
             
-            // render on change
+            // Append topic stage name
+            u.appendStageName(this.model.attributes);
+            
+            // Set subtitle, requires that appendStageName was called before
+            this.setSubtitle();
+            
+            // Render on change
             this.model.on('change', this.render, this);
             
             var body = this.model.get('body');
@@ -114,14 +119,16 @@ define([
             
             // initalize pad
             Pad.onShow.bind(this)(); // binding gives access to the pad id
-            //u.setActive('nav-'+this.model.get('_id'));
+            
+            // Set link in navigation to active
+            u.setActive('nav-tpc-'+this.model.get('_id'));
         },
         
         onAction: function() {
             //var date = Date.now() + (7*24*3600*1000);
             var date = this.model.get('nextDeadline');
             $('#timeremaining').countdown(date, function(event) {
-                $(this).html(event.strftime('%D:%H:%M:%S'));
+                $(this).html(event.strftime(u.i18n('%D days, %H:%M:%S')));
             });
             
             var stage = this.model.get('stage');
@@ -134,21 +141,22 @@ define([
         setSubtitle: function() {
             // set variables
             var stage = this.model.get('stage');
-            var subtitle_begin = this.model.get('stageName') + ' stage';
-            var subtitle_level = ' in level ' + (this.model.get('level') + 1);
-            var subtitle_remaining = ' in <span id="timeremaining"></span>';
+            var subtitle_begin = this.model.get('stageName');
+            var subtitle_level = ' ' + u.i18n('in level') + ' ' + (this.model.get('level') + 1);
+            var subtitle_remaining = '<span id="timeremaining"></span>';
             var subtitle_next = '';
             
             // evaluate conditions
             if(stage == C.STAGE_PASSED) {
-                subtitle_next = ', finished at ' + moment(this.model.get('stagePassedStarted')).format('YYYY-MM-DD');
+                subtitle_next = ', ' + u.i18n('finished at') + ' ' + moment(this.model.get('stagePassedStarted')).format('YYYY-MM-DD');
             } else if(stage == C.STAGE_REJECTED) {
                 var rejectedReason = this.model.get('rejectedReason');
                 subtitle_next = ', ' + u.i18n(rejectedReason);
             } else if(stage == C.STAGE_SELECTION) {
-                subtitle_next = ', check for enough participants ' + subtitle_remaining;
-            } else
-                subtitle_next = ', next ' + ((stage == C.STAGE_CONSENSUS) ? 'level' : 'stage') + subtitle_remaining;
+                subtitle_next = ', ' + u.i18n('check for enough participants in') + ' ' + subtitle_remaining;
+            } else {
+                subtitle_next = ', ' + ((stage == C.STAGE_CONSENSUS) ? u.i18n('next level in') : u.i18n('next stage in')) + ': ' + subtitle_remaining;
+            }
             
             var subtitle = subtitle_begin + ((stage == C.STAGE_CONSENSUS) ? subtitle_level : '' ) + subtitle_next;
             

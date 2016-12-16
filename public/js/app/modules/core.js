@@ -18,10 +18,11 @@ define([
     'text!templates/partials/blocks/topic_levels.html',
     'text!templates/partials/blocks/topic_author.html',
     'text!templates/partials/blocks/topic_final.html',
-    'text!templates/partials/blocks/block_docstate.html',
-    'text!templates/partials/blocks/group_tabs.html',
-    'text!templates/partials/blocks/group_proposals.html',
+    'text!templates/partials/blocks/group_state.html',
+    'text!templates/partials/blocks/group_members.html',
+    'text!templates/partials/blocks/group_chat.html',
     'text!templates/partials/blocks/proposal_tabs.html',
+    'text!templates/partials/blocks/proposal_state.html',
 ], function(
     Marionette,
     Handlebars,
@@ -42,10 +43,11 @@ define([
     TopicLevelsBlockPartials,
     TopicAuthorBlockPartials,
     TopicFinalBlockPartials,
-    GroupDocStateBlockPartials,
-    GroupTabsBlockPartials,
-    GroupProposalsBlockPartials,
-    ProposalTabsBlockPartials
+    GroupStateBlockPartials,
+    GroupMembersBlockPartials,
+    GroupChatBlockPartials,
+    ProposalTabsBlockPartials,
+    ProposalStateBlockPartials
     ) {
     
     var login = new Login();
@@ -81,10 +83,11 @@ define([
     Handlebars.registerPartial('topic_levels', TopicLevelsBlockPartials);
     Handlebars.registerPartial('topic_author', TopicAuthorBlockPartials);
     Handlebars.registerPartial('topic_final', TopicFinalBlockPartials);
-    Handlebars.registerPartial('block_docstate', GroupDocStateBlockPartials);
-    Handlebars.registerPartial('group_tabs', GroupTabsBlockPartials);
-    Handlebars.registerPartial('group_proposals', GroupProposalsBlockPartials);
+    Handlebars.registerPartial('group_state', GroupStateBlockPartials);
+    Handlebars.registerPartial('group_members', GroupMembersBlockPartials);
+    Handlebars.registerPartial('group_chat', GroupChatBlockPartials);
     Handlebars.registerPartial('proposal_tabs', ProposalTabsBlockPartials);
+    Handlebars.registerPartial('proposal_state', ProposalStateBlockPartials);
     
     return Module;
 });

@@ -1,10 +1,12 @@
 define([
     'jquery',
     'underscore',
+    'constants',
     'i18n!nls/lang'
     ], function(
     $,
     _,
+    C,
     i18n
     ) {
     
@@ -44,6 +46,35 @@ define([
         
         setActive: function(linkName) {
             this.handleActive($("[data-link=" + linkName + "]"));
+        },
+        
+        appendStageName: function(topic) {
+            // requires that model contains stage
+            switch (topic.stage) {
+                case C.STAGE_REJECTED:
+                    topic.stageName = i18n['rejected stage'];
+                    break;
+                case C.STAGE_SELECTION:
+                    topic.stageName = i18n['selection stage'];
+                    //model.set('stageName', this.i18n('selection stage'));
+                    break;
+                case C.STAGE_PROPOSAL:
+                    topic.stageName = i18n['proposal stage'];
+                    //model.set('stageName', this.i18n('proposal stage'));
+                    break;
+                case C.STAGE_CONSENSUS:
+                    topic.stageName = i18n['consensus stage'];
+                    //model.set('stageName', this.i18n('consensus stage'));
+                    break;
+                case C.STAGE_PASSED:
+                    topic.stageName = i18n['passed stage'];
+                    //model.set('stageName', this.i18n('passed stage'));
+                    break;
+                default:
+                    topic.stageName = i18n['unknown stage'];
+                    //model.set('stageName', 'unknown');
+                    break;
+            }
         }
     };
 
