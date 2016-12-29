@@ -2,7 +2,7 @@
 {{> header title=(lookup . 'name') }}
 
 <div class="row">
-    <section class="col-md-8">
+    <section class="col-md-8 wysiwyg">
         {{> messages}}
         <div id="body">{{{body}}}</div>
         <div class="editor-wrapper hidden">
@@ -11,7 +11,7 @@
     </section>
     
     <aside class="col-md-4">
-        {{#ifis showTabs 1}}<div class="block">{{> topic_tabs}}</div>{{/ifis}}
+        {{#ifis showTabs 1}}topic_tabs<div class="block">{{> topic_tabs}}</div>{{/ifis}}
         <div class="block">{{> topic_author}}</div>
         {{#ifis stage STAGE_PASSED}}<div class="block">{{> topic_final}}</div>{{/ifis}}
         {{#ifisOr stage STAGE_CONSENSUS STAGE_PASSED}}<div class="block">{{> topic_levels}}</div>{{/ifisOr}}

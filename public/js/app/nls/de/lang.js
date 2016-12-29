@@ -74,6 +74,7 @@ define({
     
     "Final document": "Fertiges Dokument",
     
+    "Filter and sorting": "Filter/Sortierung",
     "Filter by stage": "Stufe filtern",
     "Order by time": "Zeitliche Sortierung",
     "Oldest topics first": "Älteste Themen zuerst",
@@ -101,5 +102,10 @@ define({
     "Du hast das letzte Level der Konsensphase erreicht. Da diese Gruppe die aller letzte Gruppe des Prozesses ist, gibt es kein Rating in dieser Gruppe.",
     
     "Proposal of": "Vorschlag von",
-    "Start chatting ...": "Schreibe etwas ..."
+    "Start chatting ...": "Schreibe etwas ...",
+    
+    "Edit": "Bearbeiten",
+    "Delete": "Löschen",
+    "Leave editor mode and save changes": "Verlasse den Editor und speichere die Änderungen",
+    "Proposal requirements fulfilled": "Anforderungen an den Vorschlag wurden erfüllt"
 });

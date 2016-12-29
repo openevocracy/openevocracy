@@ -79,6 +79,7 @@ footer { font-size: 0.8em; text-align: center; }
 #topic-list .time-remaining div { text-align: right; }
 #topic-list .stats { font-size: 11px; line-height: 14px; }
 #topic-list .name { font-size: 17px; line-height: 21px; }
+#topic-list button.btn, #topic-list a.btn { margin: 4px 0 0 0; }
 
 /* Stage colors */
 
@@ -109,12 +110,14 @@ footer { font-size: 0.8em; text-align: center; }
 
 /* ### MISC ### */
 
-#editor { height: 400px; border: 1px solid #e0e0e0; }
+#editor { height: 400px; }
+
+.ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #e0e0e0; }
+.ql-container.ql-snow { border: none; }
 
 .parsley-error { background-color: #d9534f; opacity: 0.65; }
 .collab-wrap { background-color: #fff; color: #000; border: 1px solid #e0e0e0; }
-.collab-wrap #editor { border: 0; border-right: 1px solid #e0e0e0; }
-.collab-wrap .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #e0e0e0; }
+.collab-wrap .ql-container.ql-snow { border: 0; border-right: 1px solid #e0e0e0; }
 .collab-wrap aside { margin-left: -1px; border-left: 1px solid #e0e0e0; }
 .collab-wrap .choose-tool { border-bottom: 1px solid #e0e0e0; padding: 8px; }
 .collab-wrap .choose-tool .nav > li > a { padding: 2px 8px; }
@@ -135,6 +138,7 @@ footer { font-size: 0.8em; text-align: center; }
 .collab-wrap h3 { margin-top: 5px !important; }
 .collab-wrap .chat .send { padding: 6px 9px; }
 
+.wysiwyg .editor-wrapper { background-color: #fff; border: 1px solid #e0e0e0; }
 
 /* ### BOOTSTRAP ADDITIONS ### */
 
@@ -143,6 +147,8 @@ footer { font-size: 0.8em; text-align: center; }
 .label.label-trans { background-color: transparent; }
 
 .row-no-padding > [class*="col-"] { padding-left: 0 !important; padding-right: 0 !important; }
+
+.nav-pills > li > a .label { color: inherit; }
 .nav-pills > li > a:hover { background-color: #e0e0e0; }
 
 .nav-pills > li > .pill-danger { background-color: #f44336; color: #fff; }
@@ -151,5 +157,8 @@ footer { font-size: 0.8em; text-align: center; }
 .nav-pills > li > .pill-success { background-color: #4caf50; color: #fff; }
 .nav-pills > li > .pill-success:focus, .nav-pills > li > .pill-success:hover { background-color: #59b75c; }
 
+.btn:not(.btn-raised):not(.btn-link):hover { background-color: inherit; }
+.btn-group .btn, .btn-group .btn+.btn { margin: 0 1px; }
+.btn-group>.btn:last-child:not(:first-child) { margin-right: 0; }
 .btn-primary.active, .btn-primary:active, .open > .dropdown-toggle.btn-primary { background-color: inherit; }
 .btn.active .fa { color: inherit; }

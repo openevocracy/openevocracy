@@ -25,11 +25,10 @@ define([
         
         events: {
             'click .edit': function(e) {
-                if($('.edit').hasClass('active')) {
-                    $('.edit').removeClass('active');
-                    $('.edit span').removeClass('fa-floppy-o');
-                    $('.edit span').addClass('fa-pencil');
-                    $('.edit').prop('title', 'edit');
+                if($('.edit').hasClass('btn-warning')) {
+                    $('.edit').removeClass('btn-warning').addClass('btn-primary');
+                    $('.edit span').removeClass('fa-floppy-o').addClass('fa-pencil');
+                    $('.edit').prop('title', u.i18n('Edit'));
                     // pad
                     $('#body').removeClass("hidden");
                     $('.editor-wrapper').addClass("hidden");
@@ -41,10 +40,9 @@ define([
                     //this.render();
                     
                 } else {
-                    $('.edit').addClass('active');
-                    $('.edit span').addClass('fa-floppy-o');
-                    $('.edit span').removeClass('fa-pencil');
-                    $('.edit').prop('title', 'leave editor mode and save changes');
+                    $('.edit').removeClass('btn-primary').addClass('btn-warning');
+                    $('.edit span').removeClass('fa-pencil').addClass('fa-floppy-o');
+                    $('.edit').prop('title', u.i18n('Leave editor mode and save changes'));
                     // pad
                     $('.editor-wrapper').removeClass("hidden");
                     $('#body').addClass("hidden");
@@ -54,6 +52,7 @@ define([
         },
         
         initialize: function() {
+            console.log(this.model);
             this.model.set('minwords', cfg.MIN_WORDS_PROPOSAL);
         },
         
@@ -74,13 +73,13 @@ define([
             
             var words = this.editor.getText().split(/\s+\b/).length;
             if(words >= cfg.MIN_WORDS_PROPOSAL) {
-                $('.valid').addClass('accepted').attr("title", "proposal requirements fulfilled");
+                $('.valid').addClass('accepted').attr('title', u.i18n('Proposal requirements fulfilled'));
                 $('.valid span').removeClass('fa-ban');
                 $('.valid span').addClass('fa-check');
             } else { 
                 $('.valid').removeClass('accepted')
-                           .attr("title", "proposal requirements not fulfilled, " +
-                           (cfg.MIN_WORDS_PROPOSAL-words) + " more words required");
+                           .attr('title', 'proposal requirements not fulfilled, ' +
+                           (cfg.MIN_WORDS_PROPOSAL-words) + ' more words required');
                 $('.valid span').removeClass('fa-check');
                 $('.valid span').addClass('fa-ban');
             }

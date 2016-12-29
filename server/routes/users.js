@@ -192,8 +192,6 @@ exports.navigation = function(req, res) {
         find({'uid': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
             return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
                 {'name': true, 'stage': true, 'level': true, 'nextDeadline': true}).toArrayAsync();
-        }).map(function(topic) {
-            return topics.appendBasicTopicInfo(topic);
         });
         
     var proposalsPromise = topicsPrePromise.filter(function(topic) {
@@ -232,6 +230,7 @@ exports.navigation = function(req, res) {
     });
     
     Promise.props({
+        'blub': Promise.resolve('test'),
         'proposals': proposalsPromise,
         'topics': topicsPromise,
         'groups': groupsPromise

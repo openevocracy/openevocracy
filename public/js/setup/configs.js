@@ -11,9 +11,9 @@ var DEBUG_CONFIG = {
     
     MIN_WORDS_PROPOSAL: 1,
     
-    DURATION_SELECTION : 0.5*ONE_MIN,
+    DURATION_SELECTION : 20*ONE_MIN,
     DURATION_PROPOSAL  : 1*ONE_MIN,
-    DURATION_LEVEL     : 3*ONE_MIN,
+    DURATION_LEVEL     : 5*ONE_MIN,
     DURATION_NONE      : -1,
     
     // Time before end

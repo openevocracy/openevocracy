@@ -19,6 +19,8 @@ define([
     });
     
     var utils = {
+        activeDataLinks: [],
+        
         i18n: function(str) {
             // for Handlebars implementation see main.js
             return (i18n != undefined ? (i18n[str] != undefined ? i18n[str] : str) : str);
@@ -44,12 +46,28 @@ define([
             }
         },
         
-        setActive: function(linkName) {
-            this.handleActive($("[data-link=" + linkName + "]"));
+        updateActive: function() {
+            _.each(this.activeDataLinks, function(linkName) {
+                this.handleActive($("[data-link=" + linkName + "]"));
+            }.bind(this));
         },
         
-        appendStageName: function(topic) {
-            // requires that model contains stage
+        setActive: function() {
+            this.activeDataLinks = arguments;
+            this.updateActive();
+        },
+        
+        getTimestamp: function(objectid) {
+            return parseInt(objectid.substring(0, 8), 16) * 1000;
+        }
+        
+        /*appendTopicModel: function(topic) {
+            // Requires that model contains stage and topic _id
+            
+            // Append creationDate
+            //topic.timeCreated = utils.getTimestamp(topic._id);
+            
+            // Append tage name
             switch (topic.stage) {
                 case C.STAGE_REJECTED:
                     topic.stageName = i18n['rejected stage'];
@@ -75,7 +93,7 @@ define([
                     //model.set('stageName', 'unknown');
                     break;
             }
-        }
+        }*/
     };
 
     return utils;

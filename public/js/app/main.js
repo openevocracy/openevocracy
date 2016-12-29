@@ -11,7 +11,7 @@
       underscore: '//oss.maxcdn.com/underscorejs/1.8.3/underscore-min',
       underscore_string: 'https://cdn.jsdelivr.net/underscore.string/3.2.2/underscore.string.min',
       backbone: '//oss.maxcdn.com/backbonejs/1.2.1/backbone-min',
-      BackboneDeepmodel: '//oss.maxcdn.com/backbone.deepmodel/0.10.4/deep-model.min',
+      BackboneNestedModels: "../vendor/backbone.nested.models.min",
       BackboneRouteFilter: '../vendor/backbone.routefilter.min',
       BackboneSparks: '../vendor/backbone.spark',
       Marionette: '//oss.maxcdn.com/backbone.marionette/2.4.2/backbone.marionette.min',
@@ -51,6 +51,10 @@
         deps: ['jquery', 'underscore'],
         exports: 'backbone'
       },
+      BackboneNestedModels: {
+        deps: ['backbone'],
+        exports: 'BackboneNestedModels'
+      },
       BackboneRouteFilter: {
         deps: ['backbone'],
         exports: 'BackboneRouteFilter'
@@ -60,7 +64,7 @@
         exports: 'BackboneSparks'
       },
       Marionette: {
-        deps: ['jquery', 'underscore', 'BackboneRouteFilter', 'BackboneSparks'],
+        deps: ['jquery', 'underscore', 'BackboneNestedModels', 'BackboneRouteFilter', 'BackboneSparks'],
         exports: 'Marionette'
       },
       handlebars: {

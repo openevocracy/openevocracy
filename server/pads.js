@@ -108,28 +108,26 @@ function getPadDocAsync(pid) {
         return Promise.resolve(doc);
 
     // if not in map, load or create document
-    return db.collection('pads').findOneAsync({
-        '_id': pid
-    }, {
-        'did': true
-    }).
-    then(function(pad) {
-        // load or create gulf document
-        if (_.isNull(pad))
-            return gulf.Document.createAsync(adapter, ottype, starttext).
-        then(function(doc) {
-            // if newly created, save in database
-            return db.collection('pads').insertAsync({
-                '_id': pid,
-                'did': doc.id
-            }).return(doc);
+    return db.collection('pads').
+        findOneAsync({ '_id': pid }, { 'did': true }).
+        then(function(pad) {
+            // load or create gulf document
+            if (_.isNull(pad)) {
+                return gulf.Document.createAsync(adapter, ottype, starttext).
+                    then(function(doc) {
+                    // if newly created, save in database
+                    return db.collection('pads').insertAsync({
+                        '_id': pid,
+                        'did': doc.id
+                    }).return(doc);
+                });
+            } else {
+                return gulf.Document.loadAsync(adapter, ottype, pad.did);
+            }
+        }).then(function(doc) {
+            padIdToDocMap[pid] = doc;
+            return Promise.resolve(doc);
         });
-        else
-            return gulf.Document.loadAsync(adapter, ottype, pad.did);
-    }).then(function(doc) {
-        padIdToDocMap[pid] = doc;
-        return Promise.resolve(doc);
-    });
 }
 
 exports.startPadServer = function(httpServer) {
@@ -163,7 +161,7 @@ function getDocHTMLAsync(doc) {
             var editor = new window.Quill("#editor");
             editor.updateContents(doc.content);
     
-            return document.querySelector("#editor").innerHTML;
+            return document.querySelector(".ql-editor").innerHTML;
         });
 }
 
@@ -173,10 +171,9 @@ var getPadHTMLAsync = function(pid) {
 exports.getPadHTMLAsync = getPadHTMLAsync;
 
 exports.getPadPDFAsync = function(pid) {
+    console.log('pid in getPadPDFAsync', pid);
     return getPadHTMLAsync(pid).then(function(html) {
-        return pdfConvertAsync({
-            'html': html
-        });
+        return pdfConvertAsync({'html': html});
     }).then(function(result) {
         // this is required to convert the callback into a format
         // suitable for promises, e.g. error is first parameter

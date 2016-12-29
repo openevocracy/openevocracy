@@ -175,35 +175,43 @@ exports.createGroupsAsync = function(topic) {
 exports.remixGroupsAsync = function(topic) {
     var tid = topic._id;
     
-    // get groups with highest level
-    return db.collection('groups').find({ 'tid': tid, 'level': topic.level }).
+    // Get groups with highest level
+    var groupsPromise = db.collection('groups').find({ 'tid': tid, 'level': topic.level }).
     toArrayAsync().filter(function (group) {
         return db.collection('proposals').findOneAsync({'source': group._id}).
         then(function(proposal) {
+            // Get HTML from document
             proposal.body = pads.getPadHTMLAsync(proposal.pid);
             return Promise.props(proposal);
         }).then(function(proposal) {
+            // Check if proposal is valid
             return isProposalValid(proposal);
         });
     }).then(function (groups) {
+        // If no valid proposal exists: reject, otherwise return all valid groups
         if(_.isEmpty(groups))
             return Promise.reject({reason: 'REJECTED_NO_VALID_GROUP_PROPOSAL'});
         else
             return groups;
-    }).map(function(group_in) {
+    });
+    
+    var leadersPromise = groupsPromise.map(function(group_in) {
         return ratings.getGroupLeader(group_in._id);
-    }).then(function(leaders) {
+    });
+    
+    return Promise.join(groupsPromise, leadersPromise).spread(function(groups, leaders) {
         // remove all undefined leaders
         leaders = _.compact(leaders);
         var numLeaders = _.size(leaders);
         
-        if(1 == numLeaders) {
-            // if there is only ONE leader, then the topic is finished/passed.
-            // send mail to notifiy about finished topic and return stage
+        if(1 == groups.length) {
+            // If there is only ONE group in the current topic level,
+            // then the topic is finished/passed.
             return db.collection('topic_participants').find({ 'tid': topic._id }).
             toArrayAsync().then(function(participants) {
                 return db.collection('users').find({'_id': { $in: _.pluck(participants, 'uid') }},{'email': true}).
                 toArrayAsync().then(function(users) {
+                    // Send mail to notifiy about finished topic and return stage
                     mail.sendMail(_.pluck(users,'email').join(),
                         strformat(i18n.t('EMAIL_TOPIC_PASSED_SUBJECT'), topic.name),
                         strformat(i18n.t('EMAIL_TOPIC_PASSED_MESSAGE'), topic.name, topic._id)
@@ -211,7 +219,8 @@ exports.remixGroupsAsync = function(topic) {
                 });
             }).return({'nextStage': C.STAGE_PASSED});
         } else if(0 == numLeaders) {
-            // if there is NO leader, then the consensus stage has failed.
+            // If there is NO leader and group length is greater than ONE (if above),
+            // then the consensus stage has failed
             return Promise.reject({reason: 'REJECTED_UNSUFFICIENT_RATINGS'});
         }
         
@@ -310,9 +319,9 @@ exports.query = function(req, res) {
         return db.collection('groups').countAsync({'tid': topic._id, 'level': topic.level}).
             then(function(numGroupsInCurrentLevel) {
                 if(numGroupsInCurrentLevel == 1)
-                    return true;
+                    return 1;
                 else
-                    return false; 
+                    return 0; 
             });
     });
     

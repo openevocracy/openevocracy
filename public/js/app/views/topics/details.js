@@ -27,36 +27,41 @@ define([
         tagName: 'section',
         className: "content",
         id: "topic-details",
+        loaded: false,
+        
+        modelEvents: {
+            'change:body': 'render'
+        },
         
         events: {
             'click .edit': function(e) {
-                if($('.edit').hasClass('active')) {
-                    $('.edit').removeClass('active');
-                    $('.edit span').removeClass('fa-floppy-o');
-                    $('.edit span').addClass('fa-pencil');
-                    $('.edit').prop('title', 'edit');
-                    // pad
+                if($('.edit').hasClass('btn-warning')) {
+                    // currently in editor, save content
+                    $('.edit').removeClass('btn-warning').addClass('btn-primary');
+                    $('.edit span').removeClass('fa-floppy-o').addClass('fa-pencil');
+                    $('.edit').prop('title', u.i18n('Edit'));
+                    // remove editor, show html content
                     $('#body').removeClass("hidden");
                     $('.editor-wrapper').addClass("hidden");
-                    // title
+                    // title field to heading
                     this.model.set('name', $('#titleInput').val());
-                    var titleHeading = '<h2 id="topic-title">'+this.model.get('name')+'</h2>';
+                    var titleHeading = '<h2 class="topic-title">'+this.model.get('name')+'</h2>';
                     $('#titleInput').replaceWith(titleHeading);
                     
                     // bidirectional server-sync
                     // view will rerender automatically due to model change-event
                     this.model.save();
                 } else {
-                    $('.edit').addClass('active');
-                    $('.edit span').addClass('fa-floppy-o');
-                    $('.edit span').removeClass('fa-pencil');
-                    $('.edit').prop('title', 'leave editor mode and save changes');
-                    // pad
+                    // currently in body, open editor
+                    $('.edit').removeClass('btn-primary').addClass('btn-warning');
+                    $('.edit span').removeClass('fa-pencil').addClass('fa-floppy-o');
+                    $('.edit').prop('title', u.i18n('Leave editor mode and save changes'));
+                    // remove html content, show editor
                     $('.editor-wrapper').removeClass("hidden");
                     $('#body').addClass("hidden");
-                    // title
+                    // title heading to input field
                     var inputField = '<input id="titleInput" class="h2-edit" type="text" value="'+this.model.get('name')+'"></input>';
-                    $('#topic-title').replaceWith(inputField);
+                    $('.topic-title').replaceWith(inputField);
                 }
             },
             'click .del': function(e) {
@@ -85,57 +90,47 @@ define([
         },
         
         initialize: function() {
-            this.model.set(C);
+            this.model.set(C, {silent: true});
             
             // Levels
             var levels = this.model.get('levels');
-            this.model.set('levels', levels.reverse());
-            this.model.set('maxlevel', _.size(levels));
-            
-            // Append topic stage name
-            u.appendStageName(this.model.attributes);
+            this.model.set('levels', levels.reverse(), {silent: true});
+            this.model.set('maxlevel', _.size(levels), {silent: true});
             
             // Set subtitle, requires that appendStageName was called before
             this.setSubtitle();
             
-            // Render on change
-            this.model.on('change', this.render, this);
-            
             var body = this.model.get('body');
             var error = 'Error';
             if(__.startsWith(body, error)) {
-                this.model.set('body', '');
-                this.model.set('message', body);
-                this.model.set('message-type','alert alert-danger');
+                this.model.set('body', '', {silent: true});
+                this.model.set('message', body, {silent: true});
+                this.model.set('message-type','alert alert-danger', {silent: true});
             }
         },
 
         onRender: function() {
-            this.onAction();
+            if(this.loaded)
+                this.onDOMexists();
         },
         
         onShow: function() {
-            this.onAction();
-            
-            // initalize pad
-            Pad.onShow.bind(this)(); // binding gives access to the pad id
+            this.onDOMexists();
+            this.loaded = true;
             
             // Set link in navigation to active
             u.setActive('nav-tpc-'+this.model.get('_id'));
         },
         
-        onAction: function() {
+        onDOMexists: function() {
+            // recreate pad
+            Pad.onShow.bind(this)(); // binding gives access to the pad id
+            
             //var date = Date.now() + (7*24*3600*1000);
             var date = this.model.get('nextDeadline');
             $('#timeremaining').countdown(date, function(event) {
                 $(this).html(event.strftime(u.i18n('%D days, %H:%M:%S')));
             });
-            
-            var stage = this.model.get('stage');
-            var showTabs =
-                (this.model.get('joined')) &&
-                (stage == C.STAGE_PROPOSAL || stage == C.STAGE_CONSENSUS);
-            this.model.set('showTabs', showTabs);
         },
         
         setSubtitle: function() {
@@ -161,7 +156,7 @@ define([
             var subtitle = subtitle_begin + ((stage == C.STAGE_CONSENSUS) ? subtitle_level : '' ) + subtitle_next;
             
             // set model
-            this.model.set('subtitle',subtitle);
+            this.model.set('subtitle',subtitle, {silent: true});
         },
         
         updateDocumentState: function() {

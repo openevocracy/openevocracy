@@ -75,9 +75,6 @@ define([
         },
         
         initialize: function() {
-            // Append topic stage name
-            u.appendStageName(this.model.attributes);
-            
             // Render on change
             this.model.on('change', this.render, this);
         },

@@ -1,13 +1,17 @@
 define([
     'Marionette',
+    'jquery',
     'constants',
+    '../utils',
     'hbs!templates/layouts/topics',
     'hbs!templates/topics/list_filter',
     'views/topics/list',
     'collections/topics'
-], function(
+], function (
         Marionette,
+        $,
         C,
+        u,
         TopicsLayoutTemplate,
         FilterTemplate,
         TopicsView,
@@ -34,6 +38,10 @@ define([
                     var $el = this.$(e.target);
                     this.listView.setSortOldestFirst($el.val() == "oldfirst");
                 }
+            },
+            
+            onShow: function() {
+                $('aside .topic-title').text(u.i18n('Filter and sorting'));
             },
             
             render: function() {

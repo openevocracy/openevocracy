@@ -60,11 +60,14 @@ function manageConsensusStageAsync(topic, levelDuration) {
             // e.g. the proposal pad id of the group in the last level
             var finalDocumentPadIdPromise = db.collection('groups').
                 findOneAsync({'tid': tid, 'level': topic.level},{'ppid': true}).
-                get('ppid');
+                get('ppid').then(function (ppid) {
+                    return db.collection('proposals').
+                        findOneAsync({'_id': ppid},{'pid': true});
+                }).get('pid');
             
             // get pad pdf and save it
             finalDocumentPadIdPromise.then(pads.getPadPDFAsync).then(function(data) {
-                var filename = path.join(appRoot.path,'files/documents',tid+'.pdf');
+                var filename = path.join(appRoot.path, 'files/documents', tid+'.pdf');
                 return fs.writeFileAsync(filename,data);
             });
             
@@ -186,38 +189,7 @@ function manageTopicStateAsync(topic) {
     return Promise.resolve(topic);
 }
 
-// appends timeCreated and stageName
-function appendBasicTopicInfo(topic) {
-    // append timeCreated
-    topic.timeCreated = topic._id.getTimestamp();
-    
-    // append stage name
-    /*switch (topic.stage) {
-        case C.STAGE_REJECTED:
-            topic.stageName = "rejected";
-            break;
-        case C.STAGE_SELECTION:
-            topic.stageName = "selection";
-            break;
-        case C.STAGE_PROPOSAL:
-            topic.stageName = "proposal";
-            break;
-        case C.STAGE_CONSENSUS:
-            topic.stageName = "consensus";
-            break;
-        case C.STAGE_PASSED:
-            topic.stageName = "passed";
-            break;
-        default:
-            topic.stageName = "unknown";
-            break;
-    }*/
-    
-    return topic;
-}
-exports.appendBasicTopicInfo = appendBasicTopicInfo;
-
-function appendExtendedTopicInfoAsync(topic,uid,with_details) {
+function appendTopicInfoAsync(topic,uid,with_details) {
     var tid = topic._id;
     
     // get pad body if asked for
@@ -315,14 +287,8 @@ function appendExtendedTopicInfoAsync(topic,uid,with_details) {
         'joined': topic_participants_promise.then(function(topic_participants) {
             return utils.checkArrayEntryExists(topic_participants, {'uid': uid});}),
         'levels': levels_promise,
-        'gid': find_user_group_promise,
-        'timeCreated': tid.getTimestamp() // FIXME is this double with appendBasicTopicInfo ?
+        'gid': find_user_group_promise
     }));
-}
-
-function appendTopicInfoAsync(topic,uid,with_details) {
-    appendBasicTopicInfo(topic);
-    return appendExtendedTopicInfoAsync(topic,uid,with_details);
 }
 
 exports.list = function(req, res) {
@@ -405,7 +371,6 @@ exports.create = function(req, res) {
     }).then(function(topics) {
         topic.votes = 0;
         topic.participants = 0;
-        appendBasicTopicInfo(topic);
         
         res.json(topic);
     }).catch(utils.isOwnError,utils.handleOwnError(res));

@@ -1,46 +1,68 @@
 define([
-    'backbone'
+    'backbone',
+    'constants',
+    '../utils',
     ], function(
-    Backbone
+    Backbone,
+    C,
+    u
     ) {
-    var Model = Backbone.Spark.Model.extend({
+    var Model = Backbone.Model.extend({
         idAttribute: '_id',
         urlRoot: '/json/topic',
         
-        // TODO
-        // sparks: {
-        //     creationDate: function() {
-        //         return this.get('timeCreated');
-        //         //return this.formatDate(this.get('timeCreated'));
-        //     }.dependsOn('timeCreated'),
-        //     proposalDate: function() {
-        //         return this.formatDate(this.get('stageProposalStarted'));
-        //     }.dependsOn('stageProposalStarted'),
-        //     consensusDate: function() {
-        //         return this.formatDate(this.get('stageConsensusStarted'));
-        //     }.dependsOn('stageConsensusStarted'),
-        //     passedDate: function() {
-        //         return this.formatDate(this.get('stagePassedStarted'));
-        //     }.dependsOn('stagePassedStarted'),
-        //     rejectedDate: function() {
-        //         return this.formatDate(this.get('stageRejectedStarted'));
-        //     }.dependsOn('stageRejectedStarted')
-        // },
+        initialize: function() {
+            var self = this;
+            
+            this.on('change', function() {
+                this.updateDerived();
+            }, this);
+            
+            // TODO implement with handlebars, when "participate" ("joined") is removed
+            this.on('change:stage', function() {
+                var stage = self.get('stage');
+                var showTabs =
+                (self.get('joined')) &&
+                (stage == C.STAGE_PROPOSAL || stage == C.STAGE_CONSENSUS);
+                self.set('showTabs', showTabs, {silent: true});
+            });
+        },
         
-        // leadingZero: function(num) {
-        //     // if lenght of number is only 1, add leading 0
-        //     num = num.toString();
-        //     return num.length < 2 ? ("0" + num) : num;
-        // },
+        updateDerived: function() {
+            this.updateDerivedBasic();
+            this.updateDerivedStatistics();
+        },
         
-        // formatDate: function(rawDate) {
-        //     var date = new Date(rawDate);
-        //     var y = date.getFullYear();
-        //     var m = this.leadingZero(date.getMonth()+1);
-        //     var d = this.leadingZero(date.getDate());
-        //     var newDate = y+"-"+m+"-"+d;
-        //     return newDate;
-        // },
+        updateDerivedStatistics: function() {
+            // TODO
+        },
+        
+        updateDerivedBasic: function() {
+            // append timeCreated
+            this.set('timeCreated', u.getTimestamp(this.get('_id')), {silent: true});
+            
+            // append stageName
+            switch (this.get('stage')) {
+                case C.STAGE_REJECTED:
+                    this.set('stageName', u.i18n('rejected stage'), {silent: true});
+                    break;
+                case C.STAGE_SELECTION:
+                    this.set('stageName', u.i18n('selection stage'), {silent: true});
+                    break;
+                case C.STAGE_PROPOSAL:
+                    this.set('stageName', u.i18n('proposal stage'), {silent: true});
+                    break;
+                case C.STAGE_CONSENSUS:
+                    this.set('stageName', u.i18n('consensus stage'), {silent: true});
+                    break;
+                case C.STAGE_PASSED:
+                    this.set('stageName', u.i18n('passed stage'), {silent: true});
+                    break;
+                default:
+                    this.set('stageName', 'unknown', {silent: true});
+                    break;
+            }
+        },
         
         setVoted: function(status) {
             $.post(status ? '/json/topic-vote' : '/json/topic-unvote',
