@@ -39,6 +39,7 @@ define([
         // Fade out loading wheel
         $('#loading').fadeOut(500);
         
+        
         // Load material js functionality
         $.material.init();
     },

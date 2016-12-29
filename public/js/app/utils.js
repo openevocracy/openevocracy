@@ -19,6 +19,7 @@ define([
     });
     
     var utils = {
+        RE: /\{\{|\}\}|\{([^\}]+)\}/g,
         activeDataLinks: [],
         
         i18n: function(str) {
@@ -59,41 +60,42 @@ define([
         
         getTimestamp: function(objectid) {
             return parseInt(objectid.substring(0, 8), 16) * 1000;
-        }
+        },
         
-        /*appendTopicModel: function(topic) {
-            // Requires that model contains stage and topic _id
-            
-            // Append creationDate
-            //topic.timeCreated = utils.getTimestamp(topic._id);
-            
-            // Append tage name
-            switch (topic.stage) {
-                case C.STAGE_REJECTED:
-                    topic.stageName = i18n['rejected stage'];
-                    break;
-                case C.STAGE_SELECTION:
-                    topic.stageName = i18n['selection stage'];
-                    //model.set('stageName', this.i18n('selection stage'));
-                    break;
-                case C.STAGE_PROPOSAL:
-                    topic.stageName = i18n['proposal stage'];
-                    //model.set('stageName', this.i18n('proposal stage'));
-                    break;
-                case C.STAGE_CONSENSUS:
-                    topic.stageName = i18n['consensus stage'];
-                    //model.set('stageName', this.i18n('consensus stage'));
-                    break;
-                case C.STAGE_PASSED:
-                    topic.stageName = i18n['passed stage'];
-                    //model.set('stageName', this.i18n('passed stage'));
-                    break;
-                default:
-                    topic.stageName = i18n['unknown stage'];
-                    //model.set('stageName', 'unknown');
-                    break;
+        getProperty: function(o, s) {
+            // Necessary for strformat
+            s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+            s = s.replace(/^\./, ''); // strip a leading dot
+            var a = s.split('.');
+            while (a.length) {
+                var n = a.shift();
+                if (n in o) {
+                    o = o[n];
+                } else {
+                    return;
+                }
             }
-        }*/
+            return o;
+        },
+        
+        strformat: function(str, args) {
+            args = Array.prototype.slice.call(arguments, 1);
+            if (args.length < 1) {
+                return str; // nothing to replace
+            } else if ((args.length < 2) && (typeof args[0] === 'object')) {
+                args = args[0]; // handle a single array or object
+            }
+            return str.replace(this.RE, function (m, n) {
+                if (m == '{{') {
+                    return '{';
+                }
+                if (m == '}}') {
+                    return '}';
+                }
+                var val = this.getProperty(args, n);
+                return (typeof val === 'undefined') ? m : val;
+            }.bind(this));
+        }
     };
 
     return utils;

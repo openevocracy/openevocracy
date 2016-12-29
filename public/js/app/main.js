@@ -1,4 +1,6 @@
 (function() {
+  var locale = localStorage.getItem('locale') || 'de';
+    
   requirejs.config({
     paths: {
       // CDN POLICY use "http://osscdn.com/#/"
@@ -84,7 +86,7 @@
       templateExtension: '.html',
       partialsUrl: 'templates/partials'
     },
-    config: {i18n: {locale: 'de'}}
+    config: {i18n: {'locale': locale}}
   });
   
   require(['underscore','backbone','handlebars','i18n!nls/lang'], function(_, Backbone, Handlebars, i18n) {

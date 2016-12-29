@@ -101,7 +101,7 @@ exports.createGroupsAsync = function(topic) {
     var tid = topic._id;
     
     // find topic_participants
-    return db.collection('topic_participants').find({ 'tid': tid }).
+    var validParticipantsPromise = db.collection('topic_participants').find({ 'tid': tid }).
     toArrayAsync().then(function(participants) {
         participants = _.pluck(participants, 'uid');
         
@@ -117,8 +117,18 @@ exports.createGroupsAsync = function(topic) {
                     return _.isUndefined(proposal) ? false : isProposalValid(proposal);
                 });
             });
-    }).then(function(participants) {
-        return assignParticipantsToGroups(participants);
+    });
+    
+    var storeValidParticipantsPromise =
+    validParticipantsPromise.then(function(valid_participants) {
+        return db.collection('topics').updateAsync(
+            { '_id': topic._id },
+            { $set: { 'valid_participants': _.size(valid_participants) } });
+    });
+    
+    var createGroupsPromise =
+    validParticipantsPromise.then(function(valid_participants) {
+        return assignParticipantsToGroups(valid_participants);
     }).map(function(group) {
         // create new group id
         var gid = ObjectId();
@@ -164,6 +174,10 @@ exports.createGroupsAsync = function(topic) {
                 store_group_promise,
                 update_source_proposals_promise).return(group);
     });
+    
+    return Promise.join(
+            createGroupsPromise,
+            storeValidParticipantsPromise).get(0);
 };
 
 /**

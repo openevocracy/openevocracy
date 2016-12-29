@@ -18,6 +18,20 @@ define([
         events: {
             'click #logout': function (e) {
                 App.eventAggregator.trigger('App:logged_out');
+            },
+            'click .set-language': function(e) {
+                e.preventDefault();
+                localStorage.setItem('locale', $(e.target).data('locale'));
+                // reload the app
+                location.reload();
+            }
+        },
+        
+        childEvents: {
+            show: function() {
+                var locale = localStorage.getItem('locale') || 'de';
+                var jquery = '[data-locale=' + locale + ']';
+                $(jquery).parent().addClass('active');
             }
         }
     });

@@ -230,7 +230,6 @@ exports.navigation = function(req, res) {
     });
     
     Promise.props({
-        'blub': Promise.resolve('test'),
         'proposals': proposalsPromise,
         'topics': topicsPromise,
         'groups': groupsPromise

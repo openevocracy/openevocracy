@@ -77,9 +77,9 @@ define([
                 $('.valid span').removeClass('fa-ban');
                 $('.valid span').addClass('fa-check');
             } else { 
-                $('.valid').removeClass('accepted')
-                           .attr('title', 'proposal requirements not fulfilled, ' +
-                           (cfg.MIN_WORDS_PROPOSAL-words) + ' more words required');
+                $('.valid').removeClass('accepted').attr('title',
+                    u.strformat(u.i18n('proposal requirements not fulfilled, {0} more words required'),
+                                (cfg.MIN_WORDS_PROPOSAL-words)));
                 $('.valid span').removeClass('fa-check');
                 $('.valid span').addClass('fa-ban');
             }

@@ -44,7 +44,7 @@
             {{#ifis stage STAGE_PASSED}}{{i18n "passed"}}: {{passedDate}}{{/ifis}}
             
             {{#ifis stage STAGE_SELECTION}}, {{votes}} {{i18n "votes"}}{{/ifis}},
-            {{participants}} {{i18n "participants"}}
+            {{valid_participants}} {{i18n "participants"}}
             {{#ifis stage STAGE_PROPOSAL}}, {{proposals}} {{i18n "proposals"}}{{/ifis}}
         {{/ifis}}
     </div>

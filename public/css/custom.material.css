@@ -157,6 +157,8 @@ footer { font-size: 0.8em; text-align: center; }
 .nav-pills > li > .pill-success { background-color: #4caf50; color: #fff; }
 .nav-pills > li > .pill-success:focus, .nav-pills > li > .pill-success:hover { background-color: #59b75c; }
 
+.navbar .dropdown-menu .active > a:hover, .navbar.navbar-default .dropdown-menu .active > a:hover { background-color: #009688; }
+
 .btn:not(.btn-raised):not(.btn-link):hover { background-color: inherit; }
 .btn-group .btn, .btn-group .btn+.btn { margin: 0 1px; }
 .btn-group>.btn:last-child:not(:first-child) { margin-right: 0; }

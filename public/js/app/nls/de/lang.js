@@ -107,5 +107,6 @@ define({
     "Edit": "Bearbeiten",
     "Delete": "Löschen",
     "Leave editor mode and save changes": "Verlasse den Editor und speichere die Änderungen",
-    "Proposal requirements fulfilled": "Anforderungen an den Vorschlag wurden erfüllt"
+    "Proposal requirements fulfilled": "Anforderungen an den Vorschlag wurden erfüllt",
+    "proposal requirements not fulfilled, {0} more words required": "Anforderungen an den Vorschlag wurden nicht erfüllt, {0} weitere Worte erforderlich"
 });
