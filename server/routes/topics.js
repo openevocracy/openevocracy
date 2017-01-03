@@ -158,20 +158,27 @@ function manageTopicStateAsync(topic) {
                     var stageStartedEntryName = 'stageRejectedStarted';
                     topic[stageStartedEntryName] = Date.now();
                 }
+                var updateTopicStatePromise =
+                    updateTopicStateAsync(topic,stageStartedEntryName);
+                var updatePadExpirationPromise =
+                    pads.updatePadExpirationAsync(topic.pid, Date.now());
                 
-                return updateTopicStateAsync(topic,stageStartedEntryName).
+                return Promise.join(updateTopicStatePromise, updatePadExpirationPromise).
                        return(topic);
             });
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
+            // Set the next deadline here, so we can use it in createGroupsAsync.
+            topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,prevDeadline);
+            
             return groups.createGroupsAsync(topic).then(function(groups) {
                 var stageStartedEntryName;
                 
                 if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {
                     topic.stage = C.STAGE_CONSENSUS;
-                    topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,prevDeadline);
                     stageStartedEntryName = 'stageConsensusStarted';
                 } else {
                     topic.stage = C.STAGE_REJECTED;
+                    topic.nextDeadline = cfg.DURATION_NONE;
                     topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS';
                     stageStartedEntryName = 'stageRejectedStarted';
                 }
@@ -189,7 +196,7 @@ function manageTopicStateAsync(topic) {
     return Promise.resolve(topic);
 }
 
-function appendTopicInfoAsync(topic,uid,with_details) {
+function appendTopicInfoAsync(topic, uid, with_details) {
     var tid = topic._id;
     
     // get pad body if asked for
@@ -316,9 +323,9 @@ exports.update = function(req, res) {
         return db.collection('topics').updateAsync(
                 { '_id': tid }, { $set: _.pick(topic,'name') }, {}).return(topic);
     }).then(manageTopicStateAsync)
-      .then(_.partial(appendTopicInfoAsync,_,uid,true))
+      .then(_.partial(appendTopicInfoAsync, _, uid, true))
       .then(res.json.bind(res))
-      .catch(utils.isOwnError,utils.handleOwnError(res));
+      .catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 function updateTopicStateAsync(topic,stageStartedEntryName) {
@@ -335,7 +342,7 @@ exports.query = function(req, res) {
     db.collection('topics').findOneAsync({ '_id': tid }).
     then(function(topic) {
         if(null == topic)
-            return utils.rejectPromiseWithNotification(404, "Topic not found!");
+            return utils.rejectPromiseWithNotification(404, "Topic not found.");
         else
             return appendTopicInfoAsync(topic,uid,true);
     }).
@@ -362,14 +369,18 @@ exports.create = function(req, res) {
         if(count > 0)
             return utils.rejectPromiseWithNotification(409, "Topic already exists.");
         
+        // create topic
         topic.owner = ObjectId(req.signedCookies.uid);
         topic.pid = ObjectId(); // create random pad id
         topic.stage = C.STAGE_SELECTION; // start in selection stage
         topic.level = 0;
         topic.nextDeadline = getDeadline(topic.stage);
+        var createTopicPromise = db.collection('topics').insertAsync(topic);
         
-        // insert into database
-        return db.collection('topics').insertAsync(topic).return(topic);
+        // create pad
+        var createPadPromise = pads.createPadAsync(topic.pid);
+        
+        return Promise.join(createTopicPromise, createPadPromise).return(topic);
     }).then(function(topics) {
         topic.votes = 0;
         

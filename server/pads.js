@@ -12,6 +12,8 @@ var pdf = require('phantom-html2pdf');
 var ObjectId = require('mongodb').ObjectID;
 var db = require('./database').db;
 
+var utils = require('./utils');
+
 // promisify gulf
 var Promise = require('bluebird');
 Object.keys(gulf).forEach(function(key) {
@@ -53,6 +55,14 @@ function gulfIO(masterDoc, slaveSocket) {
             if (_.isEmpty(slaveToMasterChange.ops))
                 return;
 
+            // prevent writing after expiration
+            var pad = docIdToPadMap[masterDoc.id];
+            if(!_.isUndefined(pad.expiration) && Date.now() > pad.expiration)
+                return;
+            
+            // TODO implement user rights management
+            // who can write, etc...
+            
             console.log('slaveToMasterChange', slaveToMasterChange);
             slaveDoc.update(new Delta(slaveToMasterChange));
         });
@@ -100,6 +110,40 @@ function getPadDocAsync(pid) {
 var dbConnection = mongoose.createConnection('mongodb://' + process.env.IP + '/mindabout');
 var adapter = new MongoDBAdapter(dbConnection);
 var padIdToDocMap = {};
+var docIdToPadMap = {};
+
+function createPadAsync(pid, expiration) {
+    return gulf.Document.createAsync(adapter, ottype, starttext).then(function(doc) {
+        // Create pad object
+        var pad = {
+            '_id': pid,
+            'did': doc.id,
+            'expiration': expiration
+        };
+        
+        // Set values to maps (cache)
+        padIdToDocMap[pid] = doc;
+        docIdToPadMap[doc.id] = pad;
+        
+        // Store pad object in pad collection
+        return db.collection('pads').insertAsync(pad);
+    });
+};
+exports.createPadAsync = createPadAsync; 
+
+exports.createPadIfNotExistsAsync = function(pid, expiration) {
+    // Check if getPadDocAsync throws error which indicates that pad does not exist
+    return getPadDocAsync(pid).catch(utils.isOwnError, function () {
+        // If pad does not already exist, create it
+        return createPadAsync(pid, expiration);
+    });
+};
+
+exports.updatePadExpirationAsync = function(pid, expiration) {
+    return db.collection('pads').updateAsync(
+        { '_id': pid }, { $set: { 'expiration': expiration }}
+    );
+};
 
 function getPadDocAsync(pid) {
     // check if document is in map first
@@ -107,26 +151,18 @@ function getPadDocAsync(pid) {
     if (!_.isUndefined(doc))
         return Promise.resolve(doc);
 
-    // if not in map, load or create document
+    // if not in map, load or handle error
     return db.collection('pads').
-        findOneAsync({ '_id': pid }, { 'did': true }).
-        then(function(pad) {
-            // load or create gulf document
-            if (_.isNull(pad)) {
-                return gulf.Document.createAsync(adapter, ottype, starttext).
-                    then(function(doc) {
-                    // if newly created, save in database
-                    return db.collection('pads').insertAsync({
-                        '_id': pid,
-                        'did': doc.id
-                    }).return(doc);
+        findOneAsync({ '_id': pid }).then(function(pad) {
+            if (_.isNull(pad))
+                return Promise.reject({reason: 'PAD_DOES_NOT_EXIST'});
+            else {
+                return gulf.Document.loadAsync(adapter, ottype, pad.did).then(function(doc) {
+                    padIdToDocMap[pid] = doc;
+                    docIdToPadMap[doc.id] = pad;
+                    return Promise.resolve(doc);
                 });
-            } else {
-                return gulf.Document.loadAsync(adapter, ottype, pad.did);
             }
-        }).then(function(doc) {
-            padIdToDocMap[pid] = doc;
-            return Promise.resolve(doc);
         });
 }
 

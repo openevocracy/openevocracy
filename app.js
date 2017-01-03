@@ -136,6 +136,7 @@ app.get('/test/create_topic_consensus_stage', tests.create_topic_consensus_stage
 app.get('/test/create_topic_proposal_stage', tests.create_topic_proposal_stage );
 app.get('/test/create_groups', tests.create_groups );
 app.get('/test/remix_groups', tests.remix_groups );
+app.get('/test/clean_database', tests.clean_database );
 
 // ###################
 // ### S E R V E R ###

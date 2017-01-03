@@ -10,6 +10,19 @@ var groups = require('./groups');
 
 var tid = ObjectId('54f646ccc3a414a60d40d660');
 
+exports.clean_database = function(req, res) {
+    db.collection('documents').drop();
+    db.collection('pads').drop();
+    db.collection('proposals').drop();
+    db.collection('snapshots').drop();
+    db.collection('topic_votes').drop();
+    db.collection('topics').drop();
+    db.collection('groups').drop();
+    db.collection('group_members').drop();
+    
+    res.sendStatus(200);
+}
+
 /*
 standard test suite
 */

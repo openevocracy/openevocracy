@@ -12,16 +12,12 @@ exports.query = function(req, res) {
     var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.signedCookies.uid);
 
-    // get topic
-    var get_topic_promise = db.collection('topics').findOneAsync({ '_id': tid }).
-    then(function(topic) {
+    db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
         // check if topic is at least in proposal stage
         if(topic.stage < C.STAGE_PROPOSAL)
             return utils.rejectPromiseWithNotification(400, "Topic must be at least in proposal stage.");
         return topic;
-    });
-    
-    Promise.join(get_topic_promise, function(topic) {
+    }).then(function(topic) {
         // get proposal or create proposal if it does not exist
         // from http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
         var get_proposal_promise =
@@ -32,8 +28,13 @@ exports.query = function(req, res) {
         
         return Promise.join(topic, get_proposal_promise);
     }).spread(function(topic, proposal) {
+        // create pad if not exists
+        var create_pad_promise = pads.createPadIfNotExistsAsync(proposal.pid, topic.nextDeadline);
+        
         // get pad_body
-        var get_pad_html_promise = pads.getPadHTMLAsync(proposal.pid);
+        var get_pad_html_promise = create_pad_promise.then(function() {
+            return pads.getPadHTMLAsync(proposal.pid);
+        });
         // pad can only be edited in proposal stage
         if(topic.stage != C.STAGE_PROPOSAL)
             delete proposal.pid;

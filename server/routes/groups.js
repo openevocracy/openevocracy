@@ -61,29 +61,34 @@ function assignParticipantsToGroups(participants) {
     return groups;
 }
 
-function storeGroupAsync(gid,tid,level,group) {
-    var ppid = ObjectId();
+function storeGroupAsync(gid, topic, level, members) {
+    // create group proposal's pad
+    var pid = ObjectId();
+    var create_pad_promosal_promise =
+    pads.createPadAsync(pid, topic.nextDeadline); // This is actually the deadline of the next stage (not the old one).
     
     // create group's proposal
+    var ppid = ObjectId();
     var create_proposal_promise =
     db.collection('proposals').insertAsync({
-        '_id': ppid, 'tid': tid,
-        'source': gid, 'pid': ObjectId()});
+        '_id': ppid, 'tid': topic._id,
+        'source': gid, 'pid': pid});
     
     // create group itself
     var create_group_promise =
     db.collection('groups').insertAsync({
-        '_id': gid, 'tid': tid,
+        '_id': gid, 'tid': topic._id,
         'ppid': ppid, 'level': level});
     
     // insert group members
     var insert_members_promise =
     db.collection('group_members').insertAsync(
-        _.map(group, function(uid) {
+        _.map(members, function(uid) {
             return { 'gid': gid, 'uid': uid, 'lastActivity': -1 };
         }));
     
-    return Promise.join(create_proposal_promise,
+    return Promise.join(create_pad_promosal_promise,
+                        create_proposal_promise,
                         create_group_promise,
                         insert_members_promise);
 }
@@ -122,13 +127,14 @@ exports.createGroupsAsync = function(topic) {
     var createGroupsPromise =
     validParticipantsPromise.then(function(valid_participants) {
         return assignParticipantsToGroups(valid_participants);
-    }).map(function(group) {
+    }).map(function(group_members) {
         // create new group id
         var gid = ObjectId();
         
-        // send mail to notify new group users
+        // TODO Notifications
+        // Send mail to notify new group members
         var send_mail_promise =
-        db.collection('users').find({'_id': { $in: group }},{'email': true}).
+        db.collection('users').find({'_id': { $in: group_members }},{'email': true}).
         toArrayAsync().then(function(users) {
             mail.sendMail(_.pluck(users,'email').join(),
                 strformat(i18n.t('EMAIL_CONSENSUS_START_SUBJECT'), topic.name),
@@ -136,36 +142,20 @@ exports.createGroupsAsync = function(topic) {
             );
         });
         
-        // create notifications for users
-        // FIXME correct?? kann man das mit oben kombinieren?
-        /*var save_notification_promise =
-        db.collection('users').find({'_id': { $in: group }},{'uid': true}).
-        toArrayAsync().then(function(users) {
-            return db.collection('user_notifications').insertAsync(
-                _.map(group, function(uid) {
-                    return {
-                    'uid': uid,
-                    'type': 'info',
-                    'text': 'You entered a new <a href="http://mind-about-sagacitysite.c9.io/group/'+
-                                    gid.toString()+'">group</a>'
-                    }}));
-        });*/
-        
-        
         // store group in database
-        var store_group_promise = storeGroupAsync(gid, tid, 0, group);
+        var store_group_promise = storeGroupAsync(gid, topic, 0, group_members);
         
         // create members for this group
         // append gid to proposal so we can identify it later
         var update_source_proposals_promise =
         db.collection('proposals').updateAsync(
-            { 'tid': tid, 'source': { $in: group } },
+            { 'tid': tid, 'source': { $in: group_members } },
             { $set: { 'sink': gid } }, {'upsert': false, 'multi': true});
         
         return Promise.join(
                 send_mail_promise,
                 store_group_promise,
-                update_source_proposals_promise).return(group);
+                update_source_proposals_promise).return(group_members);
     });
     
     return Promise.join(
@@ -235,20 +225,20 @@ exports.remixGroupsAsync = function(topic) {
         }
         
         // assign members to groups
-        var groups = assignParticipantsToGroups(leaders);
+        var groups_members = assignParticipantsToGroups(leaders);
         
         // insert all groups into database
         var nextLevel = topic.level+1;
-        return Promise.map(groups, function(group) {
+        return Promise.map(groups_members, function(group_members) {
             // create group new id
             var gid = ObjectId();
             
             // store group in database
-            var store_group_promise = storeGroupAsync(gid, tid, nextLevel, group);
+            var store_group_promise = storeGroupAsync(gid, topic, nextLevel, group_members);
             
             // send mail to notify level change
             var send_mail_promise =
-            db.collection('users').find({'_id': { $in: group }},{'email': true}).
+            db.collection('users').find({'_id': { $in: group_members }},{'email': true}).
             toArrayAsync().then(function(users) {
                 mail.sendMail(_.pluck(users,'email').join(),
                     strformat(i18n.t('EMAIL_LEVEL_CHANGE_SUBJECT'), topic.name),
@@ -259,7 +249,7 @@ exports.remixGroupsAsync = function(topic) {
             // register as sink for source proposals
             // find previous gids corresponding uids in group_out (current group)
             var update_source_proposals_promise =
-            db.collection('group_members').find({'uid': { $in: group }}).
+            db.collection('group_members').find({'uid': { $in: group_members }}).
             toArrayAsync().then(function(members) {
                 var gids = _.pluck(members,'gid');
                 
