@@ -70,7 +70,7 @@ job.start();
 // ###################
 
 app.get('/json/topics', function(req, res) { auth(req, res, topics.list); });
-app.put('/json/topic/:id', function(req, res) { auth(req, res, topics.update); });
+app.patch('/json/topic/:id', function(req, res) { auth(req, res, topics.update); });
 app.get('/json/topic/:id', function(req, res) { auth(req, res, topics.query); });
 app.post('/json/topic', function(req, res) { auth(req, res, topics.create); });
 app.delete('/json/topic/:id', function(req, res) { auth(req, res, topics.delete); });

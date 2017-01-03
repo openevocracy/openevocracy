@@ -297,14 +297,18 @@ exports.list = function(req, res) {
 };
 
 exports.update = function(req, res) {
-    var topicNew = req.body;
-    var tid = ObjectId(topicNew._id);
+    var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.signedCookies.uid);
+    var topicNew = req.body;
     
     db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
         // only the owner can update the topic
-        if(!topic || !_.isEqual(topic.owner,uid))
+        if(!topic)
+            return utils.rejectPromiseWithNotification(404, "Topic does not exist!");
+        else if(!_.isEqual(topic.owner,uid))
             return utils.rejectPromiseWithNotification(403, "Only the owner can update the topic!");
+        else if(topic.stage != C.STAGE_SELECTION)
+            return utils.rejectPromiseWithNotification(403, "Topic may only be edited in selection stage!");
         
         return topic;
     }).then(function(topic) {

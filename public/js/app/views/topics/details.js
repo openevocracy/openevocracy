@@ -22,7 +22,7 @@ define([
         loaded: false,
         
         modelEvents: {
-            'change:body': 'render'
+            'change': 'render'
         },
         
         events: {
@@ -36,13 +36,14 @@ define([
                     $('#body').removeClass("hidden");
                     $('.editor-wrapper').addClass("hidden");
                     // title field to heading
-                    this.model.set('name', $('#titleInput').val());
-                    var titleHeading = '<h2 class="topic-title">'+this.model.get('name')+'</h2>';
+                    var name = $('#titleInput').val();
+                    //this.model.set('name', $('#titleInput').val());
+                    var titleHeading = '<h2 class="topic-title">'+name+'</h2>';
                     $('#titleInput').replaceWith(titleHeading);
                     
                     // bidirectional server-sync
                     // view will rerender automatically due to model change-event
-                    this.model.save();
+                    this.model.save({'name': name}, {patch: true});
                 } else {
                     // currently in body, open editor
                     $('.edit').removeClass('btn-primary').addClass('btn-warning');
@@ -78,7 +79,7 @@ define([
         },
         
         initialize: function() {
-            this.model.on('change', this.render, this);
+            //this.model.on('change', this.render, this);
             
             // Append derived model values
             this.model.updateDerivedBasic();

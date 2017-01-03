@@ -9,7 +9,6 @@ define([
     'controllers/topic',
     'controllers/proposal',
     'controllers/group',
-    'text!templates/partials/views/buttons.html',
     'text!templates/partials/views/messages.html',
     'text!templates/partials/views/lightbox.html',
     'text!templates/partials/blocks/topic_statistics.html',
@@ -33,7 +32,6 @@ define([
     Topic,
     Proposal,
     Group,
-    ButtonsPartial,
     MessagesPartials,
     LightboxPartials,
     StatBlockPartials,
@@ -72,7 +70,6 @@ define([
         App.router.route('group/:id', 'group_index', group.route_group_index.bind(group));
     };
     
-    Handlebars.registerPartial('buttons', ButtonsPartial);
     Handlebars.registerPartial('messages', MessagesPartials);
     Handlebars.registerPartial('lightbox', LightboxPartials);
     Handlebars.registerPartial('topic_statistics', StatBlockPartials);

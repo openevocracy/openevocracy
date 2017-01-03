@@ -1,4 +1,18 @@
-{{> buttons}}
+<div class="btn-group pull-right" role="group">
+    {{#ifis stage STAGE_SELECTION}}
+    <button class="btn btn-raised btn-sm vote{{#if voted}} btn-success{{else}} btn-primary{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
+    <!-- TODO in v0.2 <button class="btn btn-default btn-sm merge" title="merge request"><span class="fa"></span></button>-->
+    
+    {{#if pid}}
+    <button class="btn btn-raised btn-primary btn-sm edit" title="{{i18n "Edit"}}"><span class="fa fa-pencil"></span></button>
+    <!--<form action="#/topics">
+        <button class="ico del" title="delete"><span></span></button>
+    </form>-->
+    <a class="btn btn-raised btn-primary btn-sm del" title="{{i18n "Delete"}}" href="#/topics"><span class="fa fa-times"></span></a>
+    {{/if}}
+    {{/ifis}}
+</div>
+
 <div class="page-header">
     <h2 class="topic-title">{{name}}</h2>
 </div>
