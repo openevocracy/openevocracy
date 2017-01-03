@@ -188,12 +188,12 @@ exports.query = function(req, res) {
 exports.navigation = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
 
-    var topicsPrePromise = db.collection('topic_participants').
-        find({'uid': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
+    var topicsPrePromise = db.collection('proposals').
+        find({'source': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
             return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
                 {'name': true, 'stage': true, 'level': true, 'nextDeadline': true}).toArrayAsync();
         });
-        
+    
     var proposalsPromise = topicsPrePromise.filter(function(topic) {
         return topic.stage == C.STAGE_PROPOSAL;
     }).map(function(topic){

@@ -5,8 +5,8 @@
 <div class="pull-right">
     {{#ifis stage STAGE_SELECTION}}
     <div class="buttons">
-        <button class="btn btn-sm btn-raised vote{{#if voted}} btn-success{{else}} btn-primary{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
-        <button class="btn btn-sm btn-raised join{{#if joined}} btn-success{{else}} btn-primary{{/if}}{{#unless voted}} hidden{{/unless}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
+        <button class="btn btn-sm btn-raised vote{{#if voted}} btn-success{{else}} btn-primary{{/if}}" title="{{#if voted}}{{i18n "unmark as relevant"}}{{else}}{{i18n "mark as relevant"}}{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
+        <!--<button class="btn btn-sm btn-raised join{{#if joined}} btn-success{{else}} btn-primary{{/if}}{{#unless voted}} hidden{{/unless}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>-->
     </div>
     {{else}}
         {{#ifis stage STAGE_REJECTED}}
@@ -36,16 +36,12 @@
     <div class="name">{{name}} <strong class="body">{{#if body}}#body{{/if}}</strong></div>
     <div class="stats">
         {{#ifis stage STAGE_REJECTED}}
-            rejected: {{rejectedDate}}, {{i18n (lookup . "rejectedReason")}}
+            {{i18n "rejected"}}: {{rejectedDate}}, {{i18n (lookup . "rejectedReason")}}
         {{else}}
-            {{#ifis stage STAGE_SELECTION}}{{i18n "created"}}: {{creationDate}}{{/ifis}}
-            {{#ifis stage STAGE_PROPOSAL}}{{i18n "started"}}: {{proposalDate}}{{/ifis}}
-            {{#ifis stage STAGE_CONSENSUS}}{{i18n "started"}}: {{consensusDate}}{{/ifis}}
-            {{#ifis stage STAGE_PASSED}}{{i18n "passed"}}: {{passedDate}}{{/ifis}}
-            
-            {{#ifis stage STAGE_SELECTION}}, {{votes}} {{i18n "votes"}}{{/ifis}},
-            {{valid_participants}} {{i18n "participants"}}
-            {{#ifis stage STAGE_PROPOSAL}}, {{proposals}} {{i18n "proposals"}}{{/ifis}}
+            {{#ifis stage STAGE_SELECTION}}{{i18n "created"}}: {{creationDate}}, {{votes}} {{i18n "votes"}}{{/ifis}}
+            {{#ifis stage STAGE_PROPOSAL}}{{i18n "started"}}: {{proposalDate}}, {{proposals}} {{i18n "proposals"}}{{/ifis}}
+            {{#ifis stage STAGE_CONSENSUS}}{{i18n "started"}}: {{consensusDate}}, {{valid_participants}} {{i18n "participants"}}{{/ifis}}
+            {{#ifis stage STAGE_PASSED}}{{i18n "passed"}}: {{passedDate}}, {{valid_participants}} {{i18n "participants"}}{{/ifis}}
         {{/ifis}}
     </div>
 </div>

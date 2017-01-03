@@ -63,19 +63,8 @@ define([
             }
         },
         
-        initialize: function() {
-            // Check which user equals the current logged in user
-            _.each(this.model.get('members'), function(member) {
-                if(App.session.user.get('_id') == member._id)
-                    member.is_me = true;
-            });
-        },
-        
         onBeforeRender: function() {
             this.model.set('title', this.viewTitle);
-        },
-        
-        onRender: function() {
         },
         
         onShow: function() {

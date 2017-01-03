@@ -1,11 +1,17 @@
 define([
     'backbone',
+    'moment',
     'constants',
     '../utils',
+    'underscore',
+    'underscore_string'
     ], function(
     Backbone,
+    moment,
     C,
-    u
+    u,
+    _,
+    __
     ) {
     var Model = Backbone.Model.extend({
         idAttribute: '_id',
@@ -14,23 +20,53 @@ define([
         initialize: function() {
             var self = this;
             
-            this.on('change', function() {
+            this.set(C, {silent: true});
+            
+            /*this.on('change', function() {
                 this.updateDerived();
-            }, this);
+            }, this);*/
             
             // TODO implement with handlebars, when "participate" ("joined") is removed
             this.on('change:stage', function() {
                 var stage = self.get('stage');
-                var showTabs =
-                (self.get('joined')) &&
-                (stage == C.STAGE_PROPOSAL || stage == C.STAGE_CONSENSUS);
+                var showTabs = (stage == C.STAGE_PROPOSAL || stage == C.STAGE_CONSENSUS);
                 self.set('showTabs', showTabs, {silent: true});
+            });
+            
+            this.on('change:stagePassedStarted', function() {
+                self.set('stagePassedDate', moment(self.get('stagePassedStarted')).format('YYYY-MM-DD'), {silent: true});
+            });
+            
+            this.on('change:levels', function() {
+                var levels = self.get('levels');
+                self.set('levels', levels.reverse(), {silent: true});
+                self.set('maxlevel', _.size(levels), {silent: true});
+            });
+            
+            // TODO Is this still the solution we want? Seems hacky!
+            this.on('change:body', function() {
+                var body = self.get('body');
+                var error = 'Error';
+                if(__.startsWith(body, error)) {
+                    self.set('body', '', {silent: true});
+                    self.set('message', body, {silent: true});
+                    self.set('message-type','alert alert-danger', {silent: true});
+                }
             });
         },
         
         updateDerived: function() {
             this.updateDerivedBasic();
             this.updateDerivedStatistics();
+            this.updateDerivedDate();
+        },
+        
+        updateDerivedDate: function() {
+            this.set('creationDate', this.formatDate(this.get('timeCreated')), {silent: true});
+            this.set('proposalDate', this.formatDate(this.get('stageProposalStarted')), {silent: true});
+            this.set('consensusDate', this.formatDate(this.get('stageConsensusStarted')), {silent: true});
+            this.set('passedDate', this.formatDate(this.get('stagePassedStarted')), {silent: true});
+            this.set('rejectedDate', this.formatDate(this.get('stageRejectedStarted')), {silent: true});
         },
         
         updateDerivedStatistics: function() {
@@ -64,19 +100,26 @@ define([
             }
         },
         
+        leadingZero: function(num) {
+            // if lenght of number is only 1, add leading 0
+            num = num.toString();
+            return num.length < 2 ? ("0" + num) : num;
+        },
+        
+        formatDate: function(rawDate) {
+            var date = new Date(rawDate);
+            var y = date.getFullYear();
+            var m = this.leadingZero(date.getMonth()+1);
+            var d = this.leadingZero(date.getDate());
+            var newDate = y+"-"+m+"-"+d;
+            return newDate;
+        },
+        
         setVoted: function(status) {
             $.post(status ? '/json/topic-vote' : '/json/topic-unvote',
                {'tid':this.get('_id')},
                function(data) {
                    this.set({'votes': data, 'voted': status});
-               }.bind(this));
-        },
-        
-        setJoined: function(status) {
-            $.post(status ? '/json/topic-join' : '/json/topic-unjoin',
-               {'tid':this.get('_id')},
-               function(data) {
-                   this.set({'participants': data, 'joined': status});
                }.bind(this));
         }
     });

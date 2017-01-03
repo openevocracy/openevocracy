@@ -15,18 +15,9 @@ define([
     ) {
     var users = new Collection();
     
-    var Model = Backbone.Spark.Model.extend({
-        sparks: {
-            title: function() {
-                return u.i18n('Register');
-            }
-        }
-    });
-    
     var View = Marionette.CompositeView.extend({
         template: Template,
         collection: users,
-        model: new Model(),
         
         events: {
             'click #signup': function(e) {

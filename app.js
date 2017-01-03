@@ -76,8 +76,6 @@ app.post('/json/topic', function(req, res) { auth(req, res, topics.create); });
 app.delete('/json/topic/:id', function(req, res) { auth(req, res, topics.delete); });
 app.post('/json/topic-vote', function(req, res) { auth(req, res, topics.vote); });
 app.post('/json/topic-unvote', function(req, res) { auth(req, res, topics.unvote); });
-app.post('/json/topic-join', function(req, res) { auth(req, res, topics.join); });
-app.post('/json/topic-unjoin', function(req, res) { auth(req, res, topics.unjoin); });
 app.get('/file/topic/final/:id', function(req, res) { auth(req, res, topics.final); } );
 
 // #########################

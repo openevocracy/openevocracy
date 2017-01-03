@@ -10,7 +10,6 @@ define([
 
     var View = Marionette.CompositeView.extend({
         template: Template,
-        viewTitle: u.i18n("Login"),
         
         login: function (e) {
             if(e) e.preventDefault();
@@ -36,10 +35,6 @@ define([
             'click #login-btn': function(e) {
                 this.login(e);
             }
-        },
-        
-        onBeforeRender: function() {
-            this.model.set('title', this.viewTitle);
         }
     });
     

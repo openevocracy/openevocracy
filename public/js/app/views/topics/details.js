@@ -1,23 +1,15 @@
 define([
-    'underscore',
-    'underscore_string',
     'jquery',
     'Marionette',
-    'moment',
     'hbs!templates/topics/details',
-    'constants',
     'views/pad',
     '../../utils',
     'jquerycookie',
     'jquerycountdown'
 ], function(
-    _,
-    __,
     $,
     Marionette,
-    moment,
     Template,
-    C,
     Pad,
     u
     ) {
@@ -82,31 +74,14 @@ define([
             'click .vote': function(e) {
                 // if we have already voted then unvote
                 this.model.setVoted(!this.model.get('voted'));
-            },
-            'click .join': function(e) {
-                // if we have already joined then unjoin (leave after join)
-                this.model.setJoined(!this.model.get('joined'));
             }
         },
         
         initialize: function() {
-            this.model.set(C, {silent: true});
+            this.model.on('change', this.render, this);
             
-            // Levels
-            var levels = this.model.get('levels');
-            this.model.set('levels', levels.reverse(), {silent: true});
-            this.model.set('maxlevel', _.size(levels), {silent: true});
-            
-            // Set subtitle, requires that appendStageName was called before
-            this.setSubtitle();
-            
-            var body = this.model.get('body');
-            var error = 'Error';
-            if(__.startsWith(body, error)) {
-                this.model.set('body', '', {silent: true});
-                this.model.set('message', body, {silent: true});
-                this.model.set('message-type','alert alert-danger', {silent: true});
-            }
+            // Append derived model values
+            this.model.updateDerivedBasic();
         },
 
         onRender: function() {
@@ -131,32 +106,6 @@ define([
             $('#timeremaining').countdown(date, function(event) {
                 $(this).html(event.strftime(u.i18n('%D days, %H:%M:%S')));
             });
-        },
-        
-        setSubtitle: function() {
-            // set variables
-            var stage = this.model.get('stage');
-            var subtitle_begin = this.model.get('stageName');
-            var subtitle_level = ' ' + u.i18n('in level') + ' ' + (this.model.get('level') + 1);
-            var subtitle_remaining = '<span id="timeremaining"></span>';
-            var subtitle_next = '';
-            
-            // evaluate conditions
-            if(stage == C.STAGE_PASSED) {
-                subtitle_next = ', ' + u.i18n('finished at') + ' ' + moment(this.model.get('stagePassedStarted')).format('YYYY-MM-DD');
-            } else if(stage == C.STAGE_REJECTED) {
-                var rejectedReason = this.model.get('rejectedReason');
-                subtitle_next = ', ' + u.i18n(rejectedReason);
-            } else if(stage == C.STAGE_SELECTION) {
-                subtitle_next = ', ' + u.i18n('check for enough participants in') + ' ' + subtitle_remaining;
-            } else {
-                subtitle_next = ', ' + ((stage == C.STAGE_CONSENSUS) ? u.i18n('next level in') : u.i18n('next stage in')) + ': ' + subtitle_remaining;
-            }
-            
-            var subtitle = subtitle_begin + ((stage == C.STAGE_CONSENSUS) ? subtitle_level : '' ) + subtitle_next;
-            
-            // set model
-            this.model.set('subtitle',subtitle, {silent: true});
         },
         
         updateDocumentState: function() {

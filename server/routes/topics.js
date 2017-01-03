@@ -103,12 +103,12 @@ function manageConsensusStageAsync(topic, levelDuration) {
 exports.manageConsensusStage = manageConsensusStageAsync;
 
 /**
- * checks if a minimum of MIN_PARTICIPANTS_PER_TOPIC proposal exists
+ * checks if a minimum of MIN_VOTES_PER_TOPIC proposal exists
  */
 function isAccepted(topic) {
-    return db.collection('topic_participants').
+    return db.collection('topic_votes').
         countAsync({'tid': topic._id}).
-        then(function(count) {return count >= cfg.MIN_PARTICIPANTS_PER_TOPIC;});
+        then(function(count) {return count >= cfg.MIN_VOTES_PER_TOPIC;});
 }
 
 /**
@@ -200,8 +200,6 @@ function appendTopicInfoAsync(topic,uid,with_details) {
     // get number of participants and votes in this topic
     var topic_votes_promise = db.collection('topic_votes').
         find({'tid': tid}, {'uid': true}).toArrayAsync();
-    var topic_participants_promise = db.collection('topic_participants').
-        find({'tid': tid}, {'uid': true}).toArrayAsync();
     var topic_proposals_promise = db.collection('proposals').
         countAsync({'tid': tid});  // NOTE: Also non-valid proposals are counted
     
@@ -280,12 +278,9 @@ function appendTopicInfoAsync(topic,uid,with_details) {
     return Promise.props(_.extend(topic,{
         'body': pad_body_promise,
         'votes': topic_votes_promise.then(_.size),
-        'participants': topic_participants_promise.then(_.size),
         'proposals': topic_proposals_promise,
         'voted': topic_votes_promise.then(function(topic_votes) {
             return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
-        'joined': topic_participants_promise.then(function(topic_participants) {
-            return utils.checkArrayEntryExists(topic_participants, {'uid': uid});}),
         'levels': levels_promise,
         'gid': find_user_group_promise
     }));
@@ -345,17 +340,20 @@ exports.query = function(req, res) {
 };
 
 exports.create = function(req, res) {
-    var topic = req.body;
-    var topicName = topic.name;
+    //var topic = req.body;
+    //var topicName = topic.name;
+    var data = req.body;
+    var topic = {};
+    topic.name = data.name;
     
     // reject empty topic names
-    if(_.isEmpty(topicName)) {
+    if(_.isEmpty(topic.name)) {
         utils.sendNotification(res, 400, "Empty topic name not allowed.");
         return;
     }
     
     // only allow new topics if they do not exist yet
-    db.collection('topics').countAsync({'name': topicName}).then(function(count) {
+    db.collection('topics').countAsync({'name': topic.name}).then(function(count) {
         // topic already exists
         if(count > 0)
             return utils.rejectPromiseWithNotification(409, "Topic already exists.");
@@ -370,7 +368,6 @@ exports.create = function(req, res) {
         return db.collection('topics').insertAsync(topic).return(topic);
     }).then(function(topics) {
         topic.votes = 0;
-        topic.participants = 0;
         
         res.json(topic);
     }).catch(utils.isOwnError,utils.handleOwnError(res));
@@ -390,7 +387,6 @@ exports.delete = function(req,res) {
         return Promise.join(
             db.collection('topics').removeByIdAsync(tid),
             db.collection('topic_votes').removeAsync({'tid': tid}),
-            db.collection('topic_participants').removeAsync({'tid': tid}),
             db.collection('groups').removeAsync({'tid': tid}));
     }).then(res.sendStatus.bind(res,200))
       .catch(utils.isOwnError,utils.handleOwnError(res));
@@ -398,9 +394,6 @@ exports.delete = function(req,res) {
 
 function countVotes(tid) {
     return db.collection('topic_votes').countAsync( {'tid': tid} );
-}
-function countParticipants(tid) {
-    return db.collection('topic_participants').countAsync( {'tid': tid} );
 }
 
 exports.vote = function(req, res) {
@@ -436,41 +429,6 @@ exports.unvote = function(req, res) {
     db.collection('topic_votes').removeAsync(topic_vote,true).
         then(_.partial(countVotes,topic_vote.tid)).call('toString').
         then(res.json.bind(res));
-};
-
-exports.join = function(req, res) {
-    var topic_participant = req.body;
-    
-    // assemble participant
-    topic_participant.tid = ObjectId(topic_participant.tid);
-    topic_participant.uid = ObjectId(req.signedCookies.uid);
-    
-    // TODO use findAndModify as in proposal
-    db.collection('topic_participants').
-    find(_.pick(topic_participant, 'tid'), {'uid': true}).toArrayAsync().
-    then(function(topic_participants) {
-        var count = _.size(topic_participants);
-        
-        // check if user has already joined
-        // do not allow user to vote twice for the same topic
-        if(!utils.checkArrayEntryExists(topic_participants, _.pick(topic_participant, 'uid')))
-            return db.collection('topic_participants').insertAsync(topic_participant).return(++count);
-        
-        return count;
-    }).then(res.json.bind(res));
-};
-
-exports.unjoin = function(req, res) {
-    var topic_participant = req.body;
-    
-    // assemble participant
-    topic_participant.tid = ObjectId(topic_participant.tid);
-    topic_participant.uid = ObjectId(req.signedCookies.uid);
-    
-    // remove participant and return number of current participants
-    db.collection('topic_participants').removeAsync(topic_participant,true).
-        then(_.partial(countParticipants,topic_participant.tid)).
-        call('toString').then(res.json.bind(res));
 };
 
 exports.final = function(req, res) {

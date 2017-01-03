@@ -21,7 +21,7 @@
 {{/if}}
 
 {{#if proposals}}
-<h3>Proposals</h3>
+<h3>{{i18n "Proposals"}}</h3>
 <ul class="nav nav-pills nav-stacked nav-pills-sm">
 {{#each proposals}}
     <li data-link="nav-prp-{{this._id}}"><a class="{{#ifis this.danger 1}}pill-danger{{/ifis}}" href="/#/proposal/{{this._id}}"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> {{this.name}}<br/><small>{{this.timeRemaining}} {{i18n "remaining"}}</small></a></li>

@@ -40,10 +40,6 @@ define([
                 }
             },
             
-            onShow: function() {
-                $('aside .topic-title').text(u.i18n('Filter and sorting'));
-            },
-            
             render: function() {
                 this.$el.html(this.template(C));
                 return this;

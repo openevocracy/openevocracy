@@ -1,12 +1,7 @@
 <div class="btn-group pull-right" role="group">
     {{#ifis stage STAGE_SELECTION}}
     <button class="btn btn-raised btn-sm vote{{#if voted}} btn-success{{else}} btn-primary{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
-    <button class="btn btn-raised btn-sm join{{#if joined}} btn-success{{else}} btn-primary{{/if}}{{#unless voted}} hidden{{/unless}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
     <!-- TODO in v0.2 <button class="btn btn-default btn-sm merge" title="merge request"><span class="fa"></span></button>-->
-    {{/ifis}}
-    
-    {{#ifis stage STAGE_PROPOSAL}}
-    <button class="btn btn-raised btn-sm join{{#if joined}} btn-success{{else}} btn-primary{{/if}}" title="{{#if joined}}leave{{else}}join{{/if}}"><span class="fa fa-user-plus"></span></button>
     {{/ifis}}
     
     {{#if pid}}

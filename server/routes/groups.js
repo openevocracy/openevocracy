@@ -18,7 +18,7 @@ function calculateNumberOfGroups(numTopicParticipants) {
     
     // constants
     var groupSize = 4.5; // group size is 4 or 5
-    var limitSimpleRule = 50; // number of topic_participants (if more then x topic_participants, complex rule is used)
+    var limitSimpleRule = 50; // number of topic participants (if more then x topic participants, complex rule is used)
     // calculated values
     var groupMinSize = (groupSize-0.5);
     var groupMaxSize = (groupSize+0.5);
@@ -35,7 +35,7 @@ function calculateNumberOfGroups(numTopicParticipants) {
 }
 
 function assignParticipantsToGroups(participants) {
-    // shuffle topic_participants
+    // shuffle topic participants
     _.shuffle(participants);
     
     // compute number of groups
@@ -46,7 +46,7 @@ function assignParticipantsToGroups(participants) {
     for(var i=0; i<numGroups; ++i)
         groups[i] = [];
     
-    // push topic_participants into groups
+    // push topic participants into groups
     _.each(participants, function(participant) {
         // find first smallest group
         var group = _.min(groups, function(group) {return _.size(group);});
@@ -100,27 +100,20 @@ function isProposalValid(proposal) {
 exports.createGroupsAsync = function(topic) {
     var tid = topic._id;
     
-    // find topic_participants
-    var validParticipantsPromise = db.collection('topic_participants').find({ 'tid': tid }).
-    toArrayAsync().then(function(participants) {
-        participants = _.pluck(participants, 'uid');
-        
-        return db.collection('proposals').find({'tid': tid}).toArrayAsync().
-            map(function(proposal) {
-                proposal.body = pads.getPadHTMLAsync(proposal.pid);
-                return Promise.props(proposal);
-            }).then(function(proposals) {
-                // accept only participants that have a corresponding proposal
-                // and it is valid
-                return _.filter(participants, function(participant) {
-                    var proposal = utils.findWhereArrayEntryExists(proposals, {'source': participant});
-                    return _.isUndefined(proposal) ? false : isProposalValid(proposal);
-                });
-            });
+    var validParticipantsPromise = db.collection('proposals').find({ 'tid': tid }).
+    toArrayAsync().map(function(proposal) {
+        proposal.body = pads.getPadHTMLAsync(proposal.pid);
+        return proposal;
+    }).then(function(proposals) {
+        return _.filter(_.pluck(proposals, 'source'), function(source) {
+            var proposal = utils.findWhereArrayEntryExists(proposals, {'source': source});
+            return _.isUndefined(proposal) ? false : isProposalValid(proposal);
+        });
     });
     
     var storeValidParticipantsPromise =
     validParticipantsPromise.then(function(valid_participants) {
+        console.log('valid_participants',valid_participants);
         return db.collection('topics').updateAsync(
             { '_id': topic._id },
             { $set: { 'valid_participants': _.size(valid_participants) } });
@@ -220,18 +213,21 @@ exports.remixGroupsAsync = function(topic) {
         
         if(1 == groups.length) {
             // If there is only ONE group in the current topic level,
-            // then the topic is finished/passed.
-            return db.collection('topic_participants').find({ 'tid': topic._id }).
-            toArrayAsync().then(function(participants) {
-                return db.collection('users').find({'_id': { $in: _.pluck(participants, 'uid') }},{'email': true}).
-                toArrayAsync().then(function(users) {
-                    // Send mail to notifiy about finished topic and return stage
-                    mail.sendMail(_.pluck(users,'email').join(),
-                        strformat(i18n.t('EMAIL_TOPIC_PASSED_SUBJECT'), topic.name),
-                        strformat(i18n.t('EMAIL_TOPIC_PASSED_MESSAGE'), topic.name, topic._id)
-                    );
-                });
-            }).return({'nextStage': C.STAGE_PASSED});
+            // then the topic is finished/passed
+            // Send mail to notifiy about finished topic and return stage
+            return db.collection('groups').find({ 'tid': topic._id, 'level': 0 }).
+                toArrayAsync().then(function(groups) {
+                    return db.collection('group_members').find({'gid': { $in: _.pluck(groups, '_id') }}, {'uid': true}).
+                        toArrayAsync();
+                }).then(function(participants) {
+                    return db.collection('users').find({'_id': { $in: _.pluck(participants, 'uid') }}, {'email': true}).
+                        toArrayAsync().then(function(users) {
+                            mail.sendMail(_.pluck(users,'email').join(),
+                                strformat(i18n.t('EMAIL_TOPIC_PASSED_SUBJECT'), topic.name),
+                                strformat(i18n.t('EMAIL_TOPIC_PASSED_MESSAGE'), topic.name, topic._id)
+                            );
+                        });
+                }).return({'nextStage': C.STAGE_PASSED});
         } else if(0 == numLeaders) {
             // If there is NO leader and group length is greater than ONE (if above),
             // then the consensus stage has failed

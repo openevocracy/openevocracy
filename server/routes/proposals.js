@@ -20,15 +20,8 @@ exports.query = function(req, res) {
             return utils.rejectPromiseWithNotification(400, "Topic must be at least in proposal stage.");
         return topic;
     });
-    // check if user has joined topic
-    var check_user_joined_promise =
-    db.collection('topic_participants').countAsync({'tid': tid, 'uid': uid}).
-    then(function(count) {
-        if(count == 0)
-            return utils.rejectPromiseWithNotification(400, "User has not joined topic.");
-    });
     
-    Promise.join(get_topic_promise, check_user_joined_promise, function(topic) {
+    Promise.join(get_topic_promise, function(topic) {
         // get proposal or create proposal if it does not exist
         // from http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
         var get_proposal_promise =

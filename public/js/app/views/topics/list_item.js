@@ -18,16 +18,13 @@ define([
         loaded: false,
         
         events: {
-            'click .del': function() {
-                this.model.destroy();
-            },
             // toggle join
-            'click .join': function(e) {
+            /*'click .join': function(e) {
                 e.stopPropagation();
                 e.preventDefault();
                 // if we have already joined then unjoin (leave after join)
                 this.model.setJoined(!this.model.get('joined'));
-            },
+            },*/
             // toggle vote
             'click .vote': function(e) {
                 e.stopPropagation();
@@ -35,66 +32,35 @@ define([
                 // if we have already voted then unvote
                 this.model.setVoted(!this.model.get('voted'));
             },
-            'click .participate': function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-            },
             'click .doc': function(e) {
                 e.stopPropagation();
-            },
-            'click .edit': function(e) {
-                $(".topic-id").val(this.model.get('_id'));
-                $(".topic-name").val(this.model.get('name'));
-                $(".topic-desc").val(this.model.get('desc'));
-                
-                $(".lightbox").fadeIn(500);
-            },
-            'click .cancel': function(e) {
-                this.$(".lightbox").fadeOut(500);
-                this.$(".topic-name").val("");
-                this.$(".topic-desc").val("");
             },
             'click .link': function(e) {
                 window.location.href='/#/topic/'+this.model.get('_id');
             }
         },
         
-        leadingZero: function(num) {
-            // if lenght of number is only 1, add leading 0
-            num = num.toString();
-            return num.length < 2 ? ("0" + num) : num;
-        },
-        
-        formatDate: function(rawDate) {
-            var date = new Date(rawDate);
-            var y = date.getFullYear();
-            var m = this.leadingZero(date.getMonth()+1);
-            var d = this.leadingZero(date.getDate());
-            var newDate = y+"-"+m+"-"+d;
-            return newDate;
-        },
-        
         initialize: function() {
             // Render on change
             this.model.on('change', this.render, this);
+            
+            // Append derived model values
+            this.model.updateDerivedBasic();
+        },
+        
+        onBeforeRender: function() {
+            // Append derived model values
+            this.model.updateDerivedDate();
+        },
+        
+        onRender: function() {
+            if(this.loaded)
+                this.onDOMexists();
         },
         
         onShow: function() {
             this.onDOMexists();
             this.loaded = true;
-        },
-        
-        onRender: function() {
-            //console.log('render');
-            this.model.set(C); // append constants to model
-            this.model.set('creationDate', this.formatDate(this.model.get('timeCreated')));
-            this.model.set('proposalDate', this.formatDate(this.model.get('stageProposalStarted')));
-            this.model.set('consensusDate', this.formatDate(this.model.get('stageConsensusStarted')));
-            this.model.set('passedDate', this.formatDate(this.model.get('stagePassedStarted')));
-            this.model.set('rejectedDate', this.formatDate(this.model.get('stageRejectedStarted')));
-            
-            if(this.loaded)
-                this.onDOMexists();
         },
         
         onDOMexists: function() {

@@ -9,7 +9,6 @@ define([
     'controllers/topic',
     'controllers/proposal',
     'controllers/group',
-    'text!templates/partials/views/header.html',
     'text!templates/partials/views/buttons.html',
     'text!templates/partials/views/messages.html',
     'text!templates/partials/views/lightbox.html',
@@ -34,7 +33,6 @@ define([
     Topic,
     Proposal,
     Group,
-    HeaderPartial,
     ButtonsPartial,
     MessagesPartials,
     LightboxPartials,
@@ -74,7 +72,6 @@ define([
         App.router.route('group/:id', 'group_index', group.route_group_index.bind(group));
     };
     
-    Handlebars.registerPartial('header', HeaderPartial);
     Handlebars.registerPartial('buttons', ButtonsPartial);
     Handlebars.registerPartial('messages', MessagesPartials);
     Handlebars.registerPartial('lightbox', LightboxPartials);

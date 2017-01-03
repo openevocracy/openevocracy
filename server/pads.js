@@ -171,7 +171,6 @@ var getPadHTMLAsync = function(pid) {
 exports.getPadHTMLAsync = getPadHTMLAsync;
 
 exports.getPadPDFAsync = function(pid) {
-    console.log('pid in getPadPDFAsync', pid);
     return getPadHTMLAsync(pid).then(function(html) {
         return pdfConvertAsync({'html': html});
     }).then(function(result) {

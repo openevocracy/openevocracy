@@ -19,9 +19,8 @@ define([
     var View = Marionette.ItemView.extend({
         template: Template,
         tagName: 'section',
-        className: "content",
-        id: "proposal",
-        viewTitle: u.i18n("My proposal"),
+        className: 'content',
+        id: 'proposal',
         
         events: {
             'click .edit': function(e) {
@@ -51,21 +50,12 @@ define([
             }
         },
         
-        initialize: function() {
-            console.log(this.model);
-            this.model.set('minwords', cfg.MIN_WORDS_PROPOSAL);
-        },
-        
         onShow: function() {
             // Set link in navigation to active
             u.setActive('nav-prp-'+this.model.get('tid'));
             
             // initalize pad
             Pad.onShow.bind(this)();
-        },
-        
-        onBeforeRender: function() {
-            this.model.set('title', this.viewTitle);
         },
         
         updateDocumentState: function() {

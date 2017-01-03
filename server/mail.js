@@ -33,6 +33,11 @@ exports.initializeMail = function() {
     });
 };
 
+function mailHash(mailType, mailIdentifier, mailUser) {
+    return crypto.createHash('sha256').
+        update(mailType).update(mailIdentifier.toString()).update(mailUser.toString()).digest('hex');
+};
+
 function sendMail(mailTo, mailSubject, mailText) {
     var mailOptions = {
         from: '"Evocracy Project" <noreply@openevocracy.org>', // sender address
@@ -54,34 +59,42 @@ function sendMail(mailTo, mailSubject, mailText) {
 }
 exports.sendMail = sendMail;
 
-function sendMailOnce(mailTo, mailSubject, mailText) {
-    var hash = crypto.createHash('sha256').
-        update(mailTo).update(mailSubject).update(mailText).digest('hex');
-    
-    return db.collection('mail').findOneAsync({ 'hash': hash }).then(function(hashFromDb) {
-        if(hashFromDb)
+function sendMailOnce(mailTo, mailSubject, mailText, hash, interval) {
+    // Use interval to allow resending a specific mail after some time
+    return db.collection('mail').findOneAsync({$query:{ 'hash': hash }, $orderby:{ '_id': -1 }}).then(function(hashFromDb) {
+        // If mail was already sent OR
+        // sending of mail is NOT longer ago than interval
+        if((hashFromDb && _.isUndefined(interval)) || 
+           (hashFromDb && !_.isUndefined(interval) &&
+            hashFromDb._id.getTimestamp().getTime() > Date.now() - interval)) {
             return Promise.resolve();
+        }
         
+        // If mail was not yet send OR
+        // sending of mail is longer ago than interval
         sendMail(mailTo, mailSubject, mailText);
         return db.collection('mail').insertOneAsync({ 'hash': hash });
     });
 }
 exports.sendMailOnce = sendMailOnce;
 
-function sendEmailToAllTopicParticipants(topic, mailSubject, mailText) {
-    return db.collection('topic_participants').find({'tid': topic._id}, {'uid': true}).
-    toArrayAsync().then(function(participants) {
-        return db.collection('users').
-            find({ '_id': { $in: _.pluck(participants, 'uid') } }, {'email': true}).
-            toArrayAsync();
-    }).map(function(user) {
-        sendMailOnce(user.email, mailSubject, mailText);
-        return Promise.resolve();
-    });
+function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailText) {
+    // Remind participants that the deadline of proposal stage is coming
+    // In proposal stage, all sources in proposals table are users
+    return db.collection('proposals').find({'tid': topic._id}, {'source': true}).
+        toArrayAsync().then(function(participants) {
+            return db.collection('users').
+                find({ '_id': { $in: _.pluck(participants, 'source') } }, {'email': true}).
+                toArrayAsync();
+        }).map(function(user) {
+            sendMailOnce(user.email, mailSubject, mailText, mailHash(mailType, topic._id, user._id));
+            return Promise.resolve();
+        });
 }
 exports.sendEmailToAllTopicParticipants = sendEmailToAllTopicParticipants;
 
-function sendEmailToAllActiveGroupMembers(topic, mailSubject, mailText) {
+function sendEmailToAllActiveGroupMembers(mailType, topic, mailSubject, mailText) {
+    // Remind members that the deadline of the level (group) is coming
     return db.collection('groups').find({ 'tid': topic._id, 'level': topic.level }).
     toArrayAsync().then(function(groups) {
         return db.collection('group_members').
@@ -91,38 +104,32 @@ function sendEmailToAllActiveGroupMembers(topic, mailSubject, mailText) {
             find({ '_id': { $in: _.pluck(members, 'uid') } }, {'email': true}).
             toArrayAsync();
     }).map(function(user) {
-        sendMailOnce(user.email, mailSubject, mailText);
+        sendMailOnce(user.email, mailSubject, mailText, mailHash(mailType, topic._id, user._id));
         return Promise.resolve();
     });
 }
 exports.sendEmailToAllActiveGroupMembers = sendEmailToAllActiveGroupMembers;
 
-function sendEmailToAllLazyGroupMembers(topic, mailSubject, mailText) {
+function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailText) {
+    // Remind members who where not active in that group for a specific time
     return db.collection('groups').find({ 'tid': topic._id, 'level': topic.level }).
     toArrayAsync().then(function(groups) {
         return db.collection('group_members').
             find({ 'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
     }).filter(function(member) {
-        // only notify group members with timestamps older than five days or -1 (never logged in)
-        var lastActivity = member.lastActivity == -1 ? member._id.getTimestamp() : member.lastActivity;
+        // Only notify group members with timestamps older than REMINDER_GROUP_LAZY
+        // or -1 (user never opend group)
+        var lastActivity = member.lastActivity == -1 ? member._id.getTimestamp().getTime() : member.lastActivity;
         return Date.now() >= lastActivity + cfg.REMINDER_GROUP_LAZY;
-    }).then(function(members) {
-        // update last activity timestamp
-        return db.collection('group_members').
-            updateAsync(
-                { 'uid': { $in: _.pluck(members, 'uid') } },
-                { $set: {'lastActivity': Date.now()} },
-                //{ $set: {'lastLazyMail': Date.now()} },
-                { multi: true }
-            ).return(members);
     }).then(function(members) {
         // get the users
         return db.collection('users').
             find({ '_id': { $in: _.pluck(members, 'uid') } }, {'email': true}).
-            toArrayAsync();
-    }).map(function(user) {
-        sendMail(user.email, mailSubject, mailText);
-        return Promise.resolve();
+            toArrayAsync().map(function(user) {
+                var member = utils.findWhereArrayEntryExists(members, {'uid': user._id});
+                sendMailOnce(user.email, mailSubject, mailText, mailHash(mailType, member._id, user._id), cfg.REMINDER_GROUP_LAZY);
+                return Promise.resolve();
+            });
     });
 }
 exports.sendEmailToAllLazyGroupMembers = sendEmailToAllLazyGroupMembers;
@@ -131,12 +138,12 @@ exports.sendTopicReminderMessages = function(topic) {
     switch (topic.stage) {
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
             if(Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_SECOND) {
-                return sendEmailToAllTopicParticipants(
+                return sendEmailToAllTopicParticipants('EMAIL_REMINDER_PROPOSAL_SECOND',
                     topic,strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT'), topic.name),
                     strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE'), topic.name)
                 );
             } else if(Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_FIRST) {
-                return sendEmailToAllTopicParticipants(
+                return sendEmailToAllTopicParticipants('EMAIL_REMINDER_PROPOSAL_FIRST',
                     topic,strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT'), topic.name),
                     strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE'), topic.name)
                 );
@@ -144,18 +151,18 @@ exports.sendTopicReminderMessages = function(topic) {
             break;
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
             i18n.initAsync.then(function() {
-                sendEmailToAllLazyGroupMembers(
+                sendEmailToAllLazyGroupMembers('EMAIL_ALL_LAZY_GROUP_MEMBERS',
                     topic,strformat(i18n.t('EMAIL_ALL_LAZY_GROUP_MEMBERS_SUBJECT'), topic.name),
                     strformat(i18n.t('EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE'), topic.name)
                 );
             });
             if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_SECOND) {
-                return sendEmailToAllActiveGroupMembers(
+                return sendEmailToAllActiveGroupMembers('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST',
                     topic,strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_SUBJECT'), topic.name),
                     strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_MESSAGE'), topic.name)
                 );
             } else if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_FIRST) {
-                return sendEmailToAllActiveGroupMembers(
+                return sendEmailToAllActiveGroupMembers('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND',
                     topic,strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_SUBJECT'), topic.name),
                     strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_MESSAGE'), topic.name)
                 );

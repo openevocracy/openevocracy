@@ -1,11 +1,11 @@
 <!--<h3>Take action</h3>-->
 <div class="block-content tabs-block">
     <ul  class="nav nav-pills nav-stacked">
-    {{#ifisAnd stage STAGE_PROPOSAL joined}} <!-- #if ppid -->
+    {{#ifis stage STAGE_PROPOSAL}}
         <li>
             <a href="/#/proposal/{{_id}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> {{i18n "My proposal"}}</a>
         </li>
-    {{/ifisAnd}}
+    {{/ifis}}
     {{#if gid}}
         <li>
             <a href="/#/group/{{gid}}"><i class="fa fa-users" aria-hidden="true"></i> {{i18n "Our group"}}</a>
