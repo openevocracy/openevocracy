@@ -69,7 +69,20 @@ exports.login = function(req, res) {
     }
 };
 
+exports.sendVerificationMailAgain = function(req, res) {
+    // Get email from query and user id from database
+    var email = req.params.email;
+    db.collection('users').findOneAsync({'email': email}, {'_id': true}).then(function(user) {
+        // Send verification mail
+        user.email = email;
+        sendVerificationMail(user);
+        // Send alert notifivation to client
+        utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_VERIFICATION_LINK_SENT');
+    });
+};
+
 function sendVerificationMail(user) {
+    console.log('sendVerificationMail');
     mail.sendMail(user.email,
         i18n.t('EMAIL_REGISTRATION_SUBJECT'),
         strformat(i18n.t('EMAIL_REGISTRATION_MESSAGE'), user._id.toString(), cfg.EVOCRACY_HOST)
@@ -79,11 +92,10 @@ function sendVerificationMail(user) {
 function loginUser(req, res, err, user) {
     if(user) {
         // Compare the POSTed password with the encrypted db password
-        if( bcrypt.compareSync( req.body.pass, user.pass) ) {
+        if(bcrypt.compareSync(req.body.pass, user.pass)) {
             // Check email verification
             if(!user.verified) {
-                utils.sendNotification(res, 401, "You have not verified your email-address. Verification email has been sent again. Please check your inbox.");
-                sendVerificationMail(user);
+                utils.sendAlert(res, 401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', user.email);
                 return;
             }
             
@@ -97,11 +109,15 @@ function loginUser(req, res, err, user) {
             console.log('User login valid ' + JSON.stringify(user));
         } else {
             // Username did not match password given
-            utils.sendNotification(res, 401, "Password is not correct.");
+            utils.sendAlert(res, 401, 'danger', 'USER_PASSWORT_NOT_CORRECT');
         }
     } else {
-        // Could not find the username
-        utils.sendNotification(res, 401, 'User "'+req.body.name+'" does not exist.');
+        if(req.body.name) {
+            // Could not find the username
+            utils.sendAlert(res, 401, 'danger', 'USER_ENTERED_EMAIL_NOT_EXIST', req.body.name);
+        } else {
+            utils.sendAlert(res, 401, 'danger', 'You did not enter an email address.');
+        }
     }
 }
 
@@ -119,7 +135,7 @@ exports.signup = function(req, res) {
     // check if values are valid
     if(validate(form, constraints) !== undefined) {
         // values are NOT valid
-        utils.sendNotification(res, 400, "An error occured, please check the form.");
+        utils.sendAlert(res, 400, 'danger', 'Please check the form for mistakes.');
     } else {
         // assemble user
         user = {
@@ -129,17 +145,20 @@ exports.signup = function(req, res) {
             verified: false
         };
         
-        // check if user already exist
         // url: https://www.npmjs.org/package/bcrypt-nodejs
-        db.collection('users').countAsync(_.pick(user, 'email')).then(function(count) {
-            // check if user already exists
-            if(count > 0)
-                return utils.rejectPromiseWithNotification(400, "Account already exists.");
+        db.collection('users').findOneAsync(_.pick(user, 'email'), {'verified': true}).then(function(user) {
+            // Check if user already exists and check verification status
+            if(!_.isNull(user) && user.verified)
+                return utils.rejectPromiseWithAlert(400, 'warning', 'USER_ACCOUNT_ALREADY_EXISTS');
+            else if(!_.isNull(user) && !user.verified)
+                return utils.rejectPromiseWithAlert(401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', user.email);
         }).then(function() {
+            // Add user to database
             return db.collection('users').insertAsync(user).return(user);
         }).then(function(user) {
+            // Log and send verification mail to user
             console.log('Saved user ' + JSON.stringify(user));
-            utils.sendNotification(res, 200, "To verify your email address, we\'ve sent an email to you. Please check your inbox and click the link.");
+            utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_VERIFICATION_LINK_SENT');
             sendVerificationMail(user);
         }).catch(utils.isOwnError,utils.handleOwnError(res));
     }

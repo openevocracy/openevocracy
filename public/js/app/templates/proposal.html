@@ -1,4 +1,5 @@
 <div class="btn-group pull-right" role="group">
+    {{#ifis expired 0}}
     {{#if pid}}
     <button class="btn btn-raised btn-primary btn-sm edit" title="{{i18n "Edit"}}"><span class="fa fa-pencil"></span></button>
     <!-- TODO <button class="ico del" title="delete"><span></span></button> -->
@@ -6,8 +7,8 @@
     <fieldset disabled>
         <button class="btn btn-sm disabled valid" title=""><span class="fa fa-ban"></span></button>
     </fieldset>
+    {{/ifis}}
 </div>
-<!-- TODO include in partials/views/buttons.html > buttons -->
 
 <div class="page-header">
     <h2>{{i18n "My proposal"}}</h2>
@@ -15,7 +16,8 @@
 
 <div class="row">
     <div class="col-md-8 wysiwyg">
-        {{> messages}}
+        
+        {{> alert}}
         <div id="body">{{{body}}}</div>
         <div class="editor-wrapper hidden">
             <div id="editor"></div>

@@ -16,16 +16,41 @@
 </div>
 
 <div class="page-header">
-    <h2>{{title}}</h2>
+    <h2>{{i18n "Our proposal"}}</h2>
 </div>
 
-{{> messages}}
+{{#unless body}}{{> alert}}{{/unless}}
 
-<div class="row-no-padding collab-wrap clearfix">
+<div class="collab-wrap clearfix{{#unless body}} row-no-padding active{{/unless}}">
     <div class="col-md-8">
-        <div id="editor"></div>
+        {{#if body}}
+            {{> alert}}
+            {{{body}}}
+        {{else}}
+            <div id="editor"></div>
+        {{/if}}
     </div>
     <aside class="col-md-4">
+        {{#if body}}
+        <h3>{{i18n "Navigation"}}</h3>
+        <div class="block-content tabs-block">
+            <ul  class="nav nav-pills nav-stacked">
+                <li>
+                    <a href="/#/topic/{{tid}}"><span class="fa fa-chevron-left"></span> {{i18n "Back to topic"}}</a>
+                </li>
+            </ul>
+        </div>
+        <h3>{{i18n "Contributing proposals"}}</h3>
+        <div class="block-content">
+            <ul  class="nav nav-pills nav-stacked">
+                {{#each members}}
+                <li>
+                    <a class="member-proposal-link" data-member-id="{{this._id}}"><i class="fa fa-file-text-o" aria-hidden="true"></i> {{i18n 'Proposal of'}} {{this.name}}</a>
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+        {{else}}
         <div class="choose-tool">
             <ul class="nav nav-pills">
               <li class="collab-pill active"><a href="collab-doc">{{i18n 'Status'}}</a></li>
@@ -38,5 +63,6 @@
             <div data-tool="collab-members" class="block">{{> group_members}}</div>
             <div data-tool="collab-chat" class="block">{{> group_chat}}</div>
         </div>
+        {{/if}}
     </aside>
 </div>

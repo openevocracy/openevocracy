@@ -12,9 +12,9 @@ define([
         },
         route_verified_index: function() {
             var loginView = new LoginView(
-                {model: new Backbone.Model({
-                    'message-type': 'success',
-                    'message': 'You are successfully verified!'})});
+                {model: new Backbone.Model({alert: {
+                    'type': 'success',
+                    'content': 'You are successfully verified!'}})});
             App.layout.form.show(loginView);
         }
     });

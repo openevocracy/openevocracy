@@ -170,10 +170,10 @@ exports.startPadServer = function(httpServer) {
     var io = require('socket.io')(httpServer, {
         secure: true
     });
-    io.on('connection', function(slaveSocket) {
-        slaveSocket.on('identity', function(identity) {
+    io.on('connection', function(socket) {
+        socket.on('identity', function(identity) {
             getPadDocAsync(ObjectId(identity.pid)).then(function(masterDoc) {
-                gulfIO(masterDoc, slaveSocket);
+                gulfIO(masterDoc, socket);
             });
         });
     });

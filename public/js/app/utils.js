@@ -27,9 +27,13 @@ define([
             return (i18n != undefined ? (i18n[str] != undefined ? i18n[str] : str) : str);
         },
         
-        decodeServerMessage: function(err) {
-            return this.i18n(err.message);
-            // TODO return _.format(this.i18n(err.message),err.args);
+        i18nAlert: function(err) {
+            // Translate content string
+            err.content = this.i18n(err.content);
+            // Format content string if variables exist
+            if(err.vars)
+                err.content = this.strformat(err.content, err.vars);
+            return err;
         },
         
         handleActive: function(target) {

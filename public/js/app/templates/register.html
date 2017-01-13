@@ -3,7 +3,7 @@
         <h2>{{i18n "Register"}}</h2>
     </div>
     
-    {{> messages}}
+    {{> alert}}
     
     <p class="welcome-message">{{i18n "Nice to have you with us!"}}</p>
     
@@ -11,12 +11,12 @@
     
     <fieldset>
         <div class="form-group">
-            <label for="email">{{i18n "Your email-address:"}}</label>
-            <input class="form-control" type="email" required id="email" name="email" placeholder="{{i18n 'E-mail'}}" data-parsley-trigger="change" />
+            <label class="control-label" for="email">{{i18n "Your email-address:"}}</label>
+            <input class="form-control" type="email" required id="email" name="email" placeholder="{{i18n 'E-mail'}}" value="{{email}}" data-parsley-trigger="change" />
         </div>
         
         <div class="form-group">
-            <label for="pass">{{i18n "Your password:"}}</label>
+            <label class="control-label" for="pass">{{i18n "Your password:"}}</label>
             <input class="form-control" type="password" id="pass" required name="pass" placeholder="{{i18n 'Password'}}" data-parsley-trigger="change" />
         </div>
     </fieldset>

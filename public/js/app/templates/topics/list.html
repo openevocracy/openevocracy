@@ -7,9 +7,9 @@
 </div>
 
 <div class="page-header">
-    <h2>{{title}}</h2>
+    <h2>{{i18n "Current Topics"}}</h2>
 </div>
 
-{{> messages}}
+{{#ifis lightboxOpen 0}}{{> alert}}{{/ifis}}
 
 <div id="topic-list" class="list-group"></div>

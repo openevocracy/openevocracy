@@ -1,6 +1,7 @@
 /* constant values */
 
 define({
+    HOUR : 1000*60*60,
     DAY : 1000*60*60*24,
     
     STAGE_REJECTED  : -1,

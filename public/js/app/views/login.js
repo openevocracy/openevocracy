@@ -10,10 +10,13 @@ define([
 
     var View = Marionette.CompositeView.extend({
         template: Template,
+        modelEvents: {
+            'change:alert': 'render'
+        },
         
         login: function (e) {
+            //var self = this;
             if(e) e.preventDefault();
-            console.log('login');
             App.session.login({
                 name: this.$("#name").val(),
                 pass: this.$("#pass").val()
@@ -22,8 +25,9 @@ define([
                     App.eventAggregator.trigger('App:logged_in');
                 },
                 error: function(xhr, err){
-                    $('.message').addClass("alert alert-danger").html(u.decodeServerMessage(xhr.responseJSON));
-                }
+                    this.model.set('name', this.$("#name").val());
+                    this.model.set('alert', u.i18nAlert(xhr.responseJSON.alert));
+                }.bind(this)
             });
         },
         

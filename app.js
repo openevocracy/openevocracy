@@ -106,20 +106,21 @@ app.post('/json/ratings/rate', function(req, res) { auth(req, res, ratings.rate)
 
 // authentification
 // TODO required?
-app.get("/json/auth", users.auth );
+app.get('/json/auth', users.auth);
 // POST /api/auth/login
 // @desc: logs in a user
-app.post("/json/auth/login", users.login );
+app.post('/json/auth/login', users.login);
 // creates a user
-app.post("/json/auth/signup", users.signup );
+app.post('/json/auth/signup', users.signup);
 // POST /json/auth/logout
 // @desc: logs out a user, clearing the signed cookies
-app.post("/json/auth/logout", users.logout );
+app.post('/json/auth/logout', users.logout);
 /*// POST /json/auth/remove_account
 // @desc: deletes a user
 app.post("/json/auth/remove_account", users.delete );*/
 // POST /json/auth/verifyEmail
-app.get("/json/auth/verifyEmail/:id", users.verifyEmail );
+app.get('/json/auth/verifyEmail/:id', users.verifyEmail);
+app.post('/json/auth/verification/:email', users.sendVerificationMailAgain);
 
 // ###################
 // ###   U S E R   ###

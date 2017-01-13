@@ -311,11 +311,11 @@ exports.update = function(req, res) {
     db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
         // only the owner can update the topic
         if(!topic)
-            return utils.rejectPromiseWithNotification(404, "Topic does not exist!");
+            return utils.rejectPromiseWithAlert(404, 'danger', 'Topic not found.');
         else if(!_.isEqual(topic.owner,uid))
-            return utils.rejectPromiseWithNotification(403, "Only the owner can update the topic!");
+            return utils.rejectPromiseWithAlert(403, 'danger', 'Only the author can update the topic.');
         else if(topic.stage != C.STAGE_SELECTION)
-            return utils.rejectPromiseWithNotification(403, "Topic may only be edited in selection stage!");
+            return utils.rejectPromiseWithAlert(403, 'danger', 'Topic may only be edited in selection stage.');
         
         return topic;
     }).then(function(topic) {
@@ -340,11 +340,12 @@ exports.query = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
     
     db.collection('topics').findOneAsync({ '_id': tid }).
+    then(manageTopicStateAsync).
     then(function(topic) {
         if(null == topic)
-            return utils.rejectPromiseWithNotification(404, "Topic not found.");
+            return utils.rejectPromiseWithAlert(404, 'danger', 'Topic not found.');
         else
-            return appendTopicInfoAsync(topic,uid,true);
+            return appendTopicInfoAsync(topic, uid, true);
     }).
     then(res.json.bind(res)).
     catch(utils.isOwnError,utils.handleOwnError(res));
@@ -359,7 +360,7 @@ exports.create = function(req, res) {
     
     // reject empty topic names
     if(_.isEmpty(topic.name)) {
-        utils.sendNotification(res, 400, "Empty topic name not allowed.");
+        utils.sendAlert(res, 400, 'danger', 'Topic name is empty, please name it.');
         return;
     }
     
@@ -367,7 +368,7 @@ exports.create = function(req, res) {
     db.collection('topics').countAsync({'name': topic.name}).then(function(count) {
         // topic already exists
         if(count > 0)
-            return utils.rejectPromiseWithNotification(409, "Topic already exists.");
+            return utils.rejectPromiseWithAlert(409, 'danger', 'A Topic with this name already exists.');
         
         // create topic
         topic.owner = ObjectId(req.signedCookies.uid);
@@ -397,7 +398,7 @@ exports.delete = function(req,res) {
         // only the owner can delete the topic
         // and if the selection stage has passed, nobody can
         if(!_.isEqual(topic.owner,uid) || topic.stage > C.STAGE_SELECTION)
-            return utils.rejectPromiseWithNotification(401, "Only the owner can delete the topic!");
+            return utils.rejectPromiseWithAlert(401, 'danger', 'Only the author can delete the topic.');
         
         return Promise.join(
             db.collection('topics').removeByIdAsync(tid),

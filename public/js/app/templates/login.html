@@ -3,7 +3,7 @@
         <h2>{{i18n "Login"}}</h2>
     </div>
     
-    {{> messages}}
+    {{> alert}}
     <p>{{i18n "Welcome to the OpenEvocracy project!"}}</p>
     
     <form id="login-form" data-validate="parsley">
@@ -11,7 +11,7 @@
     <fieldset>
         <div class="form-group">
             <label class="control-label" for="name">{{i18n "Your email-address:"}}</label>
-            <input class="form-control" type="text" id="name" name="name" placeholder="{{i18n 'Your id or email'}}" />
+            <input class="form-control" value="{{name}}" type="text" id="name" name="name" placeholder="{{i18n 'Your id or email'}}" />
         </div>
         <div class="form-group">
             <label class="control-label" for="pass">{{i18n "Your password:"}}</label>

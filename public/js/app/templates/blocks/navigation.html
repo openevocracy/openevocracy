@@ -3,12 +3,14 @@
 </div>
 
 <!-- TODO: show max 3, 4 or 5 groups, use "read more" like link -->
+{{#ifisnot topics.length 0}}
 <h3>{{i18n "Topics"}}</h3>
 <ul class="nav nav-pills nav-stacked nav-pills-sm">
 {{#each topics}}
     <li data-link="nav-tpc-{{this._id}}"><a href="/#/topic/{{this._id}}"><i class="fa fa-question-circle" aria-hidden="true"></i> {{this.name}}<br/><small>{{this.stageName}}{{#ifis stage ../STAGE_CONSENSUS}}, {{i18n "level"}} {{math this.level "+" 1}}{{/ifis}}</small></a></li>
 {{/each}}
 </ul>
+{{/ifisnot}}
 
 {{#if groups}}
 <!-- TODO: Popup mit Namen der members -->

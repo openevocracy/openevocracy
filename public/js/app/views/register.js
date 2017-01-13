@@ -13,11 +13,14 @@ define([
     Parsley,
     u
     ) {
-    var users = new Collection();
+    //var users = new Collection();
     
     var View = Marionette.CompositeView.extend({
         template: Template,
-        collection: users,
+        //collection: users,
+        modelEvents: {
+            'change:alert': 'render'
+        },
         
         events: {
             'click #signup': function(e) {
@@ -28,17 +31,19 @@ define([
                         pass: this.$("#pass").val()
                     }, {
                     success: function(res){
-                        $('.message').addClass("alert alert-success").html(u.decodeServerMessage(res));
+                        this.model.set('alert', u.i18nAlert(res.alert));
                         $("#signup-form").remove();
                         $("#signup").remove();
-                    },
+                    }.bind(this),
                     error: function(xhr, err){
-                        $('.message').addClass("alert alert-danger").html(u.decodeServerMessage(xhr.responseJSON));
+                        this.model.set('email', this.$("#email").val());
+                        this.model.set('alert', u.i18nAlert(xhr.responseJSON.alert));
                         e.preventDefault();
-                    }});
+                    }.bind(this)});
                 } else {
                     // Clientside validation invalid
-                    $('.message').addClass("alert alert-danger").html("Please check the form for mistakes.");
+                    this.model.set('email', this.$("#email").val());
+                    this.model.set('alert', u.i18nAlert({'type': 'danger', 'content': 'Please check the form for mistakes.'}));
                 }
             }
         },

@@ -79,8 +79,17 @@ define([
         },
         
         initialize: function() {
-            //this.model.on('change', this.render, this);
-            
+            // create timer for automatic refreshing of topic details
+            this.timer = setInterval(function() {
+                this.model.fetch();
+            }.bind(this), 10000);
+        },
+        
+        onDestroy: function() {
+            clearInterval(this.timer);
+        },
+        
+        onBeforeRender: function() {
             // Append derived model values
             this.model.updateDerivedBasic();
         },

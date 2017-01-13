@@ -25,5 +25,5 @@ define([
         }
     }
     
-    return Pad;
+    return Chat;
 });

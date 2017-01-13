@@ -17,11 +17,7 @@ define([
     ) {
     
     var ListModel = Backbone.Spark.Model.extend({
-        sparks: {
-            title: function() {
-                return u.i18n('Current Topics');
-            }
-        }
+        sparks: { lightboxOpen: false }
     });
     
     var View = Marionette.CompositeView.extend({
@@ -29,6 +25,10 @@ define([
         tagName: 'section',
         id: "topics-list",
         model: new ListModel(C),
+        
+        modelEvents: {
+            'change:alert': 'render'
+        },
         
         //viewComparator: 'stage',
         viewComparator: function(t0,t1) {
@@ -68,13 +68,18 @@ define([
                 this.$('.topic-id').val("");
                 this.$('.topic-name').val("");
                 
-                this.$(".lightbox").fadeIn(500);
+                this.$(".lightbox").fadeIn(500, function() {
+                    this.model.set('lightboxOpen', true);
+                    this.$('.topic-name').focus();
+                }.bind(this));
             },
             'click .save': function(e) {
                 if(e) e.preventDefault();
+                this.model.unset('alert');
                 this.addTopic(this.$('.topic-name').val());
             },
             'keydown .topic-name': function(e) {
+                this.model.unset('alert');
                 if(e.keyCode == 13) {
                     this.addTopic(this.$('.topic-name').val());
                     if(e) e.preventDefault();
@@ -82,6 +87,8 @@ define([
             },
             'click .cancel': function(e) {
                 if(e) e.preventDefault();
+                this.model.set('lightboxOpen', false);
+                this.model.unset('alert');
                 this.$('.lightbox').fadeOut(500);
             }
         },
@@ -101,11 +108,20 @@ define([
         },
         
         onDestroy: function() {
+            this.model.set('lightboxOpen', false);
             clearInterval(this.timer);
         },
         
         onDestroyTopic: function(topic) {
             this.collection.remove(topic);
+        },
+        
+        onRender: function() {
+            console.log(this.model.get('alert'));
+            if(this.model.get('lightboxOpen')) {
+                this.$('.lightbox').show();
+                this.$('.topic-name').focus();
+            }
         },
         
         onShow: function() {
@@ -127,8 +143,11 @@ define([
         },
         
         addTopic: function(topicName) {
-            if(topicName == null || topicName.trim() == "")
+            if(topicName == null || topicName.trim() == "") {
+                this.model.set('alert', u.i18nAlert({'type': 'danger', 'content': 'Topic name is empty, please name it.'}));
+                this.$('.topic-name').focus();
                 return;
+            }
             
             var Model = this.collection.model;
             var topic = new Model({
@@ -141,13 +160,14 @@ define([
                     topic.set(res);
                     this.collection.add(topic);
                     window.location.hash = '/topic/'+topic.id;
+                    this.model.set('lightboxOpen', false);
+                    this.$('.lightbox').fadeOut(500);
                 }.bind(this),
                 error: function(model,res) {
-                    this.$('.message').addClass('alert alert-danger').html(u.decodeServerMessage(res.responseJSON));
+                    console.log(res.responseJSON.alert);
+                    this.model.set('alert', u.i18nAlert(u.i18nAlert(res.responseJSON.alert)));
                 }.bind(this)
             });
-            
-            this.$('.lightbox').fadeOut(500);
         }
     });
     

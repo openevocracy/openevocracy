@@ -3,15 +3,13 @@ define([
     'handlebars',
     'controllers/login',
     'controllers/register',
-    'text!templates/partials/views/header.html',
-    'text!templates/partials/views/messages.html'
+    'text!templates/partials/views/alert.html'
 ], function(
     Marionette,
     Handlebars,
     Login,
     Register,
-    HeaderPartial,
-    MessagesPartials
+    AlertPartials
     ) {
 
     var login = new Login();
@@ -24,8 +22,7 @@ define([
         App.router.route('register', 'register_index', register.route_register_index.bind(register));
     };
     
-    Handlebars.registerPartial('header', HeaderPartial);
-    Handlebars.registerPartial('messages', MessagesPartials);
+    Handlebars.registerPartial('alert', AlertPartials);
     
     return Module;
 });

@@ -308,10 +308,10 @@ exports.query = function(req, res) {
             {'_id': group.ppid}, {'pid': true});
     });
     
-    // Request topics to get nextDeadline and topic name
+    // Request topic to get info
     var topic_promise = group_promise.then(function(group) {
         return db.collection('topics').findOneAsync(
-            {'_id': group.tid}, {'nextDeadline': true, 'name': true, 'level': true});
+            {'_id': group.tid}, {'nextDeadline': true, 'name': true, 'stage': true, 'level': true});
     });
     
     // Count number of groups in current level to obtain if we are in last level
@@ -401,8 +401,25 @@ exports.query = function(req, res) {
                  last_level_promise,
                  set_member_timestamp_promise).
     spread(function(group, proposal, members, topic, lastLevel) {
-        return _.extend(group, {'pid': proposal.pid, 'members': members,
-                        'nextDeadline': topic.nextDeadline, 'topicname': topic.name,
-                        'lastLevel': lastLevel});
+        
+        // flash message in client if group not editable
+        if( topic.stage != C.STAGE_CONSENSUS ||
+           (topic.stage != C.STAGE_CONSENSUS && topic.level == group.level)) {
+            
+            // append proposal body
+            group.body = pads.getPadHTMLAsync(proposal.pid);
+            
+            // flash message in client
+            group.alert.type = "info";
+            group.alert.content = "GROUP_QUERIED_NOT_ACTIVE";
+        }
+        
+        return Promise.props(_.extend(group, {
+            'pid': proposal.pid,
+            'members': members,
+            'nextDeadline': topic.nextDeadline,
+            'topicname': topic.name,
+            'lastLevel': lastLevel
+        }));
     }).then(res.json.bind(res));
 };

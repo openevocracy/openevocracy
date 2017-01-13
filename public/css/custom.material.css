@@ -115,9 +115,9 @@ footer { font-size: 0.8em; text-align: center; }
 .ql-container.ql-snow { border: none; }
 
 .parsley-error { background-color: #d9534f; opacity: 0.65; }
-.collab-wrap { background-color: #fff; color: #000; border: 1px solid #e0e0e0; }
+.collab-wrap.active { background-color: #fff; color: #000; border: 1px solid #e0e0e0; }
+.collab-wrap.active aside { margin-left: -1px; border-left: 1px solid #e0e0e0; }
 .collab-wrap .ql-container.ql-snow { border: 0; border-right: 1px solid #e0e0e0; }
-.collab-wrap aside { margin-left: -1px; border-left: 1px solid #e0e0e0; }
 .collab-wrap .choose-tool { border-bottom: 1px solid #e0e0e0; padding: 8px; }
 .collab-wrap .choose-tool .nav > li > a { padding: 2px 8px; }
 .collab-wrap .collab-tool .block { padding: 8px; display: none; }

@@ -24,10 +24,15 @@ define([
         tagName: 'section',
         className: 'content',
         id: 'collaborative',
-        viewTitle: u.i18n('Our proposal'),
+        loaded: false,
+        
         ratySettings: {
             /*half: true, FIXME: https://github.com/FortAwesome/Font-Awesome/issues/2301 */
             starOff : 'fa fa-fw fa-heart-o', starOn  : 'fa fa-fw fa-heart' },
+            
+        modelEvents: {
+            'change:body': 'render'
+        },
         
         events: {
             'click .member-title': function(e) {
@@ -63,23 +68,36 @@ define([
             }
         },
         
-        onBeforeRender: function() {
-            this.model.set('title', this.viewTitle);
+        initialize: function() {
+            // Create timer for automatic refreshing of topic details
+            if(!this.model.has('body'))
+                this.timer = setInterval(function() {
+                    // Level/Stage change depends on cronjob
+                    this.model.fetch();
+                }.bind(this), 60000);
+        },
+        
+        onDestroy: function() {
+            clearInterval(this.timer);
+        },
+
+        onRender: function() {
+            if(this.loaded)
+                this.onDOMexists();
+            
+            if(this.model.has('body'))
+                clearInterval(this.timer);
         },
         
         onShow: function() {
+            this.onDOMexists();
+            this.loaded = true;
+            
             // Set link in navigation to active
             u.setActive('nav-grp-'+this.model.get('_id'));
             
+            // Activate tooltip
             $('[data-toggle="tooltip"]').tooltip();
-            
-            Pad.onShow.bind(this)();
-            
-            // Timer in docstate block
-            var date = this.model.get('nextDeadline');
-            $(".group-time-remain").countdown(date)
-            .on('update.countdown', function(event) { $(this)
-            .html(event.strftime(u.i18n("%D days, %H:%M:%S"))); });
             
             // Create raty objects and connect them to DOM using jquery
             _.each(this.model.get('members'), function(member) {
@@ -97,6 +115,17 @@ define([
                     raty(_.extend(this.ratySettings,
                          { score: member.rating_mean, readOnly: true }));
             }.bind(this));
+        },
+        
+        onDOMexists: function() {
+            if(!this.model.has('body'))
+                Pad.onShow.bind(this)();
+            
+            // Timer in docstate block
+            var date = this.model.get('nextDeadline');
+            $(".group-time-remain").countdown(date)
+                .on('update.countdown', function(event) { $(this)
+                .html(event.strftime(u.i18n("%D days, %H:%M:%S"))); });
         },
         
         updateDocumentState: function() {

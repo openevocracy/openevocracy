@@ -15,7 +15,7 @@ exports.query = function(req, res) {
     db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
         // check if topic is at least in proposal stage
         if(topic.stage < C.STAGE_PROPOSAL)
-            return utils.rejectPromiseWithNotification(400, "Topic must be at least in proposal stage.");
+            return utils.rejectPromiseWithAlert(400, 'danger', 'Topic must be at least in proposal stage.');
         return topic;
     }).then(function(topic) {
         // get proposal or create proposal if it does not exist
@@ -28,19 +28,27 @@ exports.query = function(req, res) {
         
         return Promise.join(topic, get_proposal_promise);
     }).spread(function(topic, proposal) {
-        // create pad if not exists
-        var create_pad_promise = pads.createPadIfNotExistsAsync(proposal.pid, topic.nextDeadline);
-        
-        // get pad_body
-        var get_pad_html_promise = create_pad_promise.then(function() {
+        // Create a pad if pad does not already exist
+        return pads.createPadIfNotExistsAsync(proposal.pid, topic.nextDeadline).
+        then(function() {
+            // Get body of pad as html
             return pads.getPadHTMLAsync(proposal.pid);
+        }).then(function(body) {
+            // Extend proposal object with html body of pad and expired status
+            proposal.body = body;
+            proposal.expired = (topic.stage != C.STAGE_PROPOSAL);
+            
+            // Delete pid from proposal object if we are not in proposal stage
+            if(topic.stage != C.STAGE_PROPOSAL) {
+                delete proposal.pid;
+                
+                // flash message in client that proposal not editable
+                proposal.alert.type = "info";
+                proposal.alert.content = "PROPOSAL_QUERIED_NOT_IN_PROPOSAL_STAGE";
+            }
+            
+            return proposal;
         });
-        // pad can only be edited in proposal stage
-        if(topic.stage != C.STAGE_PROPOSAL)
-            delete proposal.pid;
-        
-        // append pad body
-        return Promise.props(_.extend(proposal,{'body': get_pad_html_promise}));
     }).then(_.bind(res.json,res))
       .catch(utils.isOwnError,utils.handleOwnError(res));
 };

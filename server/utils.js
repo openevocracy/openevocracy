@@ -3,14 +3,19 @@ var rp = require('request-promise');
 var requirejs = require('requirejs');
 var db = require('./database').db;
 
-exports.sendNotification = function(res,status,message) {
-    res.status(status).send({'status': status, 'message': message});
+function prepareAlert(type, content, vars) {
+    vars = vars || false;
+    return { 'type': type, 'content': content, 'vars': vars };
+}
+
+exports.sendAlert = function(res, status, type, content, vars) {
+    res.status(status).send({'alert': prepareAlert(type, content, vars)});
 };
-exports.rejectPromiseWithNotification = function(status,message) {
-    return Promise.reject({'status': status, 'message': message});
+exports.rejectPromiseWithAlert = function(status, type, content, vars) {
+    return Promise.reject({'status': status, 'alert': prepareAlert(type, content, vars)});
 };
 exports.isOwnError = function(error) {
-    return _.has(error,'status') && _.has(error,'message') || _.has(error,'reason');
+    return _.has(error,'status') && _.has(error,'alert') || _.has(error,'reason');
 };
 exports.handleOwnError = function(res) {
     return function(error) {

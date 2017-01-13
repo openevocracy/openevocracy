@@ -50,7 +50,7 @@ define([
                 if(__.startsWith(body, error)) {
                     self.set('body', '', {silent: true});
                     self.set('message', body, {silent: true});
-                    self.set('message-type','alert alert-danger', {silent: true});
+                    self.set('messageType','alert alert-danger', {silent: true});
                 }
             });
         },

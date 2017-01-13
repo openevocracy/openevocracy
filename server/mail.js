@@ -14,6 +14,15 @@ var cfg = requirejs('public/js/setup/configs');
 
 var transporter;
 
+function getTimeString(time) {
+    var stringHours = i18n.t('hours');
+    var stringDays = i18n.t('days');
+    if(time <= C.DAY)
+        return (Math.round(time/C.HOUR)).toString() + ' ' + stringHours;
+    else
+        return (Math.round(time/C.DAY)).toString() + ' ' + stringDays;
+}
+
 exports.initializeMail = function() {
     var smtpConfig = {
         host: 'smtp.openevocracy.org',
@@ -36,7 +45,7 @@ exports.initializeMail = function() {
 function mailHash(mailType, mailIdentifier, mailUser) {
     return crypto.createHash('sha256').
         update(mailType).update(mailIdentifier.toString()).update(mailUser.toString()).digest('hex');
-};
+}
 
 function sendMail(mailTo, mailSubject, mailText) {
     var mailOptions = {
@@ -140,12 +149,14 @@ exports.sendTopicReminderMessages = function(topic) {
             if(Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_SECOND) {
                 return sendEmailToAllTopicParticipants('EMAIL_REMINDER_PROPOSAL_SECOND',
                     topic,strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT'), topic.name),
-                    strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE'), topic.name)
+                    strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE'),
+                              topic.name, getTimeString(cfg.REMINDER_PROPOSAL_SECOND))
                 );
             } else if(Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_FIRST) {
                 return sendEmailToAllTopicParticipants('EMAIL_REMINDER_PROPOSAL_FIRST',
                     topic,strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT'), topic.name),
-                    strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE'), topic.name)
+                    strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE'),
+                              topic.name, getTimeString(cfg.REMINDER_PROPOSAL_FIRST))
                 );
             }
             break;
@@ -153,18 +164,21 @@ exports.sendTopicReminderMessages = function(topic) {
             i18n.initAsync.then(function() {
                 sendEmailToAllLazyGroupMembers('EMAIL_ALL_LAZY_GROUP_MEMBERS',
                     topic,strformat(i18n.t('EMAIL_ALL_LAZY_GROUP_MEMBERS_SUBJECT'), topic.name),
-                    strformat(i18n.t('EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE'), topic.name)
+                    strformat(i18n.t('EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE'),
+                              topic.name, getTimeString(cfg.REMINDER_GROUP_LAZY))
                 );
             });
             if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_SECOND) {
                 return sendEmailToAllActiveGroupMembers('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST',
                     topic,strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_SUBJECT'), topic.name),
-                    strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_MESSAGE'), topic.name)
+                    strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_MESSAGE'),
+                              topic.name, getTimeString(cfg.REMINDER_GROUP_SECOND))
                 );
             } else if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_FIRST) {
                 return sendEmailToAllActiveGroupMembers('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND',
                     topic,strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_SUBJECT'), topic.name),
-                    strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_MESSAGE'), topic.name)
+                    strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_MESSAGE'),
+                              topic.name, getTimeString(cfg.REMINDER_GROUP_FIRST))
                 );
             }
             break;
