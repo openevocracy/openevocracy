@@ -1,10 +1,12 @@
 define([
     'Marionette',
     'hbs!templates/login',
+    'jquery',
     '../utils'
     ], function(
     Marionette,
     Template,
+    $,
     u
     ) {
 
@@ -14,7 +16,30 @@ define([
             'change:alert': 'render'
         },
         
-        login: function (e) {
+        events: {
+            'keypress #pass': function(e) {
+                if (e.which == 13)
+                    this.login(e);
+            },
+            'click #login-btn': function(e) {
+                this.login(e);
+            },
+            'click #verify-account': function(e) {
+                e.preventDefault();
+                // Get url from href of link
+                var url = $('#verify-account').attr('href');
+                // Ajax post to send verification link
+                $.post(url).done(function(res) {
+                    // Success
+                    this.model.set('alert', u.i18nAlert(res.alert));
+                }.bind(this)).fail(function(res) {
+                    // Error
+                    this.model.set('alert', u.i18nAlert(res.responseJSON.alert));
+                }.bind(this));
+            }
+        },
+        
+        login: function(e) {
             //var self = this;
             if(e) e.preventDefault();
             App.session.login({
@@ -29,16 +54,6 @@ define([
                     this.model.set('alert', u.i18nAlert(xhr.responseJSON.alert));
                 }.bind(this)
             });
-        },
-        
-        events: {
-            'keypress #pass': function(e) {
-                if (e.which == 13)
-                    this.login(e);
-            },
-            'click #login-btn': function(e) {
-                this.login(e);
-            }
         }
     });
     

@@ -128,7 +128,7 @@ function createPadAsync(pid, expiration) {
         // Store pad object in pad collection
         return db.collection('pads').insertAsync(pad);
     });
-};
+}
 exports.createPadAsync = createPadAsync; 
 
 exports.createPadIfNotExistsAsync = function(pid, expiration) {
@@ -166,12 +166,9 @@ function getPadDocAsync(pid) {
         });
 }
 
-exports.startPadServer = function(httpServer) {
-    var io = require('socket.io')(httpServer, {
-        secure: true
-    });
+exports.startPadServer = function(io) {
     io.on('connection', function(socket) {
-        socket.on('identity', function(identity) {
+        socket.on('pad_identity', function(identity) {
             getPadDocAsync(ObjectId(identity.pid)).then(function(masterDoc) {
                 gulfIO(masterDoc, socket);
             });

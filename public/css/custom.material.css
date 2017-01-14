@@ -139,12 +139,17 @@ footer { font-size: 0.8em; text-align: center; }
 
 .wysiwyg .editor-wrapper { background-color: #fff; border: 1px solid #e0e0e0; }
 
+#chat-message { font-size: 1em; }
+#chat-message:placeholder-shown { font-size: 1em; }
+#chat-message::-webkit-input-placeholder { font-size: 1em; }
+#chat-message::-moz-placeholder { font-size: 1em; }
+#chat-message:-ms-input-placeholder { font-size: 1em; }
+
 /* ### BOOTSTRAP ADDITIONS ### */
 
+.alert a { font-weight: bold; }
 .form-group { margin-top: 5px; }
-
 .label.label-trans { background-color: transparent; }
-
 .row-no-padding > [class*="col-"] { padding-left: 0 !important; padding-right: 0 !important; }
 
 .nav-pills > li > a .label { color: inherit; }

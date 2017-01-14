@@ -5,6 +5,7 @@ define([
     'Marionette',
     'configs',
     'views/pad',
+    'views/chat',
     'hbs!templates/groups/collaborative',
     '../../utils',
     'ratyfa'
@@ -15,6 +16,7 @@ define([
     Marionette,
     conf,
     Pad,
+    Chat,
     Template,
     u
     ) {
@@ -53,13 +55,25 @@ define([
             'click .member-proposal-link': function(e) {
                 e.preventDefault();
                 // Find members
-                console.log(this.model.get('members'));
                 var member = _.findWhere(this.model.get('members'), { '_id': $(e.target).attr('data-member-id') });
                 // Set lightbox values
                 $('.proposal-of-user').html(member.proposal_body);
                 $('.name-of-user').html(member.name);
                 // Show lightbox
                 this.$(".lightbox").fadeIn(500);
+            },
+            'click #chat-send': function(e) {
+                e.preventDefault();
+                
+                var text = $('#chat-message').val();
+                if(text.trim() == "")
+                    return;
+                
+                // send message
+                var uid = _.findWhere(this.model.get('members'), {'is_me': true})._id;
+                Chat.sendText.bind(this)(uid, text);
+                // clear input field
+                $('#chat-message').val('');
             },
             'click .cancel': function(e) {
                 if(e) e.preventDefault();
@@ -115,17 +129,34 @@ define([
                     raty(_.extend(this.ratySettings,
                          { score: member.rating_mean, readOnly: true }));
             }.bind(this));
+            
+            // Set height of editor to have the size of the navigation
+            $('#editor').css("min-height", $('.navigation-content').height() - $('.ql-toolbar').outerHeight());
         },
         
         onDOMexists: function() {
-            if(!this.model.has('body'))
+            if(!this.model.has('body')) {
                 Pad.onShow.bind(this)();
+                Chat.onShow.bind(this)(this.onReceiveMessage.bind(this));
+            }
             
             // Timer in docstate block
             var date = this.model.get('nextDeadline');
             $(".group-time-remain").countdown(date)
                 .on('update.countdown', function(event) { $(this)
                 .html(event.strftime(u.i18n("%D days, %H:%M:%S"))); });
+        },
+        
+        onReceiveMessage: function(msg) {
+            var el = '';
+            if(msg.text) {
+                var name = _.findWhere(this.model.get('members'), {'_id': msg.uid}).name;
+                el = '<div class="msg-text"><strong class="user-name">'+ name + '</strong>: ' + msg.text + '</div>';
+            } else if(msg.info)
+                el = '<span class="msg-info">' + msg.info + '</span>';
+            
+            // append element to DOM
+            $('#chat-messages').prepend(el);
         },
         
         updateDocumentState: function() {

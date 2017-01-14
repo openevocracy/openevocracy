@@ -73,11 +73,15 @@ exports.sendVerificationMailAgain = function(req, res) {
     // Get email from query and user id from database
     var email = req.params.email;
     db.collection('users').findOneAsync({'email': email}, {'_id': true}).then(function(user) {
-        // Send verification mail
-        user.email = email;
-        sendVerificationMail(user);
-        // Send alert notifivation to client
-        utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_VERIFICATION_LINK_SENT');
+        if(!_.isNull(user)) {
+            // Send verification mail
+            user.email = email;
+            sendVerificationMail(user);
+            // Send alert notifivation to client
+            utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_VERIFICATION_LINK_SENT');
+        } else {
+            utils.sendAlert(res, 404, 'danger', 'USER_ACCOUNT_DOES_NOT_EXIST');
+        }
     });
 };
 

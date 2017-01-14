@@ -75,10 +75,12 @@ function storeGroupAsync(gid, topic, level, members) {
         'source': gid, 'pid': pid});
     
     // create group itself
+    var crid = ObjectId();
     var create_group_promise =
     db.collection('groups').insertAsync({
         '_id': gid, 'tid': topic._id,
-        'ppid': ppid, 'level': level});
+        'ppid': ppid, 'crid': crid,
+        'level': level});
     
     // insert group members
     var insert_members_promise =

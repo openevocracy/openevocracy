@@ -14,7 +14,7 @@ define([
             var loginView = new LoginView(
                 {model: new Backbone.Model({alert: {
                     'type': 'success',
-                    'content': 'You are successfully verified!'}})});
+                    'content': 'You are successfully verified.'}})});
             App.layout.form.show(loginView);
         }
     });

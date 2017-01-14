@@ -18,6 +18,7 @@ var cookieParser = require('cookie-parser');
 //var cookieSession = require('cookie-session');
 var utils = require('./server/utils');
 var pads = require('./server/pads');
+var chats = require('./server/chats');
 var CronJob = require('cron').CronJob;
 
 var db = require('./server/database').db;
@@ -147,4 +148,7 @@ var httpServer = http.createServer(app);
 httpServer.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
-var padServer = pads.startPadServer(httpServer);
+
+var io = require('socket.io')(httpServer, {secure: true});
+var padServer = pads.startPadServer(io);
+var chatServer = chats.startChatServer(io);
