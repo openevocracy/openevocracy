@@ -117,7 +117,6 @@ define([
         },
         
         onRender: function() {
-            console.log(this.model.get('alert'));
             if(this.model.get('lightboxOpen')) {
                 this.$('.lightbox').show();
                 this.$('.topic-name').focus();

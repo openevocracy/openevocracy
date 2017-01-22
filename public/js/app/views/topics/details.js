@@ -78,17 +78,6 @@ define([
             }
         },
         
-        initialize: function() {
-            // create timer for automatic refreshing of topic details
-            this.timer = setInterval(function() {
-                this.model.fetch();
-            }.bind(this), 10000);
-        },
-        
-        onDestroy: function() {
-            clearInterval(this.timer);
-        },
-        
         onBeforeRender: function() {
             // Append derived model values
             this.model.updateDerivedBasic();
@@ -115,7 +104,10 @@ define([
             var date = this.model.get('nextDeadline');
             $('#timeremaining').countdown(date, function(event) {
                 $(this).html(event.strftime(u.i18n('%D days, %H:%M:%S')));
-            });
+            }).on('finish.countdown', function(event) {
+                // Update model if timer has finished
+                this.model.fetch();
+            }.bind(this));
         },
         
         updateDocumentState: function() {

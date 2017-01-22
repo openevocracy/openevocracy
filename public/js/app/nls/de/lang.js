@@ -121,20 +121,25 @@ define({
     "Proposal requirements fulfilled": "Anforderungen an den Vorschlag wurden erfüllt",
     "proposal requirements not fulfilled, {0} more words required": "Anforderungen an den Vorschlag wurden nicht erfüllt, {0} weitere Worte erforderlich",
     
-    /* Alerts */
-    "USER_ENTERED_EMAIL_NOT_EXIST": "Zu der eingegebenen E-Mail-Adresse &raquo;{0}&laquo; gibt es kein Benutzerkonto. Hast du dich vertippt?",
-    "You did not enter an email address.": "Du hast keine E-Mail-Adresse eingegeben.",
-    "USER_PASSWORT_NOT_CORRECT": "Das Passwort ist nicht korrekt.",
-    "USER_ACCOUNT_NOT_VERIFIED": 'Du hast deine E-Mail-Adresse noch nicht bestätigt. Lass dir die <a id="verify-account" href="/json/auth/verification/{0}">E-Mail zur Verifizierung noch einmal senden</a>.',
-    "Please check the form for mistakes.": "Das Formular enthält Fehler, bitte prüfe das nochmal.",
-    "USER_ACCOUNT_ALREADY_EXISTS": "Der Account existiert bereits, logge dich ein.",
-    "USER_ACCOUNT_VERIFICATION_LINK_SENT": "Zur Verifizeirung deiner E-Mail-Adresse haben wir dir eine E-Mail gesendet. Schau in deinem Posteingang nach und klick auf den enthaltenen Link.",
-    "Topic name is empty, please name it.": "Der Topic Name ist leer, bitte vergib einen Namen.",
-    "A Topic with this name already exists.": "Eine Topic mit diesem Namen existiert bereits.",
-    "Topic not found.": "Diese Topic konnte nicht gefunden werden.",
-    "Only the author can update the topic.": "Nur der Autor der Topic hat das Recht diese zu bearbeiten.",
-    "Only the author can delete the topic.": "Nur der Autor der Topuc hat das Recht diese zu löschen.",
-    "Topic may only be edited in selection stage.": "Die Topic darf nur in der Selektionsphase editiert werden.",
-    "Topic must be at least in proposal stage.": "Die Topic muss sich mindestens in der Vorschlagphase befinden.",
-    'USER_ACCOUNT_DOES_NOT_EXIST': 'Das Benutzerkonto existiert nicht, bitte registrieren.'
+    '{0} entered the chat room.': '{0} ist dem Chatroom beigetreten.',
+    '{0} left the chat room.': '{0} hat den Chatroom verlassen.',
+    
+    /* *** Alerts *** */
+    
+    'USER_PASSWORT_NOT_CORRECT': 'Das Passwort ist nicht korrekt.',
+    'USER_FORM_EMAIL_MISSING': 'Du hast keine E-Mail-Adresse eingegeben.',
+    'USER_FORM_VALIDATION_ERROR': 'Das Formular enthält Fehler, bitte prüfe das nochmal.',
+    'USER_ACCOUNT_EMAIL_NOT_EXIST': 'Zu der eingegebenen E-Mail-Adresse &raquo;{0}&laquo; gibt es kein Benutzerkonto. Hast du dich vertippt?',
+    'USER_ACCOUNT_NOT_VERIFIED': 'Du hast deine E-Mail-Adresse noch nicht bestätigt. Lass dir die <a id="verify-account" href="/json/auth/verification/{0}">E-Mail zur Verifizierung noch einmal senden</a>.',
+    'USER_ACCOUNT_ALREADY_EXISTS': 'Der Account existiert bereits, logge dich ein.',
+    'USER_ACCOUNT_VERIFICATION_LINK_SENT': 'Zur Verifizeirung deiner E-Mail-Adresse haben wir dir eine E-Mail gesendet. Schau in deinem Posteingang nach und klick auf den enthaltenen Link.',
+    'USER_ACCOUNT_DOES_NOT_EXIST': 'Das Benutzerkonto existiert nicht, bitte registrieren.',
+    
+    'TOPIC_NOT_FOUND': 'Diese Topic konnte nicht gefunden werden.',
+    'TOPIC_NOT_AUTHORISIZED_FOR_UPDATE': 'Nur der Autor der Topic hat das Recht diese zu bearbeiten.',
+    'TOPIC_NOT_AUTHORISIZED_FOR_DELETION': 'Nur der Autor der Topuc hat das Recht diese zu löschen.',
+    'TOPIC_UPDATE_ONLY_IN_SELECTION_STAGE': 'Die Topic darf nur in der Selektionsphase editiert werden.',
+    'TOPIC_NAME_EMPTY': 'Der Topic Name ist leer, bitte vergib einen Namen.',
+    'TOPIC_NAME_ALREADY_EXISTS': 'Eine Topic mit diesem Namen existiert bereits.',
+    'TOPIC_REQUIREMENT_PROPOSAL_STAGE': 'Die Topic muss sich mindestens in der Vorschlagphase befinden.'
 });

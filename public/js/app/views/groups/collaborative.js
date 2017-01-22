@@ -1,8 +1,10 @@
 define([
     'jquery',
-    'constants',
     'underscore',
     'Marionette',
+    //'Embed',
+    'strftime',
+    'constants',
     'configs',
     'views/pad',
     'views/chat',
@@ -11,9 +13,11 @@ define([
     'ratyfa'
 ], function(
     $,
-    C,
     _,
     Marionette,
+    //Embed,
+    dateformat,
+    C,
     conf,
     Pad,
     Chat,
@@ -62,18 +66,15 @@ define([
                 // Show lightbox
                 this.$(".lightbox").fadeIn(500);
             },
+            'keydown #chat-message': function(e) {
+                if(e.keyCode == 13) {
+                    this.sendMessage();
+                    if(e) e.preventDefault();
+                }
+            },
             'click #chat-send': function(e) {
                 e.preventDefault();
-                
-                var text = $('#chat-message').val();
-                if(text.trim() == "")
-                    return;
-                
-                // send message
-                var uid = _.findWhere(this.model.get('members'), {'is_me': true})._id;
-                Chat.sendText.bind(this)(uid, text);
-                // clear input field
-                $('#chat-message').val('');
+                this.sendMessage();
             },
             'click .cancel': function(e) {
                 if(e) e.preventDefault();
@@ -93,6 +94,7 @@ define([
         
         onDestroy: function() {
             clearInterval(this.timer);
+            Chat.remove.bind(this)();
         },
 
         onRender: function() {
@@ -131,13 +133,19 @@ define([
             }.bind(this));
             
             // Set height of editor to have the size of the navigation
-            $('#editor').css("min-height", $('.navigation-content').height() - $('.ql-toolbar').outerHeight());
+            $('#editor').css('min-height', $('.navigation-content').height() - $('.ql-toolbar').outerHeight());
+            $('#chat-messages').css('max-height', $('#editor').height());
         },
         
         onDOMexists: function() {
             if(!this.model.has('body')) {
+                var messageCallback = this.onReceiveMessage.bind(this);
+                var onlineCallback  = this.onNotifyOnline.bind(this);
+                var uid   = App.session.user.get('_id');
+                var uname = _.findWhere(this.model.get('members'), { '_id': uid }).name;
+                
                 Pad.onShow.bind(this)();
-                Chat.onShow.bind(this)(this.onReceiveMessage.bind(this));
+                Chat.onShow.bind(this)(messageCallback, onlineCallback, uid, uname);
             }
             
             // Timer in docstate block
@@ -147,16 +155,63 @@ define([
                 .html(event.strftime(u.i18n("%D days, %H:%M:%S"))); });
         },
         
+        sendMessage: function() {
+            var text = $('#chat-message').val();
+            if(text.trim() == "")
+                return;
+            
+            // send message
+            Chat.sendText.bind(this)(text);
+            // clear input field
+            $('#chat-message').val('');
+        },
+        
         onReceiveMessage: function(msg) {
+            var me_id = App.session.user.get('_id');
+            
             var el = '';
-            if(msg.text) {
-                var name = _.findWhere(this.model.get('members'), {'_id': msg.uid}).name;
-                el = '<div class="msg-text"><strong class="user-name">'+ name + '</strong>: ' + msg.text + '</div>';
-            } else if(msg.info)
-                el = '<span class="msg-info">' + msg.info + '</span>';
+            if(!_.isUndefined(msg.text)) {
+                var user = _.findWhere(this.model.get('members'), {'_id': msg.uid});
+                var me_class = (msg.uid == me_id) ? ' msg-me' : '';
+                var el_head = '<span class="msg-date">'+ dateformat('%d.%m., %H:%M:%S', new Date(u.getTimestamp(msg._id))) +'</span><span class="msg-sender"><strong class="user-name"><span class="user-color" style="background-color: '+ user.color +';"></span>'+ user.name + '</strong></span>';
+                var el_body = '<span id="'+ msg._id +'" class="msg-text">' + msg.text + '</span>';
+                el = '<div class="msg-wrap'+ me_class +'">'+ el_head + el_body +'</div>';
+            } else if(!_.isUndefined(msg.info))
+                el = '<div class="msg-info"><span>'+ u.strformat(u.i18n(msg.info), msg.arg) +'</span></div>';
             
             // append element to DOM
             $('#chat-messages').prepend(el);
+            
+            // Emoji magic
+            /*if(!_.isUndefined(msg.text)) {
+                // EmbedJS magic
+                var embed = new Embed({
+                    input : document.getElementById(msg._id),
+                    link: true,
+                    emoji: true,
+                    fontIcons: false
+                });
+                embed.render();
+                //?embed.destroy();
+            }*/
+        },
+        
+        onNotifyOnline: function(users) {
+            var me_id = App.session.user.get('_id');
+            
+            // make array unique and remove own user
+            var other_users = _.without(_.uniq(users), me_id);
+            
+            // if there is any user except own, add to model
+            if(!_.isEmpty(other_users)) {
+                var members = this.model.get('members');
+                // filter members
+                var online_members = _.filter(members, function(member) {
+                    return _.contains(other_users, member._id);
+                });
+                // save online members to model
+                this.model.set('online', online_members);
+            }
         },
         
         updateDocumentState: function() {

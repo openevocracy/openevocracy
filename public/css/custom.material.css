@@ -10,6 +10,8 @@ small { font-size: 11px; }
 .table a { display: block; }
 .table th { cursor: default; }
 
+label { font-weight: 300; font-size: 1em; color: inherit; line-height: 1em; }
+
 #proposal .valid { color: #ff0000; cursor: default; }
 #proposal .valid.accepted { color: #00ff00; }
 
@@ -99,20 +101,20 @@ footer { font-size: 0.8em; text-align: center; }
 /* ### GROUPS ### */
 
 #members table a { text-decoration: none; }
-.user-color {
-    display: inline-block;
-    height: 1em;
-    width: 1em;
-    margin-right: 0.35em;
-    border: 1px solid #ebebeb;
-}
 
-/* ### MISC ### */
+/* ### GROUP COLLABORATIVE ### */
+
+.user-color { display: inline-block; height: 1em; width: 1em; margin-right: 0.35em; margin-bottom: -1px; border: 1px solid #ebebeb; }
+
+/* Quill Editor */
+
+.wysiwyg .editor-wrapper { background-color: #fff; border: 1px solid #e0e0e0; }
 
 #editor { height: 400px; }
-
 .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #e0e0e0; }
 .ql-container.ql-snow { border: none; }
+
+/* Tabs */
 
 .parsley-error { background-color: #d9534f; opacity: 0.65; }
 .collab-wrap.active { background-color: #fff; color: #000; border: 1px solid #e0e0e0; }
@@ -123,6 +125,9 @@ footer { font-size: 0.8em; text-align: center; }
 .collab-wrap .collab-tool .block { padding: 8px; display: none; }
 .collab-wrap .collab-tool .block.active { display: block; }
 .collab-wrap .collab-tool p.small { margin-top: 10px; padding: 5px; color: #9e9e9e; }
+
+/* Members Tab */
+
 .collab-wrap .member-details { background-color: #f9f9f9; margin-bottom: 5px; }
 .collab-wrap .member-ratings { padding: 10px 5px 0 5px; margin: 0; }
 .collab-wrap .member-ratings li { padding: 5px 0; }
@@ -137,13 +142,22 @@ footer { font-size: 0.8em; text-align: center; }
 .collab-wrap h3 { margin-top: 5px !important; }
 .collab-wrap .chat .send { padding: 6px 9px; }
 
-.wysiwyg .editor-wrapper { background-color: #fff; border: 1px solid #e0e0e0; }
+/* Chat */
 
 #chat-message { font-size: 1em; }
 #chat-message:placeholder-shown { font-size: 1em; }
 #chat-message::-webkit-input-placeholder { font-size: 1em; }
 #chat-message::-moz-placeholder { font-size: 1em; }
 #chat-message:-ms-input-placeholder { font-size: 1em; }
+
+#chat-messages { overflow-y: scroll; }
+.chat .msg-wrap { background-color: #f9f9f9; margin-bottom: 3px; padding: 8px 5px; }
+.chat .msg-me { background-color: #f9fbe7; }
+.chat .msg-sender { display: block; margin-bottom: 3px; }
+.chat .msg-sender strong { font-weight: 600; font-size: 0.9em; color: #455a64; }
+.chat .msg-date { float: right; font-size: 0.9em; color: #90a4ae; }
+.chat .msg-info { background-color: #00bcd4; color: #fff; padding: 8px 5px; margin-bottom: 3px; }
+.chat .user-color { height: 0.9em; width: 0.9em; margin-right: 0.1em; }
 
 /* ### BOOTSTRAP ADDITIONS ### */
 

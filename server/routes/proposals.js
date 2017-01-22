@@ -13,13 +13,13 @@ exports.query = function(req, res) {
     var uid = ObjectId(req.signedCookies.uid);
 
     db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
-        // check if topic is at least in proposal stage
+        // Check if topic is at least in proposal stage to show proposal
         if(topic.stage < C.STAGE_PROPOSAL)
-            return utils.rejectPromiseWithAlert(400, 'danger', 'Topic must be at least in proposal stage.');
+            return utils.rejectPromiseWithAlert(400, 'danger', 'TOPIC_REQUIREMENT_PROPOSAL_STAGE');
         return topic;
     }).then(function(topic) {
-        // get proposal or create proposal if it does not exist
-        // from http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
+        // Get proposal or create proposal if it does not exist
+        // From http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
         var get_proposal_promise =
         db.collection('proposals').findAndModifyAsync(
             { 'tid':tid, 'source':uid },[],
@@ -43,8 +43,7 @@ exports.query = function(req, res) {
                 delete proposal.pid;
                 
                 // flash message in client that proposal not editable
-                proposal.alert.type = "info";
-                proposal.alert.content = "PROPOSAL_QUERIED_NOT_IN_PROPOSAL_STAGE";
+                proposal.alert = {type: 'info', content: 'PROPOSAL_QUERIED_NOT_IN_PROPOSAL_STAGE'};
             }
             
             return proposal;

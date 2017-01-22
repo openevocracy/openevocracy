@@ -31,7 +31,9 @@
       configs: '../setup/configs',
       //quill: '//cdn.quilljs.com/1.0.0-beta.3/quill',
       quill: '//cdn.quilljs.com/1.0.6/quill.min',
-      socketio: '//cdn.socket.io/socket.io-1.4.5'
+      socketio: '//cdn.socket.io/socket.io-1.4.5',
+      strftime: '../vendor/strftime.min',
+      Embed: '../vendor/embed.min'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for
@@ -80,7 +82,13 @@
       },
       material : {
         deps: ['bootstrap']
-      }
+      },
+      strftime : {
+          exports: 'strftime'
+      }/*,
+      Embed: {
+          exports: 'Embed'
+      }*/
     },
     hbs: {
       templateExtension: '.html',

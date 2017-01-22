@@ -118,9 +118,9 @@ function loginUser(req, res, err, user) {
     } else {
         if(req.body.name) {
             // Could not find the username
-            utils.sendAlert(res, 401, 'danger', 'USER_ENTERED_EMAIL_NOT_EXIST', req.body.name);
+            utils.sendAlert(res, 401, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', req.body.name);
         } else {
-            utils.sendAlert(res, 401, 'danger', 'You did not enter an email address.');
+            utils.sendAlert(res, 401, 'danger', 'USER_FORM_EMAIL_MISSING');
         }
     }
 }
@@ -139,7 +139,7 @@ exports.signup = function(req, res) {
     // check if values are valid
     if(validate(form, constraints) !== undefined) {
         // values are NOT valid
-        utils.sendAlert(res, 400, 'danger', 'Please check the form for mistakes.');
+        utils.sendAlert(res, 400, 'danger', 'USER_FORM_VALIDATION_ERROR');
     } else {
         // assemble user
         user = {

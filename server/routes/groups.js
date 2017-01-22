@@ -412,8 +412,7 @@ exports.query = function(req, res) {
             group.body = pads.getPadHTMLAsync(proposal.pid);
             
             // flash message in client
-            group.alert.type = "info";
-            group.alert.content = "GROUP_QUERIED_NOT_ACTIVE";
+            group.alert = {type: "info", content: "GROUP_QUERIED_NOT_ACTIVE"};
         }
         
         return Promise.props(_.extend(group, {
