@@ -2,7 +2,7 @@ define([
     'jquery',
     'underscore',
     'Marionette',
-    //'Embed',
+    'emojify',
     'strftime',
     'constants',
     'configs',
@@ -15,7 +15,7 @@ define([
     $,
     _,
     Marionette,
-    //Embed,
+    emojify,
     dateformat,
     C,
     conf,
@@ -84,6 +84,20 @@ define([
         },
         
         initialize: function() {
+            // Init emojify
+            emojify.setConfig({
+                emojify_tag_type : 'span',          // Only run emojify.js on this element
+                only_crawl_id    : null,            // Use to restrict where emojify.js applies
+                img_dir          : 'https://mind-about-sagacitysite.c9.io/img/emojify/basic',  // Directory for emoji images
+                ignored_tags     : {                // Ignore the following tags
+                    'SCRIPT'  : 1,
+                    'TEXTAREA': 1,
+                    'A'       : 1,
+                    'PRE'     : 1,
+                    'CODE'    : 1
+                }
+            });
+            
             // Create timer for automatic refreshing of topic details
             if(!this.model.has('body'))
                 this.timer = setInterval(function() {
@@ -138,6 +152,7 @@ define([
         },
         
         onDOMexists: function() {
+            // check if body-text exists instead of editor (group has finished)
             if(!this.model.has('body')) {
                 var messageCallback = this.onReceiveMessage.bind(this);
                 var onlineCallback  = this.onNotifyOnline.bind(this);
@@ -171,8 +186,9 @@ define([
             
             var el = '';
             if(!_.isUndefined(msg.text)) {
-                var user = _.findWhere(this.model.get('members'), {'_id': msg.uid});
+                msg.text = u.replaceUrl(msg.text);
                 var me_class = (msg.uid == me_id) ? ' msg-me' : '';
+                var user = _.findWhere(this.model.get('members'), {'_id': msg.uid});
                 var el_head = '<span class="msg-date">'+ dateformat('%d.%m., %H:%M:%S', new Date(u.getTimestamp(msg._id))) +'</span><span class="msg-sender"><strong class="user-name"><span class="user-color" style="background-color: '+ user.color +';"></span>'+ user.name + '</strong></span>';
                 var el_body = '<span id="'+ msg._id +'" class="msg-text">' + msg.text + '</span>';
                 el = '<div class="msg-wrap'+ me_class +'">'+ el_head + el_body +'</div>';
@@ -183,17 +199,9 @@ define([
             $('#chat-messages').prepend(el);
             
             // Emoji magic
-            /*if(!_.isUndefined(msg.text)) {
-                // EmbedJS magic
-                var embed = new Embed({
-                    input : document.getElementById(msg._id),
-                    link: true,
-                    emoji: true,
-                    fontIcons: false
-                });
-                embed.render();
-                //?embed.destroy();
-            }*/
+            if(!_.isUndefined(msg.text)) {
+                emojify.run(document.getElementById(msg._id));
+            }
         },
         
         onNotifyOnline: function(users) {
@@ -202,16 +210,26 @@ define([
             // make array unique and remove own user
             var other_users = _.without(_.uniq(users), me_id);
             
+            // empty html tag
+            var $el = $('.users-online').empty();
+            
+            // if there is just you, show message
+            if(_.isEmpty(other_users)) {
+                $el.html('<span>'+ u.i18n('Currently, no one seems to be here.') +'</span>');
             // if there is any user except own, add to model
-            if(!_.isEmpty(other_users)) {
+            } else {
                 var members = this.model.get('members');
                 // filter members
-                var online_members = _.filter(members, function(member) {
-                    return _.contains(other_users, member._id);
+                var strHtml = '<i class="fa fa-podcast" aria-hidden="true" title="'+ u.i18n('Currently online') +'"></i>';
+                _.each(members, function(member) {
+                    if(!_.contains(other_users, member._id))
+                        return;
+                    
+                    strHtml += '<span class="user-online"><span class="user-color" style="background-color: '+ member.color +';"></span>'+ member.name +'</span>';
                 });
-                // save online members to model
-                this.model.set('online', online_members);
+                $el.html(strHtml);
             }
+            
         },
         
         updateDocumentState: function() {

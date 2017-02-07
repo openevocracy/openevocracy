@@ -150,7 +150,7 @@ footer { font-size: 0.8em; text-align: center; }
 #chat-message::-moz-placeholder { font-size: 1em; }
 #chat-message:-ms-input-placeholder { font-size: 1em; }
 
-#chat-messages { overflow-y: scroll; }
+#chat-messages { overflow-y: auto; }
 .chat .msg-wrap { background-color: #f9f9f9; margin-bottom: 3px; padding: 8px 5px; }
 .chat .msg-me { background-color: #f9fbe7; }
 .chat .msg-sender { display: block; margin-bottom: 3px; }

@@ -1,14 +1,5 @@
 <div class="chat">
-    <div class="users-online">
-    {{#if online}}
-        <strong>Online:</strong>
-        {{#each online}}
-            <span class="user-online"><span class="user-color" style="background-color: {{this.color}};"></span>{{this.name}}</span>
-        {{/each}}
-    {{else}}
-        <span>{{i18n "Currently, no one seems to be here."}}</span>
-    {{/if}}
-    </div>
+    <div class="users-online"></div>
     <div class="form-group label-floating">
         <div class="input-group">
             <input id="chat-message" type="text" class="form-control" placeholder="{{i18n 'Start chatting ...'}}">

@@ -83,12 +83,14 @@ function gulfIO(masterDoc, slaveSocket) {
     };
     slaveDoc._collectChanges = function(cb) {
         cb();
-    }
+    };
 
     slaveSocket.on('disconnect', function() {
         console.log('disconnect');
         // remove link from master doc
         masterDoc.links.splice(masterDoc.links.indexOf(slaveToMasterLink), 1);
+        // remove link to master doc
+        slaveDoc.master = [];
     });
 }
 

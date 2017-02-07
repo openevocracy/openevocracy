@@ -99,6 +99,10 @@ define([
                 var val = this.getProperty(args, n);
                 return (typeof val === 'undefined') ? m : val;
             }.bind(this));
+        },
+        
+        replaceUrl: function(str) {
+            return str.replace(/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i, '<a href="$&" target="_blank">$&</a>');
         }
     };
 

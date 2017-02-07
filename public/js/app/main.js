@@ -33,7 +33,8 @@
       quill: '//cdn.quilljs.com/1.0.6/quill.min',
       socketio: '//cdn.socket.io/socket.io-1.4.5',
       strftime: '../vendor/strftime.min',
-      Embed: '../vendor/embed.min'
+      //Embed: '../vendor/embed.min',
+      emojify: '//cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/js/emojify.min'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for
@@ -85,10 +86,13 @@
       },
       strftime : {
           exports: 'strftime'
-      }/*,
-      Embed: {
+      },
+      /*Embed: {
           exports: 'Embed'
-      }*/
+      },*/
+      emojify: {
+          exports: 'emojify'
+      }
     },
     hbs: {
       templateExtension: '.html',
