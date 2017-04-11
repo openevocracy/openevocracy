@@ -2,8 +2,8 @@ var _ = require('underscore');
 var $ = require('jquery');
 var requirejs = require('requirejs');
 var gulf = require('gulf');
-var mongoose = require('mongoose');
-var MongoDBAdapter = require('gulf-mongodb');
+//var MongoDBAdapter = require('gulf-mongodb');
+var MongoskinAdapter = require('gulf-mongoskin');
 var richText = require('rich-text');
 var ottype = richText.type;
 var Delta = richText.Delta;
@@ -39,7 +39,12 @@ var starttext = {
 // masterDoc -> slaveLink <-> masterLink <- slaveDoc <-> quill
 function gulfIO(masterDoc, slaveSocket) {
     // create slaveDoc and slaveToMasterLink
-    var slaveDoc = new gulf.EditableDocument(new gulf.MemoryAdapter, ottype);
+    var slaveDoc = new gulf.EditableDocument({
+        storageAdapter: new gulf.MemoryAdapter(),
+        ottype: ottype
+    });
+    slaveDoc.initializeFromStorage();
+    
     var slaveToMasterLink = slaveDoc.masterLink();
 
     // masterDoc -> slaveLink <-> masterLink <- slaveDoc
@@ -64,68 +69,53 @@ function gulfIO(masterDoc, slaveSocket) {
             // who can write, etc...
             
             console.log('slaveToMasterChange', slaveToMasterChange);
-            slaveDoc.update(new Delta(slaveToMasterChange));
+            //slaveDoc.update(new Delta(slaveToMasterChange));
+            slaveDoc.submitChange(slaveToMasterChange);
         });
     }
 
     // slaveDoc -> quill
-    slaveDoc._setContents = function(contents, cb) {
+    slaveDoc._setContent = function(contents) {
         console.log('setContents', JSON.stringify(contents));
         slaveSocket.emit('setContents', contents);
-
-        cb();
     };
-    slaveDoc._change = function(masterToSlaveChange, cb) {
+    slaveDoc._onChange = function(masterToSlaveChange) {
         console.log('masterToSlaveChange', JSON.stringify(masterToSlaveChange));
         slaveSocket.emit('change', masterToSlaveChange);
-
-        cb();
     };
-    slaveDoc._collectChanges = function(cb) {
+    /*slaveDoc._collectChanges = function(cb) {
         cb();
-    };
+    };*/
 
     slaveSocket.on('disconnect', function() {
         console.log('disconnect');
-        // remove link from master doc
-        masterDoc.links.splice(masterDoc.links.indexOf(slaveToMasterLink), 1);
-        // remove link to master doc
-        slaveDoc.master = [];
+        slaveDoc.close();
     });
 }
 
-/*var adapter = new gulf.MemoryAdapter();
-var padIdToDocMap = {};
-function getPadDocAsync(pid) {
-  // check if document is in map first
-  var doc = padIdToDocMap[pid];
-  if(!_.isUndefined(doc))
-    return Promise.resolve(doc);
-  
-  return gulf.Document.createAsync(adapter, ottype, starttext).
-  then(function(doc) {
-    padIdToDocMap[pid] = doc;
-    return Promise.resolve(doc);
-  });
-}*/
-
-var dbConnection = mongoose.createConnection('mongodb://' + process.env.IP + '/mindabout');
-var adapter = new MongoDBAdapter(dbConnection);
 var padIdToDocMap = {};
 var docIdToPadMap = {};
 
 function createPadAsync(pid, expiration) {
-    return gulf.Document.createAsync(adapter, ottype, starttext).then(function(doc) {
+    var adapter = new MongoskinAdapter(db, ObjectId());
+    var masterDoc = new gulf.Document({
+        storageAdapter: adapter,
+        ottype: ottype
+    });
+    //adapter.docId = doc.id;
+    masterDoc.id = adapter.docId;
+    
+    return masterDoc.initializeFromStorage(starttext).then(function() {
         // Create pad object
         var pad = {
             '_id': pid,
-            'did': doc.id,
+            'did': masterDoc.id,
             'expiration': expiration
         };
         
         // Set values to maps (cache)
-        padIdToDocMap[pid] = doc;
-        docIdToPadMap[doc.id] = pad;
+        padIdToDocMap[pid] = masterDoc; // TODO Reset
+        docIdToPadMap[masterDoc.id] = pad;
         
         // Store pad object in pad collection
         return db.collection('pads').insertAsync(pad);
@@ -149,9 +139,9 @@ exports.updatePadExpirationAsync = function(pid, expiration) {
 
 function getPadDocAsync(pid) {
     // check if document is in map first
-    var doc = padIdToDocMap[pid];
-    if (!_.isUndefined(doc))
-        return Promise.resolve(doc);
+    var masterDoc = padIdToDocMap[pid];
+    if (!_.isUndefined(masterDoc))
+        return Promise.resolve(masterDoc);
 
     // if not in map, load or handle error
     return db.collection('pads').
@@ -159,10 +149,17 @@ function getPadDocAsync(pid) {
             if (_.isNull(pad))
                 return Promise.reject({reason: 'PAD_DOES_NOT_EXIST'});
             else {
-                return gulf.Document.loadAsync(adapter, ottype, pad.did).then(function(doc) {
-                    padIdToDocMap[pid] = doc;
-                    docIdToPadMap[doc.id] = pad;
-                    return Promise.resolve(doc);
+                var adapter = new MongoskinAdapter(db, pad.did);
+                var masterDoc = new gulf.Document({
+                    storageAdapter: adapter,
+                    ottype: ottype
+                });
+                
+                masterDoc.id = pad.did;
+                return masterDoc.initializeFromStorage().then(function() {
+                    padIdToDocMap[pid] = masterDoc; // Reset
+                    docIdToPadMap[masterDoc.id] = pad;
+                    return Promise.resolve(masterDoc);
                 });
             }
         });

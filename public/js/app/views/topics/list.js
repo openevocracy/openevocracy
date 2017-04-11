@@ -158,7 +158,7 @@ define([
                 success: function(model,res) {
                     topic.set(res);
                     this.collection.add(topic);
-                    window.location.hash = '/topic/'+topic.id;
+                    //window.location.hash = '/topic/'+topic.id;
                     this.model.set('lightboxOpen', false);
                     this.$('.lightbox').fadeOut(500);
                 }.bind(this),

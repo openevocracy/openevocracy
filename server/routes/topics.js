@@ -379,7 +379,7 @@ exports.create = function(req, res) {
         var createTopicPromise = db.collection('topics').insertAsync(topic);
         
         // create pad
-        var createPadPromise = pads.createPadAsync(topic.pid);
+        var createPadPromise = pads.createPadAsync(topic.pid, topic.nextDeadline);
         
         return Promise.join(createTopicPromise, createPadPromise).return(topic);
     }).then(function(topics) {
