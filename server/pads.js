@@ -137,7 +137,11 @@ exports.updatePadExpirationAsync = function(pid, expiration) {
     );
 };
 
+//var heapdump = require('heapdump');
 function getPadDocAsync(pid) {
+    /*global.gc();
+    heapdump.writeSnapshot();*/
+    
     // check if document is in map first
     var masterDoc = padIdToDocMap[pid];
     if (!_.isUndefined(masterDoc))
@@ -193,7 +197,10 @@ function getDocHTMLAsync(doc) {
             var editor = new window.Quill("#editor");
             editor.updateContents(doc.content);
     
-            return document.querySelector(".ql-editor").innerHTML;
+            var html = document.querySelector(".ql-editor").innerHTML;
+            
+            window.close();
+            return Promise.resolve(html);
         });
 }
 
