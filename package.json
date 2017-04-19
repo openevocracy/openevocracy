@@ -22,7 +22,7 @@
     "express": "*",
     "express-session": "*",
     "gulf": "^5",
-    "gulf-mongodb": "0.2.3",
+    "gulf-mongoskin": "0.2.3",
     "i18next-express-middleware": "^1.0.2",
     "i18next-node-fs-backend": "^0.1.2",
     "jsdom": "*",
