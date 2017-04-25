@@ -61,5 +61,11 @@ define({
     "Welcome {0} at Evocracy,\n\n" +
     "You just created an account at {1}. Please verify your email by visiting:\n\n"+
     "{1}/json/auth/verifyEmail/{0}\n\n" +
-    "If you did not register, just ignore this message.\n"
+    "If you did not register, just ignore this message.\n",
+    
+    'EMAIL_PASSWORD_RESET_SUBJECT': 'New password',
+    'EMAIL_PASSWORD_RESET_MESSAGE':
+    'Hi,\n\n' +
+    'You ordered a password reset for evocracy. Your temporary password is:\n\n{0}\n\n' +
+    'We highly suggest to change the password directly after your next login to a password of your choice.'
 });

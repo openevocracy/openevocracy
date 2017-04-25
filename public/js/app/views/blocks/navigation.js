@@ -29,6 +29,10 @@ define([
         
         onRender: function() {
             u.updateActive();
+        },
+        
+         onDestroy: function() {
+            clearInterval(this.timer);
         }
     });
     

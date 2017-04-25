@@ -126,9 +126,6 @@ define([
             // Set link in navigation to active
             u.setActive('nav-grp-'+this.model.get('_id'));
             
-            // Activate tooltip
-            $('[data-toggle="tooltip"]').tooltip();
-            
             // Create raty objects and connect them to DOM using jquery
             _.each(this.model.get('members'), function(member) {
                 member = _.extend(member, {'rating_mean': (member.rating_integration + member.rating_knowledge)/2 });
@@ -152,13 +149,15 @@ define([
         },
         
         onDOMexists: function() {
-            // check if body-text exists instead of editor (group has finished)
+            // Check if body-text exists instead of editor (group has finished)
             if(!this.model.has('body')) {
                 var messageCallback = this.onReceiveMessage.bind(this);
                 var onlineCallback  = this.onNotifyOnline.bind(this);
                 var uid   = App.session.user.get('_id');
                 var uname = _.findWhere(this.model.get('members'), { '_id': uid }).name;
+                var ucolor = _.findWhere(this.model.get('members'), { '_id': uid }).color;
                 
+                this.mods = { authorship: { enabled: true, authorId: uid, color: ucolor } };
                 Pad.onShow.bind(this)();
                 Chat.onShow.bind(this)(messageCallback, onlineCallback, uid, uname);
             }

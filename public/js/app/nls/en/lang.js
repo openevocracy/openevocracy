@@ -9,14 +9,18 @@ define({
     
     /* *** Alerts *** */
     
-    'USER_PASSWORT_NOT_CORRECT': 'Password is not correct.',
+    'USER_PASSWORT_NOT_CORRECT': 'Password is not correct. Did you <a class="pwforgot" href="{0}">forget your password</a>?',
     'USER_FORM_EMAIL_MISSING': 'You did not enter an email address.',
-    'USER_FORM_VALIDATION_ERROR': 'Please check the form for mistakes.',
+    'USER_FORM_VALIDATION_ERROR': 'There was something wrong with the entered data. Please check your input again.',
+    'USER_FORM_VALIDATION_ERROR_EMAIL': 'The entered email address does not meet the necessary form, please check it.',
+    'USER_FORM_VALIDATION_ERROR_PASSWORD': 'The entered password does not meet the necessary form, please check it.<br/>Hint: whitespace is not allowed.',
     'USER_ACCOUNT_EMAIL_NOT_EXIST': 'The entered email address &raquo;{0}&laquo; is not connected to an user account. Do you have a typo?',
     'USER_ACCOUNT_NOT_VERIFIED': 'You have not verified your email-address. Click here to <a id="verify-account" href="/json/auth/verification/{0}">send verification email again.</a>',
     'USER_ACCOUNT_ALREADY_EXISTS': 'Account already exists. Please just log in.',
     'USER_ACCOUNT_VERIFICATION_LINK_SENT': 'To verify your email address, we\'ve sent an email to you. Please check your inbox and click the containing link.',
-    'USER_ACCOUNT_DOES_NOT_EXIST': 'User account does not exist, please register.',
+    'USER_ACCOUNT_EMAIL_UPDATED': 'The entered email-address was updated sucessfully.',
+    'USER_ACCOUNT_PASSWORD_UPDATED': 'The entered password was updated sucessfully.',
+    'USER_ACCOUNT_PASSWORD_RESET': 'A new password was sent to &raquo;{0}&laquo;. After logging in, you should immediately change your password.',
     
     'TOPIC_NOT_FOUND': 'Topic not found.',
     'TOPIC_NOT_AUTHORISIZED_FOR_UPDATE': 'Only the author can update the topic.',

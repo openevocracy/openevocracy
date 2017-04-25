@@ -123,12 +123,20 @@ app.post("/json/auth/remove_account", users.delete );*/
 app.get('/json/auth/verifyEmail/:id', users.verifyEmail);
 app.post('/json/auth/verification/:email', users.sendVerificationMailAgain);
 
+// Reset Password and send to user
+app.post('/json/auth/password/:email', users.sendPassword);
+
 // ###################
 // ###   U S E R   ###
 // ###################
 
+// Social
 app.get('/json/user/profile/:id', function(req, res) { auth(req, res, users.query); });
 app.get('/json/user/navi', function(req, res) { auth(req, res, users.navigation); });
+
+// Get and edit own profile
+app.get('/json/user/settings/:id', function(req, res) { auth(req, res, users.settings); });
+app.patch('/json/user/settings/:id', function(req, res) { auth(req, res, users.update); });
 
 // ###################
 // ###   T E S T   ###

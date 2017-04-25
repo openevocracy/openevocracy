@@ -17,13 +17,21 @@ define([
     var Pad = {
         onShow: function() {
             // close connection if it already exits to avoid multiple connections
-            if(this.pad_socket)
+            if(this.pad_socket) {
+                console.log('disconnect');
                 this.pad_socket.disconnect();
-            
+            }
+                        
             this.pad_socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
-            this.editor = new Quill('#editor', {theme: 'snow'});
+            
+            console.log('mods', this.mods);
+            if(_.isUndefined(this.mods))
+                this.editor = new Quill('#editor', { theme: 'snow' });
+            else
+                this.editor = new Quill('#editor', { theme: 'snow', modules: this.mods });
             
             this.pad_socket.on('setContents', function(contents) {
+                console.log('setContents');
                 //console.log(JSON.stringify(contents));
                 this.editor.updateContents(contents);
             

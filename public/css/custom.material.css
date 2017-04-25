@@ -2,6 +2,7 @@ body { padding: 60px 0 50px 0; }
 #wrapper { padding-bottom: 50px; }
 a { cursor: pointer; }
 small { font-size: 11px; }
+hr { border-color: #ccc; }
 .fa { margin-right: 0.1em; }
 .btn.active .fa { color: #5cb85c; }
 .tr.active .fa { color: #aaa; }
@@ -14,6 +15,15 @@ label { font-weight: 300; font-size: 1em; color: inherit; line-height: 1em; }
 
 #proposal .valid { color: #ff0000; cursor: default; }
 #proposal .valid.accepted { color: #00ff00; }
+
+.fa-bg:after {
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+  text-decoration: inherit;
+  position: absolute;
+  z-index: 1;
+}
 
 .h2-edit {
     border: 1px solid #ccc;
@@ -64,12 +74,28 @@ main aside div:first-child h3 { margin-top: 0; }
 .levels-block .label { line-height: 15px; }
 .members-docs-heading span { font-size: 12px; }
 
-/* #### FOOTER #### */
+/* ### FOOTER ### */
 
 footer { font-size: 0.8em; text-align: center; }
 #footmenu { display: inline-block; margin: 0; }
 #footmenu li { list-style: none; float: left; }
-#footmenu a { display: inline-block; padding: 0 0.3em; line-height: 40px; }
+#footmenu a { display: inline-block; padding: 0 0.3em; line-height: 40px; color: #fff; }
+
+/* ### SETTINGS ### */
+
+#settings form { padding: 0 10px; }
+
+#settings .btn-setting:after {
+    content: "\f0d7";
+    top: 50%;
+    right: 30px;
+    font-size: 20px;
+    margin: -12px 0 0 0;
+}
+
+#settings .btn-setting.active:after {
+    content: "\f0d8";
+}
 
 /* ### TOPICS ### */
 
@@ -100,7 +126,7 @@ footer { font-size: 0.8em; text-align: center; }
 
 /* ### GROUPS ### */
 
-#members table a { text-decoration: none; }
+/*#members table a { text-decoration: none; }*/
 
 /* ### GROUP COLLABORATIVE ### */
 

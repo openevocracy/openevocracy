@@ -29,8 +29,8 @@
       parsley: '//cdnjs.cloudflare.com/ajax/libs/parsley.js/2.3.5/parsley.min',
       constants: '../setup/constants',
       configs: '../setup/configs',
-      //quill: '//cdn.quilljs.com/1.0.0-beta.3/quill',
-      quill: '//cdn.quilljs.com/1.0.6/quill.min',
+      //quill: '//cdn.quilljs.com/1.0.6/quill.min',
+      quill: '../vendor/quill',
       socketio: '//cdn.socket.io/socket.io-1.4.5',
       strftime: '../vendor/strftime.min',
       //Embed: '../vendor/embed.min',
@@ -101,72 +101,78 @@
     config: {i18n: {'locale': locale}}
   });
   
-  require(['underscore','backbone','handlebars','i18n!nls/lang'], function(_, Backbone, Handlebars, i18n) {
-    // register handlebars i18n helper
-    // for javascript implementation see utils.js
-    Handlebars.registerHelper('i18n',
-        function(str) {
-            return (i18n != undefined ? (i18n[str] != undefined ? i18n[str] : str) : str);
-        }
-    );
-    
-    // register handlebars helper for equality conditions
-    Handlebars.registerHelper('ifis', function(a, b, opts) {
-      if(a == b) {
-          return opts.fn(this);
-      } else {
-          return opts.inverse(this);
-      }
+    require([
+      'underscore',
+      'backbone',
+      'handlebars',
+      'i18n!nls/lang'
+    ], function(
+        _,
+        Backbone,
+        Handlebars,
+        i18n
+    ) {
+        // register handlebars i18n helper
+        // for javascript implementation see utils.js
+        Handlebars.registerHelper('i18n',
+            function(str) {
+                return (i18n != undefined ? (i18n[str] != undefined ? i18n[str] : str) : str);
+            }
+        );
+        
+        // register handlebars helper for equality conditions
+        Handlebars.registerHelper('ifis', function(a, b, opts) {
+          if(a == b) {
+              return opts.fn(this);
+          } else {
+              return opts.inverse(this);
+          }
+        });
+        Handlebars.registerHelper('ifisnot', function(a, b, opts) {
+          if(a != b) {
+              return opts.fn(this);
+          } else {
+              return opts.inverse(this);
+          }
+        });
+        Handlebars.registerHelper('ifisOr', function(a, b, c, opts) {
+          if(a == b || a == c) {
+              return opts.fn(this);
+          } else {
+              return opts.inverse(this);
+          }
+        });
+        Handlebars.registerHelper('ifisAnd', function(a, b, c, opts) {
+          if(a == b && a == c) {
+              return opts.fn(this);
+          } else {
+              return opts.inverse(this);
+          }
+        });
+        Handlebars.registerHelper('ifIn', function(value, list, options) {
+          if(_.contains(list,value)) {
+            return options.fn(this);
+          }
+          return options.inverse(this);
+        });
+        Handlebars.registerHelper("math", function(lvalue, operator, rvalue, options) {
+            lvalue = parseFloat(lvalue);
+            rvalue = parseFloat(rvalue);
+                
+            return {
+                "+": lvalue + rvalue,
+                "-": lvalue - rvalue,
+                "*": lvalue * rvalue,
+                "/": lvalue / rvalue,
+                "%": lvalue % rvalue
+            }[operator];
+        });
+        // force ajax call on all browsers
+        $.ajaxSetup({ cache: false });
+        
+        require(['application'], function(Application) {
+          App = new Application();
+          App.start();
+        });
     });
-    Handlebars.registerHelper('ifisnot', function(a, b, opts) {
-      if(a != b) {
-          return opts.fn(this);
-      } else {
-          return opts.inverse(this);
-      }
-    });
-    Handlebars.registerHelper('ifisOr', function(a, b, c, opts) {
-      if(a == b || a == c) {
-          return opts.fn(this);
-      } else {
-          return opts.inverse(this);
-      }
-    });
-    Handlebars.registerHelper('ifisAnd', function(a, b, c, opts) {
-      if(a == b && a == c) {
-          return opts.fn(this);
-      } else {
-          return opts.inverse(this);
-      }
-    });
-    Handlebars.registerHelper('ifIn', function(value, list, options) {
-      if(_.contains(list,value)) {
-        return options.fn(this);
-      }
-      return options.inverse(this);
-    });
-    Handlebars.registerHelper("math", function(lvalue, operator, rvalue, options) {
-        lvalue = parseFloat(lvalue);
-        rvalue = parseFloat(rvalue);
-            
-        return {
-            "+": lvalue + rvalue,
-            "-": lvalue - rvalue,
-            "*": lvalue * rvalue,
-            "/": lvalue / rvalue,
-            "%": lvalue % rvalue
-        }[operator];
-    });
-    // force ajax call on all browsers
-    $.ajaxSetup({ cache: false });
-    
-    /*$('[data-toggle="popover"]').on('DOMNodeInserted') popover();
-    $(document).on('DOMNodeInserted','[data-toggle="tooltip"]',
-      function(e) {e.target.tooltip();});*/
-    
-    require(['application'], function(Application) {
-      App = new Application();
-      App.start();
-    });
-  });
 })();
