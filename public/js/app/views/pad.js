@@ -33,7 +33,7 @@ define([
             this.pad_socket.on('setContents', function(contents) {
                 console.log('setContents');
                 //console.log(JSON.stringify(contents));
-                this.editor.updateContents(contents);
+                this.editor.setContents(contents);
             
                 this.updateDocumentState();
             }.bind(this));
