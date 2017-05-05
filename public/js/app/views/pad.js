@@ -15,20 +15,19 @@ define([
     ) {
     
     var Pad = {
-        onShow: function() {
+        onShow: function(quill) {
             // close connection if it already exits to avoid multiple connections
             if(this.pad_socket) {
                 console.log('disconnect');
                 this.pad_socket.disconnect();
             }
-                        
+            
             this.pad_socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
             
-            console.log('mods', this.mods);
-            if(_.isUndefined(this.mods))
+            if(_.isUndefined(quill))
                 this.editor = new Quill('#editor', { theme: 'snow' });
             else
-                this.editor = new Quill('#editor', { theme: 'snow', modules: this.mods });
+                this.editor = quill;
             
             this.pad_socket.on('setContents', function(contents) {
                 console.log('setContents');
@@ -37,6 +36,7 @@ define([
             
                 this.updateDocumentState();
             }.bind(this));
+            
             this.pad_socket.on('change', function(change) {
                 //console.log(JSON.stringify(change));
                 this.editor.updateContents(change);
@@ -48,7 +48,7 @@ define([
                 if(source != 'user')
                     return;
 
-                //console.log('Editor contents have changed', JSON.stringify(delta));
+                console.log('Editor contents have changed', JSON.stringify(delta));
                 this.pad_socket.emit('change', delta);
                 
                 this.updateDocumentState();

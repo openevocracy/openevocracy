@@ -49,22 +49,12 @@ define([
                 if(e) e.preventDefault();
                 this.closeLightbox();
             },
+            'keydown .email': function(e) {
+                if(e.keyCode == 13)
+                    this.sendPassword(e);
+            },
             'click .send-password': function(e) {
-                var email = this.$('.lightbox input.email').val();
-                var self = this;
-                $.ajax({
-                    type: 'POST',
-			        contentType: 'application/json',
-                    url: "/json/auth/password/"+email,
-                    success: function(res) {
-                        self.closeLightbox();
-                        self.model.set('alert', u.i18nAlert(res.alert));
-                    },
-                    error: function(xhr, err) {
-                        self.model.set('alert', u.i18nAlert(xhr.responseJSON.alert));
-                        self.$('.lightbox input.email').val(email);
-                    }
-                });
+                this.sendPassword(e);
             }
         },
         
@@ -102,6 +92,24 @@ define([
                     this.model.set('name', this.$("#name").val());
                     this.model.set('alert', u.i18nAlert(xhr.responseJSON.alert));
                 }.bind(this)
+            });
+        },
+        
+        sendPassword: function(e) {
+            var email = this.$('.lightbox input.email').val();
+            var self = this;
+            $.ajax({
+                type: 'POST',
+		        contentType: 'application/json',
+                url: "/json/auth/password/"+email,
+                success: function(res) {
+                    self.closeLightbox();
+                    self.model.set('alert', u.i18nAlert(res.alert));
+                },
+                error: function(xhr, err) {
+                    self.model.set('alert', u.i18nAlert(xhr.responseJSON.alert));
+                    self.$('.lightbox input.email').val(email);
+                }
             });
         }
     });

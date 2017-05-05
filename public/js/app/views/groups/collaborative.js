@@ -2,6 +2,7 @@ define([
     'jquery',
     'underscore',
     'Marionette',
+    'quill',
     'emojify',
     'strftime',
     'constants',
@@ -15,6 +16,7 @@ define([
     $,
     _,
     Marionette,
+    Quill,
     emojify,
     dateformat,
     C,
@@ -157,8 +159,25 @@ define([
                 var uname = _.findWhere(this.model.get('members'), { '_id': uid }).name;
                 var ucolor = _.findWhere(this.model.get('members'), { '_id': uid }).color;
                 
-                this.mods = { authorship: { enabled: true, authorId: uid, color: ucolor } };
-                Pad.onShow.bind(this)();
+                // Initialize Quill with current user
+                var quill = new Quill('#editor', {
+                    theme: 'snow',
+                    modules: {
+                        authorship: {
+                            enabled: true,
+                            authorId: uid,
+                            color: ucolor}}});
+                
+                // Add other users as authors
+                _.map(this.model.get('members'), function(obj) {
+                    if(obj._id != uid)
+                        quill.theme.modules.authorship.addAuthor(obj._id, obj.color);
+                });
+                
+                // Show Quill-editor
+                Pad.onShow.bind(this)(quill);
+                
+                // Chow chat
                 Chat.onShow.bind(this)(messageCallback, onlineCallback, uid, uname);
             }
             

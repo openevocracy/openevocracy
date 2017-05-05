@@ -32,7 +32,7 @@ var pdfConvertAsync = Promise.promisify(pdf.convert);
 // TODO bring this text to config file
 var starttext = {
     "ops": [{
-        "insert": "Hello World!"
+        "insert": "Hello World!\n"
     }]
 };
 
@@ -44,7 +44,7 @@ function gulfIO(masterDoc, slaveSocket) {
         ottype: ottype
     });
     slaveDoc.initializeFromStorage();
-    
+
     var slaveToMasterLink = slaveDoc.masterLink();
 
     // masterDoc -> slaveLink <-> masterLink <- slaveDoc
@@ -57,6 +57,8 @@ function gulfIO(masterDoc, slaveSocket) {
     // quill -> slaveDoc
     {
         slaveSocket.on('change', function(slaveToMasterChange) {
+            console.log('socket on change');
+
             if (_.isEmpty(slaveToMasterChange.ops))
                 return;
 
@@ -71,6 +73,7 @@ function gulfIO(masterDoc, slaveSocket) {
             console.log('slaveToMasterChange', slaveToMasterChange);
             //slaveDoc.update(new Delta(slaveToMasterChange));
             slaveDoc.submitChange(slaveToMasterChange);
+            //slaveDoc.submitChange(new Delta(slaveToMasterChange));
         });
     }
 
@@ -78,14 +81,16 @@ function gulfIO(masterDoc, slaveSocket) {
     slaveDoc._setContent = function(contents) {
         console.log('setContents', JSON.stringify(contents));
         slaveSocket.emit('setContents', contents);
+        return Promise.resolve();
     };
     slaveDoc._onChange = function(masterToSlaveChange) {
         console.log('masterToSlaveChange', JSON.stringify(masterToSlaveChange));
         slaveSocket.emit('change', masterToSlaveChange);
+        return Promise.resolve();
     };
-    /*slaveDoc._collectChanges = function(cb) {
-        cb();
-    };*/
+    slaveDoc._onBeforeChange = function() {
+        return Promise.resolve();
+    };
 
     slaveSocket.on('disconnect', function() {
         console.log('disconnect');

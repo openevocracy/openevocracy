@@ -4,14 +4,14 @@ var ONE_MIN = 1000*60;
 
 var DEBUG_CONFIG = {
     DEBUG: true,
-    MAIL: true,
+    MAIL: false,
     
     MIN_VOTES_PER_TOPIC: 1,
     MIN_GROUPS_PER_TOPIC: 1,
     
     MIN_WORDS_PROPOSAL: 2,
     
-    DURATION_SELECTION : 1*ONE_MIN,
+    DURATION_SELECTION : 0.5*ONE_MIN,
     DURATION_PROPOSAL  : 1*ONE_MIN,
     DURATION_LEVEL     : 2000*ONE_MIN,
     DURATION_NONE      : -1,

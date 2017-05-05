@@ -53,7 +53,7 @@ define([
             else {
                 var deadlineComparison = (d0 < d1) ? -1 : (d0 > d1) ? 1 : 0;
                 return this.deadlineSortFactor*deadlineComparison;
-            };
+            }
         },
         
         childView: ChildView,
