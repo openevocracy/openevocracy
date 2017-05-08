@@ -177,7 +177,7 @@ define([
                 // Show Quill-editor
                 Pad.onShow.bind(this)(quill);
                 
-                // Chow chat
+                // Show chat
                 Chat.onShow.bind(this)(messageCallback, onlineCallback, uid, uname);
             }
             

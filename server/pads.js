@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var $ = require('jquery');
+var Promise = require('bluebird');
 var requirejs = require('requirejs');
 var gulf = require('gulf');
 //var MongoDBAdapter = require('gulf-mongodb');
@@ -13,17 +14,10 @@ var ObjectId = require('mongodb').ObjectID;
 var db = require('./database').db;
 
 var utils = require('./utils');
+var promisify = require('./promisify');
 
 // promisify gulf
-var Promise = require('bluebird');
-Object.keys(gulf).forEach(function(key) {
-    var value = gulf[key];
-    if (typeof value === "function") {
-        Promise.promisifyAll(value);
-        Promise.promisifyAll(value.prototype);
-    }
-});
-Promise.promisifyAll(gulf);
+var gulf = promisify(gulf);
 
 var envAsync = Promise.promisify(dom.env);
 var pdfConvertAsync = Promise.promisify(pdf.convert);

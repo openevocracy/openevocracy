@@ -1,14 +1,7 @@
 var mongoskin = require('mongoskin');
+var promisify = require('./promisify');
 
 // promisify mongoskin
-var Promise = require('bluebird');
-Object.keys(mongoskin).forEach(function(key) {
-  var value = mongoskin[key];
-  if (typeof value === "function") {
-    Promise.promisifyAll(value);
-    Promise.promisifyAll(value.prototype);
-  }
-});
-Promise.promisifyAll(mongoskin);
+var mongoskin = promisify(mongoskin);
 
 exports.db = mongoskin.db('mongodb://'+process.env.IP+'/mindabout');
