@@ -130,7 +130,7 @@ footer { font-size: 0.8em; text-align: center; }
 
 /* ### GROUP COLLABORATIVE ### */
 
-.user-color { display: inline-block; height: 1em; width: 1em; margin-right: 0.35em; margin-bottom: -1px; border: 1px solid #ebebeb; }
+.user-color { display: inline-block; height: 1em; width: 1em; margin-right: 0.35em; margin-bottom: -1px; border: 1px solid #bdbdbd; }
 
 /* Quill Editor */
 

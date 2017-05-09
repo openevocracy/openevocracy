@@ -10,6 +10,7 @@
     "buffer-crc32": "*",
     "chance": "*",
     "collections": "*",
+    "color": "^1.0.3",
     "connect": "*",
     "cookie": "*",
     "cookie-parser": "*",

@@ -3,6 +3,8 @@ var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var Chance = require('chance');
+var Color = require('color');
+var bcrypt = require('bcrypt');
 var requirejs = require('requirejs');
 var strformat = require('strformat');
 
@@ -287,7 +289,33 @@ exports.list = function(req, res) {
     db.collection('groups').find().toArrayAsync().then(_.bind(res.json,res));
 };
 
-function getMemberRating(ruid, gid, uid, type) {
+function getProposalBodyAsync(mid, gid, proposals_source_promise) {
+    // mid: member id, gid: group id
+    return db.collection('proposals').findOneAsync(
+        {'source': mid, 'sink': gid},{'pid': true}).then(function(proposal) {
+        
+        // Proposal was found
+        // This means it was a user-created proposal
+        if(proposal)
+            return proposal;
+        
+        // Proposal was not found: We have a group proposal
+        // Find group where user was member in level before
+        // and get proposal from that group
+        return proposals_source_promise.then(function(proposals) {
+            return db.collection('group_members').
+                findOneAsync({'gid': {$in: _.pluck(proposals, 'source')}, 'uid': mid },
+                    {'gid': true}).
+                then(function(group_member) {
+                    return utils.findWhereArrayEntryExists(proposals, {'source': group_member.gid});
+                });
+        });
+    }).then(function(proposal) {
+        return pads.getPadHTMLAsync(proposal.pid);
+    });
+}
+
+function getMemberRatingAsync(ruid, gid, uid, type) {
     return db.collection('ratings').findOneAsync(
         {'ruid': ruid, 'gid': gid, 'uid': uid, 'type': type},{'score': true}).
     then(function(rating) {
@@ -334,60 +362,44 @@ exports.query = function(req, res) {
     });
     
     // Get all group members
-    var members_promise =
-    db.collection('group_members').find({'gid': gid}, {'uid': true}).
-    //map(function(member) {return member.uid;}).
-    toArrayAsync().map(function(member) {
+    var find_members_promise =
+        db.collection('group_members').find({'gid': gid}, {'uid': true}).
+        toArrayAsync();
+    
+    // generate group specific color_offset
+    var chance = new Chance(gid.toString());
+    var offset = chance.integer({min: 0, max: 360});
+
+    // Additional member information
+    var members_promise = find_members_promise.map(function(member) {
         return member.uid;
     }).then(function(uids) {
         return db.collection('users').
             find({'_id': { $in: uids }},{'_id': true, 'name': true}).
             toArrayAsync();
-    }).map(function (member) {
-        // generate member name
-        var chance = new Chance(gid+member._id);
-        member.name = chance.first();
-        member.color = chance.color({format: 'shorthex'});
+    }).map(function (member, index) {
+        // generate member name and color
+        var member_color_promise = find_members_promise.then(function (members) {
+            var num_members = _.size(members);
+            var hue = offset + index*(360/num_members);
+
+            return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
+        });
         
         // get proposal body
-        var proposal_body_promise = db.collection('proposals').findOneAsync(
-            {'source': member._id, 'sink': gid},{'pid': true}).then(function(proposal) {
-            
-            // Proposal was found
-            // This means it was a user-created proposal
-            if(proposal)
-                return proposal;
-            
-            // Find group where user was member in level before
-            // and get proposal from that group
-            return proposals_source_promise.then(function(proposals) {
-                return db.collection('group_members').
-                    findOneAsync({'gid': {$in: _.pluck(proposals, 'source')}, 'uid': member._id },
-                        {'gid': true}).
-                    then(function(group_member) {
-                        return utils.findWhereArrayEntryExists(proposals, {'source': group_member.gid});
-                    });
-            });
-        }).then(function(proposal) {
-            return pads.getPadHTMLAsync(proposal.pid);
-        });
+        var proposal_body_promise = getProposalBodyAsync(member._id, gid, proposals_source_promise);
         
         // get member rating
-        var member_rating_knowledge_promise = getMemberRating(member._id, gid, uid, C.RATING_KNOWLEDGE);
-        var member_rating_integration_promise = getMemberRating(member._id, gid, uid, C.RATING_INTEGRATION);
+        var member_rating_knowledge_promise = getMemberRatingAsync(member._id, gid, uid, C.RATING_KNOWLEDGE);
+        var member_rating_integration_promise = getMemberRatingAsync(member._id, gid, uid, C.RATING_INTEGRATION);
         
-        return Promise.join(proposal_body_promise,
-                            member_rating_knowledge_promise,
-                            member_rating_integration_promise).
-        spread(function(proposal_body,
-                        member_rating_knowledge,
-                        member_rating_integration) {
-            return _.extend(member,
-                            {'proposal_body': proposal_body},
-                            {'rating_knowledge': member_rating_knowledge},
-                            {'rating_integration': member_rating_integration},
-                            {'gid': gid});
-        });
+        return Promise.props(_.extend(member, {
+                             'name': chance.first(),
+                             'color': member_color_promise,
+                             'proposal_body': proposal_body_promise,
+                             'rating_knowledge': member_rating_knowledge_promise,
+                             'rating_integration': member_rating_integration_promise,
+                             'gid': gid}));
     });
     
     // set the timestamp for the member just querying the group
