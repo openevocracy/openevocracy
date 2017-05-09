@@ -1,14 +1,12 @@
 var _ = require('underscore');
-var $ = require('jquery');
 var Promise = require('bluebird');
-var requirejs = require('requirejs');
 var gulf = require('gulf');
 //var MongoDBAdapter = require('gulf-mongodb');
 var MongoskinAdapter = require('gulf-mongoskin');
 var richText = require('rich-text');
 var ottype = richText.type;
 var Delta = richText.Delta;
-var dom = require('jsdom');
+var QuillDeltaToHtmlConverter = require('quill-delta-to-html');
 var pdf = require('phantom-html2pdf');
 var ObjectId = require('mongodb').ObjectID;
 var db = require('./database').db;
@@ -19,7 +17,6 @@ var promisify = require('./promisify');
 // promisify gulf
 var gulf = promisify(gulf);
 
-var envAsync = Promise.promisify(dom.env);
 var pdfConvertAsync = Promise.promisify(pdf.convert);
 
 // all pads will be initialized with this
@@ -136,11 +133,7 @@ exports.updatePadExpirationAsync = function(pid, expiration) {
     );
 };
 
-//var heapdump = require('heapdump');
 function getPadDocAsync(pid) {
-    /*global.gc();
-    heapdump.writeSnapshot();*/
-    
     // check if document is in map first
     var masterDoc = padIdToDocMap[pid];
     if (!_.isUndefined(masterDoc))
@@ -179,28 +172,11 @@ exports.startPadServer = function(io) {
 };
 
 function getDocHTMLAsync(doc) {
-    // from https://github.com/quilljs/quill/issues/993#issuecomment-249387907
-    return envAsync('<div id="editor"></div>',
-        ['https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.22/MutationObserver.js',
-         'https://cdn.quilljs.com/1.1.5/quill.min.js']).
-        then(function(window) {
-            // fake getSelection
-            // https://github.com/tmpvar/jsdom/issues/317
-            var document = window.document;
-            document.getSelection = function() { 
-                return { 
-                    getRangeAt: function() {}
-                };
-            }; 
-            
-            var editor = new window.Quill("#editor");
-            editor.updateContents(doc.content);
+    var cfg = {};
+    var converter = new QuillDeltaToHtmlConverter(doc.content.ops, cfg);
+    var html = converter.convert();
     
-            var html = document.querySelector(".ql-editor").innerHTML;
-            
-            window.close();
-            return Promise.resolve(html);
-        });
+    return html;
 }
 
 var getPadHTMLAsync = function(pid) {

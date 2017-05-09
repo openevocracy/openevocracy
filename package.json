@@ -39,6 +39,8 @@
     "nodemailer": "2.7.2",
     "phantom-html2pdf": "*",
     "quill": "1.0.0",
+    "quill-delta-to-html": "^0.3.0",
+    "quill-render": "https://github.com/casetext/quill-render/archive/v1.0.5.tar.gz",
     "range-parser": "*",
     "request": "*",
     "request-promise": "*",
