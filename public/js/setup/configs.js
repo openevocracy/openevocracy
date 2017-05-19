@@ -11,7 +11,7 @@ var DEBUG_CONFIG = {
     
     MIN_WORDS_PROPOSAL: 2,
     
-    DURATION_SELECTION : 6000*ONE_MIN,
+    DURATION_SELECTION : 0.5*ONE_MIN,
     DURATION_PROPOSAL  : 1*ONE_MIN,
     DURATION_LEVEL     : 2000*ONE_MIN,
     DURATION_NONE      : -1,
@@ -30,8 +30,8 @@ var RELEASE_CONFIG = {
     DEBUG : true,
     MAIL: true,
     
-    MIN_PARTICIPANTS_PER_TOPIC: 20,
-    MIN_GROUPS_PER_TOPIC: 2,
+    MIN_VOTES_PER_TOPIC: 1,
+    MIN_GROUPS_PER_TOPIC: 1,
     
     MIN_WORDS_PROPOSAL: 100,
     
@@ -50,5 +50,5 @@ var RELEASE_CONFIG = {
     EVOCRACY_HOST : 'https://mind-about-sagacitysite.c9.io'
 };
 
-define(DEBUG_CONFIG);
-//define(RELEASE_CONFIG);
+//define(DEBUG_CONFIG);
+define(RELEASE_CONFIG);
