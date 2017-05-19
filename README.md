@@ -23,6 +23,7 @@ You should have a server with ssh access and root permissions and you should kno
 
 ```shell
 npm install openevocracy
+cd node_modules/openevocracy
 ```
 
 **Background**: [How to get npm?](https://docs.npmjs.com/getting-started/installing-node)
