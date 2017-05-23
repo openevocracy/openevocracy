@@ -50,5 +50,5 @@ var RELEASE_CONFIG = {
     EVOCRACY_HOST : 'https://mind-about-sagacitysite.c9.io'
 };
 
-//define(DEBUG_CONFIG);
-define(RELEASE_CONFIG);
+define(DEBUG_CONFIG);
+//define(RELEASE_CONFIG);

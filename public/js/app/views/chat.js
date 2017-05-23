@@ -30,7 +30,7 @@ define([
             
             this.chat_socket.on('messages', function(msgs) {
                 _.each(msgs, function(msg) {
-                    receiveMessageCallback(msg);
+                    receiveMessageCallback(msg, true);
                 });
             });
             

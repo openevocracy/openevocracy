@@ -11,6 +11,10 @@ hr { border-color: #ccc; }
 .table a { display: block; }
 .table th { cursor: default; }
 
+h1 { font-size: 26px; }
+h2 { font-size: 23px; }
+h3 { font-size: 20px; }
+
 label { font-weight: 300; font-size: 1em; color: inherit; line-height: 1em; }
 
 #proposal .valid { color: #ff0000; cursor: default; }
@@ -139,6 +143,11 @@ footer { font-size: 0.8em; text-align: center; }
 #editor { height: 400px; }
 .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #e0e0e0; }
 .ql-container.ql-snow { border: none; }
+
+.ql-snow .ql-editor h1 { font-size: 1.5em; margin-bottom: 0.4em; }
+.ql-snow .ql-editor h2 { font-size: 1.3em; margin-bottom: 0.4em; }
+.ql-snow .ql-editor h3 { font-size: 1.15em; margin-bottom: 0.4em; }
+
 
 /* Tabs */
 

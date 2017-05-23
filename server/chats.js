@@ -47,7 +47,7 @@ function joinChatRoom(socket, crid, uid, uname) {
         // notify about changed user online status in room
         sendToSocketsInRoom('online', room, room.users);
         // send message to other sockets in room
-        sendToSocketsInRoom('message', room, {'info': '{0} entered the chat room.', 'arg': uname});
+        sendToSocketsInRoom('message', room, {'uid': uid, 'info': '{0} entered the chat room.', 'arg': uname});
     });
     
     // when socket receives a message
@@ -83,7 +83,7 @@ function joinChatRoom(socket, crid, uid, uname) {
         // notify about changed user online status in room
         sendToSocketsInRoom('online', room, room.users);
         // notify with info
-        sendToSocketsInRoom('message', room, {'info': '{0} left the chat room.', 'arg': uname});
+        sendToSocketsInRoom('message', room, {'uid': uid, 'info': '{0} left the chat room.', 'arg': uname});
     });
 }
 

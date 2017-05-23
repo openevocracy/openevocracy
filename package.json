@@ -1,5 +1,5 @@
 {
-  "name": "OpenEvocracy",
+  "name": "openevocracy",
   "version": "0.1.0",
   "dependencies": {
     "app-root-path": "*",

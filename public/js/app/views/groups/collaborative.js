@@ -33,6 +33,7 @@ define([
         className: 'content',
         id: 'collaborative',
         loaded: false,
+        countMsgs: 0,
         
         ratySettings: {
             /*half: true, FIXME: https://github.com/FortAwesome/Font-Awesome/issues/2301 */
@@ -57,6 +58,18 @@ define([
                 $(target).siblings().fadeOut(250).promise().done(function() {
                     $(target).fadeIn(250);
                 });
+                // Chat activity notification
+                if($(e.target).attr('href') == 'collab-chat') {
+                    // User entered chat pill: Hide counter
+                    $('.chat-counter').addClass('hide');
+                } else {
+                    // User left chat pill: Show and reset counter
+                    if($('.chat-counter').hasClass('hide')) {
+                        $('.chat-counter').removeClass('hide');
+                        this.countMsgs = 0;
+                        $('.chat-counter').text('');
+                    }
+                }
             },
             'click .member-proposal-link': function(e) {
                 e.preventDefault();
@@ -188,6 +201,20 @@ define([
                 .html(event.strftime(u.i18n("%D days, %H:%M:%S"))); });
         },
         
+        setCounter: function(value) {
+            // Set counter variable
+            this.countMsgs = value;
+            
+            // Set counter text
+            if(value != 0)
+                $('.chat-counter').text(' ('+value+')');
+            else
+                $('.chat-counter').text('');
+                
+            // Blink
+            $('.chat-counter').parents('.collab-pill').fadeTo(250, 0.3, function() { $(this).fadeTo(250, 1.0); });
+        },
+        
         sendMessage: function() {
             var text = $('#chat-message').val();
             if(text.trim() == "")
@@ -199,7 +226,7 @@ define([
             $('#chat-message').val('');
         },
         
-        onReceiveMessage: function(msg) {
+        onReceiveMessage: function(msg, isInitial) {
             var me_id = App.session.user.get('_id');
             
             var el = '';
@@ -219,6 +246,12 @@ define([
             // Emoji magic
             if(!_.isUndefined(msg.text)) {
                 emojify.run(document.getElementById(msg._id));
+            }
+
+            // Messages counter
+            if(!isInitial && msg.uid != App.session.user.get('_id')) {
+                console.log(msg);
+                this.setCounter(++this.countMsgs);
             }
         },
         

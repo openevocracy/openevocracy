@@ -20,11 +20,92 @@ var gulf = promisify(gulf);
 var pdfConvertAsync = Promise.promisify(pdf.convert);
 
 // all pads will be initialized with this
-// TODO bring this text to config file
+// TODO allow individual starttext for every type of pad
+// TODO think about language handling
 var starttext = {
-    "ops": [{
-        "insert": "Hello World!\n"
-    }]
+    "ops": [
+            {
+                "insert": "(See English translation below.)\n\n"
+            },
+            {
+                "insert": "Übersicht"
+            },
+            {
+                "insert": "\n",
+                "attributes": {
+                    "header": 1
+                }
+            },
+            {
+                "insert": "Eine kurze Zusammenfassung ...\n\n"
+            },
+            {
+                "insert": "Beschreibung"
+            },
+            {
+                "insert": "\n",
+                "attributes": {
+                    "header": 1
+                }
+            },
+            {
+                "insert": "Eine ausführliche Beschreibung ...\n\n"
+            },
+            {
+                "insert": "Diskussion"
+            },
+            {
+                "insert": "\n",
+                "attributes": {
+                    "header": 1
+                }
+            },
+            {
+                "insert": "Unbehandelte und kritische Aspekte ...\n\n"
+            },
+            {
+                "insert": "(Hinweis: Dies ist nur eine Vorlage und muss nicht zwingend beachtet werden.)\n\n\n"
+            },
+            {
+                "insert": "Abstract"
+            },
+            {
+                "insert": "\n",
+                "attributes": {
+                    "header": 1
+                }
+            },
+            {
+                "insert": "A short summary ...\n\n"
+            },
+            {
+                "insert": "Description"
+            },
+            {
+                "insert": "\n",
+                "attributes": {
+                    "header": 1
+                }
+            },
+            {
+                "insert": "A more detailed description ...\n\n"
+            },
+            {
+                "insert": "Discussion"
+            },
+            {
+                "insert": "\n",
+                "attributes": {
+                    "header": 1
+                }
+            },
+            {
+                "insert": "Untreated and critical aspects ...\n\n"
+            },
+            {
+                "insert": "(Note: This is just a template and may be ignored.)\n"
+            }
+        ]
 };
 
 // masterDoc -> slaveLink <-> masterLink <- slaveDoc <-> quill
