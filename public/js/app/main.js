@@ -31,7 +31,7 @@
       configs: '../setup/configs',
       //quill: '//cdn.quilljs.com/1.0.6/quill.min',
       quill: '../vendor/quill',
-      socketio: '//cdn.socket.io/socket.io-1.4.5',
+      socketio: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.2/socket.io.slim',
       strftime: '../vendor/strftime.min',
       //Embed: '../vendor/embed.min',
       emojify: '//cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/js/emojify.min'

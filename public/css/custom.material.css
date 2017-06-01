@@ -139,6 +139,7 @@ footer { font-size: 0.8em; text-align: center; padding: 10px 0 15px 0; }
 /* Quill Editor */
 
 .wysiwyg .editor-wrapper { background-color: #fff; border: 1px solid #e0e0e0; }
+#body p { word-wrap: break-word; }
 
 #editor { height: 400px; }
 .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #e0e0e0; }

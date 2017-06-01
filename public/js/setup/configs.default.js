@@ -1,4 +1,5 @@
 /* system values, later mainly replaced by user values or user means */
+var DISABLED = -1;
 var ONE_DAY = 1000*60*60*24;
 var ONE_MIN = 1000*60;
 

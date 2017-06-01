@@ -4,14 +4,16 @@ define([
     'Marionette',
     'quill',
     'socketio',
-    'configs'
+    'configs',
+    '../utils'
 ], function(
     $,
     _,
     Marionette,
     Quill,
     socketio,
-    conf
+    conf,
+    u
     ) {
     
     var Pad = {
@@ -59,29 +61,32 @@ define([
         },
         
         updateDocumentState: function() {
-            // count words
+            // Count words
             var words = this.editor.getText().split(/\s+\b/).length;
             
-            // calculate state
-            // TODO store in config file
-            var limits = {
-                "simple": 0,
-                "standard": 99,
-                "advanced": 249,
-                "excellent": 449,
-                "superior": 699
-            };
+            // Define states
+            var limits = [
+                { 'limit': 0, 'name': u.i18n('simple') },
+                { 'limit': 99, 'name': u.i18n('standard') },
+                { 'limit': 249, 'name': u.i18n('advanced') },
+                { 'limit': 449, 'name': u.i18n('excellent') },
+                { 'limit': 699, 'name': u.i18n('superior') }
+            ];
             
-            var position = _.sortedIndex(_.values(limits), words);
-            var state_curr = _.pairs(limits)[position-1];
+            var position = _.sortedIndex(limits, {'limit': words}, 'limit');
+            var state_curr = limits[position-1];
             
+            // Set text
             if(position < 5) {
-                var state_next = _.pairs(limits)[position];
-                $('.state-status').html('You reached ' + state_curr[0] + ' status.'
-                    + '<br/><small>Write '+ (state_next[1]-words+1) + ' more words for ' + state_next[0] + ' status.</small>');
+                var state_next = limits[position];
+                var status_next = u.strformat(u.i18n('Write {0} more words for {1} status.'), state_next.limit-words+1, state_next.name);
+                $('.state-status').html(state_curr.name);
+                $('.state-next').html(status_next);
             } else {
-                $('.state-status').html('Congrats, you reached ' + state_curr[0] + ' status.');
+                $('.state-status').html(u.strformat(u.i18n('Congrats, you reached {0} status.'), state_curr.name));
             }
+            
+            // Set stars
             var stars = '';
             for(var i = 1; i <= 5; i++) {
                 if(i <= position)

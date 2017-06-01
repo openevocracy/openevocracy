@@ -132,6 +132,14 @@ define({
     '{0} entered the chat room.': '{0} ist dem Chatroom beigetreten.',
     '{0} left the chat room.': '{0} hat den Chatroom verlassen.',
     
+    'Write {0} more words for {1} status.': 'Schreibe {0} weitere Wörter um Status "{1}" zu erreichen.',
+    'Congrats, you reached {0} status.': 'Glückwunsch, dein Dokument ist: {0}.',
+    'simple': 'Einfach',
+    'standard': 'Standard',
+    'advanced': 'Erweitert',
+    'excellent': 'Exzellent',
+    'superior': 'Überragend',
+    
     'current version': 'Aktuelle Version',
     
     /* *** Alerts *** */
@@ -144,7 +152,7 @@ define({
     'USER_ACCOUNT_EMAIL_NOT_EXIST': 'Zu der eingegebenen E-Mail-Adresse &raquo;{0}&laquo; gibt es kein Benutzerkonto. Hast du dich vertippt?',
     'USER_ACCOUNT_NOT_VERIFIED': 'Du hast deine E-Mail-Adresse noch nicht bestätigt. Lass dir die <a id="verify-account" href="/json/auth/verification/{0}">E-Mail zur Verifizierung noch einmal senden</a>.',
     'USER_ACCOUNT_ALREADY_EXISTS': 'Der Account existiert bereits, logge dich ein.',
-    'USER_ACCOUNT_VERIFICATION_LINK_SENT': 'Zur Verifizeirung deiner E-Mail-Adresse haben wir dir eine E-Mail gesendet. Schau in deinem Posteingang nach und klick auf den enthaltenen Link.',
+    'USER_ACCOUNT_VERIFICATION_LINK_SENT': 'Zur Verifizierung deiner E-Mail-Adresse haben wir dir eine E-Mail gesendet. Schau in deinem Posteingang nach und klick auf den enthaltenen Link.',
     'USER_ACCOUNT_EMAIL_UPDATED': 'Die eingegebene E-Mail-Adresse wurde erfolgreich aktualisiert.',
     'USER_ACCOUNT_PASSWORD_UPDATED': 'Das eingegebene Passwort wurde erfolgreich aktualisiert',
     'USER_ACCOUNT_PASSWORD_RESET': 'An die E-Mail-Adresse &raquo;{0}&laquo; wurde ein neues Passwort versendet. Du solltest das Passwort direkt beim nächsten Login wieder ändern.',
