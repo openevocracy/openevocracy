@@ -348,10 +348,7 @@ exports.query = function(req, res) {
     var last_level_promise = topic_promise.then(function(topic) {
         return db.collection('groups').countAsync({'tid': topic._id, 'level': topic.level}).
             then(function(numGroupsInCurrentLevel) {
-                if(numGroupsInCurrentLevel == 1)
-                    return 1;
-                else
-                    return 0; 
+                return (numGroupsInCurrentLevel == 1) ? 1 : 0;
             });
     });
     

@@ -44,7 +44,12 @@ mkdir data
 
 ### 3. Customize config.js
 
-In `public/js/setup/config.js` you can customize the config. There are different config sets, one for productive use and one for debugging. You can choose the config set in the end of the file.
+First copy the default config:
+```shell
+cp public/js/setup/configs.default.js public/js/setup/configs.js
+```
+
+Then customize the copied config in `public/js/setup/config.js`. There are different config sets, one for productive use and one for debugging. You can choose the config set in the end of the file.
 
 #### Necessary changes
 

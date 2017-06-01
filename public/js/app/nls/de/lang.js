@@ -132,6 +132,8 @@ define({
     '{0} entered the chat room.': '{0} ist dem Chatroom beigetreten.',
     '{0} left the chat room.': '{0} hat den Chatroom verlassen.',
     
+    'current version': 'Aktuelle Version',
+    
     /* *** Alerts *** */
     
     'USER_PASSWORT_NOT_CORRECT': 'Das Passwort ist nicht korrekt. Hast du dein <a class="pwforgot" href="{0}">Passwort vergessen</a>?',

@@ -43,7 +43,7 @@ app.set('port', process.env.PORT || process.env.PORT);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-app.use(favicon('public/img/favicon.ico'));
+app.use(favicon('public/img/favicon.png'));
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
