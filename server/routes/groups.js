@@ -18,20 +18,11 @@ var utils = require('../utils');
 
 function calculateNumberOfGroups(numTopicParticipants) {
     
-    // constants
-    var groupSize = 4.5; // group size is 4 or 5
-    var limitSimpleRule = 50; // number of topic participants (if more then x topic participants, complex rule is used)
-    // calculated values
-    var groupMinSize = (groupSize-0.5);
-    var groupMaxSize = (groupSize+0.5);
+    // TODO throw error if group size is smaller than 3
+    //if(cfg.GROUP_SIZE < 3)
     
-    var numGroups;
-    if(numTopicParticipants>limitSimpleRule)
-        numGroups = numTopicParticipants/groupSize; // simple rule, ideally all groups are 5, group size 4 only exception
-    else
-        numGroups = numTopicParticipants/groupMaxSize; // complex rule, 4 and 5 uniformly distributed
-    numGroups = Math.ceil(numGroups); // round up to next integer
-    console.log('rounded groups: '+numGroups);
+    var numGroups = Math.ceil(numTopicParticipants/cfg.GROUP_SIZE); // round up to next integer
+    console.log('number of groups: ', numGroups);
     
     return numGroups;
 }

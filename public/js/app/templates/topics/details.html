@@ -1,6 +1,6 @@
 <div class="btn-group pull-right" role="group">
     {{#ifis stage STAGE_SELECTION}}
-    <button class="btn btn-raised btn-sm vote{{#if voted}} btn-success{{else}} btn-primary{{/if}}" title="{{#if voted}}unvote{{else}}vote{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
+    <button class="btn btn-raised btn-sm vote{{#if voted}} btn-success{{else}} btn-primary{{/if}}" title="{{#if voted}}{{i18n "unmark as relevant"}}{{else}}{{i18n "mark as relevant"}}{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
     <!-- TODO in v0.2 <button class="btn btn-default btn-sm merge" title="merge request"><span class="fa"></span></button>-->
     
     {{#if pid}}

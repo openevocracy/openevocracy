@@ -120,6 +120,10 @@ function sendEmailToAllActiveGroupMembers(mailType, topic, mailSubject, mailText
 exports.sendEmailToAllActiveGroupMembers = sendEmailToAllActiveGroupMembers;
 
 function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailText) {
+    // if lazy reminder is disabled then exit early
+    if(cfg.REMINDER_GROUP_LAZY < 0)
+        return Promise.resolve();
+    
     // Remind members who where not active in that group for a specific time
     return db.collection('groups').find({ 'tid': topic._id, 'level': topic.level }).
     toArrayAsync().then(function(groups) {
