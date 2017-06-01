@@ -58,6 +58,9 @@ Change `EVOCRACY_HOST` to the URL where the instance will be reachable.
 ## Run OpenEvocracy
 
 ```shell
+export IP=localhost
+export PORT=80
+
 mongod --dbpath=data --nojournal &
 node app.js
 ```
