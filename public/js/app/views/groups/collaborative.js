@@ -44,6 +44,11 @@ define([
         },
         
         events: {
+            'keydown #editor': function(e) {
+                var code = e.keyCode || e.which;
+                if(code == 90 && e.ctrlKey)
+                    e.preventDefault();
+            },
             'click .member-title': function(e) {
                 e.stopPropagation();
                 // Show details of member

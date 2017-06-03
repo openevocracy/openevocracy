@@ -61,7 +61,7 @@ var starttext = {
                 }
             },
             {
-                "insert": "Unbehandelte und kritische Aspekte ...\n\n"
+                "insert": "Aspekte bei denen noch Uneinigkeit besteht ...\n\n"
             },
             {
                 "insert": "(Hinweis: Dies ist nur eine Vorlage und muss nicht zwingend beachtet werden.)\n\n\n"
@@ -100,7 +100,7 @@ var starttext = {
                 }
             },
             {
-                "insert": "Untreated and critical aspects ...\n\n"
+                "insert": "Aspects were you still disagree ...\n\n"
             },
             {
                 "insert": "(Note: This is just a template and may be ignored.)\n"

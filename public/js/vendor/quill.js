@@ -6047,11 +6047,12 @@ var History = function (_Module) {
         _this.transform(delta);
       }
     });
-    _this.quill.keyboard.addBinding({ key: 'Z', shortKey: true }, _this.undo.bind(_this));
-    _this.quill.keyboard.addBinding({ key: 'Z', shortKey: true, shiftKey: true }, _this.redo.bind(_this));
+
+    /* this.quill.keyboard.addBinding({ key: 'Z', shortKey: true }, this.undo.bind(this));
+    this.quill.keyboard.addBinding({ key: 'Z', shortKey: true, shiftKey: true }, this.redo.bind(this));
     if (/Win/i.test(navigator.platform)) {
-      _this.quill.keyboard.addBinding({ key: 'Y', shortKey: true }, _this.redo.bind(_this));
-    }
+      this.quill.keyboard.addBinding({ key: 'Y', shortKey: true }, this.redo.bind(this));
+    } */
     return _this;
   }
 

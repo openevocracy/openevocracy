@@ -26,6 +26,11 @@ define([
         },
         
         events: {
+            'keydown #editor': function(e) {
+                var code = e.keyCode || e.which;
+                if(code == 90 && e.ctrlKey)
+                    e.preventDefault();
+            },
             'click .edit': function(e) {
                 if($('.edit').hasClass('btn-warning')) {
                     // currently in editor, save content
