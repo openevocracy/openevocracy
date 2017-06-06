@@ -30,8 +30,8 @@ define([
         childEvents: {
             show: function() {
                 var locale = localStorage.getItem('locale') || 'de';
-                var jquery = '[data-locale=' + locale + ']';
-                $(jquery).parent().addClass('active');
+                var dataLocale = '[data-locale=' + locale + ']';
+                $(dataLocale).parent().addClass('active');
             }
         }
     });

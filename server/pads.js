@@ -166,6 +166,7 @@ function gulfIO(masterDoc, slaveSocket) {
 
     slaveSocket.on('disconnect', function() {
         console.log('disconnect');
+        masterDoc.detachLink(masterToSlaveLink);
         slaveDoc.close();
     });
 }
@@ -179,7 +180,6 @@ function createPadAsync(pid, expiration) {
         storageAdapter: adapter,
         ottype: ottype
     });
-    //adapter.docId = doc.id;
     masterDoc.id = adapter.docId;
     
     return masterDoc.initializeFromStorage(starttext).then(function() {

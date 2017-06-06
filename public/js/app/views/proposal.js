@@ -3,6 +3,7 @@ define([
     'configs',
     'application',
     'Marionette',
+    'quill',
     'hbs!templates/proposal',
     'views/pad',
     '../utils'
@@ -11,6 +12,7 @@ define([
     cfg,
     app,
     Marionette,
+    Quill,
     Template,
     Pad,
     u
@@ -25,6 +27,7 @@ define([
         events: {
             'click .edit': function(e) {
                 if($('.edit').hasClass('btn-warning')) {
+                    // currently in editor, save content
                     $('.edit').removeClass('btn-warning').addClass('btn-primary');
                     $('.edit span').removeClass('fa-floppy-o').addClass('fa-pencil');
                     $('.edit').prop('title', u.i18n('Edit'));
@@ -38,7 +41,11 @@ define([
                     }.bind(this));
                     //this.render();
                     
+                    // destroy pad
+                    this.pad.destroy();
+                    
                 } else {
+                    // currently in body, open editor
                     $('.edit').removeClass('btn-primary').addClass('btn-warning');
                     $('.edit span').removeClass('fa-pencil').addClass('fa-floppy-o');
                     $('.edit').prop('title', u.i18n('Leave editor mode and save changes'));
@@ -46,6 +53,12 @@ define([
                     $('.editor-wrapper').removeClass("hidden");
                     $('#body').addClass("hidden");
                     $('.docstate').removeClass("hidden");
+                    
+                    // create pad
+                    var pid = this.model.get('pid');
+                    var quill = new Quill('#editor', { theme: 'snow' });
+                    this.editor = quill;
+                    this.pad = new Pad(pid, quill, this.onUpdateDocumentState.bind(this));
                 }
             }
         },
@@ -53,14 +66,9 @@ define([
         onShow: function() {
             // Set link in navigation to active
             u.setActive('nav-prp-'+this.model.get('tid'));
-            
-            // initalize pad
-            Pad.onShow.bind(this)();
         },
-        
-        updateDocumentState: function() {
-            Pad.updateDocumentState.bind(this)();
-            
+
+        onUpdateDocumentState: function() {
             var words = this.editor.getText().split(/\s+\b/).length;
             if(words >= cfg.MIN_WORDS_PROPOSAL) {
                 $('.valid').addClass('accepted').attr('title', u.i18n('Proposal requirements fulfilled'));

@@ -49,6 +49,9 @@ define([
                     // bidirectional server-sync
                     // view will rerender automatically due to model change-event
                     this.model.save({'name': name}, {patch: true});
+                    
+                    // destroy pad
+                    this.pad.destroy();
                 } else {
                     // currently in body, open editor
                     $('.edit').removeClass('btn-primary').addClass('btn-warning');
@@ -60,6 +63,11 @@ define([
                     // title heading to input field
                     var inputField = '<input id="titleInput" class="h2-edit" type="text" value="'+this.model.get('name')+'"></input>';
                     $('.topic-title').replaceWith(inputField);
+                    
+                    // create pad
+                    var pid = this.model.get('pid');
+                    var quill = new Quill('#editor', { theme: 'snow' })
+                    this.pad = new Pad(pid, quill);
                 }
             },
             'click .del': function(e) {
@@ -102,9 +110,6 @@ define([
         },
         
         onDOMexists: function() {
-            // recreate pad
-            Pad.onShow.bind(this)(); // binding gives access to the pad id
-            
             //var date = Date.now() + (7*24*3600*1000);
             var date = this.model.get('nextDeadline');
             $('#timeremaining').countdown(date, function(event) {
@@ -113,10 +118,6 @@ define([
                 // Update model if timer has finished
                 this.model.fetch();
             }.bind(this));
-        },
-        
-        updateDocumentState: function() {
-            Pad.updateDocumentState.bind(this)();
         }
     });
     

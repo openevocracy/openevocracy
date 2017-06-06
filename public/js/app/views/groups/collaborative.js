@@ -129,6 +129,7 @@ define([
         onDestroy: function() {
             clearInterval(this.timer);
             Chat.remove.bind(this)();
+            this.pad.destroy();
         },
 
         onRender: function() {
@@ -193,7 +194,8 @@ define([
                 });
                 
                 // Show Quill-editor
-                Pad.onShow.bind(this)(quill);
+                var pid = this.model.get('pid');
+                this.pad = new Pad(pid, quill);
                 
                 // Show chat
                 Chat.onShow.bind(this)(messageCallback, onlineCallback, uid, uname);
@@ -286,10 +288,6 @@ define([
                 $el.html(strHtml);
             }
             
-        },
-        
-        updateDocumentState: function() {
-            Pad.updateDocumentState.bind(this)();
         },
         
         saveRating: function(model, type, score, e) {

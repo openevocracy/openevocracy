@@ -16,21 +16,11 @@ define([
     u
     ) {
     
-    var Pad = {
-        onShow: function(quill) {
-            // close connection if it already exits to avoid multiple connections
-            if(this.pad_socket) {
-                console.log('disconnect');
-                this.pad_socket.disconnect();
-            }
-            
+    function Pad(pid, quill, onUpdateDocumentState) {
+        // constructor
+        {
             this.pad_socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
-            
-            if(_.isUndefined(quill))
-                this.editor = new Quill('#editor', { theme: 'snow' });
-            else
-                this.editor = quill;
-            
+
             this.pad_socket.on('setContents', function(contents) {
                 console.log('setContents');
                 //console.log(JSON.stringify(contents));
@@ -46,6 +36,7 @@ define([
                 this.updateDocumentState();
             }.bind(this));
             
+            this.editor = quill;
             this.editor.on('text-change', function(delta, oldDelta, source) {
                 if(source != 'user')
                     return;
@@ -57,10 +48,10 @@ define([
             }.bind(this));
             
             // this packet commands the server to initialize the pad
-            this.pad_socket.emit('pad_identity', {'pid': this.model.get('pid')});
-        },
+            this.pad_socket.emit('pad_identity', {'pid': pid});
+        }
         
-        updateDocumentState: function() {
+        this.updateDocumentState = function() {
             // Count words
             var words = this.editor.getText().split(/\s+\b/).length;
             
@@ -95,13 +86,19 @@ define([
                     stars += '<i class="fa fa-star-o" aria-hidden="true"></i>';
             }
             $('.state-stars').html(stars);
-        },
+            
+            // call callback
+            if(!_.isUndefined(onUpdateDocumentState))
+                onUpdateDocumentState();
+        };
         
-        remove: function() {
+        this.destroy = function() {
             $('.ql-toolbar').remove();
             $('#editor').empty().removeClass();
-        }
-    };
+            
+            this.pad_socket.disconnect();
+        };
+    }
     
     return Pad;
 });
