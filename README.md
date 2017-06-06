@@ -61,7 +61,7 @@ Change `EVOCRACY_HOST` to the URL where the instance will be reachable.
 export IP=localhost
 export PORT=80
 
-mongod --dbpath=data --nojournal &
+mongod --dbpath=data --nojournal --bind_ip=127.0.0.1 &
 node app.js
 ```
 
