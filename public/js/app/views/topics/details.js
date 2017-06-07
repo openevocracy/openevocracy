@@ -1,6 +1,7 @@
 define([
     'jquery',
     'Marionette',
+    'Quill',
     'hbs!templates/topics/details',
     'views/pad',
     '../../utils',
@@ -9,6 +10,7 @@ define([
 ], function(
     $,
     Marionette,
+    quill,
     Template,
     Pad,
     u
