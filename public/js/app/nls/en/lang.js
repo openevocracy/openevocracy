@@ -7,6 +7,10 @@ define({
     "PROPOSAL_QUERIED_NOT_IN_PROPOSAL_STAGE": "The related topic is not in proposal stage any more.",
     "GROUP_QUERIED_NOT_ACTIVE": "The group is not active any more.",
     
+    'DEFAULT_TOPIC_TEXT': 'Our suggestion: Write a short summary on top of your topic description, such that other readers can get a quick overview.',
+    'DEFAULT_PROPOSAL_TEXT': 'Our suggestion: Write a short summary on top of your proposal, such that other readers can get a quick overview.',
+    'DEFAULT_GROUP_TEXT': 'Our suggestion: Write a short summary on top of your document, such that other readers can get a quick overview. Also add a section in the end where you collect all aspects where no consensus was achieved, such that further groups can consider those aspects easier.',
+    
     /* *** Alerts *** */
     
     'USER_PASSWORT_NOT_CORRECT': 'Password is not correct. Did you <a class="pwforgot" href="{0}">forget your password</a>?',

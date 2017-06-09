@@ -167,6 +167,9 @@ define([
             // Set height of editor to have the size of the navigation
             $('#editor').css('min-height', $('.navigation-content').height() - $('.ql-toolbar').outerHeight());
             $('#chat-messages').css('max-height', $('#editor').height());
+            
+            // Show social share buttons
+            u.showShareButtons();
         },
         
         onDOMexists: function() {
@@ -181,6 +184,7 @@ define([
                 // Initialize Quill with current user
                 var quill = new Quill('#editor', {
                     theme: 'snow',
+                    placeholder: u.i18n('DEFAULT_GROUP_TEXT'),
                     modules: {
                         authorship: {
                             enabled: true,

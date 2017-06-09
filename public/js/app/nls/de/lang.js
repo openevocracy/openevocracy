@@ -83,6 +83,9 @@ define({
     
     "My proposal": "Mein Entwurf",
     "Document status": "Status des Dokuments",
+    "Proposal status": "Status des Entwurfs",
+    "Proposal is valid": "Entwurf ist gültig",
+    "Proposal is not valid": "Entwurf ist nicht gültig",
     "Topic status": "Status des Themas",
     "Time remaining": "Verbleibende Zeit",
     "in level": "in Level",
@@ -141,6 +144,11 @@ define({
     'superior': 'Überragend',
     
     'current version': 'Aktuelle Version',
+    'Share this page': 'Teile diese Seite',
+    
+    'DEFAULT_TOPIC_TEXT': 'Unsere Empfehlung: Schreibe oben im Dokument eine kurze Zusammenfassung der Thematik, so dass die Leser schnell einen Überblick bekommen können.',
+    'DEFAULT_PROPOSAL_TEXT': 'Unsere Empfehlung: Schreibe oben im Dokument eine kurze Zusammenfassung deines Entwurfs, so dass die Leser schnell einen Überblick bekommen können.',
+    'DEFAULT_GROUP_TEXT': 'Unsere Empfehlung: Schreibt oben im Dokument eine kurze Zusammenfassung eures Entwurfs, so dass die Leser schnell einen Überblick bekommen können. Fügt außerdem am Ende einen Abschnitt ein in dem alle Apekte enthalten sind bei denen ihr keinen Konsens erreichen konntet, so dass zukünftige Gruppen schnell darauf aufmerksam werden.',
     
     /* *** Alerts *** */
     

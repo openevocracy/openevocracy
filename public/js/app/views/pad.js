@@ -16,15 +16,20 @@ define([
     u
     ) {
     
-    function Pad(pid, quill, onUpdateDocumentState) {
+    function Pad(pid, quill, onUpdatePad) {
         // constructor
         {
+            $('#editor').addClass('loading');
+            $('#editor .ql-editor').attr('contenteditable', 'false');
             this.pad_socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
 
             this.pad_socket.on('setContents', function(contents) {
                 console.log('setContents');
                 //console.log(JSON.stringify(contents));
                 this.editor.setContents(contents);
+                
+                $('#editor').removeClass('loading');
+                $('#editor .ql-editor').attr('contenteditable', 'true');
             
                 this.updateDocumentState();
             }.bind(this));
@@ -88,8 +93,8 @@ define([
             $('.state-stars').html(stars);
             
             // call callback
-            if(!_.isUndefined(onUpdateDocumentState))
-                onUpdateDocumentState();
+            if(!_.isUndefined(onUpdatePad))
+                onUpdatePad();
         };
         
         this.destroy = function() {

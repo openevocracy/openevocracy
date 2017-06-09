@@ -59,6 +59,8 @@ label { font-weight: 300; font-size: 1em; color: inherit; line-height: 1em; }
 
 #loading .fa { font-size: 40px; }
 
+.jssocials-share { margin-right: 0.3em; }
+
 /* ### CONTAINER WIDTH ### */
 
 @media (min-width: 1600px) {
@@ -128,9 +130,9 @@ footer { font-size: 0.8em; text-align: center; padding: 10px 0 15px 0; }
 #topic-list .stage2 { background-color: #d9534f; } /* consensus */
 #topic-list .stage3 { background-color: #5cb85c; } /* passed */
 
-/* ### GROUPS ### */
+/* ### PROPOSAL ### */
 
-/*#members table a { text-decoration: none; }*/
+.propstate button { cursor: default; }
 
 /* ### GROUP COLLABORATIVE ### */
 
@@ -142,6 +144,8 @@ footer { font-size: 0.8em; text-align: center; padding: 10px 0 15px 0; }
 #body p { word-wrap: break-word; }
 
 #editor { height: 400px; }
+#editor.loading { background-color: #bdbdbd; }
+#editor.loading .ql-editor.ql-blank::before { color: transparent; }
 .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #e0e0e0; }
 .ql-container.ql-snow { border: none; }
 

@@ -1,16 +1,22 @@
 define([
     'jquery',
     'underscore',
+    'jsSocials',
     'constants',
     'i18n!nls/lang'
     ], function(
     $,
     _,
+    jsSocials,
     C,
     i18n
     ) {
     
-    // This needs to be on top, since it needs to run before functions are instanciated
+    /*
+    ** This needs to be on top, since it needs to run before functions are instanciated
+    */
+    
+    // Initalize active links event
     $(document.body).on('click', '[data-link]', function(event) {
         var target = $(event.target);
         if(target.is('span'))
@@ -103,6 +109,15 @@ define([
         
         replaceUrl: function(str) {
             return str.replace(/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i, '<a href="$&" target="_blank">$&</a>');
+        },
+        
+        showShareButtons: function() {
+            // Activate social share functionality
+            $("#shareIcons").jsSocials({
+                showLabel: false,
+                showCount: false,
+                shares: ["email", "twitter", "facebook", "googleplus", "linkedin", "telegram"]
+            });
         }
     };
 

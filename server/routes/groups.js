@@ -131,7 +131,7 @@ exports.createGroupsAsync = function(topic) {
         var send_mail_promise =
         db.collection('users').find({'_id': { $in: group_members }},{'email': true}).
         toArrayAsync().then(function(users) {
-            mail.sendMail(_.pluck(users,'email').join(),
+            mail.sendMail(_.pluck(users,'email'),
                 strformat(i18n.t('EMAIL_CONSENSUS_START_SUBJECT'), topic.name),
                 strformat(i18n.t('EMAIL_CONSENSUS_START_MESSAGE'), topic.name, gid.toString())
             );
@@ -207,7 +207,7 @@ exports.remixGroupsAsync = function(topic) {
                 }).then(function(participants) {
                     return db.collection('users').find({'_id': { $in: _.pluck(participants, 'uid') }}, {'email': true}).
                         toArrayAsync().then(function(users) {
-                            mail.sendMail(_.pluck(users,'email').join(),
+                            mail.sendMail(_.pluck(users,'email'),
                                 strformat(i18n.t('EMAIL_TOPIC_PASSED_SUBJECT'), topic.name),
                                 strformat(i18n.t('EMAIL_TOPIC_PASSED_MESSAGE'), topic.name, topic._id)
                             );
@@ -235,7 +235,7 @@ exports.remixGroupsAsync = function(topic) {
             var send_mail_promise =
             db.collection('users').find({'_id': { $in: group_members }},{'email': true}).
             toArrayAsync().then(function(users) {
-                mail.sendMail(_.pluck(users,'email').join(),
+                mail.sendMail(_.pluck(users,'email'),
                     strformat(i18n.t('EMAIL_LEVEL_CHANGE_SUBJECT'), topic.name),
                     strformat(i18n.t('EMAIL_LEVEL_CHANGE_MESSAGE'), topic.name, gid.toString())
                 );

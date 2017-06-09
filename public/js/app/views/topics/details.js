@@ -1,7 +1,7 @@
 define([
     'jquery',
     'Marionette',
-    'Quill',
+    'quill',
     'hbs!templates/topics/details',
     'views/pad',
     '../../utils',
@@ -10,7 +10,7 @@ define([
 ], function(
     $,
     Marionette,
-    quill,
+    Quill,
     Template,
     Pad,
     u
@@ -68,7 +68,7 @@ define([
                     
                     // create pad
                     var pid = this.model.get('pid');
-                    var quill = new Quill('#editor', { theme: 'snow' })
+                    var quill = new Quill('#editor', { theme: 'snow', placeholder: u.i18n('DEFAULT_TOPIC_TEXT') });
                     this.pad = new Pad(pid, quill);
                 }
             },
@@ -109,6 +109,9 @@ define([
             
             // Set link in navigation to active
             u.setActive('nav-tpc-'+this.model.get('_id'));
+            
+            // Show social share buttons
+            u.showShareButtons();
         },
         
         onDOMexists: function() {

@@ -43,6 +43,7 @@
         </div>
         {{#ifis stage STAGE_PASSED}}<div class="block">{{> topic_final}}</div>{{/ifis}}
         {{#ifisOr stage STAGE_CONSENSUS STAGE_PASSED}}<div class="block">{{> topic_levels}}</div>{{/ifisOr}}
+        <div class="block">{{> social}}</div>
         <div class="block">{{> topic_statistics}}</div>
     </aside>
 </div>

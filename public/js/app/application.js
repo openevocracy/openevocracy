@@ -7,7 +7,6 @@ define([
   'layouts/splash',
   'layouts/application',
   'bootstrap',
-  'bootstrapcustom',
   'material'
 ], function (
   _,
@@ -38,7 +37,6 @@ define([
         
         // Fade out loading wheel
         $('#loading').fadeOut(500);
-        
         
         // Load material js functionality
         $.material.init();
@@ -76,22 +74,22 @@ define([
           function(CoreModule) {
             this.setAppLayout();
             this.module('core',CoreModule);
-            
             callback();
           }.bind(this));
     },
     
     loadSplashModule: function(callback) {
         require(['modules/splash'],
-          function(SplashModule) {
-            this.setSplashLayout();
-            this.module('splash',SplashModule);
-            
-            callback();
-            
-            // preload core module and app layout
-            require(['modules/core','layouts/application']);
-          }.bind(this));
+            function(SplashModule) {
+                this.setSplashLayout();
+                
+                this.module('splash', SplashModule);
+                
+                callback();
+                
+                // preload core module and app layout
+                require(['modules/core','layouts/application']);
+            }.bind(this));
       }
   });
   

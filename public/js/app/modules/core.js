@@ -22,6 +22,8 @@ define([
     'text!templates/partials/blocks/group_chat.html',
     'text!templates/partials/blocks/proposal_tabs.html',
     'text!templates/partials/blocks/proposal_state.html',
+    'text!templates/partials/blocks/document_state.html',
+    'text!templates/partials/blocks/social.html'
 ], function(
     Marionette,
     Handlebars,
@@ -45,7 +47,9 @@ define([
     GroupMembersBlockPartials,
     GroupChatBlockPartials,
     ProposalTabsBlockPartials,
-    ProposalStateBlockPartials
+    ProposalStateBlockPartials,
+    DocumentStateBlockPartials,
+    Social
     ) {
     
     var login = new Login();
@@ -86,6 +90,8 @@ define([
     Handlebars.registerPartial('group_chat', GroupChatBlockPartials);
     Handlebars.registerPartial('proposal_tabs', ProposalTabsBlockPartials);
     Handlebars.registerPartial('proposal_state', ProposalStateBlockPartials);
+    Handlebars.registerPartial('document_state', DocumentStateBlockPartials);
+    Handlebars.registerPartial('social', Social);
     
     return Module;
 });

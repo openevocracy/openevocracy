@@ -49,18 +49,24 @@ function mailHash(mailType, mailIdentifier, mailUser) {
 
 function sendMail(mailTo, mailSubject, mailText) {
     var mailOptions = {
-        from: '"Evocracy Project" <noreply@openevocracy.org>', // sender address
-        to: mailTo, // list of receivers
-        subject: mailSubject, // Subject line
-        text: mailText//, // plaintext body
+        'from': '"Evocracy Project" <noreply@openevocracy.org>', // sender address
+        //'to': mailTo, // list of receivers
+        'subject': mailSubject, // Subject line
+        'text': mailText//, // plaintext body
         //html: '<b>Welcome/b>' // html body
     };
     
+    // Avoid that string is seperated in characters
+    if(_.isString(mailTo))
+        mailTo = [mailTo];
+    
     if(cfg.MAIL) {
-        transporter.sendMail(mailOptions, function(error, info){
-            if(error)
-                return console.log(error);
-            console.log('Message sent: ' + info.response);
+        _.each(mailTo, function(receiver) {
+            transporter.sendMail(_.extend(mailOptions, {'to': receiver}), function(error, info){
+                if(error)
+                    return console.log(error);
+                console.log('Message sent: ' + info.response);
+            });
         });
     } else {
         console.log('Message was NOT sent: Configurations flag MAIL was set to false');

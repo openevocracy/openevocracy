@@ -1,5 +1,6 @@
 define([
     'jquery',
+    'underscore',
     'configs',
     'application',
     'Marionette',
@@ -9,6 +10,7 @@ define([
     '../utils'
 ], function(
     $,
+    _,
     cfg,
     app,
     Marionette,
@@ -35,6 +37,8 @@ define([
                     $('#body').removeClass("hidden");
                     $('.editor-wrapper').addClass("hidden");
                     $('.docstate').addClass("hidden");
+                    
+                    // fetch html content from server
                     this.model.fetch().done(function () {
                         $('#body').html(this.model.get('body'));
                         //$('#body').show();
@@ -56,9 +60,9 @@ define([
                     
                     // create pad
                     var pid = this.model.get('pid');
-                    var quill = new Quill('#editor', { theme: 'snow' });
+                    var quill = new Quill('#editor', { theme: 'snow', placeholder: u.i18n('DEFAULT_PROPOSAL_TEXT') });
                     this.editor = quill;
-                    this.pad = new Pad(pid, quill, this.onUpdateDocumentState.bind(this));
+                    this.pad = new Pad(pid, quill, this.onUpdateProposal.bind(this));
                 }
             }
         },
@@ -66,20 +70,32 @@ define([
         onShow: function() {
             // Set link in navigation to active
             u.setActive('nav-prp-'+this.model.get('tid'));
+            
+            // Initialite proposal state
+            this.onUpdateProposal();
         },
 
-        onUpdateDocumentState: function() {
-            var words = this.editor.getText().split(/\s+\b/).length;
+        onUpdateProposal: function() {
+            var text;
+            if(_.isUndefined(this.editor))
+                text = $('#body').text();
+            else
+                text = this.editor.getText();
+            
+            var words = text.split(/\s+\b/).length;
             if(words >= cfg.MIN_WORDS_PROPOSAL) {
-                $('.valid').addClass('accepted').attr('title', u.i18n('Proposal requirements fulfilled'));
-                $('.valid span').removeClass('fa-ban');
-                $('.valid span').addClass('fa-check');
+                $('.propstate button').addClass('btn-success').removeClass('btn-danger')
+                    .attr('title', u.i18n('Proposal requirements fulfilled'));
+                $('.propstate button span').text(u.i18n('Proposal is valid'));
+                $('.propstate i').removeClass('fa-ban');
+                $('.propstate i').addClass('fa-check');
             } else { 
-                $('.valid').removeClass('accepted').attr('title',
+                $('.propstate button').addClass('btn-danger').removeClass('btn-success').attr('title',
                     u.strformat(u.i18n('proposal requirements not fulfilled, {0} more words required'),
                                 (cfg.MIN_WORDS_PROPOSAL-words)));
-                $('.valid span').removeClass('fa-check');
-                $('.valid span').addClass('fa-ban');
+                $('.propstate button span').text(u.i18n('Proposal is not valid'));
+                $('.propstate i').removeClass('fa-check');
+                $('.propstate i').addClass('fa-ban');
             }
         }
     });

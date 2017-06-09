@@ -21,11 +21,9 @@
       handlebars: 'https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min',
       ColorHash: '../bower_components/color-hash/dist/color-hash',
       bootstrap: '//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min',
-      bootstrapcustom: '../vendor/bootstrap.custom',
       material: '../vendor/material.min',
       moment: '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min',
       ratyfa: '../vendor/jquery.raty-fa',
-      //isactive: '../vendor/isactive',
       parsley: '//cdnjs.cloudflare.com/ajax/libs/parsley.js/2.3.5/parsley.min',
       constants: '../setup/constants',
       configs: '../setup/configs',
@@ -34,7 +32,8 @@
       socketio: 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.2/socket.io.slim',
       strftime: '../vendor/strftime.min',
       //Embed: '../vendor/embed.min',
-      emojify: '//cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/js/emojify.min'
+      emojify: '//cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/js/emojify.min',
+      jsSocials: '//cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials.min'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for
@@ -77,9 +76,6 @@
       },
       bootstrap : {
         deps: ['jquery']
-      },
-      bootstrapcustom : {
-        deps: ['bootstrap']
       },
       material : {
         deps: ['bootstrap']
