@@ -426,7 +426,7 @@ exports.query = function(req, res) {
         
         // flash message in client if group not editable
         if( topic.stage != C.STAGE_CONSENSUS ||
-           (topic.stage != C.STAGE_CONSENSUS && topic.level == group.level)) {
+           (topic.stage == C.STAGE_CONSENSUS && topic.level != group.level)) {
             
             // append proposal body
             group.body = pads.getPadHTMLAsync(proposal.pid);

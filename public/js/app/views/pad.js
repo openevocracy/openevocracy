@@ -17,19 +17,40 @@ define([
     ) {
     
     function Pad(pid, quill, onUpdatePad) {
-        // constructor
-        {
+        
+        this.activate = function() {
+            $('#editor').removeClass('loading');
+            $('#editor .ql-editor').attr('contenteditable', 'true');
+        };
+        
+        this.deactivate = function() {
+            // TODO parameter "message", to show message depending on reason, why pad is deactivated (loading, connection lost, group expired, etc.)
             $('#editor').addClass('loading');
             $('#editor .ql-editor').attr('contenteditable', 'false');
+        };
+        
+        this.destroy = function() {
+            $('.ql-toolbar').remove();
+            $('#editor').empty().removeClass();
+            
+            this.pad_socket.disconnect();
+        };
+        
+        // constructor
+        {
+            // Deactivate editing
+            this.deactivate();
+            
+            // Connect to socket
             this.pad_socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
-
+            
             this.pad_socket.on('setContents', function(contents) {
                 console.log('setContents');
                 //console.log(JSON.stringify(contents));
                 this.editor.setContents(contents);
                 
-                $('#editor').removeClass('loading');
-                $('#editor .ql-editor').attr('contenteditable', 'true');
+                // Activate editing
+                this.activate();
             
                 this.updateDocumentState();
             }.bind(this));
@@ -45,7 +66,7 @@ define([
             this.editor.on('text-change', function(delta, oldDelta, source) {
                 if(source != 'user')
                     return;
-
+                
                 //console.log('Editor contents have changed', JSON.stringify(delta));
                 this.pad_socket.emit('change', delta);
                 
@@ -95,13 +116,6 @@ define([
             // call callback
             if(!_.isUndefined(onUpdatePad))
                 onUpdatePad();
-        };
-        
-        this.destroy = function() {
-            $('.ql-toolbar').remove();
-            $('#editor').empty().removeClass();
-            
-            this.pad_socket.disconnect();
         };
     }
     

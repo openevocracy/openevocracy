@@ -28,11 +28,6 @@ define([
         },
         
         events: {
-            'keydown #editor': function(e) {
-                var code = e.keyCode || e.which;
-                if(code == 90 && e.ctrlKey)
-                    e.preventDefault();
-            },
             'click .edit': function(e) {
                 if($('.edit').hasClass('btn-warning')) {
                     // currently in editor, save content
@@ -115,7 +110,6 @@ define([
         },
         
         onDOMexists: function() {
-            //var date = Date.now() + (7*24*3600*1000);
             var date = this.model.get('nextDeadline');
             $('#timeremaining').countdown(date, function(event) {
                 $(this).html(event.strftime(u.i18n('%D days, %H:%M:%S')));

@@ -16,6 +16,7 @@ var errorHandler = require('errorhandler');
 var http = require('http');
 var cookieParser = require('cookie-parser');
 //var cookieSession = require('cookie-session');
+var requirejs = require('requirejs');
 var utils = require('./server/utils');
 var pads = require('./server/pads');
 var chats = require('./server/chats');
@@ -25,6 +26,8 @@ var db = require('./server/database').db;
 var mail = require('./server/mail');
 var path = require('path');
 var app = express();
+
+var cfg = requirejs('public/js/setup/configs');
 
 // initilize mail
 mail.initializeMail();
@@ -55,7 +58,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // setup cronjob to run every minute
 var job = new CronJob({
-  cronTime: '*/1 * * * *',
+  cronTime: '*/'+cfg.CRON_INTERVAL+' * * * *',
   onTick: function() {
       topics.manageAndListTopicsAsync().then(function(topics) {
         _.map(topics, mail.sendTopicReminderMessages); // Promise.map does not work above
@@ -147,6 +150,15 @@ app.get('/test/create_topic_proposal_stage', tests.create_topic_proposal_stage )
 app.get('/test/create_groups', tests.create_groups );
 app.get('/test/remix_groups', tests.remix_groups );
 app.get('/test/clean_database', tests.clean_database );
+
+// ####################
+// ### 404 handling ###
+// ####################
+
+app.use(function(req, res, next){
+  // TODO redirect to specific 404 page
+  res.redirect(cfg.EVOCRACY_HOST);
+});
 
 // ###################
 // ### S E R V E R ###

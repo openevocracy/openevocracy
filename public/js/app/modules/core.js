@@ -76,6 +76,10 @@ define([
         App.router.route('topic/:id', 'topic_index', topic.route_topic_index.bind(topic));
         App.router.route('proposal/:id', 'proposal_index', proposal.route_proposal_index.bind(proposal));
         App.router.route('group/:id', 'group_index', group.route_group_index.bind(group));
+        
+        // Handle 404 error
+        // TODO redirect to specific 404 page
+        App.router.route('*notFound', 'topics_index', topics.route_topics_index.bind(topics));
     };
     
     Handlebars.registerPartial('alert', AlertPartials);

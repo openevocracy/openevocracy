@@ -40,15 +40,10 @@ define([
             starOff : 'fa fa-fw fa-heart-o', starOn  : 'fa fa-fw fa-heart' },
             
         modelEvents: {
-            'change:body': 'render'
+            'change': 'render'
         },
         
         events: {
-            'keydown #editor': function(e) {
-                var code = e.keyCode || e.which;
-                if(code == 90 && e.ctrlKey)
-                    e.preventDefault();
-            },
             'click .member-title': function(e) {
                 e.stopPropagation();
                 // Show details of member
@@ -119,11 +114,11 @@ define([
             });
             
             // Create timer for automatic refreshing of topic details
-            if(!this.model.has('body'))
+            /*if(!this.model.has('body'))
                 this.timer = setInterval(function() {
                     // Level/Stage change depends on cronjob
                     this.model.fetch();
-                }.bind(this), 60000);
+                }.bind(this), 60000);*/
         },
         
         onDestroy: function() {
@@ -136,8 +131,8 @@ define([
             if(this.loaded)
                 this.onDOMexists();
             
-            if(this.model.has('body'))
-                clearInterval(this.timer);
+            /*if(this.model.has('body'))
+                clearInterval(this.timer);*/
         },
         
         onShow: function() {
@@ -203,13 +198,26 @@ define([
                 
                 // Show chat
                 Chat.onShow.bind(this)(messageCallback, onlineCallback, uid, uname);
-            }
             
-            // Timer in docstate block
-            var date = this.model.get('nextDeadline');
-            $(".group-time-remain").countdown(date)
-                .on('update.countdown', function(event) { $(this)
-                .html(event.strftime(u.i18n("%D days, %H:%M:%S"))); });
+                // Timer in docstate block
+                var date = this.model.get('nextDeadline');
+                if(date != conf.DURATION_NONE) {
+                    $(".group-time-remain").countdown(date)
+                        .on('update.countdown', function(event) {
+                            $(this).html(event.strftime(u.i18n("%D days, %H:%M:%S")));
+                        }).on('finish.countdown', function(event) {
+                            // Deactivate editing
+                            this.pad.deactivate();
+                            
+                            // Update model if timer has finished.
+                            // (This is required because the cronjob triggers
+                            // the level change a little too late.)
+                            setTimeout(function(){
+                                this.model.fetch();
+                            }.bind(this), conf.CRON_INTERVAL*60000);
+                        }.bind(this));
+                }
+            }
         },
         
         setCounter: function(value) {
