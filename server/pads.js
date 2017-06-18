@@ -93,24 +93,26 @@ var padIdToDocMap = {};
 var docIdToPadMap = {};
 
 function createPadAsync(pid, expiration) {
-    var adapter = new MongoskinAdapter(db, ObjectId());
+    // Initalize MongoskinAdapter with db and document id
+    var did = ObjectId();
+    var adapter = new MongoskinAdapter(db, did);
     var masterDoc = new gulf.Document({
         storageAdapter: adapter,
         ottype: ottype
     });
-    masterDoc.id = adapter.docId;
+    masterDoc.id = did;
     
     return masterDoc.initializeFromStorage(starttext).then(function() {
         // Create pad object
         var pad = {
             '_id': pid,
-            'did': masterDoc.id,
+            'did': did,
             'expiration': expiration
         };
         
         // Set values to maps (cache)
         padIdToDocMap[pid] = masterDoc; // TODO Reset
-        docIdToPadMap[masterDoc.id] = pad;
+        docIdToPadMap[did] = pad;
         
         // Store pad object in pad collection
         return db.collection('pads').insertAsync(pad);
@@ -133,11 +135,13 @@ exports.updatePadExpirationAsync = function(pid, expiration) {
 };
 
 function getPadDocAsync(pid) {
+    console.log(pid);
     // check if document is in map first
     var masterDoc = padIdToDocMap[pid];
     if (!_.isUndefined(masterDoc))
         return Promise.resolve(masterDoc);
-
+    
+    console.log('');
     // if not in map, load or handle error
     return db.collection('pads').
         findOneAsync({ '_id': pid }).then(function(pad) {

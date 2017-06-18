@@ -98,7 +98,7 @@ define([
             App.eventAggregator.bind('destroyTopic', this.onDestroyTopic);
             
             // initialize filter/sort settings
-            this.stageSelected = {"-1": false, "0": true, "1": true, "2": true, "3": false};
+            this.stageSelected = {"-1": false, "0": true, "1": true, "2": true, "3": true};
             this.deadlineSortFactor = 1;
             
             // create timer for automatic refreshing of list

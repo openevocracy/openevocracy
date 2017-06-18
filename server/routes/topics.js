@@ -16,13 +16,13 @@ var pads = require('../pads');
 var utils = require('../utils');
 var mail = require('../mail');
 
-function getDeadline(nextStage, prevDeadline, levelDuration) {
+function calculateDeadline(nextStage, prevDeadline, levelDuration) {
     // define standard parameter
     if(_.isUndefined(levelDuration))
         levelDuration = cfg.DURATION_LEVEL;
     
-    //var nextDeadline = prevDeadline || Date.now();
-    var nextDeadline = Date.now();
+    var nextDeadline = _.isUndefined(prevDeadline) ? Date.now() : prevDeadline;
+    //var nextDeadline = Date.now();
     switch (nextStage) {
         case C.STAGE_SELECTION: // get selection stage deadline
             nextDeadline += cfg.DURATION_SELECTION;
@@ -41,8 +41,13 @@ function getDeadline(nextStage, prevDeadline, levelDuration) {
     
     return nextDeadline;
 }
+exports.calculateDeadline = calculateDeadline;
 
 function manageConsensusStageAsync(topic, levelDuration) {
+    // levelDuration is an optional parameter
+    // it will get a default value in calculateDeadline if not set (for testing purposes)
+    var prevDeadline = topic.nextDeadline;
+    
     return groups.remixGroupsAsync(topic).then(function(result) {
         var update_set_promise;
         switch(result.nextStage) {
@@ -50,7 +55,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
             // updates below are only required while we are in consensus stage
             update_set_promise = {
                 'level': (++topic.level),
-                'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,undefined,levelDuration))
+                'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline,levelDuration))
             };
             break;
         case C.STAGE_PASSED:
@@ -74,7 +79,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
             // updates below are only required if consensus stage is over
             update_set_promise = {
                 'stage': (topic.stage = C.STAGE_PASSED),
-                'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_PASSED)),
+                'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_PASSED,prevDeadline)),
                 'stagePassedStarted': Date.now(),
                 'finalDocument': finalDocumentPadIdPromise.then(pads.getPadHTMLAsync)
             };
@@ -83,7 +88,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
             // updates below are only required if topic was rejected
             update_set_promise = {
                 'stage': (topic.stage = C.STAGE_REJECTED),
-                'nextDeadline': (topic.nextDeadline = getDeadline(C.STAGE_REJECTED)),
+                'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_REJECTED,prevDeadline)),
                 'stageRejectedStarted': Date.now(),
                 'rejectedReason': result.rejectedReason
             };
@@ -143,19 +148,20 @@ function manageTopicStateAsync(topic) {
     switch (topic.stage) {
         case C.STAGE_SELECTION: // we are currently in selection stage
             return isAccepted(topic).then(function(isAccepted) {
+                var stageStartedEntryName;
                 if(isAccepted) {
                     // topic does meet the minimum requirements for the next stage
                     // move to next stage
                     topic.stage = C.STAGE_PROPOSAL;
-                    topic.nextDeadline = getDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
-                    var stageStartedEntryName = 'stageProposalStarted';
+                    topic.nextDeadline = calculateDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
+                    stageStartedEntryName = 'stageProposalStarted';
                     topic[stageStartedEntryName] = Date.now();
                 } else {
                     // topic has been rejected
                     // move to rejection stage
                     topic.stage = C.STAGE_REJECTED;
                     topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VOTES';
-                    var stageStartedEntryName = 'stageRejectedStarted';
+                    stageStartedEntryName = 'stageRejectedStarted';
                     topic[stageStartedEntryName] = Date.now();
                 }
                 var updateTopicStatePromise =
@@ -168,7 +174,7 @@ function manageTopicStateAsync(topic) {
             });
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
             // Set the next deadline here, so we can use it in createGroupsAsync.
-            topic.nextDeadline = getDeadline(C.STAGE_CONSENSUS,prevDeadline);
+            topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
             
             return groups.createGroupsAsync(topic).then(function(groups) {
                 var stageStartedEntryName;
@@ -342,7 +348,7 @@ exports.query = function(req, res) {
     db.collection('topics').findOneAsync({ '_id': tid }).
     then(manageTopicStateAsync).
     then(function(topic) {
-        if(null == topic)
+        if(_.isNull(topic))
             return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
         else
             return appendTopicInfoAsync(topic, uid, true);
@@ -375,7 +381,7 @@ exports.create = function(req, res) {
         topic.pid = ObjectId(); // create random pad id
         topic.stage = C.STAGE_SELECTION; // start in selection stage
         topic.level = 0;
-        topic.nextDeadline = getDeadline(topic.stage);
+        topic.nextDeadline = calculateDeadline(topic.stage);
         var createTopicPromise = db.collection('topics').insertAsync(topic);
         
         // create pad

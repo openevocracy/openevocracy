@@ -12,9 +12,15 @@ var C = requirejs('public/js/setup/constants');
 var cfg = requirejs('public/js/setup/configs');
 var i18n = require('../i18n');
 var ratings = require('./ratings');
+var topics = require('./topics');
 var pads = require('../pads');
 var mail = require('../mail');
 var utils = require('../utils');
+
+function getGroupMembersAsync(gid) {
+    return db.collection('group_members').find({'gid': gid}, {'uid': true}).
+        toArrayAsync();
+}
 
 function calculateNumberOfGroups(numTopicParticipants) {
     
@@ -54,24 +60,24 @@ function assignParticipantsToGroups(participants) {
     return groups;
 }
 
-function storeGroupAsync(gid, topic, level, members) {
+function storeGroupAsync(gid, tid, nextDeadline, level, members) {
     // create group proposal's pad
     var pid = ObjectId();
     var create_pad_promosal_promise =
-    pads.createPadAsync(pid, topic.nextDeadline); // This is actually the deadline of the next stage (not the old one).
+    pads.createPadAsync(pid, nextDeadline); // This is actually the deadline of the next stage (not the old one).
     
     // create group's proposal
     var ppid = ObjectId();
     var create_proposal_promise =
     db.collection('proposals').insertAsync({
-        '_id': ppid, 'tid': topic._id,
+        '_id': ppid, 'tid': tid,
         'source': gid, 'pid': pid});
     
     // create group itself
     var crid = ObjectId();
     var create_group_promise =
     db.collection('groups').insertAsync({
-        '_id': gid, 'tid': topic._id,
+        '_id': gid, 'tid': tid,
         'ppid': ppid, 'crid': crid,
         'level': level});
     
@@ -89,7 +95,8 @@ function storeGroupAsync(gid, topic, level, members) {
 }
 
 function isProposalValid(proposal) {
-    return proposal.body.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length >= cfg.MIN_WORDS_PROPOSAL;
+    var proposal_words = proposal.body.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length;
+    return proposal_words >= cfg.MIN_WORDS_PROPOSAL;
 }
 
 /**
@@ -102,18 +109,19 @@ exports.createGroupsAsync = function(topic) {
     
     var validParticipantsPromise = db.collection('proposals').find({ 'tid': tid }).
     toArrayAsync().map(function(proposal) {
-        proposal.body = pads.getPadHTMLAsync(proposal.pid);
-        return proposal;
+        return pads.getPadHTMLAsync(proposal.pid).then(function(body) {
+            proposal.body = body;
+            return proposal;
+        });
     }).then(function(proposals) {
         return _.filter(_.pluck(proposals, 'source'), function(source) {
-            var proposal = utils.findWhereArrayEntryExists(proposals, {'source': source});
+            var proposal = utils.findWhereObjectId(proposals, {'source': source});
             return _.isUndefined(proposal) ? false : isProposalValid(proposal);
         });
     });
     
     var storeValidParticipantsPromise =
     validParticipantsPromise.then(function(valid_participants) {
-        console.log('valid_participants',valid_participants);
         return db.collection('topics').updateAsync(
             { '_id': topic._id },
             { $set: { 'valid_participants': _.size(valid_participants) } });
@@ -138,7 +146,9 @@ exports.createGroupsAsync = function(topic) {
         });
         
         // store group in database
-        var store_group_promise = storeGroupAsync(gid, topic, 0, group_members);
+        var tid = topic._id;
+        var nextDeadline = topic.nextDeadline;
+        var store_group_promise = storeGroupAsync(gid, tid, nextDeadline, 0, group_members);
         
         // create members for this group
         // append gid to proposal so we can identify it later
@@ -158,18 +168,13 @@ exports.createGroupsAsync = function(topic) {
             storeValidParticipantsPromise).get(0);
 };
 
-/**
- * create of groups after level is finished
- * - check if group proposals are valid (filter groups)
- * - find group leader (with highest rating)
- * - randomly assign participants to new groups
- */
-exports.remixGroupsAsync = function(topic) {
-    var tid = topic._id;
-    
-    // Get groups with highest level
-    var groupsPromise = db.collection('groups').find({ 'tid': tid, 'level': topic.level }).
-    toArrayAsync().filter(function (group) {
+function getGroupsOfSpecificLevelAsync(tid, level) {
+    return db.collection('groups').find({ 'tid': tid, 'level': level }).toArrayAsync();
+}
+exports.getGroupsOfSpecificLevelAsync = getGroupsOfSpecificLevelAsync;
+
+function getValidGroupsOfSpecificLevelAsync(tid, level) {
+    return getGroupsOfSpecificLevelAsync(tid, level).filter(function (group) {
         return db.collection('proposals').findOneAsync({'source': group._id}).
         then(function(proposal) {
             // Get HTML from document
@@ -184,22 +189,42 @@ exports.remixGroupsAsync = function(topic) {
         if(_.isEmpty(groups))
             return Promise.reject({reason: 'REJECTED_NO_VALID_GROUP_PROPOSAL'});
         else
-            return groups;
+            return Promise.resolve(groups);
     });
+}
+
+/**
+ * create of groups after level is finished
+ * - check if group proposals are valid (filter groups)
+ * - find group leader (with highest rating)
+ * - randomly assign participants to new groups
+ */
+exports.remixGroupsAsync = function(topic) {
+    var tid = topic._id;
     
+    // Get groups with highest level
+    var groupsPromise = getValidGroupsOfSpecificLevelAsync(tid, topic.level);
+    
+    // Get group leaders
     var leadersPromise = groupsPromise.map(function(group_in) {
-        return ratings.getGroupLeader(group_in._id);
+        var gid = group_in._id;
+        
+        return ratings.getGroupLeaderAsync(gid).then(function(leader) {
+            if(!_.isUndefined(leader))
+                return Promise.resolve(leader);
+            
+            // if group leader is undefined, pick one randomly
+            return getGroupMembersAsync(gid).then(function(members) {
+                return Promise.resolve(_.sample(members).uid);
+            });
+        });
     });
     
     return Promise.join(groupsPromise, leadersPromise).spread(function(groups, leaders) {
-        // remove all undefined leaders
-        leaders = _.compact(leaders);
-        var numLeaders = _.size(leaders);
-        
-        if(1 == groups.length) {
-            // If there is only ONE group in the current topic level,
-            // then the topic is finished/passed
-            // Send mail to notifiy about finished topic and return stage
+        // If there is only ONE group in the current topic level,
+        // then the topic is finished/passed.
+        if(1 == _.size(groups)) {
+            // Send mail to notifiy about finished topic and return next stage.
             return db.collection('groups').find({ 'tid': topic._id, 'level': 0 }).
                 toArrayAsync().then(function(groups) {
                     return db.collection('group_members').find({'gid': { $in: _.pluck(groups, '_id') }}, {'uid': true}).
@@ -213,10 +238,6 @@ exports.remixGroupsAsync = function(topic) {
                             );
                         });
                 }).return({'nextStage': C.STAGE_PASSED});
-        } else if(0 == numLeaders) {
-            // If there is NO leader and group length is greater than ONE (if above),
-            // then the consensus stage has failed
-            return Promise.reject({reason: 'REJECTED_UNSUFFICIENT_RATINGS'});
         }
         
         // assign members to groups
@@ -229,7 +250,10 @@ exports.remixGroupsAsync = function(topic) {
             var gid = ObjectId();
             
             // store group in database
-            var store_group_promise = storeGroupAsync(gid, topic, nextLevel, group_members);
+            var tid = topic._id;
+            var prevDeadline = topic.nextDeadline;
+            var nextDeadline = topics.calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
+            var store_group_promise = storeGroupAsync(gid, tid, nextDeadline, nextLevel, group_members);
             
             // send mail to notify level change
             var send_mail_promise =
@@ -257,7 +281,6 @@ exports.remixGroupsAsync = function(topic) {
                 var sources = _.pluck(source_groups,'_id');
                 
                 // update sink of previous proposals
-                console.log(gid, tid, sources);
                 return db.collection('proposals').updateAsync(
                     { 'tid': tid, 'source': { $in: sources } },
                     { $set: { 'sink': gid } }, {'upsert': false, 'multi': true});
@@ -287,18 +310,17 @@ function getProposalBodyAsync(mid, gid, proposals_source_promise) {
         
         // Proposal was found
         // This means it was a user-created proposal
-        if(proposal)
-            return proposal;
+        if(!_.isNull(proposal))
+            return Promise.resolve(proposal);
         
         // Proposal was not found: We have a group proposal
         // Find group where user was member in level before
         // and get proposal from that group
         return proposals_source_promise.then(function(proposals) {
             return db.collection('group_members').
-                findOneAsync({'gid': {$in: _.pluck(proposals, 'source')}, 'uid': mid },
-                    {'gid': true}).
+                findOneAsync({'gid': {$in: _.pluck(proposals, 'source')}, 'uid': mid },{'gid': true}).
                 then(function(group_member) {
-                    return utils.findWhereArrayEntryExists(proposals, {'source': group_member.gid});
+                    return utils.findWhereObjectId(proposals, {'source': group_member.gid});
                 });
         });
     }).then(function(proposal) {
@@ -350,16 +372,14 @@ exports.query = function(req, res) {
     });
     
     // Get all group members
-    var find_members_promise =
-        db.collection('group_members').find({'gid': gid}, {'uid': true}).
-        toArrayAsync();
+    var get_members_promise = getGroupMembersAsync(gid);
     
     // generate group specific color_offset
     var chance = new Chance(gid.toString());
     var offset = chance.integer({min: 0, max: 360});
 
     // Additional member information
-    var members_promise = find_members_promise.map(function(member) {
+    var members_promise = get_members_promise.map(function(member) {
         return member.uid;
     }).then(function(uids) {
         return db.collection('users').
@@ -367,7 +387,7 @@ exports.query = function(req, res) {
             toArrayAsync();
     }).map(function (member, index) {
         // generate member name and color
-        var member_color_promise = find_members_promise.then(function (members) {
+        var member_color_promise = get_members_promise.then(function (members) {
             var num_members = _.size(members);
             var hue = offset + index*(360/num_members);
 

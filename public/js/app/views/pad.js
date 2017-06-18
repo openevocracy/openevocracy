@@ -46,7 +46,7 @@ define([
                 if(source != 'user')
                     return;
 
-                console.log('Editor contents have changed', JSON.stringify(delta));
+                //console.log('Editor contents have changed', JSON.stringify(delta));
                 this.pad_socket.emit('change', delta);
                 
                 this.updateDocumentState();

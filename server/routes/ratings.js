@@ -63,7 +63,7 @@ exports.rate = function(req, res) {
  * return the user with the highest overall ratings
  * @param gid group id
  */
-exports.getGroupLeader = function(gid) {
+exports.getGroupLeaderAsync = function(gid) {
     return db.collection('ratings').find(
         { 'gid': gid },
         { 'ruid': true, 'score': true }).

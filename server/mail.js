@@ -8,6 +8,8 @@ var strformat = require('strformat');
 var db = require('./database').db;
 var utils = require('./utils');
 var i18n = require('./i18n');
+var ratings = require('./routes/ratings');
+var groups = require('./routes/groups');
 
 var C = requirejs('public/js/setup/constants');
 var cfg = requirejs('public/js/setup/configs');
@@ -62,7 +64,7 @@ function sendMail(mailTo, mailSubject, mailText) {
     
     if(cfg.MAIL) {
         _.each(mailTo, function(receiver) {
-            transporter.sendMail(_.extend(mailOptions, {'to': receiver}), function(error, info){
+            transporter.sendMail(_.extend(mailOptions, {'to': receiver}), function(error, info) {
                 if(error)
                     return console.log(error);
                 console.log('Message sent: ' + info.response);
@@ -108,25 +110,38 @@ function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailText)
 }
 exports.sendEmailToAllTopicParticipants = sendEmailToAllTopicParticipants;
 
-function sendEmailToAllActiveGroupMembers(mailType, topic, mailSubject, mailText) {
-    // Remind members that the deadline of the level (group) is coming
-    return db.collection('groups').find({ 'tid': topic._id, 'level': topic.level }).
-    toArrayAsync().then(function(groups) {
-        return db.collection('group_members').
-            find({ 'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
-    }).then(function(members) {
+function sendEmailToMembersOfSpecificGroups(mailType, gids, tid, mailSubject, mailText) {
+    // Send email to members of specific groups
+    // "gids" is an array of group id's where a mail should be sent to
+    
+    // If gids is just a single gid, transform it to an array
+    if(!_.isArray(gids))
+        gids = [gids];
+    
+    // Send mail to group members of groups with gid in gids
+    return db.collection('group_members').
+        find({ 'gid': { $in: gids }
+    }).toArrayAsync().then(function(members) {
         return db.collection('users').
             find({ '_id': { $in: _.pluck(members, 'uid') } }, {'email': true}).
             toArrayAsync();
     }).map(function(user) {
-        sendMailOnce(user.email, mailSubject, mailText, mailHash(mailType, topic._id, user._id));
+        sendMailOnce(user.email, mailSubject, mailText, mailHash(mailType, tid, user._id));
+        return Promise.resolve();
+    });
+}
+
+function sendEmailToAllActiveGroupMembers(mailType, topic, mailSubject, mailText) {
+    // Remind members that the deadline of the level (group) is coming
+    return groups.getGroupsOfSpecificLevelAsync(topic._id, topic.level).then(function(groups) {
+        sendEmailToMembersOfSpecificGroups(mailType, _.pluck(groups, '_id'), topic._id, mailSubject, mailText);
         return Promise.resolve();
     });
 }
 exports.sendEmailToAllActiveGroupMembers = sendEmailToAllActiveGroupMembers;
 
 function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailText) {
-    // if lazy reminder is disabled then exit early
+    // If lazy reminder is disabled then exit early
     if(cfg.REMINDER_GROUP_LAZY < 0)
         return Promise.resolve();
     
@@ -145,7 +160,7 @@ function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailText) 
         return db.collection('users').
             find({ '_id': { $in: _.pluck(members, 'uid') } }, {'email': true}).
             toArrayAsync().map(function(user) {
-                var member = utils.findWhereArrayEntryExists(members, {'uid': user._id});
+                var member = utils.findWhereObjectId(members, {'uid': user._id});
                 sendMailOnce(user.email, mailSubject, mailText, mailHash(mailType, member._id, user._id), cfg.REMINDER_GROUP_LAZY);
                 return Promise.resolve();
             });
@@ -153,9 +168,28 @@ function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailText) 
 }
 exports.sendEmailToAllLazyGroupMembers = sendEmailToAllLazyGroupMembers;
 
+function sendEmailRatingReminderToGroupMembers(mailType, topic, mailSubject, mailText) {
+    // If rating reminder is disabled then exit early
+    if(cfg.REMINDER_GROUP_RATING < 0)
+        return Promise.resolve();
+    
+    // Find groups which are currently active
+    return groups.getGroupsOfSpecificLevelAsync(topic._id, topic.level).filter(function(group) {
+        // Find out if leader can be figured out for every group
+        return ratings.getGroupLeaderAsync(group._id).then(_.isUndefined);
+    }).then(function(leaderless_groups) {
+        console.log('no rating in:', leaderless_groups);
+        // send mail to all group members
+        sendEmailToMembersOfSpecificGroups(mailType, _.pluck(leaderless_groups, '_id'), topic._id, mailSubject, mailText);
+        return Promise.resolve();
+    });
+}
+exports.sendEmailRatingReminderToGroupMembers = sendEmailRatingReminderToGroupMembers;
+
 exports.sendTopicReminderMessages = function(topic) {
     switch (topic.stage) {
         case C.STAGE_PROPOSAL: // we are currently in proposal stage
+        
             if(Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_SECOND) {
                 return sendEmailToAllTopicParticipants('EMAIL_REMINDER_PROPOSAL_SECOND',
                     topic,strformat(i18n.t('EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT'), topic.name),
@@ -171,6 +205,8 @@ exports.sendTopicReminderMessages = function(topic) {
             }
             break;
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
+        
+            // Lazy group members, if members where inactive for some time
             i18n.initAsync.then(function() {
                 sendEmailToAllLazyGroupMembers('EMAIL_ALL_LAZY_GROUP_MEMBERS',
                     topic,strformat(i18n.t('EMAIL_ALL_LAZY_GROUP_MEMBERS_SUBJECT'), topic.name),
@@ -178,6 +214,16 @@ exports.sendTopicReminderMessages = function(topic) {
                               topic.name, getTimeString(cfg.REMINDER_GROUP_LAZY))
                 );
             });
+            
+            // Group rating reminder, if no ratings where made in that group
+            if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_RATING) {
+                return sendEmailRatingReminderToGroupMembers('EMAIL_RATING_REMINDER_GROUP_MEMBERS',
+                    topic,strformat(i18n.t('EMAIL_RATING_REMINDER_GROUP_MEMBERS_SUBJECT'), topic.name),
+                    strformat(i18n.t('EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE'), topic.name)
+                );
+            }
+            
+            // Group reminder
             if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_SECOND) {
                 return sendEmailToAllActiveGroupMembers('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST',
                     topic,strformat(i18n.t('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_SUBJECT'), topic.name),
