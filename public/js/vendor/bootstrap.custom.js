@@ -1,1 +1,0 @@
-/* FIXME: currently using onShow method, e.g. in views/groups/members.js */

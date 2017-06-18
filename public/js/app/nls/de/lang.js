@@ -125,6 +125,8 @@ define({
     "Contributing proposals": "Beitragende Vorschläge",
     "Proposal of": "Vorschlag von",
     "Start chatting ...": "Schreibe etwas ...",
+    'Currently, no one seems to be here.': 'Derzeit ist niemand hier.',
+    'Currently online': 'Derzeit online',
     
     "Edit": "Bearbeiten",
     "Delete": "Löschen",

@@ -14,8 +14,14 @@ define({
     "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_SUBJECT": "Group reminder: {0}",
     "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_MESSAGE":
     "Hi,\n\n" +
-    "You are a member of a group in. The current level will end in {1}.\n" +
+    "You are a member of a group in {0}. The current level will end in {1}.\n" +
     "We highly suggest to check your collaborative document for final corrections.\n",
+    
+    'EMAIL_RATING_REMINDER_GROUP_MEMBERS_SUBJECT': 'Rating Reminder: {0}',
+    'EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE':
+    'Hi,\n\n' +
+    'You are a member of a group in {0}. Currently no one has given any rating in your current group.\n' +
+    'Please rate the other members to increase the chance that qualified people will represent your group.\n',
     
     "EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT": "Proposal reminder: {0}",
     "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE":
