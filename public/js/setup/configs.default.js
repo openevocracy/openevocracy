@@ -6,6 +6,7 @@ var ONE_MIN = 1000*60;
 var DEBUG_CONFIG = {
     DEBUG: true,
     MAIL: false,
+    CRON_INTERVAL: 1, // run cron every x minute(s)
     
     MIN_VOTES_PER_TOPIC: 1,
     MIN_GROUPS_PER_TOPIC: 1,
@@ -32,6 +33,7 @@ var DEBUG_CONFIG = {
 var RELEASE_CONFIG = {
     DEBUG : true,
     MAIL: true,
+    CRON_INTERVAL: 1, // run cron every x minute(s)
     
     MIN_VOTES_PER_TOPIC: 1,
     MIN_GROUPS_PER_TOPIC: 1,
