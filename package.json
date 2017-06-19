@@ -38,6 +38,7 @@
     "multer": "*",
     "node-crontab": "*",
     "nodemailer": "2.7.2",
+    "rich-text": "*",
     "phantom-html2pdf": "*",
     "quill-delta-to-html": "^0.3.0",
     "range-parser": "*",
