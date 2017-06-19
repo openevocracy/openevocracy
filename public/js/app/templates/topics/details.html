@@ -21,10 +21,15 @@
     <section class="col-md-8 wysiwyg">
         
         {{> alert}}
+        <h3>{{i18n "Group Description"}}</h3>
         <div id="body">{{{body}}}</div>
         <div class="editor-wrapper hidden">
             <div id="editor"></div>
         </div>
+        
+        <h3>{{i18n "Group Diagram"}}</h3>
+        <div id="groupviz"></div>
+        <div id="eventSpan"></div>
     </section>
     
     <aside class="col-md-4">

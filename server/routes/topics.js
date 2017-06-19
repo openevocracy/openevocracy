@@ -213,8 +213,10 @@ function appendTopicInfoAsync(topic, uid, with_details) {
     // get number of participants and votes in this topic
     var topic_votes_promise = db.collection('topic_votes').
         find({'tid': tid}, {'uid': true}).toArrayAsync();
+    //var topic_proposals_promise = db.collection('proposals').
+    //    countAsync({'tid': tid});  // NOTE: Also non-valid proposals are counted
     var topic_proposals_promise = db.collection('proposals').
-        countAsync({'tid': tid});  // NOTE: Also non-valid proposals are counted
+        find({'tid': tid}).toArrayAsync();
     
     // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
     
@@ -291,9 +293,11 @@ function appendTopicInfoAsync(topic, uid, with_details) {
     return Promise.props(_.extend(topic,{
         'body': pad_body_promise,
         'votes': topic_votes_promise.then(_.size),
-        'proposals': topic_proposals_promise,
+        'proposals': topic_proposals_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
             return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
+        'groups': groups_promise,
+        'proposals_': topic_proposals_promise,
         'levels': levels_promise,
         'gid': find_user_group_promise
     }));

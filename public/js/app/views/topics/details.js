@@ -4,6 +4,7 @@ define([
     'quill',
     'hbs!templates/topics/details',
     'views/pad',
+    'views/groupviz',
     '../../utils',
     'jquerycookie',
     'jquerycountdown'
@@ -13,6 +14,7 @@ define([
     Quill,
     Template,
     Pad,
+    GroupViz,
     u
     ) {
     
@@ -110,6 +112,9 @@ define([
         },
         
         onDOMexists: function() {
+            // create groupviz
+            this.groupviz = new GroupViz(this.model.get('groups'), this.model.get('proposals_'));
+            
             var date = this.model.get('nextDeadline');
             $('#timeremaining').countdown(date, function(event) {
                 $(this).html(event.strftime(u.i18n('%D days, %H:%M:%S')));

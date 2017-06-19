@@ -33,7 +33,8 @@
       strftime: '../vendor/strftime.min',
       //Embed: '../vendor/embed.min',
       emojify: '//cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/js/emojify.min',
-      jsSocials: '//cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials.min'
+      jsSocials: '//cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials.min',
+      vis: 'https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.0/vis.min'
     },
     /*
     shim: Configure the dependencies, exports, and custom initialization for
