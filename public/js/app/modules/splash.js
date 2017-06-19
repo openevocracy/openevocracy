@@ -16,14 +16,14 @@ define([
     var register = new Register();
     
     var Module = function(module, App) {
+        // Handle 404 error (needs to be added first)
+        // TODO redirect to specific 404 page
+        App.router.route('*notFound', 'login_index', login.route_login_index.bind(login));
+        
         App.router.route('', 'login_index', login.route_login_index.bind(login));
         App.router.route('login', 'login_index', login.route_login_index.bind(login));
         App.router.route('verified', 'verified_index', login.route_verified_index.bind(login));
         App.router.route('register', 'register_index', register.route_register_index.bind(register));
-        
-        // Handle 404 error
-        // TODO redirect to specific 404 page
-        App.router.route('*notFound', 'login_index', login.route_login_index.bind(login));
     };
     
     Handlebars.registerPartial('alert', AlertPartials);
