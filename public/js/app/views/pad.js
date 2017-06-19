@@ -18,12 +18,12 @@ define([
     
     function Pad(pid, quill, onUpdatePad) {
         
-        this.activate = function() {
+        this.activateEdit = function() {
             $('#editor').removeClass('loading');
             $('#editor .ql-editor').attr('contenteditable', 'true');
         };
         
-        this.deactivate = function() {
+        this.deactivateEdit = function() {
             // TODO parameter "message", to show message depending on reason, why pad is deactivated (loading, connection lost, group expired, etc.)
             $('#editor').addClass('loading');
             $('#editor .ql-editor').attr('contenteditable', 'false');
@@ -39,7 +39,7 @@ define([
         // constructor
         {
             // Deactivate editing
-            this.deactivate();
+            this.deactivateEdit();
             
             // Connect to socket
             this.pad_socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
@@ -50,7 +50,7 @@ define([
                 this.editor.setContents(contents);
                 
                 // Activate editing
-                this.activate();
+                this.activateEdit();
             
                 this.updateDocumentState();
             }.bind(this));

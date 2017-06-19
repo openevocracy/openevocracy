@@ -123,7 +123,7 @@ define([
         
         onDestroy: function() {
             clearInterval(this.timer);
-            Chat.remove.bind(this)();
+            this.chat.destroy();
             this.pad.destroy();
         },
 
@@ -197,8 +197,11 @@ define([
                 this.pad = new Pad(pid, quill);
                 
                 // Show chat
-                Chat.onShow.bind(this)(messageCallback, onlineCallback, uid, uname);
-            
+                var crid = this.model.get('crid');
+                this.chat = new Chat(this.onReceiveMessage.bind(this),
+                                     this.onNotifyOnline.bind(this),
+                                     crid, uid, uname);
+                
                 // Timer in docstate block
                 var date = this.model.get('nextDeadline');
                 if(date != conf.DURATION_NONE) {
@@ -207,7 +210,7 @@ define([
                             $(this).html(event.strftime(u.i18n("%D days, %H:%M:%S")));
                         }).on('finish.countdown', function(event) {
                             // Deactivate editing
-                            this.pad.deactivate();
+                            this.pad.deactivateEdit();
                             
                             // Update model if timer has finished.
                             // (This is required because the cronjob triggers
@@ -240,7 +243,7 @@ define([
                 return;
             
             // send message
-            Chat.sendText.bind(this)(text);
+            this.chat.sendText(text);
             // clear input field
             $('#chat-message').val('');
         },
