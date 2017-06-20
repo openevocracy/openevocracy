@@ -130,6 +130,20 @@ footer { font-size: 0.8em; text-align: center; padding: 10px 0 15px 0; }
 #topic-list .stage2 { background-color: #d9534f; } /* consensus */
 #topic-list .stage3 { background-color: #5cb85c; } /* passed */
 
+/* Visualisation */
+
+.vis-navigation .vis-button { width: 20px; font-size: 20px; line-height: 20px; cursor: pointer; }
+.vis-navigation .vis-button:before { font-family: 'FontAwesome'; position: absolute; bottom: 0; }
+.vis-navigation .vis-up:before { content: '\f139'; left: 0; }
+.vis-navigation .vis-down:before { content: '\f13a'; left: 20px; }
+.vis-navigation .vis-left:before { content: '\f137'; left: 40px; }
+.vis-navigation .vis-right:before { content: '\f138'; left: 60px; }
+.vis-navigation .vis-zoomIn:before { content: '\f055'; right: 40px; }
+.vis-navigation .vis-zoomOut:before { content: '\f056'; right: 20px; }
+.vis-navigation .vis-zoomExtends:before { content: '\f065'; right: 0; }
+
+/*#groupviz .vis-network { cursor: move; }*/
+
 /* ### PROPOSAL ### */
 
 .propstate button { cursor: default; }

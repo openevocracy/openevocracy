@@ -27,6 +27,11 @@ exports.clean_database = function(req, res) {
 };
 
 /*
+FIXME All tests are broken
+because topic_participants is deprecated.
+*/
+
+/*
 standard test suite
 */
 exports.create_topic_consensus_stage = function(req, res) {

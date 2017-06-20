@@ -204,17 +204,10 @@ function manageTopicStateAsync(topic) {
 
 function appendTopicInfoAsync(topic, uid, with_details) {
     var tid = topic._id;
-    
-    // get pad body if asked for
-    var pad_body_promise = null;
-    if(with_details)
-        pad_body_promise = pads.getPadHTMLAsync(topic.pid);
-    
+        
     // get number of participants and votes in this topic
     var topic_votes_promise = db.collection('topic_votes').
         find({'tid': tid}, {'uid': true}).toArrayAsync();
-    //var topic_proposals_promise = db.collection('proposals').
-    //    countAsync({'tid': tid});  // NOTE: Also non-valid proposals are counted
     var topic_proposals_promise = db.collection('proposals').
         find({'tid': tid}).toArrayAsync();
     
@@ -274,31 +267,50 @@ function appendTopicInfoAsync(topic, uid, with_details) {
             return _.toArray(levels_object);
         });
     
-    
-    // find the group that the current user is part of
-    var find_user_group_promise = groups_promise.then(function(groups) {
-        var highest_level = _.max(groups, function(group) {return group.level;}).level;
-        var highest_level_groups = _.filter(groups, function(group) {return group.level == highest_level;});
+    // detailed data (not used in topic list, only in details)
+    var pad_body_promise = null;
+    var group_members_promise = null;
+    var find_user_group_promise = null;
+    if(with_details) {
+        // get pad body
+        pad_body_promise = pads.getPadHTMLAsync(topic.pid);
         
-        return db.collection('group_members').findOneAsync(
-            {'gid': { $in: _.pluck(highest_level_groups, '_id') }, 'uid': uid}, {'gid': true});
-    }).then(function(group_member) {
-        return group_member ? group_member.gid : null;
-    });
+        // get group_members
+        group_members_promise = groups_promise.then(function(groups) {
+            return db.collection('group_members').find(
+                {'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
+        });
+        
+        // find the group that the current user is part of
+        find_user_group_promise = groups_promise.then(function(groups) {
+            var highest_level = _.max(groups, function(group) {return group.level;}).level;
+            var highest_level_groups = _.filter(groups, function(group) {return group.level == highest_level;});
+        
+            return db.collection('group_members').findOneAsync(
+                {'gid': { $in: _.pluck(highest_level_groups, '_id') }, 'uid': uid}, {'gid': true});
+        }).then(function(group_member) {
+            return group_member ? group_member.gid : null;
+        });
+    }
     
     // delete pad id if user is not owner, pid is removed from response
     if(!_.isEqual(topic.owner,uid))
         delete topic.pid;
     
     return Promise.props(_.extend(topic,{
-        'body': pad_body_promise,
-        'votes': topic_votes_promise.then(_.size),
-        'proposals': topic_proposals_promise.then(_.size),
+        // basic
+        'num_votes': topic_votes_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
             return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
-        'groups': groups_promise,
-        'proposals_': topic_proposals_promise,
         'levels': levels_promise,
+        
+        // detailed, but required for basic data
+        'groups': with_details ? groups_promise : null,
+        'proposals': with_details ? topic_proposals_promise : null,
+        
+        // detailed
+        'body': pad_body_promise,
+        'group_members': group_members_promise,
         'gid': find_user_group_promise
     }));
 }

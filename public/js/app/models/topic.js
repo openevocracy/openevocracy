@@ -74,8 +74,8 @@ define([
         },
         
         updateDerivedBasic: function() {
-            // append timeCreated
             this.set('timeCreated', u.getTimestamp(this.get('_id')), {silent: true});
+            this.set('num_proposals', _.size(this.get('proposals')), {silent: true});
             
             // append stageName
             switch (this.get('stage')) {
@@ -119,7 +119,7 @@ define([
             $.post(status ? '/json/topic-vote' : '/json/topic-unvote',
                {'tid':this.get('_id')},
                function(data) {
-                   this.set({'votes': data, 'voted': status});
+                   this.set({'num_votes': data, 'voted': status});
                }.bind(this));
         }
     });

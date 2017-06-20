@@ -118,6 +118,11 @@ define([
                 showCount: false,
                 shares: ["email", "twitter", "facebook", "googleplus", "linkedin", "telegram"]
             });
+        },
+        
+        countWords: function(html) {
+            // Count words of html document, analog to "isProposalValid" in "groups.js"
+            return html.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length;
         }
     };
 

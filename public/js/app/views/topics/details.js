@@ -113,7 +113,10 @@ define([
         
         onDOMexists: function() {
             // create groupviz
-            this.groupviz = new GroupViz(this.model.get('groups'), this.model.get('proposals_'));
+            this.groupviz = new GroupViz(
+                this.model.get('groups'),
+                this.model.get('proposals'),
+                this.model.get('group_members'));
             
             var date = this.model.get('nextDeadline');
             $('#timeremaining').countdown(date, function(event) {
