@@ -111,12 +111,17 @@ define([
             return str.replace(/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i, '<a href="$&" target="_blank">$&</a>');
         },
         
-        showShareButtons: function() {
+        showShareButtons: function(shareText) {
+            if(_.isUndefined(shareText))
+                shareText = ""
+            
             // Activate social share functionality
             $("#shareIcons").jsSocials({
-                showLabel: false,
-                showCount: false,
-                shares: ["email", "twitter", "facebook", "googleplus", "linkedin", "telegram"]
+                'text': shareText,
+                'showLabel': false,
+                'showCount': false,
+                'shareIn': "popup",
+                'shares': ["email", "twitter", "facebook", "googleplus", "linkedin", "telegram"]
             });
         },
         

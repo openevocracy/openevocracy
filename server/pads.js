@@ -141,7 +141,6 @@ function getPadDocAsync(pid) {
     if (!_.isUndefined(masterDoc))
         return Promise.resolve(masterDoc);
     
-    console.log('');
     // if not in map, load or handle error
     return db.collection('pads').
         findOneAsync({ '_id': pid }).then(function(pad) {

@@ -164,7 +164,8 @@ define([
             $('#chat-messages').css('max-height', $('#editor').height());
             
             // Show social share buttons
-            u.showShareButtons();
+            var socialShareText = u.strformat(u.i18n('Have a look at this group in topic "{0}":'), this.model.get('topicname'));
+            u.showShareButtons(socialShareText);
         },
         
         onDOMexists: function() {

@@ -23,7 +23,10 @@ define([
             $('#editor .ql-editor').attr('contenteditable', 'true');
         };
         
-        this.deactivateEdit = function() {
+        this.deactivateEdit = function(reason) {
+            if(_.isUndefined(reason))
+                reason = "";
+            
             // TODO parameter "message", to show message depending on reason, why pad is deactivated (loading, connection lost, group expired, etc.)
             $('#editor').addClass('loading');
             $('#editor .ql-editor').attr('contenteditable', 'false');

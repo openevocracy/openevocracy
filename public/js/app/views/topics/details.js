@@ -108,7 +108,8 @@ define([
             u.setActive('nav-tpc-'+this.model.get('_id'));
             
             // Show social share buttons
-            u.showShareButtons();
+            var socialShareText = u.strformat(u.i18n('Have a look at topic "{0}":'), this.model.get('name'));
+            u.showShareButtons(socialShareText);
         },
         
         onDOMexists: function() {

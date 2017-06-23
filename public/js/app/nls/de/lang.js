@@ -89,6 +89,8 @@ define({
     "Topic status": "Status des Themas",
     "Time remaining": "Verbleibende Zeit",
     "in level": "in Level",
+    'Have a look at topic "{0}":': 'Schau dir das Thema "{0}" an:',
+    'Have a look at this group in topic "{0}":':'Schau dir diese Gruppe im Thema "{0}" an:',
     
     "Final document": "Fertiges Dokument",
     
