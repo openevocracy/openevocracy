@@ -6,8 +6,8 @@ define([
     cfg
     ) {
     var Model = Backbone.Model.extend({
-        idAttribute: 'ppid',
-        urlRoot: '/json/proposal',
+        idAttribute: 'tid',
+        urlRoot: '/json/proposal/create',
         
         initialize: function() {
             this.set('minwords', cfg.MIN_WORDS_PROPOSAL);

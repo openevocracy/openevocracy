@@ -115,14 +115,14 @@ function createPadAsync(pid, expiration) {
         docIdToPadMap[did] = pad;
         
         // Store pad object in pad collection
-        return db.collection('pads').insertAsync(pad);
+        return db.collection('pads').insertAsync(pad).return(pad);
     });
 }
 exports.createPadAsync = createPadAsync; 
 
 exports.createPadIfNotExistsAsync = function(pid, expiration) {
     // Check if getPadDocAsync throws error which indicates that pad does not exist
-    return getPadDocAsync(pid).catch(utils.isOwnError, function () {
+    return getPadAsync(pid).then(getPadDocAsync).catch(utils.isOwnError, function () {
         // If pad does not already exist, create it
         return createPadAsync(pid, expiration);
     });
@@ -134,39 +134,54 @@ exports.updatePadExpirationAsync = function(pid, expiration) {
     );
 };
 
-function getPadDocAsync(pid) {
-    console.log(pid);
+function getPadAsync(pid) {
+    return db.collection('pads').findOneAsync({ '_id': pid }).then(function(pad) {
+        if (_.isNull(pad))
+            return Promise.reject({reason: 'PAD_DOES_NOT_EXIST'});
+        
+        // append helper function
+        pad.isExpired = function() {
+            return !_.isUndefined(this.expiration) && Date.now() > this.expiration;
+        }.bind(pad);
+        
+        return Promise.resolve(pad);
+    });
+}
+exports.getPadAsync = getPadAsync;
+
+function getPadWithBodyAsync(pid) {
+    return getPadAsync(pid).then(function(pad) {
+        pad.body = getPadDocAsync(pad).then(getDocHTMLAsync);
+        return Promise.props(pad);
+    });
+}
+exports.getPadWithBodyAsync = getPadWithBodyAsync;
+
+function getPadDocAsync(pad) {
     // check if document is in map first
-    var masterDoc = padIdToDocMap[pid];
+    var masterDoc = padIdToDocMap[pad._id];
     if (!_.isUndefined(masterDoc))
         return Promise.resolve(masterDoc);
     
     // if not in map, load or handle error
-    return db.collection('pads').
-        findOneAsync({ '_id': pid }).then(function(pad) {
-            if (_.isNull(pad))
-                return Promise.reject({reason: 'PAD_DOES_NOT_EXIST'});
-            else {
-                var adapter = new MongoskinAdapter(db, pad.did);
-                var masterDoc = new gulf.Document({
-                    storageAdapter: adapter,
-                    ottype: ottype
-                });
-                
-                masterDoc.id = pad.did;
-                return masterDoc.initializeFromStorage().then(function() {
-                    padIdToDocMap[pid] = masterDoc; // Reset
-                    docIdToPadMap[masterDoc.id] = pad;
-                    return Promise.resolve(masterDoc);
-                });
-            }
-        });
+    var adapter = new MongoskinAdapter(db, pad.did);
+    masterDoc = new gulf.Document({
+        storageAdapter: adapter,
+        ottype: ottype
+    });
+        
+    masterDoc.id = pad.did;
+    return masterDoc.initializeFromStorage().then(function() {
+        padIdToDocMap[pad._id] = masterDoc; // Reset
+        docIdToPadMap[masterDoc.id] = pad;
+        return Promise.resolve(masterDoc);
+    });
 }
 
 exports.startPadServer = function(io) {
     io.on('connection', function(socket) {
         socket.on('pad_identity', function(identity) {
-            getPadDocAsync(ObjectId(identity.pid)).then(function(masterDoc) {
+            getPadAsync(ObjectId(identity.pid)).then(getPadDocAsync).then(function(masterDoc) {
                 gulfIO(masterDoc, socket);
             });
         });
@@ -182,7 +197,7 @@ function getDocHTMLAsync(doc) {
 }
 
 var getPadHTMLAsync = function(pid) {
-    return getPadDocAsync(pid).then(getDocHTMLAsync);
+    return getPadAsync(pid).then(getPadDocAsync).then(getDocHTMLAsync);
 };
 exports.getPadHTMLAsync = getPadHTMLAsync;
 

@@ -86,6 +86,7 @@ app.get('/file/topic/final/:id', function(req, res) { auth(req, res, topics.fina
 // ### P R O P O S A L S ###
 // #########################
 
+app.get('/json/proposal/create/:id', function(req, res) { auth(req, res, proposals.create); });
 app.get('/json/proposal/:id', function(req, res) { auth(req, res, proposals.query); });
 
 // ###################

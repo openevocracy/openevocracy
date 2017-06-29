@@ -204,7 +204,7 @@ function manageTopicStateAsync(topic) {
 
 function appendTopicInfoAsync(topic, uid, with_details) {
     var tid = topic._id;
-        
+    
     // get number of participants and votes in this topic
     var topic_votes_promise = db.collection('topic_votes').
         find({'tid': tid}, {'uid': true}).toArrayAsync();
@@ -271,11 +271,12 @@ function appendTopicInfoAsync(topic, uid, with_details) {
     var pad_body_promise = null;
     var group_members_promise = null;
     var find_user_group_promise = null;
+    var user_proposal_id_promise = null;
     if(with_details) {
         // get pad body
         pad_body_promise = pads.getPadHTMLAsync(topic.pid);
         
-        // get group_members
+        // get group members
         group_members_promise = groups_promise.then(function(groups) {
             return db.collection('group_members').find(
                 {'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
@@ -291,6 +292,17 @@ function appendTopicInfoAsync(topic, uid, with_details) {
         }).then(function(group_member) {
             return group_member ? group_member.gid : null;
         });
+        
+        // get user proposal id
+        user_proposal_id_promise =
+            db.collection('proposals').findOneAsync(
+                { 'tid':tid, 'source':uid }).then(function(proposal) {
+                
+                if(_.isNull(proposal))
+                    return null;
+                
+                return proposal._id;
+            });
     }
     
     // delete pad id if user is not owner, pid is removed from response
@@ -311,7 +323,8 @@ function appendTopicInfoAsync(topic, uid, with_details) {
         // detailed
         'body': pad_body_promise,
         'group_members': group_members_promise,
-        'gid': find_user_group_promise
+        'gid': find_user_group_promise,
+        'ppid': user_proposal_id_promise
     }));
 }
 

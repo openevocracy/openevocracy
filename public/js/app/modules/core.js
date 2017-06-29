@@ -9,6 +9,7 @@ define([
     'controllers/topics',
     'controllers/topic',
     'controllers/proposal',
+    'controllers/proposal_create',
     'controllers/group',
     'text!templates/partials/views/alert.html',
     'text!templates/partials/views/lightbox.html',
@@ -35,6 +36,7 @@ define([
     Topics,
     Topic,
     Proposal,
+    ProposalCreate,
     Group,
     AlertPartials,
     LightboxPartials,
@@ -60,6 +62,7 @@ define([
     var topics = new Topics();
     var topic = new Topic();
     var proposal = new Proposal();
+    var proposal_create = new ProposalCreate();
     var group = new Group();
     
     var Module = function(module, App) {
@@ -79,6 +82,7 @@ define([
         App.router.route('topics', 'topics_index', topics.route_topics_index.bind(topics));
         App.router.route('topic/:id', 'topic_index', topic.route_topic_index.bind(topic));
         App.router.route('proposal/:id', 'proposal_index', proposal.route_proposal_index.bind(proposal));
+        App.router.route('proposal_create/:id', 'proposal_create_index', proposal_create.route_proposal_index.bind(proposal_create));
         App.router.route('group/:id', 'group_index', group.route_group_index.bind(group));
     };
     

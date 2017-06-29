@@ -3,7 +3,7 @@ define([
     //'layouts/center_right',
     'views/proposal',
     //'views/blocks/proposal_tabs',
-    'models/proposal',
+    'models/proposal_create',
 ], function(
     Marionette,
     //CenterRightLayout,
@@ -12,8 +12,8 @@ define([
     Model
     ) {
     var Controller = Marionette.Controller.extend({
-        route_proposal_index: function(ppid) {
-            var proposal = new Model({'ppid':ppid});
+        route_proposal_index: function(tid) {
+            var proposal = new Model({'tid':tid});
             
             proposal.fetch().done(function () {
                 var proposalView = new ProposalView({model:proposal});

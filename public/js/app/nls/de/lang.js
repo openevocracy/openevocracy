@@ -105,7 +105,7 @@ define({
     "REJECTED_UNSUFFICIENT_RATINGS": "Keine gültigen Bewertungen in den Gruppen",
     "REJECTED_NO_VALID_GROUP_PROPOSAL": "Keine gültigen Entwürfe in den Gruppen",
     
-    "PROPOSAL_QUERIED_NOT_IN_PROPOSAL_STAGE": "Die zugehörige Topic befindet sich nicht mehr in der Vorschlagphase.",
+    "PROPOSAL_QUERIED_NOT_IN_PROPOSAL_STAGE": "Das zugehörige Thema befindet sich nicht mehr in der Vorschlagphase.",
     "GROUP_QUERIED_NOT_ACTIVE": "Die Gruppe ist nicht mehr aktiv.",
     
     "%D days, %H:%M:%S": "%D Tage, %H:%M:%S",
@@ -169,11 +169,11 @@ define({
     'USER_ACCOUNT_PASSWORD_UPDATED': 'Das eingegebene Passwort wurde erfolgreich aktualisiert',
     'USER_ACCOUNT_PASSWORD_RESET': 'An die E-Mail-Adresse &raquo;{0}&laquo; wurde ein neues Passwort versendet. Du solltest das Passwort direkt beim nächsten Login wieder ändern.',
     
-    'TOPIC_NOT_FOUND': 'Diese Topic konnte nicht gefunden werden.',
-    'TOPIC_NOT_AUTHORISIZED_FOR_UPDATE': 'Nur der Autor der Topic hat das Recht diese zu bearbeiten.',
-    'TOPIC_NOT_AUTHORISIZED_FOR_DELETION': 'Nur der Autor der Topuc hat das Recht diese zu löschen.',
-    'TOPIC_UPDATE_ONLY_IN_SELECTION_STAGE': 'Die Topic darf nur in der Selektionsphase editiert werden.',
-    'TOPIC_NAME_EMPTY': 'Der Topic Name ist leer, bitte vergib einen Namen.',
-    'TOPIC_NAME_ALREADY_EXISTS': 'Eine Topic mit diesem Namen existiert bereits.',
-    'TOPIC_REQUIREMENT_PROPOSAL_STAGE': 'Die Topic muss sich mindestens in der Vorschlagphase befinden.'
+    'TOPIC_NOT_FOUND': 'Dieses Thema konnte nicht gefunden werden.',
+    'TOPIC_NOT_AUTHORISIZED_FOR_UPDATE': 'Nur der Autor des Themas hat das Recht diese zu bearbeiten.',
+    'TOPIC_NOT_AUTHORISIZED_FOR_DELETION': 'Nur der Autor des Themas hat das Recht diese zu löschen.',
+    'TOPIC_UPDATE_ONLY_IN_SELECTION_STAGE': 'Das Thema darf nur in der Selektionsphase editiert werden.',
+    'TOPIC_NAME_EMPTY': 'Der Name des Themas ist leer, bitte vergib einen Namen.',
+    'TOPIC_NAME_ALREADY_EXISTS': 'Ein Thema mit diesem Namen existiert bereits.',
+    'TOPIC_REQUIREMENT_PROPOSAL_STAGE': 'Das Thema muss sich mindestens in der Vorschlagphase befinden.'
 });
