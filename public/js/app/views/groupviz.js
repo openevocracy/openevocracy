@@ -159,12 +159,9 @@ define([
                     
                     var uid = id;
                     var proposal = _.findWhere(proposals, {'source': uid});
-                    var gid = proposal.sink;
-                    // FIXME this is inefficient
-                    // make it possible to read pad bodies directly
-                    $.get('/json/group/'+gid, function(group) {
-                        var member = _.findWhere(group.members, {'_id': uid});
-                        console.log(member.proposal_body);
+                    
+                    $.get('/json/proposal/'+proposal._id, function(proposal) {
+                        console.log(proposal.body);
                     }.bind(this));
                 } else {
                     console.error('Level '+obj.level+' is unknown.');
