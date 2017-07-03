@@ -123,8 +123,10 @@ define([
         
         onDestroy: function() {
             clearInterval(this.timer);
-            this.chat.destroy();
-            this.pad.destroy();
+            if(this.chat)
+                this.chat.destroy();
+            if(this.pad)
+                this.pad.destroy();
         },
 
         onRender: function() {

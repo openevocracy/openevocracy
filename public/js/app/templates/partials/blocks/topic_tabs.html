@@ -1,13 +1,12 @@
-<!--<h3>Take action</h3>-->
 <div class="block-content tabs-block">
     <ul  class="nav nav-pills nav-stacked">
-    <li>
-        {{#if ppid}}
-            <a href="/#/proposal/{{ppid}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> {{i18n 'My proposal'}}</a>
-        {{else}}
-            <a href="/#/proposal_create/{{_id}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> {{i18n 'Create proposal'}}</a>
-        {{/if}}
-    </li>
+        <li>
+            {{#if ppid}}
+                <a href="/#/proposal/{{ppid}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> {{i18n 'My proposal'}}</a>
+            {{else}}
+                <a href="/#/proposal_create/{{_id}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> {{i18n 'Create proposal'}}</a>
+            {{/if}}
+        </li>
     {{#if gid}}
         <li>
             <a href="/#/group/{{gid}}"><i class="fa fa-users" aria-hidden="true"></i> {{i18n 'Our group'}}</a>

@@ -1,3 +1,33 @@
+<div class="lightbox modal" id="groupviz-modal">
+    <div class="modal-dialog modal-full">
+        <div class="modal-content">
+        
+            <div class="modal-header">
+                <button type="button" class="close cancel" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">{{i18n 'Group diagram'}}</h4>
+            </div>
+                
+            <div class="modal-body">
+                <div id="groupviz"></div>
+                <div id="groupviz-details" class="clearfix">
+                    <div class="default-details">
+                        Default
+                    </div>
+                    <div class="group-details hide">
+                        <div class="deadline"></div>
+                        <div class="words"></div>
+                        <a class="btn btn-raised btn-primary grouplink" href=""><i class="fa fa-users" aria-hidden="true"></i> {{i18n 'Go to group'}}</a>
+                    </div>
+                    <div class="proposal-details hide">
+                        <div class="words"></div>
+                        <a class="btn btn-raised btn-primary proposallink" href=""><i class="fa fa-file-text-o" aria-hidden="true"></i> {{i18n 'Go to proposal'}}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="btn-group pull-right" role="group">
     {{#ifis stage STAGE_SELECTION}}
     <button class="btn btn-raised btn-sm vote{{#if voted}} btn-success{{else}} btn-primary{{/if}}" title="{{#if voted}}{{i18n "unmark as relevant"}}{{else}}{{i18n "mark as relevant"}}{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
@@ -19,30 +49,11 @@
 
 <div class="row">
     <section class="col-md-8 wysiwyg">
-        
         {{> alert}}
-        <h3>{{i18n "Topic Description"}}</h3>
+        
         <div id="body">{{{body}}}</div>
         <div class="editor-wrapper hidden">
             <div id="editor"></div>
-        </div>
-        
-        <h3>{{i18n "Group Diagram"}}</h3>
-        <div>
-            <div id="groupviz"></div>
-            <div id="groupviz-details" class="clearfix">
-                <div class="default-details">
-                    Default
-                </div>
-                <div class="group-details hide">
-                    <div class="deadline"></div>
-                    <div class="words"></div>
-                    <a class="btn btn-raised btn-primary grouplink" href=""><i class="fa fa-users" aria-hidden="true"></i> {{i18n 'Go to group'}}</a>
-                </div>
-                <div class="proposal-details hide">
-                
-                </div>
-            </div>
         </div>
     </section>
     
@@ -62,6 +73,9 @@
         </div>
         {{#ifis stage STAGE_PASSED}}<div class="block">{{> topic_final}}</div>{{/ifis}}
         {{#ifisOr stage STAGE_CONSENSUS STAGE_PASSED}}<div class="block">{{> topic_levels}}</div>{{/ifisOr}}
+        <div class="block">
+            <button id="groupviz-btn" class="btn btn-raised btn-primary"><i class="fa fa-share-alt" aria-hidden="true"></i> {{i18n 'Group diagram'}}</a>
+        </div>
         <div class="block">{{> social}}</div>
         <div class="block">{{> topic_statistics}}</div>
     </aside>

@@ -87,6 +87,13 @@ define([
             'click .vote': function(e) {
                 // if we have already voted then unvote
                 this.model.setVoted(!this.model.get('voted'));
+            },
+            'click #groupviz-btn': function(e) {
+                $('.lightbox').fadeIn(500);
+                this.groupviz.resizeCanvas();
+            },
+            'click .close': function(e) {
+                $('.lightbox').fadeOut(500);
             }
         },
         

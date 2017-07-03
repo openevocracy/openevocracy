@@ -48,13 +48,13 @@ define([
             var participant_color = { 'background': '#9C27B0', 'border': '#9C27B0', 'hover': '#BA68C8', 'highlight': '#6A1B9A'};
             
             // initial participants are the sources of initial proposals
-            var initial_participants = _.map(initial_proposals, function(p) {
+            var initial_participants = _.map(initial_proposals, function(p, index) {
                 //var group = _.findWhere(groups, {'_id': p.sink});
                 //var member = _.findWhere(group.members, {'uid': p.source});
                 
                 return {
                     'id': p.source,
-                    'label': 'u',
+                    'label': 'Vorschlag ' + (index+1),
                     'level': -1,
                     'color': p.source != me_id ? participant_color : me_color//,
                     //'body': member.proposal_body
@@ -62,11 +62,12 @@ define([
             });
             
             // format groups
+            var num_groups = _.size(groups);
             var group_color = { 'background': '#009688', 'border': '#009688', 'hover': '#4DB6AC', 'highlight': '#00695C'};
-            var groups = _.map(groups, function(g) {
+            var groups = _.map(groups, function(g, index) {
                 return {
                     'id': g._id,
-                    'label': 'g',
+                    'label': 'Gruppe' + (num_groups-index),
                     'level': g.level,
                     'color': groupContainsMember(group_members, g, me_id) ? me_color : group_color
                 };
@@ -85,8 +86,9 @@ define([
                 'nodes': nodes,
                 'edges': edges
             };
+            
             var options = {
-                'height': '300px',
+				//'height': (window.innerHeight - 175) + "px",
                 'layout':{
                     'hierarchical': {
                         'enabled': true,
@@ -99,15 +101,18 @@ define([
                     'navigationButtons': true
                 },
                 'nodes': {
-                    'shape': 'square',
+                    //'shape': 'square',
                     'color': group_color,
-                    'size': 30,
-                    'borderWidth': 0,
-                    //'labelHighlightBold': false,
+                    'size': 40,
+                    'borderWidth': 14,
+                    'labelHighlightBold': false,
                     'font': {
-                        'face': 'Roboto',
-                        'size': 20,
-                        'vadjust': -5
+                        'color': '#fff',
+                        'face': 'Arial',
+                        'size': 12,
+                        'vadjust': 0,
+                        //'strokeWidth': 7,
+                        //'strokeColor': '#fff'
                     },
                     'shadow': {
                         'enabled': true,
@@ -135,8 +140,6 @@ define([
                     
                     var gid = id;
                     $.get('/json/group/'+gid, function(group) {
-                        console.log(group);
-                        
                         var finished = group.nextDeadline == -1 ? true : false;
                         
                         // Show time status of group
@@ -149,9 +152,6 @@ define([
                         
                         // Set link to group
                         $details.children('.group-details').children('.grouplink').attr('href', '/#/group/'+gid);
-                        
-                        console.log(group.body);
-                        
                     }.bind(this));
                 } else if (obj.level == -1) {
                     $details.children('.default-details').addClass('hide');
@@ -161,7 +161,12 @@ define([
                     var proposal = _.findWhere(proposals, {'source': uid});
                     
                     $.get('/json/proposal/'+proposal._id, function(proposal) {
-                        console.log(proposal.body);
+                        // Show number of words written in that group
+                        var wordsText = 'User has written '+u.countWords(proposal.body)+' words.';
+                        $details.children('.proposal-details').children('.words').html(wordsText);
+                        
+                        // Set link to group
+                        $details.children('.proposal-details').children('.proposallink').attr('href', '/#/proposal/'+proposal._id);
                     }.bind(this));
                 } else {
                     console.error('Level '+obj.level+' is unknown.');
@@ -173,9 +178,20 @@ define([
                 $details.children('.default-details').removeClass('hide');
             });
         }
+        
+        var resizeCanvas = function() {
+            this.network.setSize('100%', (window.innerHeight - 175) + 'px');
+            this.network.fit();
+        }.bind(this);
+        this.resizeCanvas = resizeCanvas;
 
         this.destroy = function() {
         };
+        
+        $(window).on('resize', _.debounce(function(){
+            console.log('resize');
+            resizeCanvas();
+        }, 500));
     }
     
     return GroupViz;
