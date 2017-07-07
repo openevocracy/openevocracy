@@ -1,6 +1,7 @@
 (function() {
   var locale = localStorage.getItem('locale') || 'de';
-    
+  //var locale = App.session.user.lang || 'de';
+  
   requirejs.config({
     paths: {
       // CDN POLICY use "http://osscdn.com/#/"

@@ -1,6 +1,7 @@
 define([
     'Marionette',
     'handlebars',
+    'controllers/notfound',
     'controllers/login',
     'controllers/register',
     'controllers/navigation',
@@ -28,6 +29,7 @@ define([
 ], function(
     Marionette,
     Handlebars,
+    NotFound,
     Login,
     Register,
     Navi,
@@ -54,6 +56,7 @@ define([
     Social
     ) {
     
+    var notfound = new NotFound();
     var login = new Login();
     var register = new Register();
     var navi = new Navi();
@@ -72,7 +75,7 @@ define([
         
         // Handle 404 error (needs to be added first)
         // TODO redirect to specific 404 page
-        App.router.route('*notFound', 'topics_index', topics.route_topics_index.bind(topics));
+        App.router.route('*notFound', 'notfound_index', notfound.route_notfound_index.bind(notfound));
         
         App.router.route('', 'topics_index', topics.route_topics_index.bind(topics));
         App.router.route('login', 'login_index', login.route_login_index.bind(login));

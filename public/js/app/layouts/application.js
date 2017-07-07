@@ -21,7 +21,17 @@ define([
             },
             'click .set-language': function(e) {
                 e.preventDefault();
-                localStorage.setItem('locale', $(e.target).data('locale'));
+                
+                // save in local storage
+                var lang = $(e.target).data('locale');
+                localStorage.setItem('locale', lang);
+                // save in database
+                var uid = App.session.user.get('_id');
+                $.ajax({
+                    'url': '/json/user/settings/'+uid,
+                    'type' : 'PATCH',
+                    'data': {'lang':lang}
+                });
                 // reload the app
                 location.reload();
             }

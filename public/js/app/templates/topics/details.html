@@ -9,18 +9,23 @@
                 
             <div class="modal-body">
                 <div id="groupviz"></div>
-                <div id="groupviz-details" class="clearfix">
-                    <div class="default-details">
-                        Default
+                <div id="groupviz-details" class="panel panel-primary clearfix">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{i18n 'Details'}}</h3>
                     </div>
-                    <div class="group-details hide">
-                        <div class="deadline"></div>
-                        <div class="words"></div>
-                        <a class="btn btn-raised btn-primary grouplink" href=""><i class="fa fa-users" aria-hidden="true"></i> {{i18n 'Go to group'}}</a>
-                    </div>
-                    <div class="proposal-details hide">
-                        <div class="words"></div>
-                        <a class="btn btn-raised btn-primary proposallink" href=""><i class="fa fa-file-text-o" aria-hidden="true"></i> {{i18n 'Go to proposal'}}</a>
+                    <div class="panel-body">
+                        <div class="details-panel default-details">
+                            {{i18n 'Click on any group or proposal from the hierarchy to get more information.'}}
+                        </div>
+                        <div class="details-panel group-details" style="display: none;">
+                            <div class="deadline"></div>
+                            <div class="words"></div>
+                            <a class="btn btn-raised btn-primary grouplink" href=""><i class="fa fa-users" aria-hidden="true"></i> {{i18n 'Go to group'}}</a>
+                        </div>
+                        <div class="details-panel proposal-details" style="display: none;">
+                            <div class="words"></div>
+                            <a class="btn btn-raised btn-primary proposallink" href=""><i class="fa fa-file-text-o" aria-hidden="true"></i> {{i18n 'Go to proposal'}}</a>
+                        </div>
                     </div>
                 </div>
             </div>

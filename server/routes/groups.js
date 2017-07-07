@@ -424,12 +424,12 @@ exports.query = function(req, res) {
                  set_member_timestamp_promise).
     spread(function(group, proposal, members, topic, lastLevel) {
         
+        // append proposal body
+        group.body = pads.getPadHTMLAsync(proposal.pid);
+        
         // flash message in client if group not editable
         if( topic.stage != C.STAGE_CONSENSUS ||
            (topic.stage == C.STAGE_CONSENSUS && topic.level != group.level)) {
-            
-            // append proposal body
-            group.body = pads.getPadHTMLAsync(proposal.pid);
             
             // flash message in client
             group.alert = {type: "info", content: "GROUP_QUERIED_NOT_ACTIVE"};

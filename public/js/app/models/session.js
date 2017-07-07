@@ -36,6 +36,11 @@ define([
         // Fxn to update user attributes after recieving API response
         updateSessionUser: function( userData ){
             this.user.set( userData );
+            
+            if(userData.lang != localStorage.getItem('locale')) {
+                localStorage.setItem('locale', userData.lang);
+                location.reload();
+            }
         },
 
         /*

@@ -3,13 +3,15 @@ define([
     'jquery',
     'utils',
     'vis',
-    'configs'
+    'configs',
+    'strftime'
 ], function(
     _,
     $,
     u,
     vis,
-    cfg) {
+    cfg,
+    dateformat) {
     
     function remap(array, keyMapping) {
         return _.map(array, function(object) {
@@ -35,7 +37,8 @@ define([
     function GroupViz(groups, proposals, group_members) {
         // constructor
         {
-            var $details = $('#groupviz-details');
+            // Initialize
+            var $details = $('#groupviz-details');       
             
             // Get ID of current logged in user and define color for me
             var me_id = App.session.user.get('_id');
@@ -63,7 +66,8 @@ define([
             
             // format groups
             var num_groups = _.size(groups);
-            var group_color = { 'background': '#009688', 'border': '#009688', 'hover': '#4DB6AC', 'highlight': '#00695C'};
+            //var group_color = { 'background': '#009688', 'border': '#009688', 'hover': '#4DB6AC', 'highlight': '#00695C'};
+            var group_color = { 'background': '#3F51B5', 'border': '#3F51B5', 'hover': '#7986CB', 'highlight': '#283593'};
             var groups = _.map(groups, function(g, index) {
                 return {
                     'id': g._id,
@@ -101,22 +105,29 @@ define([
                     'navigationButtons': true
                 },
                 'nodes': {
-                    //'shape': 'square',
+                    'shape': 'box',
+                    'shapeProperties': {
+                        'borderRadius': 1
+                    },
                     'color': group_color,
-                    'size': 40,
-                    'borderWidth': 14,
+                    //'size': 50,
+                    'heightConstraint': {
+                        'minimum': 28
+                    },
+                    //'borderWidth': 14,
                     'labelHighlightBold': false,
                     'font': {
                         'color': '#fff',
-                        'face': 'Arial',
-                        'size': 12,
-                        'vadjust': 0,
+                        'face': 'Roboto',
+                        //'size': 12,
+                        //'vadjust': 0,
+                        //'background': '#fff'
                         //'strokeWidth': 7,
                         //'strokeColor': '#fff'
                     },
                     'shadow': {
                         'enabled': true,
-                        'size': 4,
+                        'size': 3,
                         'x': 0,
                         'y': 2
                     }
@@ -135,47 +146,57 @@ define([
                 var obj = _.findWhere(nodes, {'id': id});
                 
                 if(obj.level >= 0) {
-                    $details.children('.default-details').addClass('hide');
-                    $details.children('.group-details').removeClass('hide');
+                    // User clicked on a group
+                    $details.find('.details-panel:visible').slideUp(400, function() {
+                        $details.find('.group-details').slideDown(400);
+                    });
                     
+                    // Request group via ajax
                     var gid = id;
                     $.get('/json/group/'+gid, function(group) {
                         var finished = group.nextDeadline == -1 ? true : false;
                         
                         // Show time status of group
-                        var deadlineText = finished ? 'Group has finished.' : 'Group is currently active and will finish in '+ group.nextDeadline +'.';
-                        $details.children('.group-details').children('.deadline').html(deadlineText);
+                        var deadlineText = finished ? u.i18n('Group has finished.') : u.strformat(u.i18n('Group is currently active and will finish on {0}.'), dateformat('%Y-%m-%d, %H:%M', new Date(group.nextDeadline)));
+                        $details.find('.group-details .deadline').html(deadlineText);
                         
                         // Show number of words written in that group
-                        var wordsText = 'Members of that group have '+(finished ? '' : 'currently')+' written '+u.countWords(group.body)+' words.';
-                        $details.children('.group-details').children('.words').html(wordsText);
+                        var wordsText = u.strformat(u.i18n('{0} members of that group have written {1} words.'), group.members.length, u.countWords(group.body));
+                        $details.find('.group-details .words').html(wordsText);
                         
                         // Set link to group
-                        $details.children('.group-details').children('.grouplink').attr('href', '/#/group/'+gid);
+                        $details.find('.group-details .grouplink').attr('href', '/#/group/'+gid);
                     }.bind(this));
                 } else if (obj.level == -1) {
-                    $details.children('.default-details').addClass('hide');
-                    $details.children('.proposal-details').removeClass('hide');
+                    // User clicked on a proposal
+                    $details.find('.details-panel:visible').slideUp(400, function() {
+                        $details.find('.proposal-details').slideDown(400);
+                    });
                     
                     var uid = id;
                     var proposal = _.findWhere(proposals, {'source': uid});
                     
+                    // Request proposal via ajax
                     $.get('/json/proposal/'+proposal._id, function(proposal) {
                         // Show number of words written in that group
-                        var wordsText = 'User has written '+u.countWords(proposal.body)+' words.';
-                        $details.children('.proposal-details').children('.words').html(wordsText);
+                        var wordsText = u.strformat(u.i18n('User has written {0} words.'), u.countWords(proposal.body));
+                        $details.find('.proposal-details').find('.words').html(wordsText);
                         
                         // Set link to group
-                        $details.children('.proposal-details').children('.proposallink').attr('href', '/#/proposal/'+proposal._id);
+                        $details.find('.proposallink').attr('href', '/#/proposal/'+proposal._id);
                     }.bind(this));
                 } else {
+                    // If something went wrong with the level, show error in client console
                     console.error('Level '+obj.level+' is unknown.');
                 }
             });
+            
             this.network.on("deselectNode", function (params) {
-                $details.children('.group-details').addClass('hide');
-                $details.children('.proposal-details').addClass('hide');
-                $details.children('.default-details').removeClass('hide');
+                if(params.nodes.length == 0) {
+                    $details.find('.details-panel:visible').slideUp(400, function() {
+                        $details.find('.default-details').slideDown(400);
+                    });
+                }
             });
         }
         

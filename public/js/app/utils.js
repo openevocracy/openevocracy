@@ -72,6 +72,11 @@ define([
             return parseInt(objectid.substring(0, 8), 16) * 1000;
         },
         
+        getTimeSince: function(timestamp) {
+            //var date = new Date(timestamp - );
+            //return
+        },
+        
         getProperty: function(o, s) {
             // Necessary for strformat
             s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties

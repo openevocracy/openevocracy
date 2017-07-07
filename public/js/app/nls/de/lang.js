@@ -91,10 +91,18 @@ define({
     "in level": "in Level",
     'Have a look at topic "{0}":': 'Schau dir das Thema "{0}" an:',
     'Have a look at this group in topic "{0}":':'Schau dir diese Gruppe im Thema "{0}" an:',
+    'Group diagram': 'Gruppendiagramm',
+    'Final document': 'Fertiges Dokument',
     
-    "Final document": "Fertiges Dokument",
+    'Click on any group or proposal from the hierarchy to get more information.': 'Klicke auf eine Gruppe oder einen Vorschlag innerhalb der Hierarchie um mehr Informationen zu erhalten.',
+    'Go to group': 'Zur Gruppe',
+    'Go to proposal': 'Zum Vorschlag',
+    'Group has finished.': 'Die Gruppe ist beendet.',
+    'Group is currently active and will finish on {0}.': 'Die Gruppe ist derzeit aktiv und läuft noch bis zum {0}.',
+    '{0} members of that group have written {1} words.': '{0} Mitglieder der Gruppe haben {1} Wörter geschrieben.',
+    'User has written {0} words.': 'Der Benutzer hat {0} Wörter geschrieben.',
     
-    "Filter and sorting": "Filter/Sortierung",
+    'Filter and sorting': 'Filter/Sortierung',
     "Filter by stage": "Stufe filtern",
     "Order by time": "Zeitliche Sortierung",
     "Oldest topics first": "Älteste Themen zuerst",
@@ -149,6 +157,9 @@ define({
     
     'current version': 'Aktuelle Version',
     'Share this page': 'Teile diese Seite',
+    
+    '404 - Page not found': '404 - Seite nicht gefunden',
+    'Check if you typed the correct URL. It can also be that the page you searched for is outdated.': 'Überprüfe ob du die URL korrekt eingegeben hast. Es kann auch sein, dass die Seite abgelaufen ist und nicht mehr existiert.',
     
     'DEFAULT_TOPIC_TEXT': 'Unsere Empfehlung: Schreibe oben im Dokument eine kurze Zusammenfassung der Thematik, so dass die Leser schnell einen Überblick bekommen können.',
     'DEFAULT_PROPOSAL_TEXT': 'Unsere Empfehlung: Schreibe oben im Dokument eine kurze Zusammenfassung deines Entwurfs, so dass die Leser schnell einen Überblick bekommen können.',

@@ -277,6 +277,15 @@ exports.update = function(req, res) {
         }
     }
     
+    // Language was updated
+    if(_.has(userUpdate, 'lang')) {
+        db.collection('users')
+            .updateAsync({ '_id': uid }, { $set: _.pick(userUpdate, "lang") })
+            .then(function() {
+                utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_LANG_UPDATED');
+            });
+    }
+    
     // Password was updated
     if(_.has(userUpdate, 'pass')) {
         // Validate password using parseley (no whitespace)
