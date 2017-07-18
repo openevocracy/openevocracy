@@ -63,24 +63,19 @@
     </section>
     
     <aside class="col-md-4">
-        {{#ifis showTabs 1}}<div class="block">{{> topic_tabs}}</div>{{/ifis}}
-        <div class="block">{{> topic_author}}</div>
+        <div class="block">{{> topic_tabs}}</div>
         <div class="block">
             <h3>{{i18n "Status"}}</h3>
             <div class="block-content">
                 <p>Aktuelle Phase: {{stageName}}</p>
-                {{#ifis stage STAGE_SELECTION}}{{i18n "Check for enough participants in"}}:<br/><span id="timeremaining"></span>{{/ifis}}
-                {{#ifis stage STAGE_PROPOSAL}}{{i18n "End of stage in"}}:<br/><span id="timeremaining"></span>{{/ifis}}
-                {{#ifis stage STAGE_CONSENSUS}}{{i18n "Currently in level"}} {{math level "+" 1}}, {{i18n "next level in"}}:<br/><span id="timeremaining"></span>{{/ifis}}
-                {{#ifis stage STAGE_PASSED}}{{i18n "Finished at"}} {{stagePassedDate}}{{/ifis}}
+                {{#ifis stage STAGE_SELECTION}}{{i18n 'Check for enough participants in'}}:<br/><span id="timeremaining"></span>{{/ifis}}
+                {{#ifis stage STAGE_PROPOSAL}}{{i18n 'End of stage in'}}:<br/><span id="timeremaining"></span>{{/ifis}}
+                {{#ifis stage STAGE_CONSENSUS}}{{i18n 'Currently in level'}} {{math level "+" 1}}, {{i18n "next level in"}}:<br/><span id="timeremaining"></span>{{/ifis}}
+                {{#ifis stage STAGE_PASSED}}{{i18n 'Finished at'}} {{stagePassedDate}}{{/ifis}}
                 {{#ifis stage STAGE_REJECTED}}{{i18n "Reason for rejection"}}:<br/>{{i18n rejectedReason}}{{/ifis}}
             </div>
         </div>
-        {{#ifis stage STAGE_PASSED}}<div class="block">{{> topic_final}}</div>{{/ifis}}
         {{#ifisOr stage STAGE_CONSENSUS STAGE_PASSED}}<div class="block">{{> topic_levels}}</div>{{/ifisOr}}
-        <div class="block">
-            <button id="groupviz-btn" class="btn btn-raised btn-primary"><i class="fa fa-share-alt" aria-hidden="true"></i> {{i18n 'Group diagram'}}</a>
-        </div>
         <div class="block">{{> social}}</div>
         <div class="block">{{> topic_statistics}}</div>
     </aside>

@@ -1,16 +1,31 @@
 <div class="block-content tabs-block">
     <ul  class="nav nav-pills nav-stacked">
         <li>
+            <a href="/#/user/{{owner}}"><span class="fa fa-user"></span> {{i18n "Visit author's profile"}}</a>
+        </li>
+        {{#ifis stage STAGE_PROPOSAL}}
+        <li>
             {{#if ppid}}
                 <a href="/#/proposal/{{ppid}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> {{i18n 'My proposal'}}</a>
             {{else}}
                 <a href="/#/proposal_create/{{_id}}" id="myprop"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> {{i18n 'Create proposal'}}</a>
             {{/if}}
         </li>
-    {{#if gid}}
+        {{/ifis}}
+        {{#ifis stage STAGE_CONSENSUS}}
         <li>
             <a href="/#/group/{{gid}}"><i class="fa fa-users" aria-hidden="true"></i> {{i18n 'Our group'}}</a>
         </li>
-    {{/if}}
+        {{/ifis}}
+        {{#ifisOr stage STAGE_CONSENSUS STAGE_PASSED}}
+        <li>
+            <a id="groupviz-btn" href="#"><i class="fa fa-share-alt" aria-hidden="true"></i> {{i18n 'Group diagram'}}</a>
+        </li>
+        {{/ifisOr}}
+        {{#ifis stage STAGE_PASSED}}
+        <li>
+            <a href="file/topic/final/{{_id}}" target="_blank"><span class="fa fa-file-text-o" aria-hidden="true"></span> {{i18n "Final document"}}</a>
+        </li>
+        {{/ifis}}
     </ul>
 </div>

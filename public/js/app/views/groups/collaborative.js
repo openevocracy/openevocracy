@@ -128,6 +128,12 @@ define([
             if(this.pad)
                 this.pad.destroy();
         },
+        
+        onBeforeRender: function() {
+            // Check if group is currently active, if yes add to model
+            if(new Date().getTime() <= this.model.get('nextDeadline'))
+                this.model.set('active', 1);
+        },
 
         onRender: function() {
             if(this.loaded)
@@ -172,7 +178,7 @@ define([
         
         onDOMexists: function() {
             // Check if body-text exists instead of editor (group has finished)
-            if(!this.model.has('body')) {
+            if(this.model.has('active')) {
                 var messageCallback = this.onReceiveMessage.bind(this);
                 var onlineCallback  = this.onNotifyOnline.bind(this);
                 var uid   = App.session.user.get('_id');
@@ -197,7 +203,7 @@ define([
                 
                 // Show Quill-editor
                 var pid = this.model.get('pid');
-                this.pad = new Pad(pid, quill);
+                this.pad = new Pad(pid, quill, {'documentState': true});
                 
                 // Show chat
                 var crid = this.model.get('crid');
@@ -213,7 +219,7 @@ define([
                             $(this).html(event.strftime(u.i18n("%D days, %H:%M:%S")));
                         }).on('finish.countdown', function(event) {
                             // Deactivate editing
-                            this.pad.deactivateEdit();
+                            this.pad.deactivateEdit(u.i18n('Group has just finished, editing is not possible any more.'));
                             
                             // Update model if timer has finished.
                             // (This is required because the cronjob triggers

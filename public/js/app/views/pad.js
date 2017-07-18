@@ -12,24 +12,24 @@ define([
     Marionette,
     Quill,
     socketio,
-    conf,
+    cfg,
     u
     ) {
     
-    function Pad(pid, quill, onUpdatePad) {
+    function Pad(pid, quill, conf) {
         
         this.activateEdit = function() {
-            $('#editor').removeClass('loading');
-            $('#editor .ql-editor').attr('contenteditable', 'true');
+            $('#editor').removeClass('not-available');
+            $('#editor .ql-editor').attr('contenteditable', 'true').fadeIn(500);
+            $('#editor .editor-reason').remove();
         };
         
         this.deactivateEdit = function(reason) {
-            if(_.isUndefined(reason))
-                reason = "";
+            $('#editor').addClass('not-available');
+            $('#editor .ql-editor').attr('contenteditable', 'false').hide();
             
-            // TODO parameter "message", to show message depending on reason, why pad is deactivated (loading, connection lost, group expired, etc.)
-            $('#editor').addClass('loading');
-            $('#editor .ql-editor').attr('contenteditable', 'false');
+            if(!_.isUndefined(reason))
+                $('#editor').append('<p class="editor-reason"><em>'+ reason +'</em></p>');
         };
         
         this.destroy = function() {
@@ -41,11 +41,15 @@ define([
         
         // constructor
         {
+            // Inizialize conf if undefined
+            if(_.isUndefined(conf))
+                conf = {};
+            
             // Deactivate editing
-            this.deactivateEdit();
+            this.deactivateEdit(u.i18n('Loading ...'));
             
             // Connect to socket
-            this.pad_socket = socketio.connect(conf.EVOCRACY_HOST, {secure: true});
+            this.pad_socket = socketio.connect(cfg.EVOCRACY_HOST, {secure: true});
             
             this.pad_socket.on('setContents', function(contents) {
                 console.log('setContents');
@@ -62,7 +66,8 @@ define([
                 //console.log(JSON.stringify(change));
                 this.editor.updateContents(change);
                 
-                this.updateDocumentState();
+                if(!_.isUndefined(conf.documentState) && conf.documentState == true)
+                    this.updateDocumentState();
             }.bind(this));
             
             this.editor = quill;
@@ -73,7 +78,8 @@ define([
                 //console.log('Editor contents have changed', JSON.stringify(delta));
                 this.pad_socket.emit('change', delta);
                 
-                this.updateDocumentState();
+                if(!_.isUndefined(conf.documentState) && conf.documentState == true)
+                    this.updateDocumentState();
             }.bind(this));
             
             // this packet commands the server to initialize the pad
@@ -116,9 +122,21 @@ define([
             }
             $('.state-stars').html(stars);
             
-            // call callback
-            if(!_.isUndefined(onUpdatePad))
-                onUpdatePad();
+            // Show if MIN_WORDS_PROPOSAL are reached
+            if(words >= cfg.MIN_WORDS_PROPOSAL) {
+                $('.propstate button').addClass('btn-success').removeClass('btn-danger')
+                    .attr('title', u.i18n('Proposal requirements fulfilled'));
+                $('.propstate button span').text(u.i18n('Proposal is valid'));
+                $('.propstate i').removeClass('fa-ban');
+                $('.propstate i').addClass('fa-check');
+            } else {
+                $('.propstate button').addClass('btn-danger').removeClass('btn-success').attr('title',
+                    u.strformat(u.i18n('proposal requirements not fulfilled, {0} more words required'),
+                                    (cfg.MIN_WORDS_PROPOSAL-words)));
+                $('.propstate button span').text(u.i18n('Proposal is not valid'));
+                $('.propstate i').removeClass('fa-check');
+                $('.propstate i').addClass('fa-ban');
+            }
         };
     }
     

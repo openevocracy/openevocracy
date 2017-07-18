@@ -80,7 +80,7 @@ app.post('/json/topic', function(req, res) { auth(req, res, topics.create); });
 app.delete('/json/topic/:id', function(req, res) { auth(req, res, topics.delete); });
 app.post('/json/topic-vote', function(req, res) { auth(req, res, topics.vote); });
 app.post('/json/topic-unvote', function(req, res) { auth(req, res, topics.unvote); });
-app.get('/file/topic/final/:id', function(req, res) { auth(req, res, topics.final); } );
+app.get('/file/topic/final/:id', function(req, res) { auth(req, res, topics.final); });
 
 // #########################
 // ### P R O P O S A L S ###

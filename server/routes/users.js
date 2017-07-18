@@ -317,10 +317,10 @@ exports.navigation = function(req, res) {
         return topic.stage == C.STAGE_PROPOSAL;
     }).map(function(topic){
         return db.collection('proposals').
-            findOneAsync({'source': uid, 'tid': topic._id}, {'tid': true}).
+            findOneAsync({'source': uid, 'tid': topic._id}, {'_id': true}).
             then(function(proposal) {
                 if(proposal)
-                    return {'_id': proposal.tid, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
+                    return {'_id': proposal._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
                 else
                     return null;
             });

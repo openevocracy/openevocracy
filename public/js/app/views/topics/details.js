@@ -89,6 +89,7 @@ define([
                 this.model.setVoted(!this.model.get('voted'));
             },
             'click #groupviz-btn': function(e) {
+                e.preventDefault();
                 $('.lightbox').fadeIn(500);
                 this.groupviz.resizeCanvas();
             },
@@ -113,10 +114,6 @@ define([
             
             // Set link in navigation to active
             u.setActive('nav-tpc-'+this.model.get('_id'));
-            
-            // Show social share buttons
-            var socialShareText = u.strformat(u.i18n('Have a look at topic "{0}":'), this.model.get('name'));
-            u.showShareButtons(socialShareText);
         },
         
         onDOMexists: function() {
@@ -133,6 +130,10 @@ define([
                 // Update model if timer has finished
                 this.model.fetch();
             }.bind(this));
+            
+            // Show social share buttons
+            var socialShareText = u.strformat(u.i18n('Have a look at topic "{0}":'), this.model.get('name'));
+            u.showShareButtons(socialShareText);
         }
     });
     

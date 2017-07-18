@@ -19,19 +19,32 @@
     <h2>{{i18n "Our proposal"}}</h2>
 </div>
 
-{{#unless body}}{{> alert}}{{/unless}}
+{{#if active}}{{> alert}}{{/if}}
 
-<div class="collab-wrap clearfix{{#unless body}} row-no-padding active{{/unless}}">
+<div class="collab-wrap clearfix{{#if active}} row-no-padding active{{/if}}">
     <div class="col-md-8">
-        {{#if body}}
+        {{#if active}}
+            <div id="editor"></div>
+        {{else}}
             {{> alert}}
             {{{body}}}
-        {{else}}
-            <div id="editor"></div>
         {{/if}}
     </div>
     <aside class="col-md-4">
-        {{#if body}}
+        {{#if active}}
+        <div class="choose-tool">
+            <ul class="nav nav-pills">
+              <li class="collab-pill active"><a href="collab-doc">{{i18n 'Status'}}</a></li>
+              <li class="collab-pill"><a href="collab-members">{{i18n 'Members'}}</a></li>
+              <li class="collab-pill"><a href="collab-chat">{{i18n 'Chat'}}<span class="chat-counter"></span></a></li>
+            </ul>
+        </div>
+        <div class="collab-tool">
+            <div data-tool="collab-doc" class="block active">{{> group_state}}</div>
+            <div data-tool="collab-members" class="block">{{> group_members}}</div>
+            <div data-tool="collab-chat" class="block">{{> group_chat}}</div>
+        </div>
+        {{else}}
         <h3>{{i18n "Navigation"}}</h3>
         <div class="block-content tabs-block">
             <ul  class="nav nav-pills nav-stacked">
@@ -49,19 +62,6 @@
                 </li>
                 {{/each}}
             </ul>
-        </div>
-        {{else}}
-        <div class="choose-tool">
-            <ul class="nav nav-pills">
-              <li class="collab-pill active"><a href="collab-doc">{{i18n 'Status'}}</a></li>
-              <li class="collab-pill"><a href="collab-members">{{i18n 'Members'}}</a></li>
-              <li class="collab-pill"><a href="collab-chat">{{i18n 'Chat'}}<span class="chat-counter"></span></a></li>
-            </ul>
-        </div>
-        <div class="collab-tool">
-            <div data-tool="collab-doc" class="block active">{{> group_state}}</div>
-            <div data-tool="collab-members" class="block">{{> group_members}}</div>
-            <div data-tool="collab-chat" class="block">{{> group_chat}}</div>
         </div>
         {{/if}}
     </aside>

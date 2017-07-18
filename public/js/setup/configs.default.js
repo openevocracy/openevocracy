@@ -3,6 +3,8 @@ var DISABLED = -1;
 var ONE_DAY = 1000*60*60*24;
 var ONE_MIN = 1000*60;
 
+var EVOCRACY_HOST = 'https://mind-about-sagacitysite.c9.io';
+
 var DEBUG_CONFIG = {
     DEBUG: true,
     MAIL: false,
@@ -27,7 +29,7 @@ var DEBUG_CONFIG = {
     REMINDER_GROUP_SECOND   : 1*ONE_MIN,
     REMINDER_GROUP_LAZY     : 1*ONE_MIN,
     
-    EVOCRACY_HOST : 'https://mind-about-sagacitysite.c9.io'
+    EVOCRACY_HOST : EVOCRACY_HOST
 };
 
 var RELEASE_CONFIG = {
@@ -54,7 +56,7 @@ var RELEASE_CONFIG = {
     REMINDER_GROUP_SECOND   : ONE_DAY,
     REMINDER_GROUP_LAZY     : 5*ONE_DAY,
     
-    EVOCRACY_HOST : 'https://mind-about-sagacitysite.c9.io'
+    EVOCRACY_HOST : EVOCRACY_HOST
 };
 
 //define(DEBUG_CONFIG);

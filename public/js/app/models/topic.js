@@ -27,11 +27,11 @@ define([
             }, this);*/
             
             // TODO implement with handlebars, when "participate" ("joined") is removed
-            this.on('change:stage', function() {
+            /*this.on('change:stage', function() {
                 var stage = self.get('stage');
                 var showTabs = (stage == C.STAGE_PROPOSAL || stage == C.STAGE_CONSENSUS);
                 self.set('showTabs', showTabs, {silent: true});
-            });
+            });*/
             
             this.on('change:stagePassedStarted', function() {
                 self.set('stagePassedDate', moment(self.get('stagePassedStarted')).format('YYYY-MM-DD'), {silent: true});

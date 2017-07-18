@@ -163,9 +163,8 @@ footer { font-size: 0.8em; text-align: center; padding: 10px 0 15px 0; }
 .wysiwyg .editor-wrapper { background-color: #fff; border: 1px solid #e0e0e0; }
 #body p { word-wrap: break-word; }
 
-#editor { height: 400px; }
-#editor.loading { background-color: #bdbdbd; }
-#editor.loading .ql-editor.ql-blank::before { color: transparent; }
+#editor { height: 500px; }
+#editor.not-available { background-color: #e0e0e0; color: #424242; padding: 12px 15px; }
 .ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #e0e0e0; }
 .ql-container.ql-snow { border: none; }
 

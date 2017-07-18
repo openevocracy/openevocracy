@@ -9,7 +9,7 @@ define([
     _,
     jsSocials,
     C,
-    i18n
+    lang
     ) {
     
     /*
@@ -30,7 +30,7 @@ define([
         
         i18n: function(str) {
             // for Handlebars implementation see main.js
-            return (i18n != undefined ? (i18n[str] != undefined ? i18n[str] : str) : str);
+            return (lang != undefined ? (lang[str] != undefined ? lang[str] : str) : str);
         },
         
         i18nAlert: function(err) {
@@ -118,7 +118,7 @@ define([
         
         showShareButtons: function(shareText) {
             if(_.isUndefined(shareText))
-                shareText = ""
+                shareText = "";
             
             // Activate social share functionality
             $("#shareIcons").jsSocials({

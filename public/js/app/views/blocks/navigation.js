@@ -31,7 +31,7 @@ define([
             u.updateActive();
         },
         
-         onDestroy: function() {
+        onDestroy: function() {
             clearInterval(this.timer);
         }
     });
