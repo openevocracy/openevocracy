@@ -2,7 +2,7 @@
 
 Is an implementation of the Evocracy concept: http://openevocracy.org/
 
-See a running demo instance at: http://5.230.156.126:9090/
+See a running demo instance at: http://demo.openevocracy.org/
 
 ## Project
 
