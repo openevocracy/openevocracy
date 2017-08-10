@@ -2,6 +2,8 @@
   "name": "openevocracy",
   "version": "0.1.1",
   "dependencies": {
+    "angular": "^1.6.5",
+    "angular-bluebird-promises": "^1.0.2",
     "app-root-path": "*",
     "async-lock": "^0.3.8",
     "bcrypt": "^1.0.2",
@@ -38,13 +40,13 @@
     "multer": "*",
     "node-crontab": "*",
     "nodemailer": "2.7.2",
-    "rich-text": "*",
     "phantom-html2pdf": "*",
     "quill-delta-to-html": "^0.3.0",
     "range-parser": "*",
     "request": "*",
     "request-promise": "*",
     "requirejs": "*",
+    "rich-text": "*",
     "send": "*",
     "serve-favicon": "*",
     "socket.io": "2.0.2",
@@ -52,6 +54,11 @@
     "strformat": "0.0.7",
     "underscore": "*",
     "underscore.string": "*",
-    "validate.js": "*"
+    "validate.js": "*",
+    "webpack": "^3.4.1"
+  },
+  "scripts" : {
+    "dev": "~/workspace/webpack-dev-server --host 0.0.0.0 --disable-host-check",
+    "public": "~/workspace/webpack && http-server public"
   }
 }
