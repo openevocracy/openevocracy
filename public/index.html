@@ -1,44 +1,52 @@
 <!DOCTYPE html>
 <html ng-app="evocracy">
-    <head>
-        <title>OpenEvocracy</title>
-        <link rel="icon" type="image/png" href="img/favicon.png" sizes="32x32">
-        
-        <!--Meta -->
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- Stylesheets -->
-        <!--<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials.css" />
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials-theme-flat.css" />
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/css/basic/emojify.min.css" />-->
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-        <link rel="stylesheet" href="/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/css/bootstrap-material-design.min.css">
-        <!--<link rel="stylesheet" href="https://cdn.quilljs.com/1.0.6/quill.snow.css">-->
-        <link rel="stylesheet" href="/css/custom.material.css">
-    </head>
-    <body>
-        <div id="layout"></div>
-        <div id="loading">
-            <p class="fa fa-cog fa-spin"></p>
-            <p class="text-muted">Loading ...</p>
-        </div>
-        <script src="dist/index.bundle.js"></script>
-        
-        <div ng-controller="TopicListController as topicList">
-          <table>
-            <thead>
-            <tr>
-              <th>name</th>
-              <th>description</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="topic in topicList.topics">
-              <td>{{topic.name}}</td>
-              <td>{{topic.description}}</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-    </body>
+<head>
+	<title>OpenEvocracy</title>
+	<link rel="icon" type="image/png" href="img/favicon.png" sizes="32x32">
+	<!--Meta -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- Stylesheets -->
+	<!--<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials-theme-flat.css" />
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/emojify.js/1.1.0/css/basic/emojify.min.css" />-->
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/bootstrap-material-design.min.css">
+	<!--<link rel="stylesheet" href="https://cdn.quilljs.com/1.0.6/quill.snow.css">-->
+	<link rel="stylesheet" href="/css/custom.material.css">
+</head>
+<body>
+	<div id="layout">
+		<div id="wrapper">
+			<div ng-include="'header.html'"></div>
+		</div>
+	</div>
+	
+	<div id="loading">
+		<p class="fa fa-cog fa-spin"></p>
+		<p class="text-muted">Loading ...</p>
+	</div>
+	
+	<script src="dist/index.bundle.js"></script>
+	
+	<div ng-controller="TopicListController as topicList">
+		<div translate="TOPICS"></div>
+		<div translate>TOPICS</div>
+		<table>
+			<thead>
+				<tr>
+					<th>name</th>
+					<th>description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="topic in topicList.topics">
+					<td>{{topic.name}}</td>
+					<td>{{topic.description}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+</body>
 </html>
