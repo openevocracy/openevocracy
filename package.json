@@ -4,6 +4,8 @@
   "dependencies": {
     "angular": "^1.6.5",
     "angular-bluebird-promises": "^1.0.2",
+    "angular-translate": "*",
+    "angular-translate-loader-static-files": "*",
     "app-root-path": "*",
     "async-lock": "^0.3.8",
     "bcrypt": "^1.0.2",
@@ -19,7 +21,7 @@
     "cookie-session": "*",
     "cookie-signature": "*",
     "cron": "*",
-    "debug": "*",
+    "debug": "~2.6.4",
     "ejs": "*",
     "errorhandler": "*",
     "express": "*",
