@@ -58,7 +58,7 @@
     "webpack": "^3.4.1"
   },
   "scripts" : {
-    "dev": "~/workspace/webpack-dev-server --host 0.0.0.0 --disable-host-check",
-    "public": "~/workspace/webpack && http-server public"
+    "dev": "webpack-dev-server --host 0.0.0.0 --disable-host-check",
+    "public": "webpack && http-server public"
   }
 }
