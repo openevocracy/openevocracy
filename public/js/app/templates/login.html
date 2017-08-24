@@ -1,0 +1,60 @@
+<div class="lightbox modal" id="box-topic-new">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        
+            <div class="modal-header">
+                <button type="button" class="close cancel" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">{{i18n "Get a new password"}}</h4>
+            </div>
+                
+            <div class="modal-body">
+                {{#ifis lightboxOpen 1}}{{> alert}}{{/ifis}}
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="topic-name" class="col-md-3 control-label">{{i18n "Your email-address:"}}</label>
+                        <div class="col-md-9"><input class="form-control email" type="email" /></div>
+                    </div>
+                    <input type="hidden" class="topic-id" />
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-primary send-password">{{i18n "Send password"}}</button>
+                <button class="btn btn-default cancel">{{i18n "Cancel"}}</button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<section class="content" id="login">
+    <div class="page-header">
+        <h2>{{i18n "Login"}}</h2>
+    </div>
+    
+    {{#ifis lightboxOpen 0}}{{> alert}}{{/ifis}}
+    <p>{{i18n "Welcome to the OpenEvocracy project!"}}</p>
+    
+    <form id="login-form" data-validate="parsley">
+    
+    <fieldset>
+        <div class="form-group">
+            <label class="control-label" for="name">{{i18n "Your email-address:"}}</label>
+            <input class="form-control" value="{{name}}" type="text" id="name" name="name" placeholder="{{i18n 'Your id or email'}}" />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="pass">{{i18n "Your password:"}}</label>
+            <input class="form-control" type="password" id="pass" name="pass" placeholder="{{i18n 'Your password'}}" />
+        </div>
+    </fieldset>
+    
+    </form>
+    
+    <button id="login-btn" class="btn btn-raised btn-primary">{{i18n "Login"}}</button>
+    
+    <hr/>
+    <p>
+        {{{i18n 'Need an account? Just <a href="/#/register">register</a>'}}}.<br/>
+        {{{i18n 'Forgot your password? <a class="pwforgot" href="">Get a new one</a>'}}}.
+    </p>
+</section>

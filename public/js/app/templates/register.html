@@ -1,0 +1,30 @@
+<section class="content" id="register">
+    <div class="page-header">
+        <h2>{{i18n "Register"}}</h2>
+    </div>
+    
+    {{> alert}}
+    
+    <p class="welcome-message">{{i18n "Nice to have you with us!"}}</p>
+    
+    <form id="signup-form" data-parsley-validate>
+    
+    <fieldset>
+        <div class="form-group">
+            <label class="control-label" for="email">{{i18n "Your email-address:"}}</label>
+            <input class="form-control" type="email" required id="email" name="email" placeholder="{{i18n 'E-mail'}}" value="{{email}}" data-parsley-trigger="change" />
+        </div>
+        
+        <div class="form-group">
+            <label class="control-label" for="pass">{{i18n "Your password:"}}</label>
+            <input class="form-control" type="password" id="pass" required name="pass" placeholder="{{i18n 'Password'}}" data-parsley-trigger="change" />
+        </div>
+    </fieldset>
+    
+    </form>
+    
+    <button id="signup" class="btn btn-raised btn-primary">{{i18n "Register"}}</button>
+    
+    <hr/>
+    <p>{{{i18n "You already have an account? Just <a href='/#/login'>login</a>"}}}.</p>
+</section>

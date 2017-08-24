@@ -1,0 +1,47 @@
+<div class="page-header">
+    <h2>{{i18n "Settings"}}</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="jquery-alert"></div>
+        {{> alert}}
+        <p><strong>{{i18n "Your ID"}}:</strong> {{_id}}</p>
+        <hr/>
+        
+        <div class="setting">
+            <button class="btn-setting btn btn-default btn-lg btn-block btn-raised btn-primary fa-bg">{{i18n "E-mail address"}}</button>
+            <form data-validate="parsley" data-type="email" style="display: none;">
+                <fieldset>
+                    <div class="form-group">
+                        <label class="control-label" for="email">{{i18n "Your email-address:"}}</label>
+                        <input class="form-control" type="email" id="email" name="email" value="{{email}}" />
+                    </div>
+                    <button class="btn-save btn btn-raised btn-primary pull-right">{{i18n "Save"}}</button>
+                </fieldset>
+            </form>
+        </div>
+        
+        <div class="setting">
+            <button class="btn-setting btn btn-default btn-lg btn-block btn-raised btn-primary fa-bg">{{i18n "Password"}}</button>
+            <form data-validate="parsley" data-type="pass" style="display: none;">
+                <fieldset>
+                    <div class="form-group">
+                        <label class="control-label" for="pass">{{i18n "Your new password"}}:</label>
+                        <input class="form-control" type="password" id="pass" name="pass" placeholder="{{i18n 'Your new password'}}" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="pass">{{i18n "Repeat your new password"}}:</label>
+                        <input class="form-control" type="password" id="pass-rep" name="pass-rep" placeholder="{{i18n 'Repeat your new password'}}" />
+                    </div>
+                    <button class="btn-save btn btn-raised btn-primary pull-right">{{i18n "Save"}}</button>
+                </fieldset>
+            </form>
+        </div>
+        
+    </div>
+    
+    <aside class="col-md-4">
+        <div class="block"></div>
+    </aside>
+</div>

@@ -1,0 +1,28 @@
+<div class="btn-group pull-right" role="group">
+    {{#ifis expired 0}}
+    {{#if pid}}
+    <button class="btn btn-raised btn-primary btn-sm edit" title="{{i18n "Edit"}}"><span class="fa fa-pencil"></span></button>
+    <!-- TODO <button class="ico del" title="deactivate"><span></span></button> -->
+    {{/if}}
+    {{/ifis}}
+</div>
+
+<div class="page-header">
+    <h2>{{i18n "My proposal"}}</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-8 wysiwyg">
+        
+        {{> alert}}
+        <div id="body">{{{body}}}</div>
+        <div class="editor-wrapper hidden">
+            <div id="editor"></div>
+        </div>
+    </div>
+    
+    <aside class="col-md-4">
+        <div class="block">{{> proposal_tabs}}</div>
+        <div class="block">{{> proposal_state}}</div>
+    </aside>
+</div>

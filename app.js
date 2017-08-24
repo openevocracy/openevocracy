@@ -29,7 +29,7 @@ var app = express();
 
 var cfg = requirejs('public/js/setup/configs');
 
-// initilize mail
+// initialize mail
 mail.initializeMail();
 
 // import routes

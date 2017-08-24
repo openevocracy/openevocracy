@@ -1,16 +1,18 @@
 {
   "name": "openevocracy",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "dependencies": {
     "angular": "^1.6.5",
     "angular-bluebird-promises": "^1.0.2",
-    "angular-translate": "*",
+    "angular-translate": "^2.15.2",
     "angular-translate-loader-static-files": "*",
+    "angular-translate-loader-partial": "*",
     "app-root-path": "*",
     "async-lock": "^0.3.8",
     "bcrypt": "^1.0.2",
     "bluebird": "*",
     "body-parser": "*",
+    "bootstrap": "^3.3.7",
     "buffer-crc32": "*",
     "chance": "*",
     "collections": "*",
@@ -59,8 +61,10 @@
     "validate.js": "*",
     "webpack": "^3.4.1"
   },
-  "scripts" : {
-    "dev": "webpack-dev-server --host 0.0.0.0 --disable-host-check",
-    "public": "webpack && http-server public"
+  "scripts": {
+    "mongod": "./mongod.sh",
+    "watch": "webpack --watch",
+    "dev": "webpack --watch & node --debug-brk=15454 app.js",
+    "public": "./mongod.sh & webpack && node app.js"
   }
 }

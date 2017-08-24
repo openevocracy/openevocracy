@@ -4,7 +4,7 @@ a { cursor: pointer; }
 small { font-size: 11px; }
 hr { border-color: #ccc; }
 .fa { margin-right: 0.1em; }
-.btn.active .fa { color: #5cb85c; }
+.btn.active .fa { color: #5cb85c; } 
 .tr.active .fa { color: #aaa; }
 .block { margin-bottom: 5px; }
 .btn-block { text-align: left; }

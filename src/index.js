@@ -1,35 +1,46 @@
 // Load libraries
 var angular = require("angular");
+var bootstrap = require("bootstrap"); // TODO load it in webpack.config.js -> plugins
+var angularTranslate = require("angular-translate");
+var angularTranslateFiles = require("angular-translate-loader-partial");
 
 // Define app
-var module = angular.module('evocracy', ['pascalprecht.translate']);
+var module = angular.module('evocracy', [angularTranslate]);
 
-module.config(function ($translateProvider) {
-  $translateProvider.translations('en', {
-    TOPICS: 'Topics'
-  });
-  $translateProvider.translations('de', {
-    TOPICS: 'Themen'
-  });
-  $translateProvider.preferredLanguage('en');
+module.config(function($translateProvider, $translatePartialLoaderProvider) {
+	// Register a loader for the static files
+	$translatePartialLoaderProvider.addPart('ids');
+	$translatePartialLoaderProvider.addPart('classes');
+	$translateProvider.useLoader('$translatePartialLoader', {
+		urlTemplate: 'i18n/{lang}/{part}.json'
+	});
+	
+	$translateProvider.useSanitizeValueStrategy('escape'); // see https://angular-translate.github.io/docs/#/guide/19_security
+	$translateProvider.preferredLanguage('de');
 });
 
-// Fade out loading spinner
-$('#loading').fadeOut();
+// Define header controller
+module.controller('HeaderController', function($scope, $translate) {
+	$scope.setLanguage = function(lang) {
+		$translate.use(lang);
+	};
+});
 
 // Define topic list controller
-module.controller('TopicListController', function($scope, $translate) {
-    // Request topic collection via get ajax
-    /*$http({
-        method : 'GET', url : 'json/topics'
-    }).then(function success(res) {
-        this.topics = res.data;
-    }.bind(this), function error(res) {
-        console.error(res);
-    });*/
-    
-    $scope.changeLanguage = function (key) {
-        $translate.use(key);
-    };
+module.controller('TopicListController', function($scope, $http) {
+	// Request topic collection via get ajax
+	$http({
+		method : 'GET', url : 'json/topics'
+	}).then(function success(res) {
+		this.topics = res.data;
+	}.bind(this), function error(res) {
+		console.error(res);
+	});
 });
 
+
+
+// Fade out loading spinner
+$('#loading').fadeOut(function() {
+	$('#layout').fadeIn();
+});

@@ -3,8 +3,10 @@
 <head>
 	<title>OpenEvocracy</title>
 	<link rel="icon" type="image/png" href="img/favicon.png" sizes="32x32">
+	
 	<!--Meta -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
 	<!-- Stylesheets -->
 	<!--<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.jssocials/1.4.0/jssocials-theme-flat.css" />
@@ -16,9 +18,28 @@
 	<link rel="stylesheet" href="/css/custom.material.css">
 </head>
 <body>
-	<div id="layout">
+	<div id="layout" style="display: none;">
 		<div id="wrapper">
-			<div ng-include="'header.html'"></div>
+			<div ng-controller="HeaderController">
+				<div ng-include="'header.html'"></div>
+			</div>
+			
+			<div ng-controller="TopicListController as topicList">
+				<table>
+					<thead>
+						<tr>
+							<th>name</th>
+							<th>description</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="topic in topicList.topics">
+							<td>{{topic.name}}</td>
+							<td>{{topic.description}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 	
@@ -28,25 +49,6 @@
 	</div>
 	
 	<script src="dist/index.bundle.js"></script>
-	
-	<div ng-controller="TopicListController as topicList">
-		<div translate="TOPICS"></div>
-		<div translate>TOPICS</div>
-		<table>
-			<thead>
-				<tr>
-					<th>name</th>
-					<th>description</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr ng-repeat="topic in topicList.topics">
-					<td>{{topic.name}}</td>
-					<td>{{topic.description}}</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
 	
 </body>
 </html>

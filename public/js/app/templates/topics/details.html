@@ -1,0 +1,82 @@
+<div class="lightbox modal" id="groupviz-modal">
+    <div class="modal-dialog modal-full">
+        <div class="modal-content">
+        
+            <div class="modal-header">
+                <button type="button" class="close cancel" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">{{i18n 'Group diagram'}}</h4>
+            </div>
+                
+            <div class="modal-body">
+                <div id="groupviz"></div>
+                <div id="groupviz-details" class="panel panel-primary clearfix">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{i18n 'Details'}}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="details-panel default-details">
+                            {{i18n 'Click on any group or proposal from the hierarchy to get more information.'}}
+                        </div>
+                        <div class="details-panel group-details" style="display: none;">
+                            <div class="deadline"></div>
+                            <div class="words"></div>
+                            <a class="btn btn-raised btn-primary grouplink" href=""><i class="fa fa-users" aria-hidden="true"></i> {{i18n 'Go to group'}}</a>
+                        </div>
+                        <div class="details-panel proposal-details" style="display: none;">
+                            <div class="words"></div>
+                            <a class="btn btn-raised btn-primary proposallink" href=""><i class="fa fa-file-text-o" aria-hidden="true"></i> {{i18n 'Go to proposal'}}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="btn-group pull-right" role="group">
+    {{#ifis stage STAGE_SELECTION}}
+    <button class="btn btn-raised btn-sm vote{{#if voted}} btn-success{{else}} btn-primary{{/if}}" title="{{#if voted}}{{i18n "unmark as relevant"}}{{else}}{{i18n "mark as relevant"}}{{/if}}"><span class="fa fa-hand-paper-o"></span></button>
+    <!-- TODO in v0.2 <button class="btn btn-default btn-sm merge" title="merge request"><span class="fa"></span></button>-->
+    
+    {{#if pid}}
+    <button class="btn btn-raised btn-primary btn-sm edit" title="{{i18n "Edit"}}"><span class="fa fa-pencil"></span></button>
+    <!--<form action="#/topics">
+        <button class="ico del" title="delete"><span></span></button>
+    </form>-->
+    <a class="btn btn-raised btn-primary btn-sm del" title="{{i18n "Delete"}}" href="#/topics"><span class="fa fa-times"></span></a>
+    {{/if}}
+    {{/ifis}}
+</div>
+
+<div class="page-header">
+    <h2 class="topic-title">{{name}}</h2>
+</div>
+
+<div class="row">
+    <section class="col-md-8 wysiwyg">
+        {{> alert}}
+        
+        <div id="body">{{{body}}}</div>
+        <div class="editor-wrapper hidden">
+            <div id="editor"></div>
+        </div>
+    </section>
+    
+    <aside class="col-md-4">
+        <div class="block">{{> topic_tabs}}</div>
+        <div class="block">
+            <h3>{{i18n "Status"}}</h3>
+            <div class="block-content">
+                <p>Aktuelle Phase: {{stageName}}</p>
+                {{#ifis stage STAGE_SELECTION}}{{i18n 'Check for enough participants in'}}:<br/><span id="timeremaining"></span>{{/ifis}}
+                {{#ifis stage STAGE_PROPOSAL}}{{i18n 'End of stage in'}}:<br/><span id="timeremaining"></span>{{/ifis}}
+                {{#ifis stage STAGE_CONSENSUS}}{{i18n 'Currently in level'}} {{math level "+" 1}}, {{i18n "next level in"}}:<br/><span id="timeremaining"></span>{{/ifis}}
+                {{#ifis stage STAGE_PASSED}}{{i18n 'Finished at'}} {{stagePassedDate}}{{/ifis}}
+                {{#ifis stage STAGE_REJECTED}}{{i18n "Reason for rejection"}}:<br/>{{i18n rejectedReason}}{{/ifis}}
+            </div>
+        </div>
+        {{#ifisOr stage STAGE_CONSENSUS STAGE_PASSED}}<div class="block">{{> topic_levels}}</div>{{/ifisOr}}
+        <div class="block">{{> social}}</div>
+        <div class="block">{{> topic_statistics}}</div>
+    </aside>
+</div>
