@@ -2,6 +2,10 @@
 	"header_mainmenu_topiclist": "Themen",
 	"header_mainmenu_timeline": "Timeline",
 	
+	"footer_menu_about": "Über uns",
+	"footer_menu_impress": "Impressum",
+	"footer_label_version": "Aktuelle Version",
+	
 	"Login": "Login",
 	"Register": "Registrieren",
 	"Welcome to the OpenEvocracy project!": "Willkommen bei OpenEvocracy!",
@@ -161,7 +165,6 @@
 	"excellent": "Exzellent",
 	"superior": "Überragend",
 	
-	"current version": "Aktuelle Version",
 	"Share this page": "Teile diese Seite",
 	
 	"404 - Page not found": "404 - Seite nicht gefunden",

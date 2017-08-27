@@ -83,7 +83,7 @@ main aside div:first-child h3 { margin-top: 0; }
 footer { font-size: 0.8em; text-align: center; padding: 10px 0 15px 0; }
 #footmenu { display: inline-block; margin: 0; padding: 0; }
 #footmenu li { list-style: none; float: left; }
-#footmenu a { display: inline-block; padding: 0 0.3em; line-height: 30px; color: #fff; }
+#footmenu a { display: inline-block; padding: 0 0.5em; line-height: 30px; color: #fff; }
 
 /* ### SETTINGS ### */
 

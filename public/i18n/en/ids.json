@@ -2,6 +2,10 @@
 	"header_mainmenu_topiclist": "Topics",
 	"header_mainmenu_timeline": "Timeline",
 	
+	"footer_menu_about": "About",
+	"footer_menu_impress": "Impress",
+	"footer_label_version": "Current version",
+	
 	"REJECTED_NOT_ENOUGH_VOTES": "Not enough participants in selection stage",
 	"REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Not enough valid proposals in proposal stage",
 	"REJECTED_UNSUFFICIENT_RATINGS": "Unsufficient ratings in groups",

@@ -24,21 +24,11 @@
 				<div ng-include="'header.html'"></div>
 			</div>
 			
-			<div ng-controller="TopicListController as topicList">
-				<table>
-					<thead>
-						<tr>
-							<th>name</th>
-							<th>description</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr ng-repeat="topic in topicList.topics">
-							<td>{{topic.name}}</td>
-							<td>{{topic.description}}</td>
-						</tr>
-					</tbody>
-				</table>
+			<!-- content is injected here  -->
+			<div ng-view></div>
+			
+			<div ng-controller="FooterController">
+				<div ng-include="'footer.html'"></div>
 			</div>
 		</div>
 	</div>

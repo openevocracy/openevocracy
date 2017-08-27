@@ -1,0 +1,16 @@
+<div ng-controller="TopicListController as topicList">
+	<table>
+		<thead>
+			<tr>
+				<th>name</th>
+				<th>description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="topic in topicList.topics">
+				<td>{{topic.name}}</td>
+				<td>{{topic.description}}</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
