@@ -1,8 +1,7 @@
 var _ = require('underscore');
 var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
-var requirejs = require('requirejs');
-var C = requirejs('public/js/setup/constants');
+var C = require('setup/constants.json');
 
 /*
  * Ratings can be either for knowledge or intigration skill.

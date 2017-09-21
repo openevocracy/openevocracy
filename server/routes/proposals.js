@@ -2,9 +2,8 @@ var _ = require('underscore');
 var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
-var requirejs = require('requirejs');
 
-var C = requirejs('public/js/setup/constants');
+var C = require('setup/constants.json');
 var utils = require('../utils');
 var pads = require('../pads');
 

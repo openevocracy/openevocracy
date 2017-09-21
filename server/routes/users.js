@@ -12,7 +12,7 @@ var topics = require('./topics');
 var mail = require('../mail');
 var utils = require('../utils');
 
-var C = requirejs('public/js/setup/constants');
+var C = require('setup/constants.json');
 var cfg = requirejs('public/js/setup/configs');
 
 // cookie config

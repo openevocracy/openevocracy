@@ -4,10 +4,14 @@ var bootstrap = require("bootstrap"); // TODO load it in webpack.config.js -> pl
 var angularTranslate = require("angular-translate");
 var angularTranslateFiles = require("angular-translate-loader-partial");
 var angularRoute = require("angular-route");
-var version = require('../package.json').version
+var version = require('../package.json').version;
+var constants = require('../setup/constants.json');
 
 // Define app
-var module = angular.module('evocracy', [angularTranslate, angularRoute]);
+var module = angular.module('evocracy', [angularTranslate, angularRoute]).
+run(function ($rootScope) {
+	$rootScope.C = constants;
+});
 
 module.config(function($translateProvider, $translatePartialLoaderProvider) {
 	// Register a loader for the static files

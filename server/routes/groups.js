@@ -8,7 +8,7 @@ var bcrypt = require('bcrypt');
 var requirejs = require('requirejs');
 var strformat = require('strformat');
 
-var C = requirejs('public/js/setup/constants');
+var C = require('setup/constants.json');
 var cfg = requirejs('public/js/setup/configs');
 var i18n = require('../i18n');
 var ratings = require('./ratings');
