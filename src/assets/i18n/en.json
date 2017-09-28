@@ -1,0 +1,76 @@
+{
+	"TOPICS": "Topics",
+	
+    "EMAIL_ALL_LAZY_GROUP_MEMBERS_SUBJECT": "Group inactivity reminder: {0}",
+    "EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE": "Hi,\n\n you are a member of a group in {0}. You were not active for {1} in your group.\n Let\"s have a look at your common document, probably someone added something new.\n",
+    
+    "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_SUBJECT": "Group reminder: {0}",
+    "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_MESSAGE": "Hi,\n\n You are a member of a group in {0}. The topic will enter consensus stage in {1}.\n We suggest to read your collaborative document once again at that time, to eliminate last mistakes in your common text.\n",
+    
+    "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_SUBJECT": "Group reminder: {0}",
+    "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_MESSAGE": "Hi,\n\n You are a member of a group in {0}. The current level will end in {1}.\n We highly suggest to check your collaborative document for final corrections.\n",
+    
+    "EMAIL_RATING_REMINDER_GROUP_MEMBERS_SUBJECT": "Rating Reminder: {0}",
+    "EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE": "Hi,\n\n You are a member of a group in {0}. Currently no one has given any rating in your current group.\n Please rate the other members to increase the chance that qualified people will represent your group.\n",
+    
+    "EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT": "Proposal reminder: {0}",
+    "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "Hi,\n\n you are a participant of topic {0}. The topic will enter consensus stage in {1}.\n We highly suggest to check your proposal for final corrections.\n",
+    
+    "EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT": "Proposal reminder: {0}",
+    "EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE": "Hi,\n\n you are a participant of topic {0}. The topic will enter consensus stage in {1}.\n We suggest to read your proposal once again at that time, to eliminate last mistakes in your text.\n",
+    
+    "EMAIL_CONSENSUS_START_SUBJECT": "{0} reached consensus stage",
+    "EMAIL_CONSENSUS_START_MESSAGE": "Hi,\n\n the consensus stage of the topic {0} has just started and you are part of it.  You have been assigned to the group #{1}. You and four other team members will be working on a joint proposal.\n\n You can find the group\"s link here:\n http://mind-about-sagacitysite.c9.io/group/{1}\n\n Thank you for your engagement!\n",
+    
+    "EMAIL_TOPIC_PASSED_SUBJECT": "{0} finished last level",
+    "EMAIL_TOPIC_PASSED_MESSAGE": "Hi,\n\n The topic {0} you were participating has finished right now.\n Have a look at the final result:\n http://mind-about-sagacitysite.c9.io/file/topic/final/{1}\n\n Thank you for your engagement!\n",
+    
+    "EMAIL_LEVEL_CHANGE_SUBJECT": "{0} reached next level",
+    "EMAIL_LEVEL_CHANGE_MESSAGE": "Hi,\n\n The consensus stage of the topic {0} has reached a new level and so have you.\n You have been assigned to the group #{1}.  You and four other new team members will be working on a joint proposal again.\n\n You can find the group\"s link here:\n http://mind-about-sagacitysite.c9.io/group/{1}\n\n Thank you for your engagement!\n",
+    
+    "EMAIL_REGISTRATION_SUBJECT": "Your registration at Evocracy",
+    "EMAIL_REGISTRATION_MESSAGE": "Welcome {0} at Evocracy,\n\n You just created an account at {1}. Please verify your email by visiting:\n\n {1}/json/auth/verifyEmail/{0}\n\n If you did not register, just ignore this message.\n",
+    
+    "EMAIL_PASSWORD_RESET_SUBJECT": "New password",
+    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n You ordered a password reset for evocracy. Your temporary password is:\n\n{0}\n\n We highly suggest to change the password directly after your next login to a password of your choice.",
+    
+   	"header_mainmenu_topiclist": "Topics",
+	"header_mainmenu_timeline": "Timeline",
+	
+	"footer_menu_about": "About",
+	"footer_menu_impress": "Impress",
+	"footer_label_version": "Current version",
+	
+	"REJECTED_NOT_ENOUGH_VOTES": "Not enough participants in selection stage",
+	"REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Not enough valid proposals in proposal stage",
+	"REJECTED_UNSUFFICIENT_RATINGS": "Unsufficient ratings in groups",
+	"REJECTED_NO_VALID_GROUP_PROPOSAL": "No valid proposals in groups",
+	
+	"PROPOSAL_QUERIED_NOT_IN_PROPOSAL_STAGE": "The related topic is not in proposal stage any more.",
+	"GROUP_QUERIED_NOT_ACTIVE": "The group is not active any more.",
+	
+	"DEFAULT_TOPIC_TEXT": "Our suggestion: Write a short summary on top of your topic description, such that other readers can get a quick overview.",
+	"DEFAULT_PROPOSAL_TEXT": "Our suggestion: Write a short summary on top of your proposal, such that other readers can get a quick overview.",
+	"DEFAULT_GROUP_TEXT": "Our suggestion: Write a short summary on top of your document, such that other readers can get a quick overview. Also add a section in the end where you collect all aspects where no consensus was achieved, such that further groups can consider those aspects easier.",
+	
+	"USER_PASSWORT_NOT_CORRECT": "Password is not correct. Did you <a class=\"pwforgot\" href=\"{0}\">forget your password</a>?",
+	"USER_FORM_EMAIL_MISSING": "You did not enter an email address.",
+	"USER_FORM_VALIDATION_ERROR": "There was something wrong with the entered data. Please check your input again.",
+	"USER_FORM_VALIDATION_ERROR_EMAIL": "The entered email address does not meet the necessary form, please check it.",
+	"USER_FORM_VALIDATION_ERROR_PASSWORD": "The entered password does not meet the necessary form, please check it.<br/>Hint: whitespace is not allowed.",
+	"USER_ACCOUNT_EMAIL_NOT_EXIST": "The entered email address &raquo;{0}&laquo; is not connected to an user account. Do you have a typo?",
+	"USER_ACCOUNT_NOT_VERIFIED": "You have not verified your email-address. Click here to <a id=\"verify-account\" href=\"/json/auth/verification/{0}\">send verification email again.</a>",
+	"USER_ACCOUNT_ALREADY_EXISTS": "Account already exists. Please just log in.",
+	"USER_ACCOUNT_VERIFICATION_LINK_SENT": "To verify your email address, we\"ve sent an email to you. Please check your inbox and click the containing link.",
+	"USER_ACCOUNT_EMAIL_UPDATED": "The entered email-address was updated sucessfully.",
+	"USER_ACCOUNT_PASSWORD_UPDATED": "The entered password was updated sucessfully.",
+	"USER_ACCOUNT_PASSWORD_RESET": "A new password was sent to &raquo;{0}&laquo;. After logging in, you should immediately change your password.",
+	
+	"TOPIC_NOT_FOUND": "Topic not found.",
+	"TOPIC_NOT_AUTHORISIZED_FOR_UPDATE": "Only the author can update the topic.",
+	"TOPIC_NOT_AUTHORISIZED_FOR_DELETION": "Only the author can delete the topic.",
+	"TOPIC_UPDATE_ONLY_IN_SELECTION_STAGE": "Topic may only be edited in selection stage.",
+	"TOPIC_NAME_EMPTY": "Topic name is empty, please name it.",
+	"TOPIC_NAME_ALREADY_EXISTS": "A Topic with this name already exists.",
+	"TOPIC_REQUIREMENT_PROPOSAL_STAGE": "Topic must be at least in proposal stage."
+}

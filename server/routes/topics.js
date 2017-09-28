@@ -9,7 +9,7 @@ var appRoot = require('app-root-path');
 var AsyncLock = require('async-lock');
 var lock = new AsyncLock();
 
-var C = require('setup/constants.json');
+var C = require('../../setup/constants.json');
 var cfg = requirejs('public/js/setup/configs');
 var groups = require('./groups');
 var pads = require('../pads');

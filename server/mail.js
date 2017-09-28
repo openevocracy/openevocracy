@@ -11,7 +11,7 @@ var i18n = require('./i18n');
 var ratings = require('./routes/ratings');
 var groups = require('./routes/groups');
 
-var C = require('setup/constants.json');
+var C = require('../setup/constants.json');
 var cfg = requirejs('public/js/setup/configs');
 
 var transporter;
