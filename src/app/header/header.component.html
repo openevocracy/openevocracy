@@ -1,0 +1,39 @@
+<header>
+	<div class="container clearfix">
+		<img class="pull-left" src="../../assets/img/logo_white_32.png" />
+		<h1 class="pull-left">OpenEvocracy</h1>
+		<md-toolbar color="primary">
+			<md-nav-list>
+				<a md-list-item routerLink="/" routerLinkActive="active">{{ 'HEADER_MAINMENU_TOPICLIST' | translate}}</a>
+				<a md-list-item routerLink="/timeline" routerLinkActive="active">{{ 'HEADER_MAINMENU_TIMELINE' | translate}}</a>
+			</md-nav-list>
+			
+			<span class="flex-spacer"></span>
+			
+			<button md-icon-button [mdMenuTriggerFor]="lang">
+				<span class="fa fa-globe"></span>
+			</button>
+			<md-menu #lang="mdMenu" [overlapTrigger]="false">
+				<button md-menu-item (click)="setLanguage('en')">
+					<span>English</span>
+				</button>
+				<button md-menu-item (click)="setLanguage('de')">
+					<span>Deutsch</span>
+				</button>
+			</md-menu>
+			
+			<button md-icon-button [mdMenuTriggerFor]="settings">
+				<span class="fa fa-cogs"></span>
+			</button>
+			<md-menu #settings="mdMenu" [overlapTrigger]="false">
+				<button md-menu-item routerLink="/settings">
+					<span>{{ 'HEADER_MAINMENU_SETTINGS' | translate }}</span>
+				</button>
+				<button md-menu-item routerLink="/logout">
+					<span>{{ 'HEADER_MAINMENU_LOGOUT' | translate }}</span>
+				</button>
+			</md-menu>
+
+		</md-toolbar>
+	</div>
+</header>

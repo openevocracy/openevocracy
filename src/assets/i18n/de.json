@@ -1,5 +1,12 @@
 {
-	"TOPICS": "\"Themen\"",
+	"HEADER_MAINMENU_TOPICLIST": "Themen",
+	"HEADER_MAINMENU_TIMELINE": "Timeline",
+	"HEADER_MAINMENU_SETTINGS": "Einstellungen",
+	"HEADER_MAINMENU_LOGOUT": "Logout",
+	
+	"FOOTER_MENU_ABOUT": "Über uns",
+	"FOOTER_MENU_IMPRESS": "Impressum",
+	"FOOTER_MENU_VERSION": "Aktuelle Version",
 	
 	"EMAIL_ALL_LAZY_GROUP_MEMBERS_SUBJECT": "Inaktivitätserinnerung für deine Gruppe: {0}",
     "EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE": "Hi,\n\n you are a member of a group in {0}. You were not active for 5 days in your group.\n Let\"s have a look at your common document, probably someone added something new.",
@@ -12,13 +19,6 @@
     
     "EMAIL_RATING_REMINDER_GROUP_MEMBERS_SUBJECT": "Bewertungs Erinnerung: {0}",
     "EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Bisher hat niemand in der Gruppe eine Bewertung abgegeben.\n Gib den anderen Mitgliedern der Gruppe eine Bewertung, um einen passenden Repräsentanten zu finden.\n",
-    
-	"header_mainmenu_topiclist": "Themen",
-	"header_mainmenu_timeline": "Timeline",
-	
-	"footer_menu_about": "Über uns",
-	"footer_menu_impress": "Impressum",
-	"footer_label_version": "Aktuelle Version",
 	
 	"Login": "Login",
 	"Register": "Registrieren",
@@ -35,7 +35,6 @@
 	"Your password": "Dein Passwort",
 	"E-mail": "E-Mail-Adresse",
 	"Password": "Passwort",
-	"Settings": "Einstellungen",
 	"Your ID": "Deine ID",
 	"E-mail address": "E-Mail Adresse",
 	"Your new password": "Dein neues Passwort",

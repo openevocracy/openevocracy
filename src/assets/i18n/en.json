@@ -1,5 +1,12 @@
 {
-	"TOPICS": "Topics",
+	"HEADER_MAINMENU_TOPICLIST": "Topics",
+	"HEADER_MAINMENU_TIMELINE": "Timeline",
+	"HEADER_MAINMENU_SETTINGS": "Settings",
+	"HEADER_MAINMENU_LOGOUT": "Logout",
+	
+	"FOOTER_MENU_ABOUT": "About",
+	"FOOTER_MENU_IMPRESS": "Impress",
+	"FOOTER_MENU_VERSION": "Current version",
 	
     "EMAIL_ALL_LAZY_GROUP_MEMBERS_SUBJECT": "Group inactivity reminder: {0}",
     "EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE": "Hi,\n\n you are a member of a group in {0}. You were not active for {1} in your group.\n Let\"s have a look at your common document, probably someone added something new.\n",
@@ -33,13 +40,6 @@
     
     "EMAIL_PASSWORD_RESET_SUBJECT": "New password",
     "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n You ordered a password reset for evocracy. Your temporary password is:\n\n{0}\n\n We highly suggest to change the password directly after your next login to a password of your choice.",
-    
-   	"header_mainmenu_topiclist": "Topics",
-	"header_mainmenu_timeline": "Timeline",
-	
-	"footer_menu_about": "About",
-	"footer_menu_impress": "Impress",
-	"footer_label_version": "Current version",
 	
 	"REJECTED_NOT_ENOUGH_VOTES": "Not enough participants in selection stage",
 	"REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Not enough valid proposals in proposal stage",

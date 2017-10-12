@@ -6,7 +6,7 @@
 	"apps": [
 		{
 			"root": "src",
-			"outDir": "dist",
+			"outDir": "public/dist",
 			"assets": [
 				"assets",
 				"favicon.ico"
@@ -20,14 +20,12 @@
 			"prefix": "app",
 			"styles": [
 				"../node_modules/font-awesome/scss/font-awesome.scss",
-				"../node_modules/bootstrap-material-design/dist/css/bootstrap-material-design.min.css",
-				"styles.scss"
+				"styles/bootstrap.min.css",
+				"styles/evocracy-theme.scss",
+				"styles/variables.scss",
+				"styles/custom-styles.scss"
 			],
-			"scripts": [
-				"../node_modules/jquery/dist/jquery.min.js",
-				"../node_modules/popper.js/dist/umd/popper.min.js",
-				"../node_modules/bootstrap-material-design/dist/js/bootstrap-material-design.min.js"
-			],
+			"scripts": [],
 			"environmentSource": "environments/environment.ts",
 			"environments": {
 			"dev": "environments/environment.ts",

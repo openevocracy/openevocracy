@@ -1,0 +1,15 @@
+/* Import variables */
+@import "~styles/variables";
+
+.mat-card { width: 94%; height: 94%; cursor: pointer; border-left: 5px solid $grey400; transition: background-color 400ms; }
+.mat-card.step-1 { /* Default */ }
+.mat-card.step0 { border-color: $blue400; }
+.mat-card.step1 { border-color: $orange400; }
+.mat-card.step2 { border-color: $red400; }
+.mat-card.step3 { border-color: $green400; }
+
+.mat-card.step-1:hover, .mat-card.step-1:focus, .mat-card.step-1:active { background-color: $grey100; }
+.mat-card.step0:hover, .mat-card.step0:focus, .mat-card.step0:active { background-color: $blue50; }
+.mat-card.step1:hover, .mat-card.step1:focus, .mat-card.step1:active { background-color: $orange50; }
+.mat-card.step2:hover, .mat-card.step2:focus, .mat-card.step2:active { background-color: $red50; }
+.mat-card.step3:hover, .mat-card.step3:focus, .mat-card.step3:active { background-color: $green50; }

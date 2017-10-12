@@ -1,6 +1,6 @@
 {
   "name": "openevocracy",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -13,6 +13,8 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/material": "*",
+    "@angular/cdk": "*",
     "@angular/animations": "^4.2.4",
     "@angular/common": "^4.2.4",
     "@angular/compiler": "^4.2.4",

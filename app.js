@@ -42,7 +42,7 @@ var tests = require('./server/routes/tests');
 var auth = users.auth_wrapper;
 
 // all environments
-app.set('port', process.env.PORT || process.env.PORT);
+app.set('port', 8081); //process.env.PORT || process.env.PORT);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
@@ -54,7 +54,9 @@ app.use(methodOverride());
 app.use(cookieParser('secret'));
 //app.use(cookieSession('secret'));
 app.use(session({ secret: 'secret', key: 'uid', cookie: { secure: true }, resave: true, saveUninitialized: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+var distPath = path.join(__dirname, 'public/dist');
+app.use(express.static(distPath));
 
 // setup cronjob to run every minute
 var job = new CronJob({
@@ -152,14 +154,22 @@ app.get('/test/create_groups', tests.create_groups );
 app.get('/test/remix_groups', tests.remix_groups );
 app.get('/test/clean_database', tests.clean_database );
 
-// ####################
-// ### 404 handling ###
-// ####################
+// ########################
+// ### Angular handling ###
+// ########################
 
-app.use(function(req, res, next){
+// If a Angular Router path was requested, respond just with index.html
+app.all('/*', function(req, res, next) {
+    // Just send the index.html for other files to support HTML5Mode
+    res.sendFile('index.html', { root: distPath });
+    
+    // TODO Error handling is necessary if given path is not a route in Angular
+});
+
+/*app.use(function(req, res, next){
   // TODO redirect to specific 404 page
   res.redirect(cfg.EVOCRACY_HOST);
-});
+});*/
 
 // ###################
 // ### S E R V E R ###

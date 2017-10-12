@@ -1,13 +1,9 @@
-<footer class="navbar navbar-default navbar-fixed-bottom">
-	<ul id="footmenu">
-		<li><a target="_blank" href="http://openevocracy.org">footer_menu_about</a></li>
-		<li><a target="_blank" href="http://openevocracy.org">footer_menu_impress</a></li>
+<footer>
+	<ul id="footmenu" class="clearfix">
+		<li><a target="_blank" href="http://openevocracy.org">{{ 'FOOTER_MENU_ABOUT' | translate }}</a></li>
+		<li><a target="_blank" href="http://openevocracy.org">{{ 'FOOTER_MENU_IMPRESS' | translate }}</a></li>
 		<li><a target="_blank" href="https://github.com/openevocracy/openevocracy">Github</a></li>
 		<li><a target="_blank" href="https://twitter.com/openevocracy">Twitter</a></li>
 	</ul>
-	<div><span>footer_label_version</span>: <span id="evocracy-version"></span></div>
+	<div class="evo-version"><span>{{ 'FOOTER_MENU_VERSION' | translate }}</span>: <span>{{ version }}</span></div>
 </footer>
-
-<button class="btn btn-primary">Test</button>
-
-<div>{{ 'TOPICS' | translate }}</div>

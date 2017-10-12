@@ -1,0 +1,29 @@
+/* Import variables */
+@import "~styles/variables";
+
+/* Add custom variables */
+$header-height: 64px;
+
+/* Component Styles */
+header {
+	background-color: $teal500;
+	height: $header-height;
+	color: $white;
+	font-size: 1.2rem;
+	position: fixed;
+	right: 0; left: 0; top: 0;
+	z-index: 1000;
+}
+
+h1 { font-size: 2rem; font-weight: 300; margin: 0; line-height: $header-height; }
+img { padding: 16px 1rem 16px 0; }
+
+md-toolbar { margin-left: 50px; }
+.mat-toolbar { width: auto; }
+
+md-nav-list { padding: 0; }
+.mat-list-item { float: left; color: $white; font-weight: 300; }
+.mat-list-item.active { background: rgba(0,0,0,0.04); }
+
+/* Component Child Styles */
+:host::ng-deep .mat-nav-list .mat-list-item .mat-list-item-content { height: $header-height; }

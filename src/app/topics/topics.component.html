@@ -1,3 +1,16 @@
-<p>
-  topics works!a
-</p>
+<md-grid-list cols="4" rowHeight="200px">
+	<md-grid-tile *ngFor="let topic of topicsList">
+		<md-card md-ripple [ngClass]="'step'+topic.stage">
+			<md-card-content>
+				<md-card-title>{{topic.name}}</md-card-title>
+				<p *ngIf="topic.stage == -1">{{topic.rejectedReason | translate}}</p>
+			</md-card-content>
+			<md-card-actions *ngIf="topic.stage == 0">
+				<button md-button><span class="fa fa-hand-paper-o"></span></button>
+			</md-card-actions>
+			<md-card-footer>
+				
+			</md-card-footer>
+		</md-card>
+	</md-grid-tile>
+</md-grid-list>

@@ -267,11 +267,12 @@ function appendTopicInfoAsync(topic, uid, with_details) {
             return _.toArray(levels_object);
         });
     
-    // detailed data (not used in topic list, only in details)
+    // Detailed data (not used in topic list, only in details)
     var pad_body_promise = null;
     var group_members_promise = null;
     var find_user_group_promise = null;
     var user_proposal_id_promise = null;
+    
     if(with_details) {
         // get pad body
         pad_body_promise = pads.getPadHTMLAsync(topic.pid);
@@ -309,7 +310,9 @@ function appendTopicInfoAsync(topic, uid, with_details) {
     if(!_.isEqual(topic.owner,uid))
         delete topic.pid;
     
-    return Promise.props(_.extend(topic,{
+    // FIXME
+    return topic;
+    /*return Promise.props(_.extend(topic,{
         // basic
         'num_votes': topic_votes_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
@@ -325,7 +328,7 @@ function appendTopicInfoAsync(topic, uid, with_details) {
         'group_members': group_members_promise,
         'gid': find_user_group_promise,
         'ppid': user_proposal_id_promise
-    }));
+    }));*/
 }
 
 exports.list = function(req, res) {
