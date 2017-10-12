@@ -311,24 +311,25 @@ function appendTopicInfoAsync(topic, uid, with_details) {
         delete topic.pid;
     
     // FIXME
-    return topic;
-    /*return Promise.props(_.extend(topic,{
+    //return topic;
+    return Promise.props(_.extend(topic,{
         // basic
         'num_votes': topic_votes_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
             return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
-        'levels': levels_promise,
+        
+        'levels': levels_promise
         
         // detailed, but required for basic data
-        'groups': with_details ? groups_promise : null,
+        /*'groups': with_details ? groups_promise : null,
         'proposals': with_details ? topic_proposals_promise : null,
         
         // detailed
         'body': pad_body_promise,
         'group_members': group_members_promise,
         'gid': find_user_group_promise,
-        'ppid': user_proposal_id_promise
-    }));*/
+        'ppid': user_proposal_id_promise*/
+    }));
 }
 
 exports.list = function(req, res) {
@@ -337,6 +338,10 @@ exports.list = function(req, res) {
     manageAndListTopicsAsync().then(function(topics) {
         // Promise.map does not work above
         Promise.map(topics, _.partial(appendTopicInfoAsync,_,uid,false)).
+        then(function(topics){
+           console.log(topics);
+           return topics;
+        }).
         then(res.json.bind(res));
     });
 };

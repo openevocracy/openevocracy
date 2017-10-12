@@ -42,7 +42,7 @@ var tests = require('./server/routes/tests');
 var auth = users.auth_wrapper;
 
 // all environments
-app.set('port', 8081); //process.env.PORT || process.env.PORT);
+app.set('port', process.env.PORT);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
@@ -55,7 +55,7 @@ app.use(cookieParser('secret'));
 //app.use(cookieSession('secret'));
 app.use(session({ secret: 'secret', key: 'uid', cookie: { secure: true }, resave: true, saveUninitialized: true }));
 
-var distPath = path.join(__dirname, 'public/dist');
+var distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
 
 // setup cronjob to run every minute
@@ -74,6 +74,17 @@ job.start();
 // ###################
 // ### T O P I C S ###
 // ###################
+
+/*
+Routes plan:
+
+/topiclist - Collection of topics with extended information
+/topiclist/:id - Single topic list element with sparse information (currently not used)
+
+/topic - Collection of topics with extended information (currently not used)
+/topic:id - Single topic with extended information
+
+*/
 
 app.get('/json/topics', function(req, res) { auth(req, res, topics.list); });
 app.patch('/json/topic/:id', function(req, res) { auth(req, res, topics.update); });

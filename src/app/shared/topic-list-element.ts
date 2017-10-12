@@ -1,4 +1,4 @@
-//import { Level } from './level';
+import { Level } from './level';
 
 export class TopicListElement {
 	/* Original topic */
@@ -16,13 +16,7 @@ export class TopicListElement {
 	finalDocument: string;
 	
 	/* Extended information */
-    /*num_votes: number;
+    num_votes: number;
     voted: boolean;
     levels: Level[];
-    groups: null;
-    proposals: null;
-    body: null;
-    group_members: null;
-    gid: null;
-    ppid: null;*/
 }

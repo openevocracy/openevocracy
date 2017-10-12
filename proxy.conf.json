@@ -1,0 +1,14 @@
+{
+	"/json": {
+		"target": "http://localhost:8083",
+		"secure": false
+	},
+	"/file": {
+		"target": "http://localhost:8083",
+		"secure": false
+	},
+	"/test": {
+		"target": "http://localhost:8083",
+		"secure": false
+	}
+}
