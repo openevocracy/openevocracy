@@ -17,6 +17,7 @@ import { TopicsComponent } from './topics/topics.component';
 import { TopicsListService } from './services/topics-list.service';
 import { HttpManagerService } from './services/http-manager.service';
 import { baseURL } from './shared/config';
+import { C } from './shared/constants';
 
 import 'hammerjs';
 
@@ -50,7 +51,8 @@ export function HttpLoaderFactory(http: HttpClient) {
   providers: [
     HttpManagerService,
     TopicsListService,
-    {provide: 'BaseURL', useValue: baseURL}
+    {provide: 'BaseURL', useValue: baseURL},
+    {provide: 'C', useValue: C}
     ],
   bootstrap: [AppComponent]
 })

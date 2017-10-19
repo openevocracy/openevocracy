@@ -13,3 +13,5 @@
 .mat-card.step1:hover, .mat-card.step1:focus, .mat-card.step1:active { background-color: $orange50; }
 .mat-card.step2:hover, .mat-card.step2:focus, .mat-card.step2:active { background-color: $red50; }
 .mat-card.step3:hover, .mat-card.step3:focus, .mat-card.step3:active { background-color: $green50; }
+
+.mat-card-footer p { border-top: 1px solid $grey300; padding: 10px 24px; }
