@@ -1,7 +1,25 @@
 /* Imports */
 @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700');
 
-/* Global styles */
-body { font-family: Roboto, sans-serif; font-weight: 300; }
+/* Import variables */
+@import "~styles/variables";
+
+/* Global Tags */
+html { height: 100%; } /* Needed for loading spinner. Observe if it's responsible for problems! */
+body { font-family: Roboto, sans-serif; font-weight: 300; color: $grey800; background-color: $grey200; }
+h1,h2,h3,h4,h5,h6 { font-weight: 300; }
+hr { border-color: $grey400; }
+
+/* Global IDs */
 #wrapper { margin: 64px auto 76px auto; }
+
+/* Global Classes */
+body.modal-open { overflow: hidden; }
 .flex-spacer { flex: 1 1 auto; }
+.text-muted { color: $grey700; }
+.mat-form-field { width: 100%; }
+
+/* Alert and Modal close button */
+button.close { padding: 0; background: transparent; border: 0; }
+.close { float: right; font-weight: 700; color: $black; text-shadow: 0 1px 0 #fff; opacity: 0.2; transition: opacity 300ms; }
+.close:hover { opacity: 0.8; }

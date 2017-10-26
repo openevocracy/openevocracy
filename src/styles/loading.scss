@@ -1,0 +1,60 @@
+/* Import variables */
+@import "~styles/variables";
+
+/* Loading varibles */
+$speed: 1.5s;
+$background: $grey200;
+$outercolor: $teal900; /* Outer rotating circle*/
+$innercolor: $teal500; /* Inner rotating circle*/
+$fixedcolor: $teal100; /* Fixed small circle in the middle */
+
+/* Loading styles */
+body.loading { height: 100%; }
+
+.loading-wrapper { position: relative; height: 100%; text-align: center; }
+.loading-wrapper:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
+.loading-wrapper div { display: inline-block; vertical-align: middle; }
+
+.loading-logo { position: relative; margin-bottom: 120px; margin-left: -48px; }
+
+.circle { position: absolute; border-radius: 50%; overflow: hidden; }
+.circle:after {
+	border-radius: inherit;
+	color: inherit;
+	content: '';
+	position: absolute;
+	top: 0;	bottom: 0; left: 0;	right: 0;
+	padding: 3px;
+	background: linear-gradient($background, $background), linear-gradient(0deg, transparent 40%, currentcolor 60%), linear-gradient(90deg, transparent 50%, currentcolor 52%);
+	background-clip: content-box, border-box, border-box;
+}
+
+.outer { top: 0; left: 0; color: $outercolor; height: 48px; width: 48px; }
+.outer:after {
+	background: linear-gradient($background, $background), linear-gradient(0deg, transparent 40%, currentcolor 60%), linear-gradient(90deg, transparent 50%, currentcolor 52%);
+	background-clip: content-box, border-box, border-box;
+}
+
+.inner { top: 8px; left: 8px; color: $innercolor; height: 32px; width: 32px; }
+.inner:after {
+	background: linear-gradient($background, $background), linear-gradient(0deg, transparent 40%, currentcolor 60%), linear-gradient(270deg, transparent 50%, currentcolor 52%);
+	background-clip: content-box, border-box, border-box;
+}
+
+.fixed { top: 16px; left: 16px; color: $fixedcolor; height: 16px; width: 16px; }
+.fixed:after {
+	background: linear-gradient($background, $background), linear-gradient(0deg, currentcolor 50%, currentcolor 50%), linear-gradient(180deg, currentcolor 50%, currentcolor 50%);
+	background-clip: content-box, border-box, border-box;
+}
+
+/* Loading animations */
+
+.forward:after { animation: forward $speed linear infinite;	}
+@keyframes forward {
+	to { transform: rotate(360deg);	}
+}
+
+.backward:after { animation: backward $speed linear infinite; }
+@keyframes backward {
+	to { transform: rotate(-360deg);	}
+}

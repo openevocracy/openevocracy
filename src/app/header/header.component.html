@@ -2,38 +2,38 @@
 	<div class="container clearfix">
 		<img class="pull-left" src="../../assets/img/logo_white_32.png" />
 		<h1 class="pull-left">OpenEvocracy</h1>
-		<md-toolbar color="primary">
-			<md-nav-list>
-				<a md-list-item routerLink="/" routerLinkActive="active">{{ 'HEADER_MAINMENU_TOPICLIST' | translate}}</a>
-				<a md-list-item routerLink="/timeline" routerLinkActive="active">{{ 'HEADER_MAINMENU_TIMELINE' | translate}}</a>
-			</md-nav-list>
+		<mat-toolbar color="primary">
+			<mat-nav-list>
+				<a mat-list-item routerLink="/" routerLinkActive="active">{{ 'HEADER_MAINMENU_TOPICLIST' | translate}}</a>
+				<a mat-list-item routerLink="/timeline" routerLinkActive="active">{{ 'HEADER_MAINMENU_TIMELINE' | translate}}</a>
+			</mat-nav-list>
 			
 			<span class="flex-spacer"></span>
 			
-			<button md-icon-button [mdMenuTriggerFor]="lang">
+			<button mat-icon-button [matMenuTriggerFor]="lang">
 				<span class="fa fa-globe"></span>
 			</button>
-			<md-menu #lang="mdMenu" [overlapTrigger]="false">
-				<button md-menu-item (click)="setLanguage('en')">
+			<mat-menu #lang="matMenu" [overlapTrigger]="false">
+				<button mat-menu-item (click)="setLanguage('en')">
 					<span>English</span>
 				</button>
-				<button md-menu-item (click)="setLanguage('de')">
+				<button mat-menu-item (click)="setLanguage('de')">
 					<span>Deutsch</span>
 				</button>
-			</md-menu>
+			</mat-menu>
 			
-			<button md-icon-button [mdMenuTriggerFor]="settings">
+			<button mat-icon-button [matMenuTriggerFor]="settings">
 				<span class="fa fa-cogs"></span>
 			</button>
-			<md-menu #settings="mdMenu" [overlapTrigger]="false">
-				<button md-menu-item routerLink="/settings">
+			<mat-menu #settings="matMenu" [overlapTrigger]="false">
+				<button mat-menu-item routerLink="/settings">
 					<span>{{ 'HEADER_MAINMENU_SETTINGS' | translate }}</span>
 				</button>
-				<button md-menu-item routerLink="/logout">
+				<button mat-menu-item (click)="logout()">
 					<span>{{ 'HEADER_MAINMENU_LOGOUT' | translate }}</span>
 				</button>
-			</md-menu>
+			</mat-menu>
 
-		</md-toolbar>
+		</mat-toolbar>
 	</div>
 </header>

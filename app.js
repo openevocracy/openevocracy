@@ -27,7 +27,35 @@ var mail = require('./server/mail');
 var path = require('path');
 var app = express();
 
+var passport = require('passport')
+  , LocalStrategy = require('passport-local').Strategy;
+
 var cfg = requirejs('public/js/setup/configs');
+
+// initialize passport
+passport.use(new LocalStrategy(/*{
+    usernameField: 'email',
+    passwordField: 'pass'
+  },*/
+  function(username, password, done) {
+    return done(null, {'email': username});
+    
+    db.collection('users').findOneAsync({ 'email': username }).then(function(user) {
+      //users.loginUser(username, password));
+      return done(null, user);
+    });
+  }
+));
+
+/*passport.serializeUser(function(user, done) {
+  done(null, user.uid);
+});
+
+passport.deserializeUser(function(uid, done) {
+  db.collection('users').findOneAsync(uid, function(err, user) {
+    done(err, user);
+  });
+});*/
 
 // initialize mail
 mail.initializeMail();
@@ -39,7 +67,6 @@ var groups = require('./server/routes/groups');
 var proposals = require('./server/routes/proposals');
 var ratings = require('./server/routes/ratings');
 var tests = require('./server/routes/tests');
-var auth = users.auth_wrapper;
 
 // all environments
 app.set('port', process.env.PORT);
@@ -51,9 +78,11 @@ app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(methodOverride());
+
 app.use(cookieParser('secret'));
-//app.use(cookieSession('secret'));
 app.use(session({ secret: 'secret', key: 'uid', cookie: { secure: true }, resave: true, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 var distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
@@ -86,37 +115,39 @@ Routes plan:
 
 */
 
-app.get('/json/topics', function(req, res) { auth(req, res, topics.list); });
-app.patch('/json/topic/:id', function(req, res) { auth(req, res, topics.update); });
-app.get('/json/topic/:id', function(req, res) { auth(req, res, topics.query); });
-app.post('/json/topic', function(req, res) { auth(req, res, topics.create); });
-app.delete('/json/topic/:id', function(req, res) { auth(req, res, topics.delete); });
-app.post('/json/topic-vote', function(req, res) { auth(req, res, topics.vote); });
-app.post('/json/topic-unvote', function(req, res) { auth(req, res, topics.unvote); });
-app.get('/file/topic/final/:id', function(req, res) { auth(req, res, topics.final); });
+var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+//app.get('/json/topics', ensureLoggedIn, topics.list);
+app.get('/json/topics', topics.list);
+app.patch('/json/topic/:id', topics.update);
+app.get('/json/topic/:id', topics.query);
+app.post('/json/topic', topics.create);
+app.delete('/json/topic/:id', topics.delete);
+app.post('/json/topic-vote', topics.vote);
+app.post('/json/topic-unvote', topics.unvote);
+app.get('/file/topic/final/:id', topics.final);
 
 // #########################
 // ### P R O P O S A L S ###
 // #########################
 
-app.get('/json/proposal/create/:id', function(req, res) { auth(req, res, proposals.create); });
-app.get('/json/proposal/:id', function(req, res) { auth(req, res, proposals.query); });
+app.get('/json/proposal/create/:id', proposals.create);
+app.get('/json/proposal/:id', proposals.query);
 
 // ###################
 // ### G R O U P S ###
 // ###################
 
-app.get('/json/groups', function(req, res) { auth(req, res, groups.list); });
+app.get('/json/groups', groups.list);
 // get group by id
-app.get('/json/group/:id', function(req, res) { auth(req, res, groups.query); });
+app.get('/json/group/:id', groups.query);
 
 // #####################
 // ### R A T I N G S ###
 // #####################
 
-app.get('/json/ratings/count', function(req, res) { auth(req, res, ratings.count); });
-app.get('/json/ratings/:id', function(req, res) { auth(req, res, ratings.query); });
-app.post('/json/ratings/rate', function(req, res) { auth(req, res, ratings.rate); });
+app.get('/json/ratings/count', ratings.count);
+app.get('/json/ratings/:id', ratings.query);
+app.post('/json/ratings/rate', ratings.rate);
 
 // ###################
 // ###   A U T H   ###
@@ -127,7 +158,8 @@ app.post('/json/ratings/rate', function(req, res) { auth(req, res, ratings.rate)
 app.get('/json/auth', users.auth);
 // POST /api/auth/login
 // @desc: logs in a user
-app.post('/json/auth/login', users.login);
+//app.post('/json/auth/login', users.login);
+app.post('/json/auth/login', passport.authenticate('local'));//, { failureRedirect: '/login' }));
 // creates a user
 app.post('/json/auth/signup', users.signup);
 // POST /json/auth/logout
@@ -148,12 +180,12 @@ app.post('/json/auth/password/:email', users.sendPassword);
 // ###################
 
 // Social
-app.get('/json/user/profile/:id', function(req, res) { auth(req, res, users.query); });
-app.get('/json/user/navi', function(req, res) { auth(req, res, users.navigation); });
+app.get('/json/user/profile/:id', users.query);
+app.get('/json/user/navi', users.navigation);
 
 // Get and edit own profile
-app.get('/json/user/settings/:id', function(req, res) { auth(req, res, users.settings); });
-app.patch('/json/user/settings/:id', function(req, res) { auth(req, res, users.update); });
+app.get('/json/user/settings/:id', users.settings);
+app.patch('/json/user/settings/:id', users.update);
 
 // ###################
 // ###   T E S T   ###

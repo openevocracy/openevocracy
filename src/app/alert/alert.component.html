@@ -1,0 +1,4 @@
+<div *ngFor="let alert of alerts" class="{{ cssClass(alert) }} alert-dismissible">
+     {{alert.message}}
+     <button class="close" (click)="removeAlert(alert)">&times;</button>
+</div>

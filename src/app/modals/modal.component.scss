@@ -1,0 +1,16 @@
+/* Import variables */
+@import "~styles/variables";
+
+:host { display: none; }
+
+.modal, .modal-background { position: fixed; top: 0; right: 0; bottom: 0; left: 0; }
+.modal { z-index: 1000; overflow: auto; }
+.modal-dialog {
+	margin: 40px auto; padding: 20px; background-color: $white; max-width: 600px;
+	box-shadow: 0 11px 15px -7px rgba(0,0,0,.2), 0 24px 38px 3px rgba(0,0,0,.14), 0 9px 46px 8px rgba(0,0,0,.12);
+}
+.modal-background { z-index: 900; opacity: 0.48; background-color: $black; }
+.modal-actions { display: flex; }
+.modal-actions button { margin-left: 1rem; }
+
+.close { font-size: 2rem; }

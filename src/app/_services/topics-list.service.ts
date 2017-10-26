@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
-import { TopicListElement } from '../shared/topic-list-element';
-import { baseURL } from '../shared/config';
+import { TopicListElement } from '../_models/topic-list-element';
+import { baseURL } from '../_shared/config';
 
 import { HttpManagerService } from './http-manager.service';
 

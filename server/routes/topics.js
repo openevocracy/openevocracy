@@ -339,7 +339,7 @@ exports.list = function(req, res) {
         // Promise.map does not work above
         Promise.map(topics, _.partial(appendTopicInfoAsync,_,uid,false)).
         then(function(topics){
-           console.log(topics);
+           //console.log(topics);
            return topics;
         }).
         then(res.json.bind(res));

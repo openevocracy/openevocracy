@@ -1,25 +1,25 @@
-<md-grid-list cols="4" rowHeight="200px">
-	<md-grid-tile *ngFor="let topic of topicsList">
-		<md-card md-ripple [ngClass]="'step'+topic.stage">
-			<md-card-content>
-				<md-card-title>{{topic.name}}</md-card-title>
+<!--<mat-grid-list cols="4" rowHeight="200px">
+	<mat-grid-tile *ngFor="let topic of topicsList">-->
+		<mat-card mat-ripple *ngFor="let topic of topicsList" [ngClass]="'step'+topic.stage">
+			<mat-card-content>
+				<mat-card-title>{{topic.name}}</mat-card-title>
 				<p *ngIf="topic.stage == C.STAGE_REJECTED">{{topic.rejectedReason | translate}}</p>
 				<p *ngIf="topic.stage == C.STAGE_SELECTION">...</p>
 				<p *ngIf="topic.stage == C.STAGE_PROPOSAL">...</p>
 				<p *ngIf="topic.stage == C.STAGE_CONSENSUS">Level {{topic.level}} in ...</p>
 				<p *ngIf="topic.stage == C.STAGE_PASSED">{{topic.valid_participants}} participants</p>
-			</md-card-content>
-			<md-card-actions *ngIf="topic.stage == C.STAGE_SELECTION">
-				<button md-button><span class="fa fa-hand-paper-o"></span></button>
-			</md-card-actions>
-			<md-card-footer>
+			</mat-card-content>
+			<mat-card-actions *ngIf="topic.stage == C.STAGE_SELECTION">
+				<button mat-button><span class="fa fa-hand-paper-o"></span></button>
+			</mat-card-actions>
+			<mat-card-footer>
 				<p *ngIf="topic.stage == C.STAGE_REJECTED">{{'Rejected' | translate}}: {{topic.stageRejectedStarted | date: 'dd.MM.y'}}</p>
 				<p *ngIf="topic.stage == C.STAGE_SELECTION">...</p>
 				<p *ngIf="topic.stage == C.STAGE_PROPOSAL">...</p>
 				<p *ngIf="topic.stage == C.STAGE_CONSENSUS">Level {{topic.level}} in ...</p>
 				<p *ngIf="topic.stage == C.STAGE_PASSED">{{'Finished' | translate}}: {{topic.stagePassedStarted | date: 'dd.MM.y'}}</p>
 				
-			</md-card-footer>
-		</md-card>
-	</md-grid-tile>
-</md-grid-list>
+			</mat-card-footer>
+		</mat-card>
+	<!--</mat-grid-tile>
+</mat-grid-list>-->

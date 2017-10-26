@@ -1,0 +1,10 @@
+/* Import variables */
+@import "~styles/variables";
+
+/* Component Styles */
+
+.alert { color: $white; padding: 15px; margin-bottom: .5rem; }
+.alert-success { background-color: $green700; }
+.alert-info { background-color: $blue700; }
+.alert-warning { background-color: $orange700; }
+.alert-danger { background-color: $red700; }

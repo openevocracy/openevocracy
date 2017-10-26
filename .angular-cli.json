@@ -23,7 +23,8 @@
 				"styles/bootstrap.min.css",
 				"styles/evocracy-theme.scss",
 				"styles/variables.scss",
-				"styles/custom-styles.scss"
+				"styles/custom-styles.scss",
+				"styles/loading.scss"
 			],
 			"scripts": [],
 			"environmentSource": "environments/environment.ts",

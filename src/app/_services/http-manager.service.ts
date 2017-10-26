@@ -12,7 +12,7 @@ export class HttpManagerService {
   
   public extractData(res: Response) {
     let body = res.json();
-    console.log(body);
+    console.log('http response', body);
     return body || { };
   }
   
