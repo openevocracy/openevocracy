@@ -12,7 +12,7 @@ const publicChildRoutes: Routes = [
 	{ path: '', redirectTo: 'login', pathMatch: 'full', },
 	{ path: 'login', pathMatch: 'full', component: LoginComponent },
 	{ path: 'register', pathMatch: 'full', component: RegisterComponent }
-]
+];
 
 const publicRoutes: Routes = [
 	{ path: '', component: PublicComponent, children: publicChildRoutes },

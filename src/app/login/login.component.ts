@@ -17,7 +17,7 @@ import { PwforgetService } from '../_services/pwforget.service';
 export class LoginComponent implements OnInit, OnDestroy {
 	
 	private loginForm: FormGroup;
-	private subscription: Subscription;
+	private pwforgetSubscription: Subscription;
 
 	constructor(
 		public router: Router,
@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 		private pwforgetService: PwforgetService) {
 			
 		this.createForm();
-		this.subscription = this.pwforgetService.getEmail().subscribe(email => {
+		this.pwforgetSubscription = this.pwforgetService.getEmail().subscribe(email => {
 			// Do POST request to server and evaluate result
 			this.alert.success("Es wurde eine E-Mail an die E-Mail-Adresse " + email + " gesendet."); // Just for testing purpose
 			
@@ -53,40 +53,54 @@ export class LoginComponent implements OnInit, OnDestroy {
 	
 	ngOnDestroy() {
 		// Unsubscribe to avoid memory leak
-		this.subscription.unsubscribe();
+		this.pwforgetSubscription.unsubscribe();
 	}
 	
-	createForm() {
+	private createForm() {
 		this.loginForm = this.fb.group({
 			email: ['', Validators.email],
 			password: ['', Validators.required]
 		});
 	}
+	
+	private handleLogin(res) {
+		console.log(res);
+			
+		// Check response
+		//if(this.authenticated) {
+			// # If 200 ok: Go on ..
+		
+			// Set login status to true (login)
+			//this.user.setLoginStatus(true);
+			
+			// Redirect to any page after login
+			//this.router.navigate(['/topics']);
+		//} else {
+			// # If not: Show alert component, where error message is in response (res) from server
+			/*this.translate.get(res).subscribe((trans: string) => {
+				this.alert.error(trans);
+			});*/
+		//}
+	}
   
-	onSubmit() {
+	private onSubmit() {
+		// Set login status to true (login)
+			this.user.setLoginStatus(true);
+			
+			// Redirect to any page after login
+			this.router.navigate(['/topics']);
+		
 		// If form is valid, go for login
-		if(this.loginForm.valid) {
-			// Check login server side ..
-			
-			// Check response
-			if(true) {
-				// # If 200 ok: Go on ..
-			
-				// Set login status to true (login)
-				this.user.setLoginStatus(true);
-				
-				// Redirect to any page after login
-				this.router.navigate(['/topics']);
-			} else {
-				// # If not: Show alert component, where error message is in response (res) from server
-				/*this.translate.get(res).subscribe((trans: string) => {
-					this.alert.error(trans);
-				});*/
-			}
-		}
+		/*if(this.loginForm.valid) {
+			// Check login server side
+			this.user.authenticate({
+				'email': this.loginForm.value.email,
+				'password': this.loginForm.value.password
+			}).subscribe(res => this.handleLogin(res));
+		}*/
 	}
 	
-	passwordForget(e) {
+	private passwordForget(e) {
 		e.preventDefault();
 		this.modal.open({email: this.loginForm.value.email});
 	}

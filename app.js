@@ -33,29 +33,24 @@ var passport = require('passport')
 var cfg = requirejs('public/js/setup/configs');
 
 // initialize passport
-passport.use(new LocalStrategy(/*{
+passport.use(new LocalStrategy({
     usernameField: 'email',
-    passwordField: 'pass'
-  },*/
+    passwordField: 'password'
+  },
   function(username, password, done) {
-    return done(null, {'email': username});
+    return done(null, {'_id': 0, 'user': username});
     
-    db.collection('users').findOneAsync({ 'email': username }).then(function(user) {
-      //users.loginUser(username, password));
-      return done(null, user);
-    });
+    db.collection('users').findOne({ 'email': username }).then(done);
   }
 ));
 
-/*passport.serializeUser(function(user, done) {
-  done(null, user.uid);
+passport.serializeUser(function(user, done) {
+  done(null, user._id);
 });
 
 passport.deserializeUser(function(uid, done) {
-  db.collection('users').findOneAsync(uid, function(err, user) {
-    done(err, user);
-  });
-});*/
+  db.collection('users').findOne(done);
+});
 
 // initialize mail
 mail.initializeMail();
@@ -80,7 +75,8 @@ app.use(bodyParser.json());
 app.use(methodOverride());
 
 app.use(cookieParser('secret'));
-app.use(session({ secret: 'secret', key: 'uid', cookie: { secure: true }, resave: true, saveUninitialized: true }));
+//app.use(session({ secret: 'secret', key: 'uid', cookie: { secure: true }, resave: true, saveUninitialized: true }));
+app.use(session({ secret: 'secret', resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -115,9 +111,19 @@ Routes plan:
 
 */
 
-var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
-//app.get('/json/topics', ensureLoggedIn, topics.list);
+// route middleware to make sure a user is logged in
+function isLoggedIn(req, res, next) {
+  
+    // if user is authenticated in the session, carry on 
+    if (req.isAuthenticated())
+        return next();
+
+    // if they aren't redirect them to the home page
+    res.redirect('/login');
+}
+
 app.get('/json/topics', topics.list);
+//app.get('/json/topics', isLoggedIn, topics.list);
 app.patch('/json/topic/:id', topics.update);
 app.get('/json/topic/:id', topics.query);
 app.post('/json/topic', topics.create);
@@ -159,7 +165,11 @@ app.get('/json/auth', users.auth);
 // POST /api/auth/login
 // @desc: logs in a user
 //app.post('/json/auth/login', users.login);
-app.post('/json/auth/login', passport.authenticate('local'));//, { failureRedirect: '/login' }));
+app.post('/json/auth/login', passport.authenticate('local'), (req, res) => res.send());
+/*app.post('/json/auth/login', passport.authenticate('local', {
+  successRedirect: '/topics',
+  failureRedirect: '/login'
+}));*/
 // creates a user
 app.post('/json/auth/signup', users.signup);
 // POST /json/auth/logout

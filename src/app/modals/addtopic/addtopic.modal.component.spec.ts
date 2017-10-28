@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ModalPwforgetComponent } from './pwforget.model.component';
+import { ModalAddtopicComponent } from './addtopic.modal.component';
 
-describe('ModalPwforgetComponent', () => {
-  let component: ModalPwforgetComponent;
-  let fixture: ComponentFixture<ModalPwforgetComponent>;
+describe('ModalAddtopicComponent', () => {
+  let component: ModalAddtopicComponent;
+  let fixture: ComponentFixture<ModalAddtopicComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ModalPwforgetComponent ]
+      declarations: [ ModalAddtopicComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ModalPwforgetComponent);
+    fixture = TestBed.createComponent(ModalAddtopicComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

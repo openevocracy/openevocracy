@@ -8,8 +8,16 @@
 	"FOOTER_MENU_IMPRESS": "Imprint",
 	"FOOTER_MENU_VERSION": "Current version",
 	
-	"FORM_LABEL_MAIL": "Your email-address:",
+	"FORM_LABEL_MAIL": "Your email address:",
 	"FORM_LABEL_PASSWORD": "Your password:",
+	
+	"MODAL_CREATE_NEW_TOPIC": "Create new topic",
+	"MODAL_NEW_TOPIC_NAME": "Name of the new topic (min. ",
+	"MODAL_NEW_TOPIC_NAME_SUFFIX": " characters)",
+	"MODAL_CREATE": "Create",
+	"MODAL_REQUEST_NEW_PASSWORD": "Request new password",
+	"MODAL_SEND_REQUEST": "Submit",
+	"MODAL_CANCEL": "Cancel",
 	
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",
@@ -93,5 +101,8 @@
     "EMAIL_REGISTRATION_MESSAGE": "Welcome {0} at Evocracy,\n\n You just created an account at {1}. Please verify your email by visiting:\n\n {1}/json/auth/verifyEmail/{0}\n\n If you did not register, just ignore this message.\n",
     
     "EMAIL_PASSWORD_RESET_SUBJECT": "New password",
-    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n You ordered a password reset for evocracy. Your temporary password is:\n\n{0}\n\n We highly suggest to change the password directly after your next login to a password of your choice."
+    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n You ordered a password reset for evocracy. Your temporary password is:\n\n{0}\n\n We highly suggest to change the password directly after your next login to a password of your choice.",
+    
+    "ADD_TOPIC": "Add topic",
+    "REFRESH_LIST": "Refresh list"
 }

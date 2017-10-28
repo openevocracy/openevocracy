@@ -23,3 +23,6 @@ body.modal-open { overflow: hidden; }
 button.close { padding: 0; background: transparent; border: 0; }
 .close { float: right; font-weight: 700; color: $black; text-shadow: 0 1px 0 #fff; opacity: 0.2; transition: opacity 300ms; }
 .close:hover { opacity: 0.8; }
+
+/* Horizontal space */
+div.hspace { float: left; overflow: hidden; height: 1px; width: 0px; }

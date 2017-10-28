@@ -20,6 +20,7 @@ import { AppComponent } from './app.component';
 import { AlertComponent } from './alert/alert.component';
 import { ModalComponent } from './modals/modal.component';
 import { ModalPwforgetComponent } from './modals/pwforget/pwforget.modal.component';
+import { ModalAddtopicComponent } from './modals/addtopic/addtopic.modal.component';
 
 // Components Public
 import { PublicComponent } from './public/public.component';
@@ -34,16 +35,19 @@ import { TopiclistComponent } from './topiclist/topiclist.component';
 
 // Services
 import { TopicsListService } from './_services/topics-list.service';
+import { TopicService } from './_services/topic.service';
 import { HttpManagerService } from './_services/http-manager.service';
 import { Guard } from './_services/guard.service';
 import { UserService } from './_services/user.service';
 import { AlertService } from './_services/alert.service';
 import { ModalService } from './_services/modal.service';
 import { PwforgetService } from './_services/pwforget.service';
+import { AddtopicService } from './_services/addtopic.service';
 
 // Shared
 import { baseURL } from './_shared/config';
 import { C } from './_shared/constants';
+import { TopicComponent } from './topic/topic.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -62,7 +66,9 @@ export function HttpLoaderFactory(http: HttpClient) {
 		AlertComponent,
 		RegisterComponent,
 		ModalComponent,
-		ModalPwforgetComponent
+		ModalPwforgetComponent,
+		ModalAddtopicComponent,
+		TopicComponent
 	],
 	imports: [
 		BrowserModule,
@@ -84,11 +90,13 @@ export function HttpLoaderFactory(http: HttpClient) {
 	providers: [
 		HttpManagerService,
 		TopicsListService,
+		TopicService,
 		Guard,
 		UserService,
 		AlertService,
 		ModalService,
 		PwforgetService,
+		AddtopicService,
 		{ provide: 'BaseURL', useValue: baseURL },
 		{ provide: 'C', useValue: C }
 	],

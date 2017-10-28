@@ -23,6 +23,14 @@
 	"FORM_LABEL_MAIL": "Deine E-Mail-Adresse:",
 	"FORM_LABEL_PASSWORD": "Dein Passwort",
 	
+	"MODAL_CREATE_NEW_TOPIC": "Neues Thema erstellen",
+	"MODAL_NEW_TOPIC_NAME": "Name des neuen Themas (mind. ",
+	"MODAL_NEW_TOPIC_NAME_SUFFIX": " Zeichen)",
+	"MODAL_CREATE": "Erstellen",
+	"MODAL_REQUEST_NEW_PASSWORD": "Neues Passwort anfordern",
+	"MODAL_SEND_REQUEST": "Absenden",
+	"MODAL_CANCEL": "Abbrechen",
+	
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",
 	"LOGIN_FORM_WELCOME": "Willkommen bei OpenEvocracy!",
@@ -75,7 +83,8 @@
 	"Statistics": "Statistiken",
 	
 	"Current Topics": "Aktuelle Themen",
-	"Add Topic": "Thema hinzufügen",
+	"ADD_TOPIC": "Thema hinzufügen",
+	"REFRESH_LIST": "Liste neu laden",
 	
 	"mark as relevant": "Als relevant bewerten",
 	"unmark as relevant": "Relevanzbewertung entfernen",

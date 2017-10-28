@@ -6,10 +6,12 @@ import { Guard } from '../_services/guard.service';
 
 import { SecureComponent } from '../secure/secure.component';
 import { TopiclistComponent } from '../topiclist/topiclist.component';
+import { TopicComponent } from '../topic/topic.component';
 
 const appChildRoutes: Routes = [
 	{ path: '', redirectTo: 'topics', pathMatch: 'full' },
-	{ path: 'topics', component: TopiclistComponent }
+	{ path: 'topics', component: TopiclistComponent },
+	{ path: 'topic/:id', component: TopicComponent }
 ];
 
 const appRoutes: Routes = [

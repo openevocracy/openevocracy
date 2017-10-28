@@ -18,10 +18,9 @@ header {
 h1 { font-size: 2rem; font-weight: 300; margin: 0; line-height: $header-height; }
 img { padding: 16px 1rem 16px 0; }
 
-md-toolbar { margin-left: 50px; }
-.mat-toolbar { width: auto; }
+.mat-toolbar { margin-left: 50px; width: auto; }
 
-md-nav-list { padding: 0; }
+.mat-nav-list { padding: 0; }
 .mat-list-item { float: left; color: $white; font-weight: 300; }
 .mat-list-item.active { background: rgba(0,0,0,0.04); }
 
