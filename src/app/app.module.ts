@@ -17,6 +17,7 @@ import { PublicRoutingModule } from './_routing/public-routing.module';
 
 // Components Global
 import { AppComponent } from './app.component';
+import { CountdownComponent } from './countdown/countdown.component';
 import { AlertComponent } from './alert/alert.component';
 import { ModalComponent } from './modals/modal.component';
 import { ModalPwforgetComponent } from './modals/pwforget/pwforget.modal.component';
@@ -32,6 +33,7 @@ import { SecureComponent } from './secure/secure.component';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 import { TopiclistComponent } from './topiclist/topiclist.component';
+import { TopicComponent } from './topic/topic.component';
 
 // Services
 import { TopicsListService } from './_services/topics-list.service';
@@ -42,12 +44,10 @@ import { UserService } from './_services/user.service';
 import { AlertService } from './_services/alert.service';
 import { ModalService } from './_services/modal.service';
 import { PwforgetService } from './_services/pwforget.service';
-import { AddtopicService } from './_services/addtopic.service';
 
 // Shared
 import { baseURL } from './_shared/config';
 import { C } from './_shared/constants';
-import { TopicComponent } from './topic/topic.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -68,7 +68,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 		ModalComponent,
 		ModalPwforgetComponent,
 		ModalAddtopicComponent,
-		TopicComponent
+		TopicComponent,
+		CountdownComponent
 	],
 	imports: [
 		BrowserModule,
@@ -96,7 +97,6 @@ export function HttpLoaderFactory(http: HttpClient) {
 		AlertService,
 		ModalService,
 		PwforgetService,
-		AddtopicService,
 		{ provide: 'BaseURL', useValue: baseURL },
 		{ provide: 'C', useValue: C }
 	],

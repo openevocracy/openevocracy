@@ -15,6 +15,7 @@ hr { border-color: $grey400; }
 
 /* Global Classes */
 body.modal-open { overflow: hidden; }
+.flex { display: flex; }
 .flex-spacer { flex: 1 1 auto; }
 .text-muted { color: $grey700; }
 .mat-form-field { width: 100%; }

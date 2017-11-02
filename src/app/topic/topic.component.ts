@@ -1,29 +1,52 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 
+import { CountdownComponent } from '../countdown/countdown.component'
+
 import { TopicService } from '../_services/topic.service';
 
-import { TopicListElement } from '../_models/topic-list-element'; // FIXME currently qual to topic list element, but needs to be extended
+import { C } from '../_shared/constants';
+import { Topic } from '../_models/topic';
 
 @Component({
 	selector: 'app-topic',
 	templateUrl: './topic.component.html',
-	styleUrls: ['./topic.component.css']
+	styleUrls: ['./topic.component.scss']
 })
 export class TopicComponent implements OnInit {
+	private C;
 	private tid: string;
-	topic: TopicListElement;
+	private topic: Topic;
 
 	constructor(
 		private topicService: TopicService,
 		private activatedRoute: ActivatedRoute) { }
 	
 	ngOnInit() {
+		this.C = C;
+		
 		this.activatedRoute.params.subscribe(
 			(params: Params) => this.tid = params['id']);
-      
-      this.topicService.getTopic(this.tid).subscribe(
-			res => { this.topic = res; console.log(this.topic); });
+		
+		this.topicService.getTopic(this.tid).subscribe(res => {
+			this.topic = new Topic(res);
+		});
+	}
+	
+	enterFullscreen() {
+		// TODO: It's just for testing purpose, should be used in group
+		
+		var element = document.documentElement;
+		
+		if(element.requestFullscreen) {
+			element.requestFullscreen();
+		/*} else if(element.mozRequestFullScreen) {
+			element.mozRequestFullScreen();
+		} else if(element.msRequestFullscreen) {
+			element.msRequestFullscreen();*/
+		} else if(element.webkitRequestFullscreen) {
+			element.webkitRequestFullscreen();
+		}
 	}
 
 }

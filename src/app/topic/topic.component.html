@@ -1,1 +1,34 @@
-<h1>{{topic.name}}</h1>
+<mat-toolbar color="primary" [ngClass]="'stage'+topic?.stage">
+	<div class="flex container">
+		<div class="topic-title">
+			<h1>{{topic?.name}}</h1>
+			<p *ngIf="topic?.stage != C.STAGE_REJECTED">{{topic?.stageName}}, nächste Phase in <countdown [time]="topic?.nextDeadline"></countdown></p>
+			<p *ngIf="topic?.stage == C.STAGE_REJECTED"><!-- Abgelehnt: -->{{ topic?.rejectedReason | translate }}</p>
+		</div>
+		<span class="flex-spacer"></span>
+		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_SELECTION" title="Als relevant markieren"><span class="fa fa-hand-paper-o"></span></button>
+		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && true" title="Vorschlag erstellen"><span class="fa fa-file-text-o"></span></button>
+		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PASSED" title="Ergebnis herunterladen"><span class="fa fa-download"></span></button>
+		<button mat-icon-button *ngIf="topic?.stage >= C.STAGE_CONSENSUS || topic?.stage == C.STAGE_REJECTED" title="Prozessübersicht"><span class="fa fa-sitemap"></span></button>
+		<button mat-icon-button (click)="enterFullscreen()" title="Productive mode"><span class="fa fa-arrows-alt"></span></button>
+		
+		<button mat-icon-button [matMenuTriggerFor]="more">
+			<span class="fa fa-ellipsis-v"></span>
+		</button>
+		<mat-menu #more="matMenu" [overlapTrigger]="false">
+			<button mat-menu-item><span class="fa fa-user"></span> Autor</button>
+			<button mat-menu-item><span class="fa fa-share-alt"></span> Teilen</button>
+		</mat-menu>
+	</div>
+</mat-toolbar>
+
+<div class="container">
+	<mat-tab-group>
+		<mat-tab label="Beschreibung"><div [innerHtml]="topic?.body"></div></mat-tab>
+		<!--<mat-tab label="Referenzen">Referenzen</mat-tab>-->
+		<mat-tab label="Mein Vorschlag" *ngIf="topic?.stage == C.STAGE_PROPOSAL">Mein Vorschlag</mat-tab>
+		<mat-tab label="Meine Gruppe" *ngIf="topic?.stage == C.STAGE_CONSENSUS">Meine Gruppe</mat-tab>
+		<!--<mat-tab label="Statistik">Statistik</mat-tab>-->
+		<mat-tab label="Ergebnis" *ngIf="topic?.stage == C.STAGE_PASSED"><div [innerHtml]="topic?.finalDocument"></div></mat-tab>
+	</mat-tab-group>
+</div>

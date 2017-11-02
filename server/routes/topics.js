@@ -306,30 +306,41 @@ function appendTopicInfoAsync(topic, uid, with_details) {
             });
     }
     
-    // delete pad id if user is not owner, pid is removed from response
+    // Delete pad id if user is not owner, pid is removed from response
     if(!_.isEqual(topic.owner,uid))
         delete topic.pid;
-    
-    // FIXME
-    //return topic;
-    return Promise.props(_.extend(topic,{
+        
+    var topic_without_details_promise = Promise.props(_.extend(topic,{
         // basic
         'num_votes': topic_votes_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
             return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
-        
         'levels': levels_promise
         
-        // detailed, but required for basic data
-        /*'groups': with_details ? groups_promise : null,
-        'proposals': with_details ? topic_proposals_promise : null,
-        
-        // detailed
-        'body': pad_body_promise,
-        'group_members': group_members_promise,
-        'gid': find_user_group_promise,
-        'ppid': user_proposal_id_promise*/
     }));
+    
+    // TODO Check if this is really a good way doing it
+    
+    if(with_details) {
+        // Extended topic information for topic view
+        return topic_without_details_promise.then(function(topic_without_details) {
+            return Promise.props(_.extend(topic_without_details,{
+                'groups': with_details ? groups_promise : null,
+                'proposals': with_details ? topic_proposals_promise : null,
+                
+                // detailed
+                'body': pad_body_promise,
+                'group_members': group_members_promise,
+                'gid': find_user_group_promise,
+                'ppid': user_proposal_id_promise
+            }));
+        });
+        
+        
+    } else {
+        // Basic topic information for topic list
+        return topic_without_details_promise;
+    }
 }
 
 exports.list = function(req, res) {
@@ -390,13 +401,16 @@ exports.query = function(req, res) {
         else
             return appendTopicInfoAsync(topic, uid, true);
     }).
+    /*then(function(res) {
+       console.log(res);
+       return res;
+    }).*/
     then(res.json.bind(res)).
     catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 exports.create = function(req, res) {
-    //var topic = req.body;
-    //var topicName = topic.name;
+    // Topic name is the only necessary request variable
     var data = req.body;
     var topic = {};
     topic.name = data.name;

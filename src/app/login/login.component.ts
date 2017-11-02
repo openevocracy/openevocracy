@@ -70,11 +70,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 		//if(this.authenticated) {
 			// # If 200 ok: Go on ..
 		
-			// Set login status to true (login)
-			//this.user.setLoginStatus(true);
 			
-			// Redirect to any page after login
-			//this.router.navigate(['/topics']);
 		//} else {
 			// # If not: Show alert component, where error message is in response (res) from server
 			/*this.translate.get(res).subscribe((trans: string) => {
@@ -85,19 +81,19 @@ export class LoginComponent implements OnInit, OnDestroy {
   
 	private onSubmit() {
 		// Set login status to true (login)
-			this.user.setLoginStatus(true);
-			
-			// Redirect to any page after login
-			this.router.navigate(['/topics']);
+		this.user.setLoginStatus(true);
+		
+		// Redirect to any page after login
+		this.router.navigate(['/topics']);
 		
 		// If form is valid, go for login
-		/*if(this.loginForm.valid) {
+		if(this.loginForm.valid) {
 			// Check login server side
 			this.user.authenticate({
 				'email': this.loginForm.value.email,
 				'password': this.loginForm.value.password
 			}).subscribe(res => this.handleLogin(res));
-		}*/
+		}
 	}
 	
 	private passwordForget(e) {

@@ -1,14 +1,15 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import * as _ from 'underscore';
 
 import { TopicListElement } from '../_models/topic-list-element';
 import { C } from '../_shared/constants';
 
+import { TopicService } from '../_services/topic.service';
 import { TopicsListService } from '../_services/topics-list.service';
 
 import { ModalService } from '../_services/modal.service';
-import { AddtopicService } from '../_services/addtopic.service';
 
 @Component({
 	selector: 'app-topics',
@@ -22,29 +23,32 @@ export class TopiclistComponent implements OnInit {
 
 	constructor(
 		private topicsListService: TopicsListService,
+		private topicService: TopicService,
 		private modal: ModalService,
-		private router: Router,
-		private addtopicService: AddtopicService) { 
-	}
+		private router: Router) { }
 	
 	ngOnInit() {
 		this.C = C;
-		this.topicsListService.getTopicsList().subscribe(
-			res => this.topicsList = res);
+		this.topicsListService.getTopicsList().subscribe(res => {
+			let with_progress = _.each(res, obj => {
+				obj.progress = (obj.stage == -1) ? 9 : obj.stage;
+			});
+			this.topicsList = _.sortBy(_.sortBy(with_progress, 'name'), 'progress');
+		});
 	}
 	
-	private openTopic(tid) {
-		// Open specific topic with _id tid
-		this.router.navigate(['/topic/'+tid]);
+	private vote(e, tid) {
+		e.stopPropagation();
+		console.log('vote', tid);
+		/*this.topicService.vote(tid).subscribe(res => {
+			let body = res.json();
+			// Update topic in topiclist
+			console.log(body);
+		});*/
 	}
 	
-	private addTopic(e) {
+	private openAddTopicModal(e) {
 		e.preventDefault();
 		this.modal.open({});
 	}
-	
-	/*private refreshList(e) {
-		e.preventDefault();
-		// TODO
-	}*/
 }
