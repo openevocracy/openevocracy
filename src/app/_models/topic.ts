@@ -16,10 +16,6 @@ export class Topic extends TopicListElement {
     gid: string;
     ppid: string;
     
-    /* Derived information */
-    stageName: string;
-    num_proposals: number;
-    
     constructor(res: any) {
         super(res);
         this.groups = res.groups;
@@ -28,28 +24,35 @@ export class Topic extends TopicListElement {
         this.group_members = res.group_members;
         this.gid = res.gid;
         this.ppid = res.ppid;
-        
-        /* Add derived information */
-        this.addStageName();
-        this.addNumProposals();
     }
     
-    private addStageName() {
+    private get stageName() {
         switch(this.stage) {
             case C.STAGE_SELECTION:
-                this.stageName = "Auswahlphase"; break;
+                return "STAGE_SELECTION";
             case C.STAGE_PROPOSAL:
-                this.stageName = "Vorschlagphase"; break;
+                return "STAGE_PROPOSAL";
             case C.STAGE_CONSENSUS:
-                this.stageName = "Konsensphase"; break;
+                return "STAGE_CONSENSUS";
             case C.STAGE_PASSED:
-                this.stageName = "Abgeschlossen"; break;
+                return "STAGE_PASSED";
             case C.STAGE_REJECTED:
-                this.stageName = "Verworfen"; break;
+                return "STAGE_REJECTED";
         }
     }
     
-    private addNumProposals() {
-        this.num_proposals = _.size(this.proposals);
+    private get numProposals() {
+        return _.size(this.proposals);
     }
 }
+
+
+
+
+
+
+
+
+
+
+

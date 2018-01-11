@@ -3,6 +3,8 @@
 	"HEADER_MAINMENU_TIMELINE": "Timeline",
 	"HEADER_MAINMENU_SETTINGS": "Einstellungen",
 	"HEADER_MAINMENU_LOGOUT": "Logout",
+	"HEADER_MAINMENU_LANGUAGE": "Sprache wählen",
+	"HEADER_MAINMENU_SETTINGS": "Einstellungen",
 	
 	"FOOTER_MENU_ABOUT": "Über uns",
 	"FOOTER_MENU_IMPRESS": "Impressum",
@@ -24,8 +26,7 @@
 	"FORM_LABEL_PASSWORD": "Dein Passwort",
 	
 	"MODAL_CREATE_NEW_TOPIC": "Neues Thema erstellen",
-	"MODAL_NEW_TOPIC_NAME": "Name des neuen Themas (mind. ",
-	"MODAL_NEW_TOPIC_NAME_SUFFIX": " Zeichen)",
+	"MODAL_NEW_TOPIC_NAME": "Name des neuen Themas (mind. {{numChars}} Zeichen)",
 	"MODAL_CREATE": "Erstellen",
 	"MODAL_REQUEST_NEW_PASSWORD": "Neues Passwort anfordern",
 	"MODAL_SEND_REQUEST": "Absenden",
@@ -48,6 +49,25 @@
 	"REGISTER_FORM_ACCOUNT_ALREADY_PREFIX": "Du bist schon registriert?",
 	"REGISTER_FORM_ACCOUNT_ALREADY_LINK": "Melde dich an",
 	"REGISTER_FORM_ACCOUNT_ALREADY_SUFFIX": ".",
+	
+	"STAGE_REJECTED": "Verworfen",
+	"STAGE_SELECTION": "Auswahlphase",
+	"STAGE_PROPOSAL": "Vorschlagphase",
+	"STAGE_CONSENSUS": "Konsensphase",
+	"STAGE_PASSED": "Abgeschlossen",
+	
+	"STAGE_COUNTDOWN_INTRO": ", nächste Phase in:",
+	"STAGE_COUNTDOWN_HOURS": " {{hh}}:{{mm}}:{{ss}}",
+	"STAGE_COUNTDOWN_ONE_DAY": " 1 Tag +{{hh}}:{{mm}}:{{ss}}",
+	"STAGE_COUNTDOWN_DAYS": " {{dd}} Tagen",
+	"STAGE_COUNTDOWN_DAYS_LEFT": "{{dd}} Tage verbleibend",
+	"STAGE_COUNTDOWN_HOURS_LEFT": "{{hh}} Std. verbleibend",
+	"STAGE_COUNTDOWN_MINUTES_LEFT": "{{mm}} Min. verbleibend",
+	"STAGE_COUNTDOWN_SECONDS_LEFT": "{{ss}} Sek. verbleibend",
+	
+	"TOPIC_SUBTITLE_1": "endet am",
+	"TOPIC_SUBTITLE_2": "um",
+	"TOPIC_SUBTITLE_3": "am",
 	
 	"USER_PASSWORT_NOT_CORRECT": "Das Passwort ist nicht korrekt. Hast du dein <a class=\"pwforgot\" href=\"{0}\">Passwort vergessen</a>?",
 	"USER_FORM_EMAIL_MISSING": "Du hast keine E-Mail-Adresse eingegeben.",
@@ -94,16 +114,7 @@
 	"Participants": "Teilnehmer",
 	"proposals": "Vorschläge",
 	"Proposals": "Vorschläge",
-	
-	"rejected stage": "Verworfen",
-	"selection stage": "Auswahlphase",
-	"proposal stage": "Vorschlagphase",
-	"consensus stage": "Konsensphase",
-	"passed stage": "Abgeschlossen",
-	"Selection stage": "Auswahlphase",
-	"Proposal stage": "Vorschlagphase",
-	"Consensus stage": "Konsensphase",
-	"next level in": "nächstes Level in",
+
 	"Currently in level": "Aktuell in Level",
 	"End of stage in": "Ende der Phase in",
 	"Finished at": "Beendet am",

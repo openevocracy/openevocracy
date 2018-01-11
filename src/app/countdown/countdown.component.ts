@@ -1,5 +1,15 @@
 import { Component, Input, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
+import { TranslateService } from '@ngx-translate/core';
+
+/*function timeStr(t : number) {
+	if (t < 10)
+		return "0" + String(t); // add leading zero
+	else	
+		return String(t);
+
+}*/
+	
 @Component({
 	selector: 'countdown',
 	template: '{{ displayTime }}',
@@ -9,7 +19,7 @@ import { Component, Input, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef
 export class CountdownComponent implements OnDestroy {
 	private timestamp: number;
 	private interval;
-	private format: string = '{dd} days {hh}:{mm}:{ss}';
+	//private format: string = '{dd} days {hh}:{mm}:{ss}';
 	
 	@Input()
 	public set time(value: string | number) {
@@ -17,7 +27,8 @@ export class CountdownComponent implements OnDestroy {
 		this._startTimer();
 	}
 
-	constructor(private changeDetectorRef: ChangeDetectorRef) { }
+	constructor(private changeDetectorRef: ChangeDetectorRef,
+					private translate: TranslateService) { }
 	
 	ngOnDestroy() {
 		this.changeDetectorRef.detach();
@@ -32,7 +43,8 @@ export class CountdownComponent implements OnDestroy {
 	}
 	
 	public get displayTime() {
-		let days, hours, minutes, seconds, delta = this.delta, time = this.format;
+		let days, hours, minutes, seconds, delta = this.delta;
+		let time = ""; //this.format;
 		
 		// Calculate time in days/hrs/min/sec from delta
 		days = Math.floor(delta / 86400);
@@ -44,10 +56,46 @@ export class CountdownComponent implements OnDestroy {
 		seconds = delta % 60;
 		
 		// Create time remaining string
-		time = time.replace('{dd}', days);
+		/*time = time.replace('{dd}', days);
 		time = time.replace('{hh}', hours);
-		time = time.replace('{mm}', minutes);
-		time = time.replace('{ss}', seconds);
+		time = time.replace('{ss}', seconds);*/
+		
+		/*if (days == 0) // in this case, also display hh:mm:ss
+		{
+			this.translate.get("STAGE_COUNTDOWN_HOURS", {hh: timeStr(hours), mm: timeStr(minutes), ss: timeStr(seconds)}).
+				subscribe(str => {time = str; });
+		}
+		else if (days == 1)
+		{
+			this.translate.get("STAGE_COUNTDOWN_ONE_DAY", {hh: timeStr(hours), mm: timeStr(minutes), ss: timeStr(seconds)}).
+				subscribe(str => {time = str; });
+		}
+		else
+		{
+			this.translate.get("STAGE_COUNTDOWN_DAYS", {dd: String(days)}).
+				subscribe(str => {time = str; });
+		}*/
+		
+		if (this.delta < 60) // in this case, display seconds left
+		{
+			this.translate.get("STAGE_COUNTDOWN_SECONDS_LEFT", {ss: String(seconds)}).
+				subscribe(str => {time = str; });
+		}
+		else if (this.delta < 3600) // in this case, display minutes left
+		{
+			this.translate.get("STAGE_COUNTDOWN_MINUTES_LEFT", {mm: String(minutes)}).
+				subscribe(str => {time = str; });
+		}
+		else if (this.delta < 86400) // in this case, display hours left
+		{
+			this.translate.get("STAGE_COUNTDOWN_HOURS_LEFT", {hh: String(hours)}).
+				subscribe(str => {time = str; });
+		}
+		else // in this case, display days left
+		{
+			this.translate.get("STAGE_COUNTDOWN_DAYS_LEFT", {dd: String(days)}).
+				subscribe(str => {time = str; });
+		}
 		
 		// Return remaining time as string (given by format)
 		return time;

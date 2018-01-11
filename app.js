@@ -1,4 +1,3 @@
-// url: http://alexehrnschwender.com/2013/07/client-side-auth-session-mgmt-backbone-node/
 /**
  * Module dependencies.
  */

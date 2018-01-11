@@ -78,7 +78,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 			});*/
 		//}
 	}
-  
+	
 	private onSubmit() {
 		// Set login status to true (login)
 		this.user.setLoginStatus(true);

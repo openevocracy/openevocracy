@@ -10,7 +10,7 @@
 			
 			<span class="flex-spacer"></span>
 			
-			<button mat-icon-button [matMenuTriggerFor]="lang">
+			<button mat-icon-button title="{{ 'HEADER_MAINMENU_LANGUAGE' | translate}}" [matMenuTriggerFor]="lang">
 				<span class="fa fa-globe"></span>
 			</button>
 			<mat-menu #lang="matMenu" [overlapTrigger]="false">
@@ -22,7 +22,7 @@
 				</button>
 			</mat-menu>
 			
-			<button mat-icon-button [matMenuTriggerFor]="settings">
+			<button mat-icon-button title="{{ 'HEADER_MAINMENU_SETTINGS' | translate}}" [matMenuTriggerFor]="settings">
 				<span class="fa fa-cogs"></span>
 			</button>
 			<mat-menu #settings="matMenu" [overlapTrigger]="false">

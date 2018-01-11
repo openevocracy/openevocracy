@@ -2,8 +2,11 @@
 	<div class="flex container">
 		<div class="topic-title">
 			<h1>{{topic?.name}}</h1>
-			<p *ngIf="topic?.stage != C.STAGE_REJECTED">{{topic?.stageName}}, nächste Phase in <countdown [time]="topic?.nextDeadline"></countdown></p>
-			<p *ngIf="topic?.stage == C.STAGE_REJECTED"><!-- Abgelehnt: -->{{ topic?.rejectedReason | translate }}</p>
+			<p *ngIf="topic?.stage != C.STAGE_REJECTED && topic?.stage != C.STAGE_PASSED">
+				{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_1' | translate }} {{ topic?.nextDeadline | date:'y-MM-dd' }} {{ 'TOPIC_SUBTITLE_2' | translate }} {{ topic?.nextDeadline | date:'HH:mm:ss' }} (<countdown [time]="topic?.nextDeadline"></countdown>)
+				</p>
+			<p *ngIf="topic?.stage == C.STAGE_PASSED">{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_3' | translate }} {{ topic?.stagePassedStarted | date:'y-MM-dd' }}</p>
+			<p *ngIf="topic?.stage == C.STAGE_REJECTED">{{ topic?.stageName | translate }}, {{ topic?.rejectedReason | translate }}</p>
 		</div>
 		<span class="flex-spacer"></span>
 		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_SELECTION" title="Als relevant markieren"><span class="fa fa-hand-paper-o"></span></button>

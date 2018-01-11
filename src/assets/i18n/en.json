@@ -3,6 +3,8 @@
 	"HEADER_MAINMENU_TIMELINE": "Timeline",
 	"HEADER_MAINMENU_SETTINGS": "Settings",
 	"HEADER_MAINMENU_LOGOUT": "Logout",
+	"HEADER_MAINMENU_LANGUAGE": "Select language",
+	"HEADER_MAINMENU_SETTINGS": "Settings",
 	
 	"FOOTER_MENU_ABOUT": "About",
 	"FOOTER_MENU_IMPRESS": "Imprint",
@@ -12,8 +14,7 @@
 	"FORM_LABEL_PASSWORD": "Your password:",
 	
 	"MODAL_CREATE_NEW_TOPIC": "Create new topic",
-	"MODAL_NEW_TOPIC_NAME": "Name of the new topic (min. ",
-	"MODAL_NEW_TOPIC_NAME_SUFFIX": " characters)",
+	"MODAL_NEW_TOPIC_NAME": "Name of the new topic (min. {{numChars}} characters)",
 	"MODAL_CREATE": "Create",
 	"MODAL_REQUEST_NEW_PASSWORD": "Request new password",
 	"MODAL_SEND_REQUEST": "Submit",
@@ -36,6 +37,25 @@
 	"REGISTER_FORM_ACCOUNT_ALREADY_PREFIX": "You already have an account? Just",
 	"REGISTER_FORM_ACCOUNT_ALREADY_LINK": "login",
 	"REGISTER_FORM_ACCOUNT_ALREADY_SUFFIX": ".",
+		
+	"STAGE_REJECTED": "Rejected",
+	"STAGE_SELECTION": "Selection stage",
+	"STAGE_PROPOSAL": "Proposal stage",
+	"STAGE_CONSENSUS": "Consensus stage",
+	"STAGE_PASSED": "Passed",
+	
+	"STAGE_COUNTDOWN_INTRO": ", next phase in:",
+	"STAGE_COUNTDOWN_HOURS": " {{hh}}:{{mm}}:{{ss}}",
+	"STAGE_COUNTDOWN_ONE_DAY": " 1 day +{{hh}}:{{mm}}:{{ss}}",
+	"STAGE_COUNTDOWN_DAYS": " {{dd}} days",
+	"STAGE_COUNTDOWN_DAYS_LEFT": "{{dd}} days remaining",
+	"STAGE_COUNTDOWN_HOURS_LEFT": "{{hh}} hrs. remaining",
+	"STAGE_COUNTDOWN_MINUTES_LEFT": "{{mm}} min. remaining",
+	"STAGE_COUNTDOWN_SECONDS_LEFT": "{{ss}} sec. remaining",
+	
+	"TOPIC_SUBTITLE_1": "ends on",
+	"TOPIC_SUBTITLE_2": "at",
+	"TOPIC_SUBTITLE_3": "on",
 	
 	"USER_PASSWORT_NOT_CORRECT": "Password is not correct. Did you <a class=\"pwforgot\" href=\"{0}\">forget your password</a>?",
 	"USER_FORM_EMAIL_MISSING": "You did not enter an email address.",
