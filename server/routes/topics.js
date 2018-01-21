@@ -344,6 +344,7 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 }
 
 exports.list = function(req, res) {
+    console.log(JSON.stringify(req.headers));
     var uid = ObjectId(req.signedCookies.uid);
     
     manageAndListTopicsAsync().then(function(topics) {

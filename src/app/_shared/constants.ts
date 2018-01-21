@@ -9,7 +9,5 @@ export const C = {
     "STAGE_PASSED"    :  3,
     
     "RATING_KNOWLEDGE"  :  1,
-    "RATING_INTEGRATION":  2,
-    
-    "MIN_LENGTH_TOPIC_NAME" : 4
+    "RATING_INTEGRATION":  2
 };

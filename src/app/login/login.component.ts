@@ -65,6 +65,13 @@ export class LoginComponent implements OnInit, OnDestroy {
 	
 	private handleLogin(res) {
 		console.log(res);
+		
+		/*if(res === true) {
+            //this.router.navigate(['/']);
+        } else {
+            this.error = 'Username or password is incorrect';
+            this.loading = false;
+        }*/
 			
 		// Check response
 		//if(this.authenticated) {
@@ -81,10 +88,10 @@ export class LoginComponent implements OnInit, OnDestroy {
 	
 	private onSubmit() {
 		// Set login status to true (login)
-		this.user.setLoginStatus(true);
+		//this.user.setLoginStatus(true);
 		
 		// Redirect to any page after login
-		this.router.navigate(['/topics']);
+		//this.router.navigate(['/topics']);
 		
 		// If form is valid, go for login
 		if(this.loginForm.valid) {

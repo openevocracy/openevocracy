@@ -26,30 +26,55 @@ var mail = require('./server/mail');
 var path = require('path');
 var app = express();
 
+var jwt = require('jsonwebtoken');
+
 var passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy;
+var passportJWT = require("passport-jwt");
+
+var ExtractJwt = passportJWT.ExtractJwt;
+var JwtStrategy = passportJWT.Strategy;
 
 var cfg = requirejs('public/js/setup/configs');
 
 // initialize passport
-passport.use(new LocalStrategy({
-    usernameField: 'email',
-    passwordField: 'password'
+var testusers = [
+  {
+    id: 1,
+    email: 'test@example.com',
+    password: 'test'
   },
-  function(username, password, done) {
-    return done(null, {'_id': 0, 'user': username});
-    
-    db.collection('users').findOne({ 'email': username }).then(done);
+  {
+    id: 2,
+    email: 'test2@example.com',
+    password: 'test2'
   }
-));
+];
 
-passport.serializeUser(function(user, done) {
-  done(null, user._id);
+var jwtOptions = {}
+//jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
+jwtOptions.secretOrKey = 'tasmanianDevil';
+
+var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
+	console.log('payload received', jwt_payload);
+	// usually this would be a database call:
+	var user = testusers[_.findIndex(testusers, {'id': jwt_payload.id})];
+	if (user) {
+		next(null, user);
+	} else {
+		next(null, false);
+	}
+});
+
+passport.use(strategy);
+
+/*passport.serializeUser(function(user, done) {
+	done(null, user._id);
 });
 
 passport.deserializeUser(function(uid, done) {
-  db.collection('users').findOne(done);
-});
+	db.collection('users').findOne(done);
+});*/
 
 // initialize mail
 mail.initializeMail();
@@ -67,17 +92,11 @@ app.set('port', process.env.PORT);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-//app.use(favicon('public/img/favicon.png'));
+app.use(passport.initialize());
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(methodOverride());
-
-app.use(cookieParser('secret'));
-//app.use(session({ secret: 'secret', key: 'uid', cookie: { secure: true }, resave: true, saveUninitialized: true }));
-app.use(session({ secret: 'secret', resave: true, saveUninitialized: true }));
-app.use(passport.initialize());
-app.use(passport.session());
 
 var distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
@@ -110,19 +129,7 @@ Routes plan:
 
 */
 
-// route middleware to make sure a user is logged in
-function isLoggedIn(req, res, next) {
-  
-    // if user is authenticated in the session, carry on 
-    if (req.isAuthenticated())
-        return next();
-
-    // if they aren't redirect them to the home page
-    res.redirect('/login');
-}
-
-app.get('/json/topics', topics.list);
-//app.get('/json/topics', isLoggedIn, topics.list);
+app.get('/json/topics', passport.authenticate('jwt', { session: false }), topics.list);
 app.patch('/json/topic/:id', topics.update);
 app.get('/json/topic/:id', topics.query);
 app.post('/json/topic', topics.create);
@@ -164,7 +171,29 @@ app.get('/json/auth', users.auth);
 // POST /api/auth/login
 // @desc: logs in a user
 //app.post('/json/auth/login', users.login);
-app.post('/json/auth/login', passport.authenticate('local'), (req, res) => res.send());
+//app.post('/json/auth/login', passport.authenticate('local'), (req, res) => res.send());
+app.post('/json/auth/login', function(req, res) {
+  if(req.body.email && req.body.password){
+    var email = req.body.email;
+    var password = req.body.password;
+  }
+  // usually this would be a database call:
+  var user = _.findWhere(testusers, {'email': email});
+  if( _.isUndefined(user) ){
+    res.status(401).json({message:"no such user found"});
+  }
+  
+  console.log('user.password', user.password);
+  if(user.password === req.body.password) {
+    // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
+    var payload = {id: user.id};
+    var token = jwt.sign(payload, jwtOptions.secretOrKey);
+    res.json({message: "ok", token: token});
+  } else {
+    res.status(401).json({message:"passwords did not match"});
+  }
+});
+
 /*app.post('/json/auth/login', passport.authenticate('local', {
   successRedirect: '/topics',
   failureRedirect: '/login'

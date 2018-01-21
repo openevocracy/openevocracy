@@ -1,1 +1,2 @@
-export const baseURL = 'http://develop.openevocracy.org/';
+export const baseURL = '';
+export const minLengthTopicName = 4;
