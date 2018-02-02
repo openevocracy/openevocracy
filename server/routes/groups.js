@@ -340,7 +340,7 @@ function getMemberRatingAsync(ruid, gid, uid, type) {
 exports.query = function(req, res) {
     
     var gid = ObjectId(req.params.id);
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
     
     // Get group
     var group_promise = db.collection('groups').findOneAsync({'_id': gid});

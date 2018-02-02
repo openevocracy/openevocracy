@@ -41,6 +41,7 @@ import { TopicService } from './_services/topic.service';
 import { HttpManagerService } from './_services/http-manager.service';
 import { Guard } from './_services/guard.service';
 import { UserService } from './_services/user.service';
+import { TokenService } from './_services/token.service';
 import { AlertService } from './_services/alert.service';
 import { ModalService } from './_services/modal.service';
 import { PwforgetService } from './_services/pwforget.service';
@@ -94,6 +95,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		TopicService,
 		Guard,
 		UserService,
+		TokenService,
 		AlertService,
 		ModalService,
 		PwforgetService,

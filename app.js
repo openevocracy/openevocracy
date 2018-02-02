@@ -3,6 +3,7 @@
  */
 
 var _ = require('underscore');
+var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var express = require('express');
 var favicon = require('serve-favicon');
@@ -57,13 +58,20 @@ jwtOptions.secretOrKey = 'tasmanianDevil';
 
 var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
 	console.log('payload received', jwt_payload);
+	
 	// usually this would be a database call:
-	var user = testusers[_.findIndex(testusers, {'id': jwt_payload.id})];
-	if (user) {
-		next(null, user);
-	} else {
-		next(null, false);
-	}
+	//var user = testusers[_.findIndex(testusers, {'id': jwt_payload.id})];
+
+	db.collection('users').findOneAsync({ '_id': ObjectId(jwt_payload.id)}).then(function (user) {
+		console.log('jwt_payload.id', ObjectId(jwt_payload.id));
+		console.log('user', user);
+	  
+	  	if (user) {
+	  		next(null, user);
+	  	} else {
+	  		next(null, false);
+	  	}
+	});
 });
 
 passport.use(strategy);
@@ -131,7 +139,8 @@ Routes plan:
 
 app.get('/json/topics', passport.authenticate('jwt', { session: false }), topics.list);
 app.patch('/json/topic/:id', topics.update);
-app.get('/json/topic/:id', topics.query);
+app.get('/json/topic/:id', passport.authenticate('jwt', { session: false }), topics.query);
+//app.get('/json/topic/:id', topics.query);
 app.post('/json/topic', topics.create);
 app.delete('/json/topic/:id', topics.delete);
 app.post('/json/topic-vote', topics.vote);
@@ -177,21 +186,26 @@ app.post('/json/auth/login', function(req, res) {
     var email = req.body.email;
     var password = req.body.password;
   }
-  // usually this would be a database call:
-  var user = _.findWhere(testusers, {'email': email});
-  if( _.isUndefined(user) ){
-    res.status(401).json({message:"no such user found"});
-  }
   
-  console.log('user.password', user.password);
-  if(user.password === req.body.password) {
-    // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
-    var payload = {id: user.id};
-    var token = jwt.sign(payload, jwtOptions.secretOrKey);
-    res.json({message: "ok", token: token});
-  } else {
-    res.status(401).json({message:"passwords did not match"});
-  }
+  // usually this would be a database call:
+  //var user = _.findWhere(testusers, {'email': email});
+  
+	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
+    if( user == null || _.isUndefined(user) ){
+      res.status(401).json({message:"no such user found"});
+      return;
+    }
+
+    console.log('user.password', user.password);
+    if (user.password === req.body.password) {
+      // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
+      var payload = {id: user._id};
+      var token = jwt.sign(payload, jwtOptions.secretOrKey);
+      res.json({message: "ok", token: token});
+    } else {
+      res.status(401).json({message:"passwords did not match"});
+    }
+	});
 });
 
 /*app.post('/json/auth/login', passport.authenticate('local', {

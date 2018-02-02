@@ -29,9 +29,7 @@ export class TopicService {
 	}
 	
 	getTopic(tid): Observable<Topic> {
-		return this.http.get(baseURL + 'json/topic/' + tid, {withCredentials: true})
-		   .map(res => { return this.httpManagerService.extractData(res); })
-		   .catch(error => { return this.httpManagerService.handleError(error); });
+		return this.httpManagerService.get('json/topic/');
 	}
 
 }

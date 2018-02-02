@@ -41,7 +41,7 @@ exports.auth_wrapper = function(req, res, next) {
     next(req, res);
     return;
     
-    db.collection('users').findOne({'_id': ObjectId(req.signedCookies.uid),
+    db.collection('users').findOne({'_id': ObjectId(req.user._id),
                                     'auth_token': req.signedCookies.auth_token },
     function(err, user){
         if(user){
@@ -59,7 +59,7 @@ exports.auth_wrapper = function(req, res, next) {
 // authentification
 // TODO use middleware, e.g. Passport?
 exports.auth = function(req, res) {
-    db.collection('users').findOne({ '_id': ObjectId(req.signedCookies.uid),
+    db.collection('users').findOne({ '_id': ObjectId(req.user._id),
                                      'auth_token': req.signedCookies.auth_token },
     function(err, user){
         if(user)
@@ -258,7 +258,7 @@ exports.settings = function(req, res) {
 
 // PATCH /json/user/settings/:id
 exports.update = function(req, res) {
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
     var userUpdate = req.body;
     var validation = null;
         
@@ -308,7 +308,7 @@ exports.update = function(req, res) {
 
 // GET /json/user/navi
 exports.navigation = function(req, res) {
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
 
     var topicsPrePromise = db.collection('proposals').
         find({'source': uid}, {'tid': true}).toArrayAsync().then(function(tids) {

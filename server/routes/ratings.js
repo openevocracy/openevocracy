@@ -17,7 +17,7 @@ var C = require('../../setup/constants.json');
 exports.query = function(req, res) {
     var rid = ObjectId(req.params.id);
     var gid = ObjectId(req.params.gid);
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
     var type = parseInt(req.params.type, 10);
     
     db.collection('ratings').
@@ -41,7 +41,7 @@ exports.count = function(req, res) {
 exports.rate = function(req, res) {
     var rid = ObjectId(req.body.id);
     var gid = ObjectId(req.body.gid);
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
     var type = parseInt(req.body.type, 10);
     var score = parseInt(req.body.score, 10);
     

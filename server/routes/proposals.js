@@ -9,7 +9,7 @@ var pads = require('../pads');
 
 exports.create = function(req, res) {
     var tid = ObjectId(req.params.id);
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
     
     db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
         // Check if topic is at least in proposal stage to show proposal

@@ -19,7 +19,8 @@
 		</mat-form-field>
 	</p>
 	
-	<button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">
+	<button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid || awaitAuthentication">
+		<span *ngIf="awaitAuthentication" class="fa fa-spinner fa-spin"></span>
 		<span>{{ 'LOGIN_FORM_SUBMIT' | translate }}</span>
 	</button>
 </form>

@@ -344,8 +344,7 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 }
 
 exports.list = function(req, res) {
-    console.log(JSON.stringify(req.headers));
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
     
     manageAndListTopicsAsync().then(function(topics) {
         // Promise.map does not work above
@@ -360,7 +359,7 @@ exports.list = function(req, res) {
 
 exports.update = function(req, res) {
     var tid = ObjectId(req.params.id);
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
     var topicNew = req.body;
     
     db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
@@ -391,8 +390,9 @@ function updateTopicStateAsync(topic,stageStartedEntryName) {
 }
 
 exports.query = function(req, res) {
+    console.log('req', req);
     var tid = ObjectId(req.params.id);
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
     
     db.collection('topics').findOneAsync({ '_id': tid }).
     then(manageTopicStateAsync).
@@ -429,7 +429,7 @@ exports.create = function(req, res) {
             return utils.rejectPromiseWithAlert(409, 'danger', 'TOPIC_NAME_ALREADY_EXISTS');
         
         // create topic
-        topic.owner = ObjectId(req.signedCookies.uid);
+        topic.owner = ObjectId(req.user._id);
         topic.pid = ObjectId(); // create random pad id
         topic.stage = C.STAGE_SELECTION; // start in selection stage
         topic.level = 0;
@@ -449,7 +449,7 @@ exports.create = function(req, res) {
 
 exports.delete = function(req,res) {
     var tid = ObjectId(req.params.id);
-    var uid = ObjectId(req.signedCookies.uid);
+    var uid = ObjectId(req.user._id);
     
     db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': true, 'stage': true }).
     then(function(topic) {
@@ -475,7 +475,7 @@ exports.vote = function(req, res) {
     
     // assemble vote
     topic_vote.tid = ObjectId(topic_vote.tid);
-    topic_vote.uid = ObjectId(req.signedCookies.uid);
+    topic_vote.uid = ObjectId(req.user._id);
     
     // TODO use findAndModify as in proposal
     db.collection('topic_votes').
@@ -497,7 +497,7 @@ exports.unvote = function(req, res) {
     
     // assemble vote
     topic_vote.tid = ObjectId(topic_vote.tid);
-    topic_vote.uid = ObjectId(req.signedCookies.uid);
+    topic_vote.uid = ObjectId(req.user._id);
     
     // remove vote and return number of current votes
     db.collection('topic_votes').removeAsync(topic_vote,true).

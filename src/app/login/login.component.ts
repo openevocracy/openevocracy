@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs/Subscription';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs/Observable';
 
 import { ModalService } from '../_services/modal.service';
 import { UserService } from '../_services/user.service';
@@ -18,6 +19,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 	
 	private loginForm: FormGroup;
 	private pwforgetSubscription: Subscription;
+	private awaitAuthentication: boolean = false;
 
 	constructor(
 		public router: Router,
@@ -64,42 +66,41 @@ export class LoginComponent implements OnInit, OnDestroy {
 	}
 	
 	private handleLogin(res) {
-		console.log(res);
 		
-		/*if(res === true) {
-            //this.router.navigate(['/']);
-        } else {
-            this.error = 'Username or password is incorrect';
-            this.loading = false;
-        }*/
-			
-		// Check response
-		//if(this.authenticated) {
-			// # If 200 ok: Go on ..
-		
-			
-		//} else {
-			// # If not: Show alert component, where error message is in response (res) from server
-			/*this.translate.get(res).subscribe((trans: string) => {
+		if(res === true) {
+			this.router.navigate(['/']);
+		/*} else {
+			console.error(res);
+		}*/
+		} else {
+			// Show alert component, where error message is in response (res) from server
+			this.alert.error(res.message);
+			// TODO translate
+			/*this.translate.get(res.message).subscribe((trans: string) => {
 				this.alert.error(trans);
 			});*/
-		//}
+		}
+		
+		// Enable button again
+		this.awaitAuthentication = false;
 	}
 	
 	private onSubmit() {
-		// Set login status to true (login)
-		//this.user.setLoginStatus(true);
-		
-		// Redirect to any page after login
-		//this.router.navigate(['/topics']);
-		
 		// If form is valid, go for login
 		if(this.loginForm.valid) {
-			// Check login server side
-			this.user.authenticate({
+			// Disable button
+			this.awaitAuthentication = true;
+			
+			// Read credentials from form
+			var credentials = {
 				'email': this.loginForm.value.email,
 				'password': this.loginForm.value.password
-			}).subscribe(res => this.handleLogin(res));
+			};
+			
+			// Check login server side
+			this.user.authenticate(credentials)
+				.catch(e => { return Observable.of(e) })
+				.subscribe(res => this.handleLogin(res));
 		}
 	}
 	
