@@ -210,8 +210,7 @@ exports.signup = function(req, res) {
 // POST /json/auth/logout
 // @desc: logs out a user, clearing the signed cookies
 exports.logout = function(req, res) {
-    res.clearCookie('uid');
-    res.clearCookie('auth_token');
+    // FIXME the actual logout is missing
     res.send();
 };
 

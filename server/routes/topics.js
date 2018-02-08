@@ -393,7 +393,7 @@ exports.query = function(req, res) {
     console.log('req', req);
     var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.user._id);
-    
+
     db.collection('topics').findOneAsync({ '_id': tid }).
     then(manageTopicStateAsync).
     then(function(topic) {

@@ -18,12 +18,52 @@ export class HttpManagerService {
 	
 	public get(url) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-   	let options = new RequestOptions({ headers: headers });
-   	console.log(options);
-   	
-   	return this.http.get(baseURL + url, options)
-   		.map(res => { return this.extractData(res); })
-		   .catch(error => { return this.handleError(error); });
+	   	let options = new RequestOptions({ headers: headers });
+	   	console.log(options);
+	   	
+	   	return this.http.get(baseURL + url, options)
+	   		.map(res => { return this.extractData(res); })
+			   .catch(error => { return this.handleError(error); });
+	}
+	
+	public post(url, body) {
+		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
+	   	let options = new RequestOptions({ headers: headers });
+	   	console.log(options);
+	   	
+	   	return this.http.post(baseURL + url, body, options)
+	   		.map(res => { return this.extractData(res); })
+			   .catch(error => { return this.handleError(error); });
+	}
+	
+	public put(url, body) {
+		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
+	   	let options = new RequestOptions({ headers: headers });
+	   	console.log(options);
+	   	
+	   	return this.http.put(baseURL + url, body, options)
+	   		.map(res => { return this.extractData(res); })
+			   .catch(error => { return this.handleError(error); });
+	}
+	
+	public delete(url) {
+		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
+	   	let options = new RequestOptions({ headers: headers });
+	   	console.log(options);
+	   	
+	   	return this.http.delete(baseURL + url, options)
+	   		.map(res => { return this.extractData(res); })
+			   .catch(error => { return this.handleError(error); });
+	}
+	
+	public patch(url, body) {
+		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
+	   	let options = new RequestOptions({ headers: headers });
+	   	console.log(options);
+	   	
+	   	return this.http.patch(baseURL + url, body, options)
+	   		.map(res => { return this.extractData(res); })
+			   .catch(error => { return this.handleError(error); });
 	}
 	
 	public extractData(res: Response) {

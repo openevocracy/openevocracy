@@ -39,9 +39,8 @@ export class ModalAddtopicComponent extends ModalComponent {
 	
 	onSubmit() {
 		// Pass topic name to topicService
-		this.topicService.addTopic(this.addTopicForm.value.topicname).subscribe(res => {
-			// Route to new topic
-			let topic = res.json();
+		this.topicService.addTopic(this.addTopicForm.value.topicname).subscribe(topic => {
+			// Navigate to new topic
 			this.router.navigate(['/topic/'+topic._id]);
 		});
 		

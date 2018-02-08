@@ -22,14 +22,11 @@ export class TopicService {
 	}
 	
 	addTopic(topicName: string) {
-		// TODO: Create instance of topic and set name
-		//let topic = new Topic();
-		//topic.name = topicName;
-		return this.http.post(baseURL + 'json/topic', {'name': topicName});
+		return this.httpManagerService.post(baseURL + 'json/topic', {'name': topicName});
 	}
 	
 	getTopic(tid): Observable<Topic> {
-		return this.httpManagerService.get('json/topic/');
+		return this.httpManagerService.get('json/topic/' + tid);
 	}
 
 }

@@ -38,29 +38,12 @@ var JwtStrategy = passportJWT.Strategy;
 var cfg = requirejs('public/js/setup/configs');
 
 // initialize passport
-var testusers = [
-  {
-    id: 1,
-    email: 'test@example.com',
-    password: 'test'
-  },
-  {
-    id: 2,
-    email: 'test2@example.com',
-    password: 'test2'
-  }
-];
-
 var jwtOptions = {}
-//jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
 jwtOptions.secretOrKey = 'tasmanianDevil';
 
 var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
 	console.log('payload received', jwt_payload);
-	
-	// usually this would be a database call:
-	//var user = testusers[_.findIndex(testusers, {'id': jwt_payload.id})];
 
 	db.collection('users').findOneAsync({ '_id': ObjectId(jwt_payload.id)}).then(function (user) {
 		console.log('jwt_payload.id', ObjectId(jwt_payload.id));
@@ -137,38 +120,41 @@ Routes plan:
 
 */
 
-app.get('/json/topics', passport.authenticate('jwt', { session: false }), topics.list);
-app.patch('/json/topic/:id', topics.update);
-app.get('/json/topic/:id', passport.authenticate('jwt', { session: false }), topics.query);
-//app.get('/json/topic/:id', topics.query);
-app.post('/json/topic', topics.create);
-app.delete('/json/topic/:id', topics.delete);
-app.post('/json/topic-vote', topics.vote);
-app.post('/json/topic-unvote', topics.unvote);
-app.get('/file/topic/final/:id', topics.final);
+function auth() {
+  return passport.authenticate('jwt', { session: false });
+}
+
+app.get('/json/topics', auth(), topics.list);
+app.patch('/json/topic/:id', auth(), topics.update);
+app.get('/json/topic/:id', auth(), topics.query);
+app.post('/json/topic', auth(), topics.create);
+app.delete('/json/topic/:id', auth(), topics.delete);
+app.post('/json/topic-vote', auth(), topics.vote);
+app.post('/json/topic-unvote', auth(), topics.unvote);
+app.get('/file/topic/final/:id', auth(), topics.final);
 
 // #########################
 // ### P R O P O S A L S ###
 // #########################
 
-app.get('/json/proposal/create/:id', proposals.create);
-app.get('/json/proposal/:id', proposals.query);
+app.get('/json/proposal/create/:id', auth(), proposals.create);
+app.get('/json/proposal/:id', auth(), proposals.query);
 
 // ###################
 // ### G R O U P S ###
 // ###################
 
-app.get('/json/groups', groups.list);
+app.get('/json/groups', auth(), groups.list);
 // get group by id
-app.get('/json/group/:id', groups.query);
+app.get('/json/group/:id', auth(), groups.query);
 
 // #####################
 // ### R A T I N G S ###
 // #####################
 
-app.get('/json/ratings/count', ratings.count);
-app.get('/json/ratings/:id', ratings.query);
-app.post('/json/ratings/rate', ratings.rate);
+app.get('/json/ratings/count', auth(), ratings.count);
+app.get('/json/ratings/:id', auth(), ratings.query);
+app.post('/json/ratings/rate', auth(), ratings.rate);
 
 // ###################
 // ###   A U T H   ###
@@ -180,15 +166,11 @@ app.get('/json/auth', users.auth);
 // POST /api/auth/login
 // @desc: logs in a user
 //app.post('/json/auth/login', users.login);
-//app.post('/json/auth/login', passport.authenticate('local'), (req, res) => res.send());
 app.post('/json/auth/login', function(req, res) {
   if(req.body.email && req.body.password){
     var email = req.body.email;
     var password = req.body.password;
   }
-  
-  // usually this would be a database call:
-  //var user = _.findWhere(testusers, {'email': email});
   
 	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
     if( user == null || _.isUndefined(user) ){
@@ -216,7 +198,7 @@ app.post('/json/auth/login', function(req, res) {
 app.post('/json/auth/signup', users.signup);
 // POST /json/auth/logout
 // @desc: logs out a user, clearing the signed cookies
-app.post('/json/auth/logout', users.logout);
+app.post('/json/auth/logout', auth(), users.logout);
 /*// POST /json/auth/remove_account
 // @desc: deletes a user
 app.post("/json/auth/remove_account", users.delete );*/
@@ -232,12 +214,12 @@ app.post('/json/auth/password/:email', users.sendPassword);
 // ###################
 
 // Social
-app.get('/json/user/profile/:id', users.query);
-app.get('/json/user/navi', users.navigation);
+app.get('/json/user/profile/:id', auth(), users.query);
+app.get('/json/user/navi', auth(), users.navigation);
 
 // Get and edit own profile
-app.get('/json/user/settings/:id', users.settings);
-app.patch('/json/user/settings/:id', users.update);
+app.get('/json/user/settings/:id', auth(), users.settings);
+app.patch('/json/user/settings/:id', auth(), users.update);
 
 // ###################
 // ###   T E S T   ###
