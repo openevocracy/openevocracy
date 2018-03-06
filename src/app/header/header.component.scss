@@ -22,7 +22,7 @@ img { padding: 16px 1rem 16px 0; }
 .mat-toolbar { margin-left: 50px; width: auto; }
 
 .mat-nav-list { padding: 0; }
-.mat-list-item { float: left; color: $white; font-weight: 300; }
+.mat-nav-list .mat-list-item { float: left; color: $white; font-weight: 300; height: auto; }
 .mat-list-item.active { background: rgba(0,0,0,0.04); }
 
 /* Component Child Styles */

@@ -12,6 +12,8 @@
 	
 	"FORM_LABEL_MAIL": "Your email address:",
 	"FORM_LABEL_PASSWORD": "Your password:",
+	"FORM_LABEL_PASSWORD_REP": "Repeat your password",
+	"FORM_ERROR_PASSWORDS_NO_MATCH": "Passwords do not match",
 	
 	"MODAL_CREATE_NEW_TOPIC": "Create new topic",
 	"MODAL_NEW_TOPIC_NAME": "Name of the new topic (min. {{numChars}} characters)",

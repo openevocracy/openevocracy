@@ -24,6 +24,8 @@
 	
 	"FORM_LABEL_MAIL": "Deine E-Mail-Adresse:",
 	"FORM_LABEL_PASSWORD": "Dein Passwort",
+	"FORM_LABEL_PASSWORD_REP": "Wiederhole Dein Passwort",
+	"FORM_ERROR_PASSWORDS_NO_MATCH": "Passwörter stimmen nicht überein",
 	
 	"MODAL_CREATE_NEW_TOPIC": "Neues Thema erstellen",
 	"MODAL_NEW_TOPIC_NAME": "Name des neuen Themas (mind. {{numChars}} Zeichen)",

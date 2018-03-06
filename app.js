@@ -195,7 +195,40 @@ app.post('/json/auth/login', function(req, res) {
   failureRedirect: '/login'
 }));*/
 // creates a user
-app.post('/json/auth/signup', users.signup);
+//app.post('/json/auth/signup', users.signup);
+app.post('/json/auth/register', function(req, res) {
+  if(req.body.email && req.body.password){
+    var email = req.body.email;
+    var password = req.body.password;
+  }
+  
+	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
+    if( user != null ){
+      res.status(401).json({message:"user already exists"});
+      return;
+    }
+
+	}).then(function() {
+    // assemble user
+    var user = {
+        email: email,
+        password: password
+        /*pass: bcrypt.hashSync(user.pass, 8),
+        auth_token: bcrypt.genSaltSync(8),
+        verified: false*/
+    };
+
+    // add user to database
+    db.collection('users').insertAsync(user).return(user);
+    
+    // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
+    var payload = {id: user._id};
+    var token = jwt.sign(payload, jwtOptions.secretOrKey);
+    res.json({message: "ok", token: token});
+  });
+	
+	
+});
 // POST /json/auth/logout
 // @desc: logs out a user, clearing the signed cookies
 app.post('/json/auth/logout', auth(), users.logout);
