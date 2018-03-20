@@ -37,17 +37,18 @@ var JwtStrategy = passportJWT.Strategy;
 
 var cfg = requirejs('public/js/setup/configs');
 
+var bcrypt = require('bcrypt');
+
 // initialize passport
 var jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
-jwtOptions.secretOrKey = 'tasmanianDevil';
+jwtOptions.secretOrKey = bcrypt.genSaltSync(8);
 
 var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
 	console.log('payload received', jwt_payload);
 
-	db.collection('users').findOneAsync({ '_id': ObjectId(jwt_payload.id)}).then(function (user) {
+	db.collection('users').findOneAsync({ '_id': ObjectId(jwt_payload.id), 'salt': jwt_payload.salt }).then(function (user) {
 		console.log('jwt_payload.id', ObjectId(jwt_payload.id));
-		console.log('user', user);
 	  
 	  	if (user) {
 	  		next(null, user);
@@ -174,18 +175,25 @@ app.post('/json/auth/login', function(req, res) {
   
 	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
     if( user == null || _.isUndefined(user) ){
-      res.status(401).json({message:"no such user found"});
+      res.status(401).json({message:"No such user found."});
       return;
     }
-
-    console.log('user.password', user.password);
-    if (user.password === req.body.password) {
+    
+    if(bcrypt.compareSync(password, user.password)) { // TODO perhaps hash on client side?
       // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
-      var payload = {id: user._id};
+      var payload = { 'id': user._id, 'salt': bcrypt.genSaltSync(8) };
       var token = jwt.sign(payload, jwtOptions.secretOrKey);
-      res.json({message: "ok", token: token});
+      
+      db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then(function(user) {
+        res.json({ 'message': "Sucessfully logged in.", 'token': token, 'id': user._id });
+      }).catch(function(e) {
+        if(cfg.DEBUG_CONFIG)
+          res.status(500).json({message: JSON.stringify(e)});
+        else
+          res.status(500).json({message: "Salt could not be updated."});
+      });
     } else {
-      res.status(401).json({message:"passwords did not match"});
+      res.status(401).json({message: "Passwords did not match."});
     }
 	});
 });
@@ -202,36 +210,38 @@ app.post('/json/auth/register', function(req, res) {
     var password = req.body.password;
   }
   
-	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
-    if( user != null ){
-      res.status(401).json({message:"user already exists"});
-      return;
+  // find user with email, if no user was found, resolve promise (go on with registration)
+	db.collection('users').findOneAsync({ 'email': email }).then(function (user) {
+    if( !_.isNull(user) ){
+      res.status(401).json({ 'message': "User already exists." });
+      return Promise.reject();
     }
-
+    
+    return Promise.resolve();
 	}).then(function() {
     // assemble user
     var user = {
         email: email,
-        password: password
-        /*pass: bcrypt.hashSync(user.pass, 8),
-        auth_token: bcrypt.genSaltSync(8),
-        verified: false*/
+        password: bcrypt.hashSync(password, 8),
+        salt: bcrypt.genSaltSync(8),
+        verified: false
     };
 
-    // add user to database
-    db.collection('users').insertAsync(user).return(user);
-    
-    // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
-    var payload = {id: user._id};
+    // add user to database and return user
+    return db.collection('users').insertAsync(user).return(user);
+	}).then(function(user) {
+    // from now on we'll identify the user by the id and its salt
+    // the id and the salt is the personalized value that goes into our token
+    var payload = { 'id': user._id, 'salt': user.salt };
     var token = jwt.sign(payload, jwtOptions.secretOrKey);
-    res.json({message: "ok", token: token});
+    res.json({ 'message': "Sucessfully registered", 'token': token, 'id': user._id });
   });
-	
-	
+
 });
 // POST /json/auth/logout
 // @desc: logs out a user, clearing the signed cookies
-app.post('/json/auth/logout', auth(), users.logout);
+app.post('/json/auth/logout', users.logout);
+//app.post('/json/auth/logout', auth(), users.logout); //TODO
 /*// POST /json/auth/remove_account
 // @desc: deletes a user
 app.post("/json/auth/remove_account", users.delete );*/

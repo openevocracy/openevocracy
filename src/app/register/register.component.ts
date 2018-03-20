@@ -51,8 +51,6 @@ export class RegisterComponent implements OnInit {
 			}, {validator: this.areEqual})
 		});
 	}
-
-
 	
 	private handleRegistration(res) {
 		
@@ -83,7 +81,7 @@ export class RegisterComponent implements OnInit {
 			// Read credentials from form
 			var credentials = {
 				'email': this.registerForm.value.email,
-				'password': this.registerForm.value.password
+				'password': this.registerForm.value.passwords.password
 			};
 			
 			// Check login server side

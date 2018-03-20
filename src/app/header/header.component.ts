@@ -30,8 +30,10 @@ export class HeaderComponent implements OnInit {
 		// Remove token from local storage
 		this.tokenService.removeToken();
 		
-		
 		// Redirect to any page after logout
 		this.router.navigate(['/login']);
+		
+		// remove salt from server database
+		this.user.logout();
 	}
 }

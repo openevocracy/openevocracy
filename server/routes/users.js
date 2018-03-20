@@ -208,9 +208,23 @@ exports.signup = function(req, res) {
 };
 
 // POST /json/auth/logout
-// @desc: logs out a user, clearing the signed cookies
+// @desc: logs out a user, deleting the salt for the user's token
 exports.logout = function(req, res) {
-    // FIXME the actual logout is missing
+    console.log(req);
+    /*if (_.isNull(req.id) || _.isUndefined(req.id)) {
+        res.json({message: "Logout failed: missing user ID"});
+    }
+    else
+    {
+        db.collection('users').updateAsync({ '_id': req.id }, { $set: { 'salt': null } }).then(function(user) {
+            res.json({message: "Logout successful"});
+          }).catch(function(e) {
+            if(cfg.DEBUG_CONFIG)
+              res.status(500).json({message: JSON.stringify(e)});
+            else
+              res.status(500).json({message: "Logout failed: salt could not be deleted"});
+          });
+    }*/
     res.send();
 };
 
