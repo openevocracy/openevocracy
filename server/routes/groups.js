@@ -5,11 +5,12 @@ var Promise = require('bluebird');
 var Chance = require('chance');
 var Color = require('color');
 var bcrypt = require('bcrypt');
-var requirejs = require('requirejs');
+//var requirejs = require('requirejs');
 var strformat = require('strformat');
 
-var C = require('../../setup/constants.json');
-var cfg = requirejs('public/js/setup/configs');
+var C = require('../../shared/constants');
+//var cfg = requirejs('public/js/setup/configs');
+var cfg = require('../../shared/config').cfg;
 var i18n = require('../i18n');
 var ratings = require('./ratings');
 var topics = require('./topics');

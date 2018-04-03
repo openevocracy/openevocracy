@@ -47,8 +47,9 @@ import { ModalService } from './_services/modal.service';
 import { PwforgetService } from './_services/pwforget.service';
 
 // Shared
-import { baseURL } from './_shared/config';
-import { C } from './_shared/constants';
+//import { cfg } from './_shared/config';
+import { cfg } from '../../shared/config';
+import { C } from '../../shared/constants';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -99,7 +100,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		AlertService,
 		ModalService,
 		PwforgetService,
-		{ provide: 'BaseURL', useValue: baseURL },
+		{ provide: 'BaseURL', useValue: cfg.baseURL },
 		{ provide: 'C', useValue: C }
 	],
 	bootstrap: [AppComponent]

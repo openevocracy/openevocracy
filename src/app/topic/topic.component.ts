@@ -5,7 +5,7 @@ import { CountdownComponent } from '../countdown/countdown.component'
 
 import { TopicService } from '../_services/topic.service';
 
-import { C } from '../_shared/constants';
+import { C } from '../../../shared/constants';
 import { Topic } from '../_models/topic';
 
 @Component({

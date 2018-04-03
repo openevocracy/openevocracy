@@ -3,24 +3,51 @@ var bcrypt = require('bcrypt');
 var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
-var requirejs = require('requirejs');
+//var requirejs = require('requirejs');
 var validate = require('validate.js');
 var strformat = require('strformat');
+
+var passportJWT = require("passport-jwt");
+var ExtractJwt = passportJWT.ExtractJwt;
+var JwtStrategy = passportJWT.Strategy;
+var jwt = require('jsonwebtoken');
 
 var i18n = require('../i18n');
 var topics = require('./topics');
 var mail = require('../mail');
 var utils = require('../utils');
 
-var C = require('../../setup/constants.json');
-var cfg = requirejs('public/js/setup/configs');
+var C = require('../../shared/constants');
+//var cfg = requirejs('public/js/setup/configs');
+var cfg = require('../../shared/config').cfg;
 
-// cookie config
-var config = {
+// cookie config, delte after 01.05.2018
+/*var config = {
     port: 3000,
     sessionSecret: 'bb-login-secret',
     cookieSecret: 'bb-login-secret',
     cookieMaxAge: (1000 * 60 * 60 * 24 * 36)
+};*/
+
+// initialize jwt authentification
+var jwtOptions = {};
+jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
+jwtOptions.secretOrKey = bcrypt.genSaltSync(8);
+
+var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
+	console.log('payload received', jwt_payload);
+
+	db.collection('users').findOneAsync({ '_id': ObjectId(jwt_payload.id), 'salt': jwt_payload.salt }).then(function (user) {
+	  	if (user) {
+	  		next(null, user);
+	  	} else {
+	  		next(null, false);
+	  	}
+	});
+});
+
+exports.getStrategy = function() {
+	return strategy;
 };
 
 function clean_user_data(user) {
@@ -72,13 +99,42 @@ exports.auth = function(req, res) {
 // POST /api/auth/login
 // @desc: logs in a user
 exports.login = function(req, res) {
-    try {
-        // Try to create ObjectID, if it works, search for ObjectID
-        db.collection('users').findOne({ '_id': ObjectId(req.body.name) }, _.partial(loginUser, req, res));
-    } catch(err) {
-        // Fall back to using email for login
-        db.collection('users').findOne({ 'email': req.body.name }, _.partial(loginUser, req, res));
-    }
+	if(req.body.email && req.body.password) {
+		var email = req.body.email;
+		var password = req.body.password;
+	} else {
+		utils.sendAlert(res, 400, 'danger', 'USER_FORM_NOT_FILLED');
+		return;
+	}
+  
+	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
+		if(_.isNull(user)) {
+			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', { 'email': email });
+			return;
+		}
+		
+		if(!_.isNull(user) && !user.verified) {
+			utils.sendAlert(res, 401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', { 'email': user.email });
+			return;
+		}
+	
+		if(bcrypt.compareSync(password, user.password)) { // TODO perhaps hash on client side?
+			// from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
+			var payload = { 'id': user._id, 'salt': bcrypt.genSaltSync(8) };
+			var token = jwt.sign(payload, jwtOptions.secretOrKey);
+	
+		db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then(function() {
+			res.json({ 'message': "Sucessfully logged in.", 'token': token, 'id': user._id });
+		}).catch(function(e) {
+			if(cfg.DEBUG_CONFIG)
+				utils.sendAlert(res, 500, 'danger', JSON.stringify(e));
+			else
+				utils.sendAlert(res, 500, 'danger', 'USER_ACCOUNT_SALT_NOT_UPDATED');
+		});
+		} else {
+			utils.sendAlert(res, 401, 'danger', 'USER_PASSWORT_NOT_CORRECT', { 'email': email });
+		}
+	});
 };
 
 exports.sendVerificationMailAgain = function(req, res) {
@@ -132,7 +188,8 @@ exports.sendPassword = function(req, res) {
     });
 };
 
-function loginUser(req, res, err, user) {
+// Old login, delete after 01.05.2018
+/*function loginUser(req, res, err, user) {
     if(user) {
         // Compare the POSTed password with the encrypted db password
         if(bcrypt.compareSync(req.body.pass, user.pass)) {
@@ -162,10 +219,68 @@ function loginUser(req, res, err, user) {
             utils.sendAlert(res, 401, 'danger', 'USER_FORM_EMAIL_MISSING');
         }
     }
-}
+}*/
 
-// creates a user
-exports.signup = function(req, res) {
+// register a new user
+exports.register = function(req, res) {
+	if(req.body.email && req.body.password){
+		var email = req.body.email;
+		var password = req.body.password;
+	} else {
+		utils.sendAlert(res, 400, 'danger', 'USER_FORM_NOT_FILLED');
+		return;
+	}
+	
+	// Setup parseley
+	var constraints = {
+		'email': { presence: true, email: true },
+		'password': { presence: true, format: /^\S+$/ } // no whitespace
+	};
+	
+	// Read form values
+	var form = {'email': email, 'password': password};
+	
+	// Check if values are valid
+	if(!_.isUndefined(validate(form, constraints))) {
+		// Values are NOT valid
+		utils.sendAlert(res, 400, 'danger', 'USER_FORM_VALIDATION_ERROR');
+		return;
+	}
+	
+	// Find user with email, if no user was found, resolve promise (go on with registration)
+	db.collection('users').findOneAsync({ 'email': email }).then(function (user) {
+		// Check if user already exists and check verification status
+      if(!_.isNull(user) && user.verified)
+          return utils.rejectPromiseWithAlert(400, 'warning', 'USER_ACCOUNT_ALREADY_EXISTS');
+      else if(!_.isNull(user) && !user.verified)
+          return utils.rejectPromiseWithAlert(401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', { 'email': user.email });
+	}).then(function() {
+		// Assemble user
+		var user = {
+			email: email,
+			password: bcrypt.hashSync(password, 8),
+			salt: bcrypt.genSaltSync(8),
+			verified: false
+		};
+	
+		// Add user to database and return user
+		return db.collection('users').insertAsync(user).return(user);
+	}).then(function(user) {
+		// From now on we'll identify the user by the id and its salt
+		// the id and the salt is the personalized value that goes into our token
+		var payload = { 'id': user._id, 'salt': user.salt };
+		var token = jwt.sign(payload, jwtOptions.secretOrKey);
+		
+		// Send email verification link to user
+      sendVerificationMail(user);
+      
+      // Send result to client
+		res.json({ 'token': token, 'id': user._id });
+	}).catch(utils.isOwnError,utils.handleOwnError(res));  // Handle errors
+};
+
+// creates a user, delete after 01.05.2018
+/*exports.signup = function(req, res) {
     var user = req.body;
     
     // Setup parseley
@@ -205,12 +320,12 @@ exports.signup = function(req, res) {
             sendVerificationMail(user);
         }).catch(utils.isOwnError,utils.handleOwnError(res));
     }
-};
+};*/
 
 // POST /json/auth/logout
 // @desc: logs out a user, deleting the salt for the user's token
 exports.logout = function(req, res) {
-    console.log(req);
+    console.log('logout', req);
     /*if (_.isNull(req.id) || _.isUndefined(req.id)) {
         res.json({message: "Logout failed: missing user ID"});
     }

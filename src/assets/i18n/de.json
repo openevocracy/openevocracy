@@ -11,16 +11,16 @@
 	"FOOTER_MENU_VERSION": "Aktuelle Version",
 	
 	"EMAIL_ALL_LAZY_GROUP_MEMBERS_SUBJECT": "Inaktivitätserinnerung für deine Gruppe: {0}",
-    "EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE": "Hi,\n\n you are a member of a group in {0}. You were not active for 5 days in your group.\n Let\"s have a look at your common document, probably someone added something new.",
-    
-    "EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT": "Vorschlag Erinnerung: {0}",
-    "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Für dieses Thema wird in drei Tagen die Konsensphase starten.\n Es wird empfohlen, den eingereichten Vorschlag abschließend zu prüfen.",
-    
-    "EMAIL_PASSWORD_RESET_SUBJECT": "Neues Passwort",
-    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n du hast dir ein neues Passwort zusenden lassen. Dein temporäres Passwort lautet:\n\n{0}\n\n Wir empfehlen dir das Passwort direkt nach dem nächsten Login wieder auf ein Passwort deiner Wahl zu ändern.",
-    
-    "EMAIL_RATING_REMINDER_GROUP_MEMBERS_SUBJECT": "Bewertungs Erinnerung: {0}",
-    "EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Bisher hat niemand in der Gruppe eine Bewertung abgegeben.\n Gib den anderen Mitgliedern der Gruppe eine Bewertung, um einen passenden Repräsentanten zu finden.\n",
+	"EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE": "Hi,\n\n you are a member of a group in {0}. You were not active for 5 days in your group.\n Let\"s have a look at your common document, probably someone added something new.",
+	
+	"EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT": "Vorschlag Erinnerung: {0}",
+	"EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Für dieses Thema wird in drei Tagen die Konsensphase starten.\n Es wird empfohlen, den eingereichten Vorschlag abschließend zu prüfen.",
+	
+	"EMAIL_PASSWORD_RESET_SUBJECT": "Neues Passwort",
+	"EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n du hast dir ein neues Passwort zusenden lassen. Dein temporäres Passwort lautet:\n\n{0}\n\n Wir empfehlen dir das Passwort direkt nach dem nächsten Login wieder auf ein Passwort deiner Wahl zu ändern.",
+	
+	"EMAIL_RATING_REMINDER_GROUP_MEMBERS_SUBJECT": "Bewertungs Erinnerung: {0}",
+	"EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Bisher hat niemand in der Gruppe eine Bewertung abgegeben.\n Gib den anderen Mitgliedern der Gruppe eine Bewertung, um einen passenden Repräsentanten zu finden.\n",
 	
 	"FORM_LABEL_MAIL": "Deine E-Mail-Adresse:",
 	"FORM_LABEL_PASSWORD": "Dein Passwort",
@@ -71,11 +71,13 @@
 	"TOPIC_SUBTITLE_2": "um",
 	"TOPIC_SUBTITLE_3": "am",
 	
-	"USER_PASSWORT_NOT_CORRECT": "Das Passwort ist nicht korrekt. Hast du dein <a class=\"pwforgot\" href=\"{0}\">Passwort vergessen</a>?",
+	"USER_PASSWORT_NOT_CORRECT": "Das Passwort ist nicht korrekt. Hast du dein <a class=\"pwforgot\" href=\"{{email}}\">Passwort vergessen</a>?",
 	"USER_FORM_EMAIL_MISSING": "Du hast keine E-Mail-Adresse eingegeben.",
 	"USER_FORM_VALIDATION_ERROR": "Deine Eingabe war nicht ganz korrekt, prüfe deine Änderung nochmal auf Richtigkeit.",
 	"USER_FORM_VALIDATION_ERROR_EMAIL": "Die eingegebe E-Mail-Adresse erfüllt nicht die nötige Form, prüfe das nochmal.",
 	"USER_FORM_VALIDATION_ERROR_PASSWORD": "Das eingegebene Password erfüllt nicht die nötige Form, prüfe das nochmal.<br/>Tipp: Bei Passwörtern sind keine Leerzeichen erlaubt.",
+	"USER_FORM_NOT_FILLED": "Die E-Mail-Adresse oder das Passwort wurden nicht eingegeben.",
+	"USER_ACCOUNT_SALT_NOT_UPDATED": "Das neue Salt konnte nicht in der Datenbank gespeichert werden.",
 	"USER_ACCOUNT_EMAIL_NOT_EXIST": "Zu der eingegebenen E-Mail-Adresse &raquo;{0}&laquo; gibt es kein Benutzerkonto. Hast du dich vertippt?",
 	"USER_ACCOUNT_NOT_VERIFIED": "Du hast deine E-Mail-Adresse noch nicht bestätigt. Lass dir die <a id=\"verify-account\" href=\"/json/auth/verification/{0}\">E-Mail zur Verifizierung noch einmal senden</a>.",
 	"USER_ACCOUNT_ALREADY_EXISTS": "Der Account existiert bereits, logge dich ein.",

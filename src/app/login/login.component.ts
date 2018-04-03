@@ -66,19 +66,13 @@ export class LoginComponent implements OnInit, OnDestroy {
 	}
 	
 	private handleLogin(res) {
-		
 		if(res === true) {
 			this.router.navigate(['/']);
-		/*} else {
-			console.error(res);
-		}*/
 		} else {
 			// Show alert component, where error message is in response (res) from server
-			this.alert.error(res.message);
-			// TODO translate
-			/*this.translate.get(res.message).subscribe((trans: string) => {
-				this.alert.error(trans);
-			});*/
+			this.translate.get(res.alert.content, res.alert.vars).subscribe(str => {
+				this.alert.alert(res.alert.type, str);
+			});
 		}
 		
 		// Enable button again

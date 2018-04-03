@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 0.0.0.0 --public-host http://develop.openevocracy.org -p 3000 --proxy-config proxy.conf.json",
+    "start": "ng serve --host 0.0.0.0 --port 3000 --public-host https://develop.openevocracy.org --proxy-config proxy.conf.json",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
@@ -39,10 +39,6 @@
     "color": "^1.0.3",
     "connect": "*",
     "connect-ensure-login": "^0.1.1",
-    "cookie": "*",
-    "cookie-parser": "*",
-    "cookie-session": "*",
-    "cookie-signature": "*",
     "core-js": "^2.4.1",
     "cron": "*",
     "debug": "^2.6.4",
@@ -78,7 +74,6 @@
     "range-parser": "*",
     "request": "*",
     "request-promise": "*",
-    "requirejs": "^2.3.5",
     "rich-text": "*",
     "rxjs": "^5.5.2",
     "send": "*",
@@ -92,7 +87,7 @@
     "zone.js": "^0.8.14"
   },
   "devDependencies": {
-    "@angular/cli": "^1.5.0",
+    "@angular/cli": "^1.7.3",
     "@angular/compiler-cli": "^5.0.0",
     "@angular/language-service": "^5.0.0",
     "@biesbjerg/ngx-translate-extract": "^2.3.2",
@@ -112,6 +107,7 @@
     "ts-node": "^3.2.0",
     "tslint": "^5.3.2",
     "typescript": ">=2.4.2 <2.6.0",
+    "webpack": "^3.11.0",
     "webpack-dev-server": "*"
   }
 }

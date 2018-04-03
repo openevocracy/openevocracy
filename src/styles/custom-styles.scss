@@ -27,3 +27,6 @@ button.close { padding: 0; background: transparent; border: 0; }
 
 /* Horizontal space */
 div.hspace { float: left; overflow: hidden; height: 1px; width: 0px; }
+
+/* Misc */
+.alert a { color: $black; }

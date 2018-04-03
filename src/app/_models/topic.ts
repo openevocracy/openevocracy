@@ -1,7 +1,7 @@
 import { TopicListElement } from './topic-list-element';
 import * as _ from 'underscore';
 
-import { C } from '../_shared/constants';
+import { C } from '../../../shared/constants';
 
 import { Group } from './group';
 import { Proposal } from './proposal';

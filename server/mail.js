@@ -1,5 +1,4 @@
 var _ = require('underscore');
-var requirejs = require('requirejs');
 var Promise = require('bluebird');
 var nodemailer = require('nodemailer');
 var crypto = require('crypto');
@@ -11,8 +10,8 @@ var i18n = require('./i18n');
 var ratings = require('./routes/ratings');
 var groups = require('./routes/groups');
 
-var C = require('../setup/constants.json');
-var cfg = requirejs('public/js/setup/configs');
+var C = require('../shared/constants');
+var cfg = require('../shared/config').cfg;
 
 var transporter;
 
@@ -36,7 +35,7 @@ exports.initializeMail = function() {
             rejectUnauthorized: false // allow self signed certificate
         },
         
-        auth: db.collection('configs').findOneAsync({'type': 'mailauth'},{'user': true, 'pass': true})
+        auth: db.collection('configs').findOneAsync({'type': 'mailauth'},{'user': true, 'password': true})
     };
     
     Promise.props(smtpConfig).then(function(smtpConfig) {

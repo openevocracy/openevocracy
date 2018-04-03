@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 
-import { baseURL } from '../_shared/config';
+import { cfg } from '../../../shared/config';
 
 import { TokenService } from './token.service';
 
@@ -19,9 +19,8 @@ export class HttpManagerService {
 	public get(url) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
-	   	console.log(options);
 	   	
-	   	return this.http.get(baseURL + url, options)
+	   	return this.http.get(cfg.baseURL + url, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}
@@ -29,9 +28,8 @@ export class HttpManagerService {
 	public post(url, body) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
-	   	console.log(options);
 	   	
-	   	return this.http.post(baseURL + url, body, options)
+	   	return this.http.post(cfg.baseURL + url, body, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}
@@ -39,9 +37,8 @@ export class HttpManagerService {
 	public put(url, body) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
-	   	console.log(options);
 	   	
-	   	return this.http.put(baseURL + url, body, options)
+	   	return this.http.put(cfg.baseURL + url, body, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}
@@ -49,9 +46,8 @@ export class HttpManagerService {
 	public delete(url) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
-	   	console.log(options);
 	   	
-	   	return this.http.delete(baseURL + url, options)
+	   	return this.http.delete(cfg.baseURL + url, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}
@@ -59,9 +55,8 @@ export class HttpManagerService {
 	public patch(url, body) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
-	   	console.log(options);
 	   	
-	   	return this.http.patch(baseURL + url, body, options)
+	   	return this.http.patch(cfg.baseURL + url, body, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}

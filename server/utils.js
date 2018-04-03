@@ -1,11 +1,11 @@
 var _ = require('underscore');
 var rp = require('request-promise');
-var requirejs = require('requirejs');
+//var requirejs = require('requirejs');
 var db = require('./database').db;
 var ObjectId = require('mongodb').ObjectID;
 
 function prepareAlert(type, content, vars) {
-    vars = vars || false;
+    vars = vars || null;
     return { 'type': type, 'content': content, 'vars': vars };
 }
 

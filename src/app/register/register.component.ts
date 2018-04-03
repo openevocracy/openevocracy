@@ -38,9 +38,7 @@ export class RegisterComponent implements OnInit {
 		}
 	}
 	
-	ngOnInit() {
-
-	}
+	ngOnInit() {}
 	
 	createForm() {
 		this.registerForm = this.fb.group({
@@ -53,19 +51,17 @@ export class RegisterComponent implements OnInit {
 	}
 	
 	private handleRegistration(res) {
-		
 		if(res === true) {
-			this.router.navigate(['/']);
-		/*} else {
-			console.error(res);
-		}*/
+			//this.router.navigate(['/']);
+			// Show alert component, where success message explains verification
+			this.translate.get('USER_ACCOUNT_VERIFICATION_LINK_SENT').subscribe(str => {
+				this.alert.success(str);
+			});
 		} else {
 			// Show alert component, where error message is in response (res) from server
-			this.alert.error(res.message);
-			// TODO translate
-			/*this.translate.get(res.message).subscribe((trans: string) => {
-				this.alert.error(trans);
-			});*/
+			this.translate.get(res.alert.content, res.alert.vars).subscribe(str => {
+				this.alert.alert(res.alert.type, str);
+			});
 		}
 		
 		// Enable button again

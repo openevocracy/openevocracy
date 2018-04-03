@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import * as _ from 'underscore';
 
 import { TopicListElement } from '../_models/topic-list-element';
-import { C } from '../_shared/constants';
+import { C } from '../../../shared/constants';
 
 import { TopicService } from '../_services/topic.service';
 import { TopicsListService } from '../_services/topics-list.service';

@@ -14,9 +14,6 @@ var bodyParser = require('body-parser');
 var multer = require('multer');
 var errorHandler = require('errorhandler');
 var http = require('http');
-var cookieParser = require('cookie-parser');
-//var cookieSession = require('cookie-session');
-var requirejs = require('requirejs');
 var utils = require('./server/utils');
 var pads = require('./server/pads');
 var chats = require('./server/chats');
@@ -27,46 +24,9 @@ var mail = require('./server/mail');
 var path = require('path');
 var app = express();
 
-var jwt = require('jsonwebtoken');
+var passport = require('passport');
 
-var passport = require('passport')
-var passportJWT = require("passport-jwt");
-
-var ExtractJwt = passportJWT.ExtractJwt;
-var JwtStrategy = passportJWT.Strategy;
-
-var cfg = requirejs('public/js/setup/configs');
-
-var bcrypt = require('bcrypt');
-
-// initialize passport
-var jwtOptions = {}
-jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
-jwtOptions.secretOrKey = bcrypt.genSaltSync(8);
-
-var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
-	console.log('payload received', jwt_payload);
-
-	db.collection('users').findOneAsync({ '_id': ObjectId(jwt_payload.id), 'salt': jwt_payload.salt }).then(function (user) {
-		console.log('jwt_payload.id', ObjectId(jwt_payload.id));
-	  
-	  	if (user) {
-	  		next(null, user);
-	  	} else {
-	  		next(null, false);
-	  	}
-	});
-});
-
-passport.use(strategy);
-
-/*passport.serializeUser(function(user, done) {
-	done(null, user._id);
-});
-
-passport.deserializeUser(function(uid, done) {
-	db.collection('users').findOne(done);
-});*/
+var cfg = require('./shared/config').cfg;
 
 // initialize mail
 mail.initializeMail();
@@ -78,6 +38,18 @@ var groups = require('./server/routes/groups');
 var proposals = require('./server/routes/proposals');
 var ratings = require('./server/routes/ratings');
 var tests = require('./server/routes/tests');
+
+// set passport strategy
+var strategy = users.getStrategy();
+passport.use(strategy);
+
+/*passport.serializeUser(function(user, done) {
+	done(null, user._id);
+});
+
+passport.deserializeUser(function(uid, done) {
+	db.collection('users').findOne(done);
+});*/
 
 // all environments
 app.set('port', process.env.PORT);
@@ -164,84 +136,20 @@ app.post('/json/ratings/rate', auth(), ratings.rate);
 // authentification
 // TODO required?
 app.get('/json/auth', users.auth);
-// POST /api/auth/login
+
 // @desc: logs in a user
-//app.post('/json/auth/login', users.login);
-app.post('/json/auth/login', function(req, res) {
-  if(req.body.email && req.body.password){
-    var email = req.body.email;
-    var password = req.body.password;
-  }
-  
-	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
-    if( user == null || _.isUndefined(user) ){
-      res.status(401).json({message:"No such user found."});
-      return;
-    }
-    
-    if(bcrypt.compareSync(password, user.password)) { // TODO perhaps hash on client side?
-      // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
-      var payload = { 'id': user._id, 'salt': bcrypt.genSaltSync(8) };
-      var token = jwt.sign(payload, jwtOptions.secretOrKey);
-      
-      db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then(function(user) {
-        res.json({ 'message': "Sucessfully logged in.", 'token': token, 'id': user._id });
-      }).catch(function(e) {
-        if(cfg.DEBUG_CONFIG)
-          res.status(500).json({message: JSON.stringify(e)});
-        else
-          res.status(500).json({message: "Salt could not be updated."});
-      });
-    } else {
-      res.status(401).json({message: "Passwords did not match."});
-    }
-	});
+app.post('/json/auth/login', users.login);
+
+// @desc: creates a user while registration
+app.post('/json/auth/register', users.register);
+
+// @desc: logs out a user, clearing the salt in database
+app.post('/json/auth/logout', function(req, res) {
+  console.log('logout function called');
+  res.json({ 'message': "Sucessfully logged out." });
 });
-
-/*app.post('/json/auth/login', passport.authenticate('local', {
-  successRedirect: '/topics',
-  failureRedirect: '/login'
-}));*/
-// creates a user
-//app.post('/json/auth/signup', users.signup);
-app.post('/json/auth/register', function(req, res) {
-  if(req.body.email && req.body.password){
-    var email = req.body.email;
-    var password = req.body.password;
-  }
-  
-  // find user with email, if no user was found, resolve promise (go on with registration)
-	db.collection('users').findOneAsync({ 'email': email }).then(function (user) {
-    if( !_.isNull(user) ){
-      res.status(401).json({ 'message': "User already exists." });
-      return Promise.reject();
-    }
-    
-    return Promise.resolve();
-	}).then(function() {
-    // assemble user
-    var user = {
-        email: email,
-        password: bcrypt.hashSync(password, 8),
-        salt: bcrypt.genSaltSync(8),
-        verified: false
-    };
-
-    // add user to database and return user
-    return db.collection('users').insertAsync(user).return(user);
-	}).then(function(user) {
-    // from now on we'll identify the user by the id and its salt
-    // the id and the salt is the personalized value that goes into our token
-    var payload = { 'id': user._id, 'salt': user.salt };
-    var token = jwt.sign(payload, jwtOptions.secretOrKey);
-    res.json({ 'message': "Sucessfully registered", 'token': token, 'id': user._id });
-  });
-
-});
-// POST /json/auth/logout
-// @desc: logs out a user, clearing the signed cookies
-app.post('/json/auth/logout', users.logout);
 //app.post('/json/auth/logout', auth(), users.logout); //TODO
+
 /*// POST /json/auth/remove_account
 // @desc: deletes a user
 app.post("/json/auth/remove_account", users.delete );*/

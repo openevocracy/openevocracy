@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
-import { baseURL } from '../_shared/config';
+import { HttpManagerService } from './http-manager.service';
+
+import { cfg } from '../../../shared/config';
 
 import { TokenService } from './token.service';
 
@@ -17,18 +19,23 @@ export class UserService {
 
 	constructor(
 		private http: Http,
+		private httpManagerService: HttpManagerService,
 		private tokenService: TokenService) {
+	}
+	
+	public getUserId() {
+		return this.userId;
 	}
 	
 	public authenticate(credentials): Observable<Credentials> {
 		let self = this;
 		
-		return this.http.post(baseURL + 'json/auth/login', credentials)
+		return this.http.post(cfg.baseURL + 'json/auth/login', credentials)
 			.map(function (res) {
-				console.log('res', res.json());
-				
+				// Set user ID
 				this.userId = res.json() && res.json().id;
 				
+				// Store token
 				let token = res.json() && res.json().token;
 				if (token) {
 					// set token property
@@ -51,9 +58,8 @@ export class UserService {
 	
 	public register(credentials): Observable<Credentials> {
 		let self = this;
-		console.log(credentials);
 		
-		return this.http.post(baseURL + 'json/auth/register', credentials)
+		return this.http.post(cfg.baseURL + 'json/auth/register', credentials)
 			.map(function (res) {
 				let token = res.json() && res.json().token;
 				this.userId = res.json() && res.json().id;
@@ -77,18 +83,22 @@ export class UserService {
 	}
 	
 	public logout() {
-		return this.http.post(baseURL + 'json/auth/logout', this.userId)
+		console.log('logout function');
+		
+		return this.httpManagerService.post('json/auth/logout', {'uid': this.userId});
+		
+		/*return this.http.post(cfg.baseURL + 'json/auth/logout', {'uid': this.userId})
 			.map(function (res) {
-				console.log('succesfully logged out');
+				console.log('res', res.json());
+				console.log('Succesfully logged out');
+				// clear userId
+				//delete this.userId;
 			})
 			.catch(error => {
 				console.warn(error);
 				var errorMessage = JSON.parse(error._body);
 				return Observable.throw(errorMessage);
-			});
-			
-		// clear userId
-		//delete this.userId;
+			});*/
 	}
 
 }

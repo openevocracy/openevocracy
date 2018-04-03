@@ -9,7 +9,7 @@ import { TopicService } from '../../_services/topic.service';
 
 import { TranslateService } from '@ngx-translate/core';
 
-import { minLengthTopicName } from '../../_shared/config';
+import { cfg } from '../../../../shared/config';
 
 @Component({
 	selector: 'modal-addtopic',
@@ -32,7 +32,7 @@ export class ModalAddtopicComponent extends ModalComponent {
 		super(modalService, el);
 		
 		this.addTopicForm = this.fb.group({
-			topicname: ['', Validators.minLength(minLengthTopicName)]
+			topicname: ['', Validators.minLength(cfg.minLengthTopicName)]
 		});
 	
 	}
@@ -49,11 +49,11 @@ export class ModalAddtopicComponent extends ModalComponent {
 	}
 	
 	open(data) {
-		this.translate.get("MODAL_NEW_TOPIC_NAME", {numChars: String(minLengthTopicName)}).subscribe(
+		this.translate.get("MODAL_NEW_TOPIC_NAME", {numChars: String(cfg.minLengthTopicName)}).subscribe(
 			str => {this.topicnamePlaceholder = str; });
 			
 		//this.translate.get("MODAL_NEW_TOPIC_NAME").subscribe(
-		//	str => {this.topicnamePlaceholder = str + String(minLengthTopicName); });
+		//	str => {this.topicnamePlaceholder = str + String(cfg.minLengthTopicName); });
 	    //this.translate.get("MODAL_NEW_TOPIC_NAME_SUFFIX").subscribe(
 		//	str => {this.topicnamePlaceholder += str; });
 			
