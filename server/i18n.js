@@ -2,8 +2,8 @@ var i18next = require('i18next');
 var Promise = require('bluebird');
 
 // TODO replace "en" by language of specific user from database
-var en = require('./i18n/de.json'); // = requirejs('public/js/app/nls/en/mail');
-var de = require('./i18n/en.json'); // = requirejs('public/js/app/nls/de/mail');
+var en = require('./i18n/de.json');
+var de = require('./i18n/en.json');
 
 exports.initAsync = Promise.promisify(i18next.init).bind(i18next)({
     lng: 'en', // TODO de
