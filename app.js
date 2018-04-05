@@ -3,23 +3,15 @@
  */
 
 var _ = require('underscore');
-var ObjectId = require('mongodb').ObjectID;
-var Promise = require('bluebird');
 var express = require('express');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var methodOverride = require('method-override');
-var session = require('express-session');
 var bodyParser = require('body-parser');
-var multer = require('multer');
-var errorHandler = require('errorhandler');
 var http = require('http');
-var utils = require('./server/utils');
 var pads = require('./server/pads');
 var chats = require('./server/chats');
 var CronJob = require('cron').CronJob;
 
-var db = require('./server/database').db;
 var mail = require('./server/mail');
 var path = require('path');
 var app = express();

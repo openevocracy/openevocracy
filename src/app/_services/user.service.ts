@@ -29,9 +29,13 @@ export class UserService {
 	
 	public authenticate(credentials): Observable<Credentials> {
 		let self = this;
+		console.log('authenticate');
+		console.log(cfg);
+		console.log(cfg.BASE_URL + '/json/auth/login');
 		
-		return this.http.post(cfg.baseURL + 'json/auth/login', credentials)
+		return this.http.post(cfg.BASE_URL + '/json/auth/login', credentials)
 			.map(function (res) {
+				console.log(res);
 				// Set user ID
 				this.userId = res.json() && res.json().id;
 				
@@ -59,7 +63,7 @@ export class UserService {
 	public register(credentials): Observable<Credentials> {
 		let self = this;
 		
-		return this.http.post(cfg.baseURL + 'json/auth/register', credentials)
+		return this.http.post(cfg.BASE_URL + '/json/auth/register', credentials)
 			.map(function (res) {
 				let token = res.json() && res.json().token;
 				this.userId = res.json() && res.json().id;
@@ -85,9 +89,9 @@ export class UserService {
 	public logout() {
 		console.log('logout function');
 		
-		return this.httpManagerService.post('json/auth/logout', {'uid': this.userId});
+		return this.httpManagerService.post('/json/auth/logout', {'uid': this.userId});
 		
-		/*return this.http.post(cfg.baseURL + 'json/auth/logout', {'uid': this.userId})
+		/*return this.http.post(cfg.BASE_URL + '/json/auth/logout', {'uid': this.userId})
 			.map(function (res) {
 				console.log('res', res.json());
 				console.log('Succesfully logged out');

@@ -14,6 +14,6 @@ export class TopicsListService {
 		private httpManagerService: HttpManagerService) { }
 		
 	getTopicsList(): Observable<TopicListElement[]> {
-		return this.httpManagerService.get('json/topics');
+		return this.httpManagerService.get('/json/topics');
 	}
 }

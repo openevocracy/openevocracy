@@ -100,7 +100,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		AlertService,
 		ModalService,
 		PwforgetService,
-		{ provide: 'BaseURL', useValue: cfg.baseURL },
+		{ provide: 'cfg', useValue: cfg },
 		{ provide: 'C', useValue: C }
 	],
 	bootstrap: [AppComponent]

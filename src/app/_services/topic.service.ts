@@ -18,15 +18,15 @@ export class TopicService {
 		
 	vote(tid: string) {
 		// FIXME: Cookie uid is necessary here!
-		//return this.http.post(cfg.baseURL + 'json/topic-vote', {'tid': tid});
+		//return this.http.post(cfg.BASE_URL + '/json/topic-vote', {'tid': tid});
 	}
 	
 	addTopic(topicName: string) {
-		return this.httpManagerService.post('json/topic', {'name': topicName});
+		return this.httpManagerService.post('/json/topic', {'name': topicName});
 	}
 	
 	getTopic(tid): Observable<Topic> {
-		return this.httpManagerService.get('json/topic/' + tid);
+		return this.httpManagerService.get('/json/topic/' + tid);
 	}
 
 }

@@ -2,7 +2,8 @@ var DISABLED = -1;
 var ONE_DAY = 1000*60*60*24;
 var ONE_MIN = 1000*60;
 
-var EVOCRACY_HOST = 'http://178.63.84.211:3000';
+var EVOCRACY_HOST = 'http://178.63.84.211:8100';
+var BASE_URL = 'https://develop.openevocracy.org';
 var DATABASE_HOST = 'mongodb://127.0.0.1/evocracy';
 
 var DEBUG_CONFIG = {
@@ -29,6 +30,7 @@ var DEBUG_CONFIG = {
     REMINDER_GROUP_SECOND   : 1*ONE_MIN,
     REMINDER_GROUP_LAZY     : 1*ONE_MIN,
     
+    BASE_URL : BASE_URL,
     EVOCRACY_HOST : EVOCRACY_HOST,
     DATABASE_HOST : DATABASE_HOST
 };
@@ -57,6 +59,7 @@ var RELEASE_CONFIG = {
     REMINDER_GROUP_SECOND   : ONE_DAY,
     REMINDER_GROUP_LAZY     : 5*ONE_DAY,
     
+    BASE_URL : BASE_URL,
     EVOCRACY_HOST : EVOCRACY_HOST,
     DATABASE_HOST : DATABASE_HOST
 };

@@ -99,6 +99,8 @@ exports.auth = function(req, res) {
 // POST /api/auth/login
 // @desc: logs in a user
 exports.login = function(req, res) {
+	console.log('login');
+	
 	if(req.body.email && req.body.password) {
 		var email = req.body.email;
 		var password = req.body.password;
@@ -112,6 +114,8 @@ exports.login = function(req, res) {
 			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', { 'email': email });
 			return;
 		}
+		
+		console.log(user);
 		
 		if(!_.isNull(user) && !user.verified) {
 			utils.sendAlert(res, 401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', { 'email': user.email });

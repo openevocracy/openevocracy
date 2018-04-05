@@ -20,7 +20,7 @@ export class HttpManagerService {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
 	   	
-	   	return this.http.get(cfg.baseURL + url, options)
+	   	return this.http.get(cfg.BASE_URL + url, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}
@@ -29,7 +29,7 @@ export class HttpManagerService {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
 	   	
-	   	return this.http.post(cfg.baseURL + url, body, options)
+	   	return this.http.post(cfg.BASE_URL + url, body, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}
@@ -38,7 +38,7 @@ export class HttpManagerService {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
 	   	
-	   	return this.http.put(cfg.baseURL + url, body, options)
+	   	return this.http.put(cfg.BASE_URL + url, body, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}
@@ -47,7 +47,7 @@ export class HttpManagerService {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
 	   	
-	   	return this.http.delete(cfg.baseURL + url, options)
+	   	return this.http.delete(cfg.BASE_URL + url, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}
@@ -56,7 +56,7 @@ export class HttpManagerService {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
 	   	let options = new RequestOptions({ headers: headers });
 	   	
-	   	return this.http.patch(cfg.baseURL + url, body, options)
+	   	return this.http.patch(cfg.BASE_URL + url, body, options)
 	   		.map(res => { return this.extractData(res); })
 			   .catch(error => { return this.handleError(error); });
 	}
