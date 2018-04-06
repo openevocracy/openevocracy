@@ -99,8 +99,6 @@ exports.auth = function(req, res) {
 // POST /api/auth/login
 // @desc: logs in a user
 exports.login = function(req, res) {
-	console.log('login');
-	
 	if(req.body.email && req.body.password) {
 		var email = req.body.email;
 		var password = req.body.password;
@@ -110,61 +108,66 @@ exports.login = function(req, res) {
 	}
   
 	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
+		// If user does not exist
 		if(_.isNull(user)) {
 			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', { 'email': email });
 			return;
 		}
 		
-		console.log(user);
-		
+		// If user does exist, but is not verified
 		if(!_.isNull(user) && !user.verified) {
 			utils.sendAlert(res, 401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', { 'email': user.email });
 			return;
 		}
 	
+		// Check if password is correct
 		if(bcrypt.compareSync(password, user.password)) { // TODO perhaps hash on client side?
-			// from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
+			// From now on we'll identify the user by the id and
+			// the id is the only personalized value that goes into our token
 			var payload = { 'id': user._id, 'salt': bcrypt.genSaltSync(8) };
 			var token = jwt.sign(payload, jwtOptions.secretOrKey);
-	
-		db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then(function() {
-			res.json({ 'message': "Sucessfully logged in.", 'token': token, 'id': user._id });
-		}).catch(function(e) {
-			if(cfg.DEBUG_CONFIG)
-				utils.sendAlert(res, 500, 'danger', JSON.stringify(e));
-			else
-				utils.sendAlert(res, 500, 'danger', 'USER_ACCOUNT_SALT_NOT_UPDATED');
-		});
+			
+			// Set salt
+			db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then(function() {
+				res.json({ 'message': "Sucessfully logged in.", 'token': token, 'id': user._id });
+			}).catch(function(e) {
+				if(cfg.DEBUG_CONFIG)
+					utils.sendAlert(res, 500, 'danger', JSON.stringify(e));
+				else
+					utils.sendAlert(res, 500, 'danger', 'USER_ACCOUNT_SALT_NOT_UPDATED');
+			});
 		} else {
+			// Passwords did not match
 			utils.sendAlert(res, 401, 'danger', 'USER_PASSWORT_NOT_CORRECT', { 'email': email });
 		}
 	});
 };
 
 exports.sendVerificationMailAgain = function(req, res) {
-    // Get email from query and user id from database
-    var email = req.params.email;
-    
-    getUserByMailAsync(email).then(function(user) {
-        // Break if no user was found
-        if(_.isNull(user)) {
-            utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', email);
-            return;
-        }
-            
-        // Send verification mail
-        user.email = email;
-        sendVerificationMail(user);
-        // Send alert notification to client
-        utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_VERIFICATION_LINK_SENT'); 
-    });
+	// Get email from query and user id from database
+	var email = req.params.email;
+	
+	getUserByMailAsync(email).then(function(user) {
+		// Break if no user was found
+		if(_.isNull(user)) {
+			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', email);
+			return;
+		}
+		
+		// Send verification mail
+		user.email = email;
+		sendVerificationMail(user);
+		
+		// Send alert notification to client
+		utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_VERIFICATION_LINK_SENT'); 
+	});
 };
 
 function sendVerificationMail(user) {
     console.log('sendVerificationMail');
     mail.sendMail(user.email,
         i18n.t('EMAIL_REGISTRATION_SUBJECT'),
-        strformat(i18n.t('EMAIL_REGISTRATION_MESSAGE'), user._id.toString(), cfg.EVOCRACY_HOST)
+        strformat(i18n.t('EMAIL_REGISTRATION_MESSAGE'), user._id.toString(), cfg.BASE_URL)
     );
 }
 
@@ -329,22 +332,30 @@ exports.register = function(req, res) {
 // POST /json/auth/logout
 // @desc: logs out a user, deleting the salt for the user's token
 exports.logout = function(req, res) {
-    console.log('logout', req);
-    /*if (_.isNull(req.id) || _.isUndefined(req.id)) {
-        res.json({message: "Logout failed: missing user ID"});
-    }
-    else
-    {
-        db.collection('users').updateAsync({ '_id': req.id }, { $set: { 'salt': null } }).then(function(user) {
-            res.json({message: "Logout successful"});
-          }).catch(function(e) {
-            if(cfg.DEBUG_CONFIG)
-              res.status(500).json({message: JSON.stringify(e)});
-            else
-              res.status(500).json({message: "Logout failed: salt could not be deleted"});
-          });
-    }*/
-    res.send();
+	var uid = req.body.uid;
+	
+	// Check if user id was transmitted correctly
+	if(_.isUndefined(uid)) {
+		utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_LOGOUT_ID_MISSING');
+		return;
+	}
+	
+	// Get user from user id
+	db.collection('users').updateAsync({ '_id': ObjectId(uid) }, { $set: { 'salt': null } }).then(function(user) {
+		// Show error if id was wrong and no user was found
+		if(_.isNull(user))
+			utils.sendAlert(res, 400, 'success', 'USER_ACCOUNT_NOT_EXIST');
+		// Just send status 200 if user was found and salt was deleted
+		else
+			res.send({});
+	}).catch(function(e) {
+		// If debug: Show detailed error
+		if(cfg.DEBUG_CONFIG)
+			utils.sendAlert(res, 500, 'success', JSON.stringify(e));
+		// If no debug: Just show message that salt could not be deleted
+		else
+			utils.sendAlert(res, 500, 'success', 'USER_ACCOUNT_LOGOUT_SALT_NOT_DELETED');
+	});
 };
 
 // POST /json/auth/verifyEmail

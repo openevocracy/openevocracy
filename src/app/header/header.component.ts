@@ -1,11 +1,9 @@
-import { Router, RouterLinkActive } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 //import { MatToolbarModule, MatListModule, MatMenuModule } from '@angular/material';
-
 import { AppComponent } from '../app.component';
+import { Router, RouterLinkActive } from '@angular/router';
 
 import { UserService } from '../_services/user.service';
-import { TokenService } from '../_services/token.service';
 
 @Component({
 	selector: 'app-header',
@@ -15,10 +13,10 @@ import { TokenService } from '../_services/token.service';
 
 export class HeaderComponent implements OnInit {
 	
-	constructor(public app: AppComponent,
-				public router: Router,
-				public user: UserService,
-				public tokenService: TokenService) { }
+	constructor(
+		private app: AppComponent,
+		private router: Router,
+		private user: UserService) { }
 	
 	ngOnInit() {}
 	
@@ -27,13 +25,12 @@ export class HeaderComponent implements OnInit {
 	}
 	
 	logout() {
-		// Remove token from local storage
-		this.tokenService.removeToken();
+		let self = this;
 		
-		// Redirect to any page after logout
-		this.router.navigate(['/login']);
-		
-		// remove salt from server database
-		this.user.logout();
+		// Call logout function in user service
+		this.user.logout().subscribe(res => {
+			// Redirect to any page after logout was successful
+			self.router.navigate(['/login']);
+		});
 	}
 }

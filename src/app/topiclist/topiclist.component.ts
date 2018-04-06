@@ -8,7 +8,6 @@ import { C } from '../../../shared/constants';
 
 import { TopicService } from '../_services/topic.service';
 import { TopicsListService } from '../_services/topics-list.service';
-
 import { ModalService } from '../_services/modal.service';
 
 @Component({

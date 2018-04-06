@@ -5,60 +5,65 @@ import { Http, Response, Headers, RequestOptions } from '@angular/http';
 
 import { cfg } from '../../../shared/config';
 
+import { AlertService } from '../_services/alert.service';
+import { TranslateService } from '@ngx-translate/core';
 import { TokenService } from './token.service';
 
 import 'rxjs/add/observable/throw';
+import * as _ from 'underscore';
 
 @Injectable()
 export class HttpManagerService {
 
 	constructor(
 		private http: Http,
-		private tokenService: TokenService) { }
+		private tokenService: TokenService,
+		private alert: AlertService,
+		private translate: TranslateService) { }
 	
 	public get(url) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-	   	let options = new RequestOptions({ headers: headers });
-	   	
-	   	return this.http.get(cfg.BASE_URL + url, options)
-	   		.map(res => { return this.extractData(res); })
-			   .catch(error => { return this.handleError(error); });
+   	let options = new RequestOptions({ headers: headers });
+   	
+   	return this.http.get(cfg.BASE_URL + url, options)
+   		.map(res => { return this.extractData(res); })
+		   .catch(error => { return this.handleError(error); });
 	}
 	
 	public post(url, body) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-	   	let options = new RequestOptions({ headers: headers });
+		let options = new RequestOptions({ headers: headers });
 	   	
-	   	return this.http.post(cfg.BASE_URL + url, body, options)
-	   		.map(res => { return this.extractData(res); })
-			   .catch(error => { return this.handleError(error); });
+   	return this.http.post(cfg.BASE_URL + url, body, options)
+   		.map(res => { return this.extractData(res); })
+		   .catch(error => { return this.handleError(error); });
 	}
 	
 	public put(url, body) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-	   	let options = new RequestOptions({ headers: headers });
-	   	
-	   	return this.http.put(cfg.BASE_URL + url, body, options)
-	   		.map(res => { return this.extractData(res); })
-			   .catch(error => { return this.handleError(error); });
+   	let options = new RequestOptions({ headers: headers });
+   	
+   	return this.http.put(cfg.BASE_URL + url, body, options)
+   		.map(res => { return this.extractData(res); })
+		   .catch(error => { return this.handleError(error); });
 	}
 	
 	public delete(url) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-	   	let options = new RequestOptions({ headers: headers });
-	   	
-	   	return this.http.delete(cfg.BASE_URL + url, options)
-	   		.map(res => { return this.extractData(res); })
-			   .catch(error => { return this.handleError(error); });
+   	let options = new RequestOptions({ headers: headers });
+   	
+   	return this.http.delete(cfg.BASE_URL + url, options)
+   		.map(res => { return this.extractData(res); })
+		   .catch(error => { return this.handleError(error); });
 	}
 	
 	public patch(url, body) {
 		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-	   	let options = new RequestOptions({ headers: headers });
-	   	
-	   	return this.http.patch(cfg.BASE_URL + url, body, options)
-	   		.map(res => { return this.extractData(res); })
-			   .catch(error => { return this.handleError(error); });
+   	let options = new RequestOptions({ headers: headers });
+   	
+   	return this.http.patch(cfg.BASE_URL + url, body, options)
+   		.map(res => { return this.extractData(res); })
+		   .catch(error => { return this.handleError(error); });
 	}
 	
 	public extractData(res: Response) {
@@ -71,12 +76,21 @@ export class HttpManagerService {
 		console.log(error);
 		
 		let errMsg: string;
-		if (error instanceof Response) {
+		if(error instanceof Response) {
 			const body = error.json() || '';
 			const err = body.error || JSON.stringify(body);
 			errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
 		} else {
 			errMsg = error.message ? error.message : error.toString();
+		}
+		
+		// Show alert component if alert object is part of the server response
+		var self = this;
+		var res = JSON.parse(error._body);
+		if(_.has(res, 'alert')) {
+			this.translate.get(res.alert.content, res.alert.vars).subscribe(str => {
+				self.alert.alert(res.alert.type, str);
+			});
 		}
 		
 		return Observable.throw(errMsg);

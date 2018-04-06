@@ -65,8 +65,8 @@ export class AlertService {
 		}
 	}
 	
-	clear() {
-		// Clear alerts
+	public clear() {
+		// Clear alerts (transmit empty alert clears alerts)
 		this.subject.next();
 	}
 

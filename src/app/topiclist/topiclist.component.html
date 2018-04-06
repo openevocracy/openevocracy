@@ -8,6 +8,10 @@
 	</div>
 </mat-toolbar>
 
+<div class="container alert-box">
+	<alert></alert>
+</div>
+
 <div class="container">
 	<mat-card *ngFor="let topic of topicsList" [ngClass]="'step'+topic.stage" [routerLink]="['/topic', topic._id]">
 		<mat-card-content>

@@ -2,6 +2,15 @@
  * Module dependencies.
  */
 
+var Promise = require('bluebird');
+var favicon = require('serve-favicon');
+var session = require('express-session')
+var multer = require('multer');
+var errorHandler = require('errorhandler');
+var utils = require('./server/utils');
+var db = require('./server/database').db;
+
+
 var _ = require('underscore');
 var express = require('express');
 var logger = require('morgan');
@@ -125,31 +134,29 @@ app.post('/json/ratings/rate', auth(), ratings.rate);
 // ###   A U T H   ###
 // ###################
 
-// authentification
-// TODO required?
-app.get('/json/auth', users.auth);
+// @desc: Authentification, TODO required?
+//app.get('/json/auth', users.auth);
 
-// @desc: logs in a user
+// @desc: Logs in a user
 app.post('/json/auth/login', users.login);
 
-// @desc: creates a user while registration
+// @desc: Creates a user while registration
 app.post('/json/auth/register', users.register);
 
-// @desc: logs out a user, clearing the salt in database
-app.post('/json/auth/logout', function(req, res) {
-  console.log('logout function called');
-  res.json({ 'message': "Sucessfully logged out." });
-});
+// @desc: Logs out a user and clears the salt in database
+app.post('/json/auth/logout', users.logout);
 //app.post('/json/auth/logout', auth(), users.logout); //TODO
 
-/*// POST /json/auth/remove_account
-// @desc: deletes a user
-app.post("/json/auth/remove_account", users.delete );*/
-// POST /json/auth/verifyEmail
+// @desc: Deletes a user
+//app.post("/json/auth/remove_account", users.delete );
+
+// @desc: Verifies email address (if users clicks on verification link)
 app.get('/json/auth/verifyEmail/:id', users.verifyEmail);
+
+// @desc: Resends verification link via email
 app.post('/json/auth/verification/:email', users.sendVerificationMailAgain);
 
-// Reset Password and send to user
+// @desc: Resets password and send an email to user (password forget functionality)
 app.post('/json/auth/password/:email', users.sendPassword);
 
 // ###################

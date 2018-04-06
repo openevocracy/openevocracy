@@ -8,7 +8,7 @@ var DATABASE_HOST = 'mongodb://127.0.0.1/evocracy';
 
 var DEBUG_CONFIG = {
     DEBUG: false,
-    MAIL: false,
+    MAIL: true,
     CRON_INTERVAL: 1, // run cron every x minute(s)
     
     MIN_VOTES_PER_TOPIC : 1,

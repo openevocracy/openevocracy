@@ -12,14 +12,14 @@ export class ModalService {
 		this.modal = null;
 	}
 	
-	open(data) {
+	public open(data) {
 		if(this.modal)
 			this.modal.open(data);
 		else
 			console.error("Cannot open non existing modal.");
 	}
 	
-	close() {
+	public close() {
 		if(this.modal)
 			this.modal.close();
 		else

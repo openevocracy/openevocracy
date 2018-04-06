@@ -1,6 +1,8 @@
 /* Import variables */
 @import "~styles/variables";
 
+.alert-box { margin-top: 15px; }
+
 /*.mat-card { width: 94%; height: 94%; cursor: pointer; border-left: 5px solid $grey400; transition: background-color 400ms; }*/
 .mat-card { width: 260px; height: 200px; margin: 12px; padding: 20px; float: left; cursor: pointer; border-left: 5px solid $grey400; transition: background-color 400ms; }
 .mat-card.step-1 { /* Default */ }
