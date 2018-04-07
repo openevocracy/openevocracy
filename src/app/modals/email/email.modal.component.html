@@ -1,0 +1,26 @@
+<div class="modal">
+	<div class="modal-dialog">
+		<div class="modal-header">
+			<button class="close" (click)="close()">&times;</button>
+			<h2>{{title | translate }}</h2>
+		</div>
+		<form [formGroup]="emailForm" (ngSubmit)="onSubmit()" novalidate>
+			
+			<div class="modal-body">
+				<mat-form-field>
+					<input matInput formControlName="email" type="email" placeholder="{{ 'FORM_LABEL_MAIL' | translate }}" required>
+				</mat-form-field>
+			</div>
+			
+			<div class="modal-actions">
+				<span class="flex-spacer"></span>
+				<button mat-raised-button color="primary" type="submit" [disabled]="emailForm.invalid">
+					<span>{{'MODAL_SEND_REQUEST' | translate }}</span>
+				</button>
+				<button mat-button type="button" (click)="close()">{{'MODAL_CANCEL' | translate }}</button>
+			</div>
+			
+		</form>
+	</div>
+</div>
+<div class="modal-background"></div>

@@ -65,6 +65,12 @@ export class AlertService {
 		}
 	}
 	
+	public alertFromServer(obj) {
+		this.translate.get(obj.content, obj.vars).subscribe(str => {
+			this.alert(obj.type, str);
+		});
+	}
+	
 	public clear() {
 		// Clear alerts (transmit empty alert clears alerts)
 		this.subject.next();

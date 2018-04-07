@@ -42,7 +42,7 @@ export class UserService {
 		this.tokenService.setToken(res.email, res.token);
 	}
 	
-	public authenticate(credentials): Observable<boolean> {
+	public authenticate(credentials) {
 		var self = this;
 		return this.http.post(cfg.BASE_URL + '/json/auth/login', credentials)
 			.map(raw => {
@@ -59,7 +59,7 @@ export class UserService {
 			});
 	}
 	
-	public register(credentials): Observable<boolean> {
+	public register(credentials) {
 		var self = this;
 		return this.http.post(cfg.BASE_URL + '/json/auth/register', credentials)
 			.map(raw => {
@@ -77,11 +77,15 @@ export class UserService {
 		return this.httpManagerService.post('/json/auth/verification', {'email': email});
 	}
 	
+	public sendNewPassword(email) {
+		return this.httpManagerService.post('/json/auth/password', {'email': email})
+	}
+	
 	public logout() {
 		var self = this;
 		
 		// Post logout, authentication needed
-		this.httpManagerService.post('/json/auth/logout', { 'uid': this.userId }).subscribe(res => {
+		this.httpManagerService.post('/json/auth/logout', {'uid': this.userId}).subscribe(res => {
 			// Remove token from local storage
 			self.tokenService.removeToken();
 			

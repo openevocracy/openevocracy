@@ -56,36 +56,37 @@ function clean_user_data(user) {
 
 function savePasswordInDatabaseAsync(uid, password) {
     var hash = bcrypt.hashSync(password, 8);
-    return db.collection('users').updateAsync({ '_id': uid }, { $set: { 'pass': hash } });
+    return db.collection('users').updateAsync({ '_id': uid }, { $set: { 'password': hash } });
 }
 
 function getUserByMailAsync(email) {
     return db.collection('users').findOneAsync({'email': email}, {'_id': true});
 }
 
+// 
 // authentication wrapper, e.g. app.get('/json/topics', auth(req,res,function(req, res) ...
-exports.auth_wrapper = function(req, res, next) {
-    next(req, res);
-    return;
-    
-    db.collection('users').findOne({'_id': ObjectId(req.user._id),
-                                    'auth_token': req.signedCookies.auth_token },
-    function(err, user){
-        if(user){
-            // handle request
-            next(req, res);
-        } else {
-            // from https://vickev.com/?_escaped_fragment_=/article/authentication-in-single-page-applications-node-js-passportjs-angularjs#!/article/authentication-in-single-page-applications-node-js-passportjs-angularjs
-            res.status(401);
-            
-            console.log('User authentication invalid');
-        }
-    });
-};
+/*exports.auth_wrapper = function(req, res, next) {
+	next(req, res);
+	return;
+	
+	db.collection('users').findOne({'_id': ObjectId(req.user._id),
+	                        'auth_token': req.signedCookies.auth_token },
+	function(err, user){
+		if(user){
+			// handle request
+			next(req, res);
+		} else {
+			// from https://vickev.com/?_escaped_fragment_=/article/authentication-in-single-page-applications-node-js-passportjs-angularjs#!/article/authentication-in-single-page-applications-node-js-passportjs-angularjs
+			res.status(401);
+			
+			console.log('User authentication invalid');
+		}
+	});
+};*/
 
 // authentification
 // TODO use middleware, e.g. Passport?
-exports.auth = function(req, res) {
+/*exports.auth = function(req, res) {
     db.collection('users').findOne({ '_id': ObjectId(req.user._id),
                                      'auth_token': req.signedCookies.auth_token },
     function(err, user){
@@ -94,7 +95,7 @@ exports.auth = function(req, res) {
         else
             res.status(403);
     });
-};
+};*/
 
 // POST /api/auth/login
 // @desc: logs in a user
@@ -175,12 +176,13 @@ function sendVerificationMail(user) {
 }
 
 exports.sendPassword = function(req, res) {
-    var email = req.params.email;
+    // Get email from request
+	var email = req.body.email;
     
     getUserByMailAsync(email).then(function(user) {
         // Break if no user was found
         if(_.isNull(user)) {
-            utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', email);
+            utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', {'email': email});
             return;
         }
         
@@ -193,43 +195,10 @@ exports.sendPassword = function(req, res) {
         
         // Save new password in database and send response
         return savePasswordInDatabaseAsync(user._id, password).then(function() {
-            utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_RESET', email);
+            utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_RESET', {'email': email});
         });
     });
 };
-
-// Old login, delete after 01.05.2018
-/*function loginUser(req, res, err, user) {
-    if(user) {
-        // Compare the POSTed password with the encrypted db password
-        if(bcrypt.compareSync(req.body.pass, user.pass)) {
-            // Check email verification
-            if(!user.verified) {
-                utils.sendAlert(res, 401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', user.email);
-                return;
-            }
-            
-            // Setup cookies
-            res.cookie('uid', user._id, { signed: true, maxAge: config.cookieMaxAge });
-            res.cookie('auth_token', user.auth_token, { signed: true, maxAge: config.cookieMaxAge });
-            
-            // Correct credentials, return the user object
-            res.send({user: clean_user_data(user)});
-            // Log
-            console.log('User login valid ' + JSON.stringify(user));
-        } else {
-            // Username did not match password given
-            utils.sendAlert(res, 401, 'danger', 'USER_PASSWORT_NOT_CORRECT', req.body.name);
-        }
-    } else {
-        if(req.body.name) {
-            // Could not find the username
-            utils.sendAlert(res, 401, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', req.body.name);
-        } else {
-            utils.sendAlert(res, 401, 'danger', 'USER_FORM_EMAIL_MISSING');
-        }
-    }
-}*/
 
 // register a new user
 exports.register = function(req, res) {
@@ -363,11 +332,17 @@ exports.logout = function(req, res) {
 
 // POST /json/auth/verifyEmail
 exports.verifyEmail = function(req, res) {
-    db.collection('users').updateAsync(
-        {'_id': ObjectId(req.params.id)}, { $set: {verified: true} }, {}
-     ).then(function() {
-        res.redirect('/#/verified');
-    });
+	// The verification key equals the user id
+	// if the user id (verification key) exists as user _id in databse, the user is verified
+	db.collection('users').updateAsync(
+		{'_id': ObjectId(req.params.id)}, { $set: {verified: true} }, {}
+	).then(function() {
+		// Update was successful (user was found), send success
+		utils.sendAlert(res, 200, 'success', 'USER_ACCOUNT_VERIFICATION_SUCCESS');
+	}).catch(function(e) {
+		// The user was not found, which means that the key was not correct, send error
+		utils.sendAlert(res, 401, 'success', 'USER_ACCOUNT_VERIFICATION_ERROR');
+	});
 };
 
 /*// POST /api/auth/remove_account
@@ -436,16 +411,16 @@ exports.update = function(req, res) {
     }
     
     // Password was updated
-    if(_.has(userUpdate, 'pass')) {
+    if(_.has(userUpdate, 'password')) {
         // Validate password using parseley (no whitespace)
-        validation = validate(_.pick(userUpdate, 'pass'), { pass: { presence: true, format: /^\S+$/ } });
+        validation = validate(_.pick(userUpdate, 'password'), { 'password': { presence: true, format: /^\S+$/ } });
         
         if(!_.isUndefined(validation)) {
             // If password is NOT valid
             utils.sendAlert(res, 200, 'danger', 'USER_FORM_VALIDATION_ERROR_PASSWORD');
         } else {
             // If password is valid
-            savePasswordInDatabaseAsync(uid, userUpdate['pass']).then(function() {
+            savePasswordInDatabaseAsync(uid, userUpdate['password']).then(function() {
                 utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_UPDATED');
             });
         }

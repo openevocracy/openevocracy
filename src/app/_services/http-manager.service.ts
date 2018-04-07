@@ -69,32 +69,22 @@ export class HttpManagerService {
 		return body || { };
 	}
 	
-	public handleError(error: Response | any) {
-		console.log(error);
-		
-		let errMsg: string;
-		if (error instanceof Response) {
-			const body = error.json() || '';
-			const err = body.error || JSON.stringify(body);
-			errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-		} else {
-			errMsg = error.message ? error.message : error.toString();
-		}
+	public handleError(raw: Response | any) {
+		var error = raw.json();
 		
 		// Show alert component if alert object is part of the server response
 		var self = this;
-		var res = error.json();
-		if(_.has(res, 'alert')) {
+		if(_.has(error, 'alert')) {
 			// First clear old alerts
 			self.alert.clear();
 			
 			// Push new alert
-			this.translate.get(res.alert.content, res.alert.vars).subscribe(str => {
-				self.alert.alert(res.alert.type, str);
+			this.translate.get(error.alert.content, error.alert.vars).subscribe(str => {
+				self.alert.alert(error.alert.type, str);
 			});
 		}
 		
-		return Observable.throw(errMsg);
+		return Observable.throw(error);
 	}
 
 }

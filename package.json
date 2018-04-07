@@ -64,7 +64,7 @@
     "morgan": "*",
     "multer": "*",
     "node-crontab": "*",
-    "nodemailer": "2.7.2",
+    "nodemailer": "4.6.4",
     "passport": "^0.4.0",
     "passport-jwt": "^3.0.1",
     "passport-local": "^1.0.0",

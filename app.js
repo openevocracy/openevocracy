@@ -156,7 +156,7 @@ app.get('/json/auth/verifyEmail/:id', users.verifyEmail);
 app.post('/json/auth/verification', users.sendVerificationMailAgain);
 
 // @desc: Resets password and send an email to user (password forget functionality)
-app.post('/json/auth/password/:email', users.sendPassword);
+app.post('/json/auth/password', users.sendPassword);
 
 // ###################
 // ###   U S E R   ###

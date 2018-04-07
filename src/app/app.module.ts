@@ -20,7 +20,7 @@ import { AppComponent } from './app.component';
 import { CountdownComponent } from './countdown/countdown.component';
 import { AlertComponent } from './alert/alert.component';
 import { ModalComponent } from './modals/modal.component';
-import { ModalPwforgetComponent } from './modals/pwforget/pwforget.modal.component';
+import { ModalEmailComponent } from './modals/email/email.modal.component';
 import { ModalAddtopicComponent } from './modals/addtopic/addtopic.modal.component';
 
 // Components Public
@@ -44,7 +44,7 @@ import { UserService } from './_services/user.service';
 import { TokenService } from './_services/token.service';
 import { AlertService } from './_services/alert.service';
 import { ModalService } from './_services/modal.service';
-import { PwforgetService } from './_services/pwforget.service';
+import { EmailModalService } from './_services/modal.email.service';
 
 // Shared
 //import { cfg } from './_shared/config';
@@ -68,7 +68,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		AlertComponent,
 		RegisterComponent,
 		ModalComponent,
-		ModalPwforgetComponent,
+		ModalEmailComponent,
 		ModalAddtopicComponent,
 		TopicComponent,
 		CountdownComponent
@@ -99,7 +99,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		TokenService,
 		AlertService,
 		ModalService,
-		PwforgetService,
+		EmailModalService,
 		{ provide: 'cfg', useValue: cfg },
 		{ provide: 'C', useValue: C }
 	],

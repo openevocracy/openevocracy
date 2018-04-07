@@ -19,6 +19,7 @@
 	"MODAL_NEW_TOPIC_NAME": "Name des neuen Themas (mind. {{numChars}} Zeichen)",
 	"MODAL_CREATE": "Erstellen",
 	"MODAL_REQUEST_NEW_PASSWORD": "Neues Passwort anfordern",
+	"MODAL_SEND_VERIFICATION_MAIL_AGAIN": "Verifizierungs-E-Mail erneut senden",
 	"MODAL_SEND_REQUEST": "Absenden",
 	"MODAL_CANCEL": "Abbrechen",
 	
@@ -70,6 +71,8 @@
 	"USER_ACCOUNT_NOT_VERIFIED": "Du hast deine E-Mail-Adresse noch nicht bestätigt. Lass dir die <a href=\"{{email}}\">E-Mail zur Verifizierung noch einmal senden</a>.",
 	"USER_ACCOUNT_ALREADY_EXISTS": "Der Account existiert bereits, logge dich ein.",
 	"USER_ACCOUNT_VERIFICATION_LINK_SENT": "Zur Verifizierung deiner E-Mail-Adresse haben wir dir eine E-Mail gesendet. Schau in deinem Posteingang nach und klick auf den enthaltenen Link.",
+	"USER_ACCOUNT_VERIFICATION_SUCCESS": "Glückwunsch, du bist verifiziert! Log dich ein und sei herzlich Willkommen bei Evocracy.",
+	"USER_ACCOUNT_VERIFICATION_ERROR": "Die Verifikationsnummer ist nicht korrekt.",
 	"USER_ACCOUNT_EMAIL_UPDATED": "Die eingegebene E-Mail-Adresse wurde erfolgreich aktualisiert.",
 	"USER_ACCOUNT_PASSWORD_UPDATED": "Das eingegebene Passwort wurde erfolgreich aktualisiert",
 	"USER_ACCOUNT_PASSWORD_RESET": "An die E-Mail-Adresse &raquo;{{email}}&laquo; wurde ein neues Passwort versendet. Du solltest das Passwort direkt beim nächsten Login wieder ändern.",

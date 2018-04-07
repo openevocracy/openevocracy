@@ -25,22 +25,27 @@ function getTimeString(time) {
 }
 
 exports.initializeMail = function() {
-    var smtpConfig = {
-        host: 'smtp.openevocracy.org',
-        port: 2587,
-        secure: false,
-        //logger: true,
-        //debug: true,
-        tls: {
-            rejectUnauthorized: false // allow self signed certificate
-        },
-        
-        auth: db.collection('configs').findOneAsync({'type': 'mailauth'},{'user': true, 'password': true})
-    };
-    
-    Promise.props(smtpConfig).then(function(smtpConfig) {
-        transporter = nodemailer.createTransport(smtpConfig);
-    });
+    db.collection('configs').findOneAsync({'type': 'mailauth'},{'user': true, 'password': true})
+        .then(function(credentials) {
+           var smtpConfig = {
+                'host': 'smtp.openevocracy.org',
+                'port': 587, //2587,
+                'secure': false,
+                //'logger': true,
+                //'debug': true,
+                tls: {
+                    'rejectUnauthorized': false // allow self signed certificate
+                },
+                auth: {
+                    'user': credentials.user,
+                    'pass': credentials.password
+                }
+            };
+            
+            Promise.props(smtpConfig).then(function(smtpConfig) {
+                transporter = nodemailer.createTransport(smtpConfig);
+            }); 
+        });
 };
 
 function mailHash(mailType, mailIdentifier, mailUser) {
@@ -64,7 +69,7 @@ function sendMail(mailTo, mailSubject, mailText) {
     if(cfg.MAIL) {
         _.each(mailTo, function(receiver) {
             transporter.sendMail(_.extend(mailOptions, {'to': receiver}), function(error, info) {
-                if(error)
+                if (error)
                     return console.log(error);
                 console.log('Message sent: ' + info.response);
             });

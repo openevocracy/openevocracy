@@ -19,6 +19,7 @@
 	"MODAL_NEW_TOPIC_NAME": "Name of the new topic (min. {{numChars}} characters)",
 	"MODAL_CREATE": "Create",
 	"MODAL_REQUEST_NEW_PASSWORD": "Request new password",
+	"MODAL_SEND_VERIFICATION_MAIL_AGAIN": "Send verification mail again",
 	"MODAL_SEND_REQUEST": "Submit",
 	"MODAL_CANCEL": "Cancel",
 	
@@ -69,7 +70,9 @@
 	"USER_ACCOUNT_EMAIL_NOT_EXIST": "The entered email address &raquo;{{email}}&laquo; is not connected to an user account. Did you do a typo?",
 	"USER_ACCOUNT_NOT_VERIFIED": "You have not verified your email-address. Click here to <a href=\"{{email}}\">send verification email again.</a>",
 	"USER_ACCOUNT_ALREADY_EXISTS": "Account already exists. Please just log in.",
-	"USER_ACCOUNT_VERIFICATION_LINK_SENT": "To verify your email address, we\"ve sent an email to you. Please check your inbox and click the containing link.",
+	"USER_ACCOUNT_VERIFICATION_LINK_SENT": "To verify your email address, we've sent an email to you. Please check your inbox and click the containing link.",
+	"USER_ACCOUNT_VERIFICATION_SUCCESS": "Congratulations, your verified! Log in and welcome at Evocracy.",
+	"USER_ACCOUNT_VERIFICATION_ERROR": "The verification key is not correct.",
 	"USER_ACCOUNT_EMAIL_UPDATED": "The entered email-address was updated sucessfully.",
 	"USER_ACCOUNT_PASSWORD_UPDATED": "The entered password was updated sucessfully.",
 	"USER_ACCOUNT_PASSWORD_RESET": "A new password was sent to &raquo;{{email}}&laquo;. You should immediately change your password after log in.",

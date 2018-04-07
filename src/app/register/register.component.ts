@@ -50,35 +50,28 @@ export class RegisterComponent implements OnInit {
 		});
 	}
 	
-	private handleRegistration(res) {
-		//this.router.navigate(['/']);
-		
-		// TODO send message from server
-		// Show alert component, where success message explains verification
-		this.translate.get('USER_ACCOUNT_VERIFICATION_LINK_SENT').subscribe(str => {
-			this.alert.success(str);
-		});
-		
-		// Enable button again
-		this.awaitAuthentication = false;
-	}
-	
 	private onSubmit() {
-		// If form is valid, go for registration
-		if(this.registerForm.valid) {
-			// Disable button
-			this.awaitAuthentication = true;
-			
-			// Read credentials from form
-			var credentials = {
-				'email': this.registerForm.value.email,
-				'password': this.registerForm.value.passwords.password
-			};
-			
-			// Check login server side
-			this.user.register(credentials)
-				.subscribe(res => this.handleRegistration(res));
-		}
+		// If form is not valid, break registration
+		if(!this.registerForm.valid)
+			return;
+		
+		// Disable button
+		this.awaitAuthentication = true;
+		
+		// Read credentials from form
+		var credentials = {
+			'email': this.registerForm.value.email,
+			'password': this.registerForm.value.passwords.password
+		};
+		
+		// Check login server side
+		this.user.register(credentials)
+			.subscribe(res => {
+				this.alert.alertFromServer(res.alert);
+				
+				// Enable button again
+				this.awaitAuthentication = false;
+			});
 	}
 	
 }

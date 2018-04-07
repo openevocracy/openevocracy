@@ -7,7 +7,7 @@ import { ModalService } from '../_services/modal.service';
 import { UserService } from '../_services/user.service';
 import { AlertService } from '../_services/alert.service';
 import { TranslateService } from '@ngx-translate/core';
-import { PwforgetService } from '../_services/pwforget.service';
+import { EmailModalService } from '../_services/modal.email.service';
 
 import * as _ from 'underscore';
 import * as $ from 'jquery';
@@ -19,8 +19,9 @@ import * as $ from 'jquery';
 })
 export class LoginComponent implements OnInit, OnDestroy {
 	private loginForm: FormGroup;
-	private pwforgetSubscription: Subscription;
+	private modalSubscription: Subscription;
 	private awaitAuthentication: boolean = false;
+	private lastAlertKey: string;
 
 	constructor(
 		public user: UserService,
@@ -28,20 +29,31 @@ export class LoginComponent implements OnInit, OnDestroy {
 		private alert: AlertService,
 		private modal: ModalService,
 		private translate: TranslateService,
-		private pwforgetService: PwforgetService) {
+		private emailModalService: EmailModalService) {
 			
 		this.createForm();
 		
-		this.pwforgetSubscription = this.pwforgetService.getEmail().subscribe(email => {
+		this.modalSubscription = this.emailModalService.getEmail().subscribe(email => {
 			// First clear old alerts
 			this.alert.clear();
 			
-			this.user.sendVerificationMailAgain(email).subscribe(res => {
-				console.log('result');
-				this.translate.get(res.alert.content, res.alert.vars).subscribe(str => {
-					this.alert.alert(res.alert.type, str);
+			console.log('ok1');
+			
+			var key = this.lastAlertKey;
+			
+			if(key == "USER_ACCOUNT_NOT_VERIFIED") {
+				this.user.sendVerificationMailAgain(email).subscribe(res => {
+					this.alert.alertFromServer(res.alert);
 				});
-			});
+			}
+			
+			if(key == "USER_PASSWORT_NOT_CORRECT") {
+				console.log('ok2');
+				this.user.sendNewPassword(email).subscribe(res => {
+					this.alert.alertFromServer(res.alert);
+				});
+				return;
+			}
 			
 		});
 	}
@@ -52,17 +64,19 @@ export class LoginComponent implements OnInit, OnDestroy {
 		// Define node which should be observed
 		var node = document.querySelector('alert');
 		
-		// Define mutation observer
+		// Define mutation observer and check if alert was added
+		// if an added alert includes a link, add a click event to it
 		var observer = new MutationObserver((mutations) => {
 			// Get mutation of type "childList" (child element was added)
 			var mutation = _.findWhere(mutations, { type: "childList" });
+			
 			// Add click event to link
 			$(mutation.addedNodes).find('a').on('click', function(e) {
 				// Prevent default click behavior
 				e.preventDefault();
 				
-				// Call password forget function
-				self.passwordForget(e);
+				// Call evaluation function
+				self.evaluateLink(e);
 			});
 		});
 		
@@ -74,7 +88,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 	
 	ngOnDestroy() {
 		// Unsubscribe to avoid memory leak
-		this.pwforgetSubscription.unsubscribe();
+		this.modalSubscription.unsubscribe();
 	}
 	
 	private createForm() {
@@ -99,22 +113,43 @@ export class LoginComponent implements OnInit, OnDestroy {
 			var self = this;
 			// Check login server side and handle login
 			this.user.authenticate(credentials)
-				.subscribe(res => {
-					console.log('login.component');
+				.subscribe(res => {}, error => {
+					// Store alert.content to direct link, if alert contains one
+					self.lastAlertKey = error.alert.content;
 					
-				}, error => {
 					// Enable button again
 					self.awaitAuthentication = false;
 				});
 		}
 	}
 	
-	private passwordForget(e) {
-		// Get mail, send from server
+	private evaluateLink(e) {
+		// Get mail, send from server (given in href of link)
 		var email = $(e.target).attr('href');
 		
-		// Open modal
-		this.modal.open({email: email});
+		var key = this.lastAlertKey;
+		
+		if(key == "USER_ACCOUNT_NOT_VERIFIED") {
+			this.modal.open({'email': email, 'title': 'MODAL_SEND_VERIFICATION_MAIL_AGAIN'});
+			return;
+		}
+		
+		if(key == "USER_PASSWORT_NOT_CORRECT") {
+			this.modal.open({'email': email, 'title': 'MODAL_REQUEST_NEW_PASSWORD'});
+			return;
+		}
+		
+	}
+	
+	private passwordForget(e) {
+		// Prevent default click behavior
+		e.preventDefault();
+		
+		// Fake lastAlertKey to get correct evaluation after form submit
+		this.lastAlertKey = "USER_PASSWORT_NOT_CORRECT"
+		
+		// Open modal with proper title
+		this.modal.open({'email': '', 'title': 'MODAL_REQUEST_NEW_PASSWORD'});
 	}
 	
 }
