@@ -20,50 +20,47 @@ export class HttpManagerService {
 		private tokenService: TokenService,
 		private alert: AlertService,
 		private translate: TranslateService) { }
+		
+	private getOptions() {
+		let token = this.tokenService.getToken();
+		
+		if (_.isUndefined(token) || _.isNull(token)) {
+			return null;
+		} else {
+			let headers = new Headers({ 'Authorization': 'JWT ' + token});
+			let options = new RequestOptions({ headers: headers });
+			return options;
+		}
+	}
 	
 	public get(url) {
-		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-   	let options = new RequestOptions({ headers: headers });
-   	
-   	return this.http.get(cfg.BASE_URL + url, options)
-   		.map(res => { return this.extractData(res); })
-		   .catch(error => { return this.handleError(error); });
+		return this.http.get(cfg.BASE_URL + url, this.getOptions())
+			.map(res => { return this.extractData(res); })
+			.catch(error => { return this.handleError(error); });
 	}
 	
 	public post(url, body) {
-		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-		let options = new RequestOptions({ headers: headers });
-	   	
-   	return this.http.post(cfg.BASE_URL + url, body, options)
-   		.map(res => { return this.extractData(res); })
-		   .catch(error => { return this.handleError(error); });
+		return this.http.post(cfg.BASE_URL + url, body, this.getOptions())
+			.map(res => { return this.extractData(res); })
+			.catch(error => { return this.handleError(error); });
 	}
 	
 	public put(url, body) {
-		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-   	let options = new RequestOptions({ headers: headers });
-   	
-   	return this.http.put(cfg.BASE_URL + url, body, options)
-   		.map(res => { return this.extractData(res); })
-		   .catch(error => { return this.handleError(error); });
+		return this.http.put(cfg.BASE_URL + url, body, this.getOptions())
+			.map(res => { return this.extractData(res); })
+			.catch(error => { return this.handleError(error); });
 	}
 	
 	public delete(url) {
-		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-   	let options = new RequestOptions({ headers: headers });
-   	
-   	return this.http.delete(cfg.BASE_URL + url, options)
-   		.map(res => { return this.extractData(res); })
-		   .catch(error => { return this.handleError(error); });
+		return this.http.delete(cfg.BASE_URL + url, this.getOptions())
+			.map(res => { return this.extractData(res); })
+			.catch(error => { return this.handleError(error); });
 	}
 	
 	public patch(url, body) {
-		let headers = new Headers({ 'Authorization': 'JWT ' + this.tokenService.getToken()});
-   	let options = new RequestOptions({ headers: headers });
-   	
-   	return this.http.patch(cfg.BASE_URL + url, body, options)
-   		.map(res => { return this.extractData(res); })
-		   .catch(error => { return this.handleError(error); });
+		return this.http.patch(cfg.BASE_URL + url, body, this.getOptions())
+			.map(res => { return this.extractData(res); })
+			.catch(error => { return this.handleError(error); });
 	}
 	
 	public extractData(res: Response) {
@@ -76,7 +73,7 @@ export class HttpManagerService {
 		console.log(error);
 		
 		let errMsg: string;
-		if(error instanceof Response) {
+		if (error instanceof Response) {
 			const body = error.json() || '';
 			const err = body.error || JSON.stringify(body);
 			errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
@@ -86,8 +83,12 @@ export class HttpManagerService {
 		
 		// Show alert component if alert object is part of the server response
 		var self = this;
-		var res = JSON.parse(error._body);
+		var res = error.json();
 		if(_.has(res, 'alert')) {
+			// First clear old alerts
+			self.alert.clear();
+			
+			// Push new alert
 			this.translate.get(res.alert.content, res.alert.vars).subscribe(str => {
 				self.alert.alert(res.alert.type, str);
 			});

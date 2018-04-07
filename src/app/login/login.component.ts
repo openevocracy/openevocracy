@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs/Subscription';
-import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { ModalService } from '../_services/modal.service';
@@ -24,7 +23,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 	private awaitAuthentication: boolean = false;
 
 	constructor(
-		public router: Router,
 		public user: UserService,
 		private fb: FormBuilder,
 		private alert: AlertService,
@@ -38,25 +36,12 @@ export class LoginComponent implements OnInit, OnDestroy {
 			// First clear old alerts
 			this.alert.clear();
 			
-			// Do POST request to server and evaluate result
-			// Just for testing purpose (response has to come from server)
-			this.translate.get('USER_ACCOUNT_PASSWORD_RESET', { 'email': email }).subscribe(str => {
-				this.alert.success(str);
+			this.user.sendVerificationMailAgain(email).subscribe(res => {
+				console.log('result');
+				this.translate.get(res.alert.content, res.alert.vars).subscribe(str => {
+					this.alert.alert(res.alert.type, str);
+				});
 			});
-			
-			
-			
-			// If response is positive, show success alert
-			/* TODO
-			this.translate.get(res).subscribe((trans: string) => {
-				this.alert.error(trans);
-			});*/
-			
-			// if response is negative, show error alert
-			/* TODO
-			this.translate.get(res).subscribe((trans: string) => {
-				this.alert.success(trans);
-			});*/
 			
 		});
 	}
@@ -67,7 +52,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 		// Define node which should be observed
 		var node = document.querySelector('alert');
 		
-		// Define observer
+		// Define mutation observer
 		var observer = new MutationObserver((mutations) => {
 			// Get mutation of type "childList" (child element was added)
 			var mutation = _.findWhere(mutations, { type: "childList" });
@@ -99,35 +84,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 		});
 	}
 	
-	private handleLogin(res) {
-		if(res === true) {
-			this.router.navigate(['/']);
-		} else {
-			// First clear old alerts
-			this.alert.clear();
-			
-			console.log(res.alert);
-			
-			// Show alert component, where error message is in response (res) from server
-			this.translate.get(res.alert.content, res.alert.vars).subscribe(str => {
-				this.alert.alert(res.alert.type, str);
-				
-				/*var self = this;
-				setTimeout(function(){
-					self.element.find('alert a').on('click', function(e) {
-						e.preventDefault();
-						
-						// Call password forget function
-						self.passwordForget(e);
-					});
-				}, 500);*/ // FIXME Very bad hack!
-			});
-		}
-		
-		// Enable button again
-		this.awaitAuthentication = false;
-	}
-	
 	private onSubmit() {
 		// If form is valid, go for login
 		if(this.loginForm.valid) {
@@ -140,10 +96,16 @@ export class LoginComponent implements OnInit, OnDestroy {
 				'password': this.loginForm.value.password
 			};
 			
-			// Check login server side
+			var self = this;
+			// Check login server side and handle login
 			this.user.authenticate(credentials)
-				.catch(e => { return Observable.of(e) })
-				.subscribe(res => this.handleLogin(res));
+				.subscribe(res => {
+					console.log('login.component');
+					
+				}, error => {
+					// Enable button again
+					self.awaitAuthentication = false;
+				});
 		}
 	}
 	

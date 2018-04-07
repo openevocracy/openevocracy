@@ -95,7 +95,7 @@ Routes plan:
 */
 
 function auth() {
-  return passport.authenticate('jwt', { session: false });
+	return passport.authenticate('jwt', { session: false });
 }
 
 app.get('/json/topics', auth(), topics.list);
@@ -144,8 +144,7 @@ app.post('/json/auth/login', users.login);
 app.post('/json/auth/register', users.register);
 
 // @desc: Logs out a user and clears the salt in database
-app.post('/json/auth/logout', users.logout);
-//app.post('/json/auth/logout', auth(), users.logout); //TODO
+app.post('/json/auth/logout', auth(), users.logout);
 
 // @desc: Deletes a user
 //app.post("/json/auth/remove_account", users.delete );
@@ -154,7 +153,7 @@ app.post('/json/auth/logout', users.logout);
 app.get('/json/auth/verifyEmail/:id', users.verifyEmail);
 
 // @desc: Resends verification link via email
-app.post('/json/auth/verification/:email', users.sendVerificationMailAgain);
+app.post('/json/auth/verification', users.sendVerificationMailAgain);
 
 // @desc: Resets password and send an email to user (password forget functionality)
 app.post('/json/auth/password/:email', users.sendPassword);

@@ -129,7 +129,7 @@ exports.login = function(req, res) {
 			
 			// Set salt
 			db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then(function() {
-				res.json({ 'message': "Sucessfully logged in.", 'token': token, 'id': user._id });
+				res.json({ 'email': user.email, 'token': token, 'id': user._id });
 			}).catch(function(e) {
 				if(cfg.DEBUG_CONFIG)
 					utils.sendAlert(res, 500, 'danger', JSON.stringify(e));
@@ -144,16 +144,19 @@ exports.login = function(req, res) {
 };
 
 exports.sendVerificationMailAgain = function(req, res) {
-	// Get email from query and user id from database
-	var email = req.params.email;
+	// Get email from request
+	var email = req.body.email;
 	
+	// Get user id from database
 	getUserByMailAsync(email).then(function(user) {
+		
 		// Break if no user was found
 		if(_.isNull(user)) {
-			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', email);
+			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', { 'email': email });
 			return;
 		}
 		
+		console.log('send mail');
 		// Send verification mail
 		user.email = email;
 		sendVerificationMail(user);

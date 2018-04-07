@@ -51,18 +51,13 @@ export class RegisterComponent implements OnInit {
 	}
 	
 	private handleRegistration(res) {
-		if(res === true) {
-			//this.router.navigate(['/']);
-			// Show alert component, where success message explains verification
-			this.translate.get('USER_ACCOUNT_VERIFICATION_LINK_SENT').subscribe(str => {
-				this.alert.success(str);
-			});
-		} else {
-			// Show alert component, where error message is in response (res) from server
-			this.translate.get(res.alert.content, res.alert.vars).subscribe(str => {
-				this.alert.alert(res.alert.type, str);
-			});
-		}
+		//this.router.navigate(['/']);
+		
+		// TODO send message from server
+		// Show alert component, where success message explains verification
+		this.translate.get('USER_ACCOUNT_VERIFICATION_LINK_SENT').subscribe(str => {
+			this.alert.success(str);
+		});
 		
 		// Enable button again
 		this.awaitAuthentication = false;
@@ -82,7 +77,6 @@ export class RegisterComponent implements OnInit {
 			
 			// Check login server side
 			this.user.register(credentials)
-				.catch(e => { return Observable.of(e) })
 				.subscribe(res => this.handleRegistration(res));
 		}
 	}

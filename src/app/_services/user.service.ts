@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
+import { Router } from '@angular/router';
 
 import { HttpManagerService } from './http-manager.service';
 import { TokenService } from './token.service';
@@ -18,6 +19,7 @@ export class UserService {
 
 	constructor(
 		private http: Http,
+		private router: Router,
 		private httpManagerService: HttpManagerService,
 		private tokenService: TokenService) {
 	}
@@ -26,67 +28,66 @@ export class UserService {
 		return this.userId;
 	}
 	
-	public authenticate(credentials): Observable<Credentials> {
-		let self = this;
+	public setUserId(uid) {
+		this.userId = uid;
+	}
+	
+	private setIdAndToken(raw) {
+		var res = raw.json();
 		
+		// Set user ID
+		this.userId = res.id;
+		
+		// Store token
+		this.tokenService.setToken(res.email, res.token);
+	}
+	
+	public authenticate(credentials): Observable<boolean> {
+		var self = this;
 		return this.http.post(cfg.BASE_URL + '/json/auth/login', credentials)
-			.map(function (res) {
-				// Set user ID
-				self.userId = res.json() && res.json().id;
+			.map(raw => {
+				// Set ID and store token
+				self.setIdAndToken(raw);
 				
-				// Store token
-				let token = res.json() && res.json().token;
-				if (token) {
-					// set token property
-					self.tokenService.setToken(credentials.email, token);
-					
-					// return true to indicate successful login
-					return true;
-				} else {
-					// return false to indicate failed login
-					console.log('failed');
-					return false;
-				}
-			})
-			.catch(error => {
-				console.warn(error);
-				var errorMessage = JSON.parse(error._body);
-				return Observable.throw(errorMessage);
+				// Redirect to front page
+				self.router.navigate(['/']);
+				
+				return true;
+			}).
+			catch(error => {
+				return self.httpManagerService.handleError(error);
 			});
 	}
 	
-	public register(credentials): Observable<Credentials> {
-		let self = this;
-		
+	public register(credentials): Observable<boolean> {
+		var self = this;
 		return this.http.post(cfg.BASE_URL + '/json/auth/register', credentials)
-			.map(res => {
-				let token = res.json() && res.json().token;
-				self.userId = res.json() && res.json().id;
-				if (token) {
-					// set token property
-					self.tokenService.setToken(credentials.email, token);
-					
-					// return true to indicate successful registration
-					return true;
-				} else {
-					// return false to indicate failed registration
-					console.log('failed');
-					return false;
-				}
+			.map(raw => {
+				// Set ID and store token
+				self.setIdAndToken(raw);
+				
+				return true;
 			})
 			.catch(error => {
-				console.warn(error);
-				var errorMessage = JSON.parse(error._body);
-				return Observable.throw(errorMessage);
+				return self.httpManagerService.handleError(error);
 			});
+	}
+	
+	public sendVerificationMailAgain(email) {
+		return this.httpManagerService.post('/json/auth/verification', {'email': email});
 	}
 	
 	public logout() {
-		// Remove token from local storage
-		this.tokenService.removeToken();
+		var self = this;
 		
 		// Post logout, authentication needed
-		return this.httpManagerService.post('/json/auth/logout', { 'uid': this.userId });
+		this.httpManagerService.post('/json/auth/logout', { 'uid': this.userId }).subscribe(res => {
+			// Remove token from local storage
+			self.tokenService.removeToken();
+			
+			// Redirect to any page after logout was successful
+			self.router.navigate(['/login']);
+		});
 	}
 
 }
