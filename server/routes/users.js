@@ -35,8 +35,6 @@ jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
 jwtOptions.secretOrKey = bcrypt.genSaltSync(8);
 
 var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
-	console.log('payload received', jwt_payload);
-
 	db.collection('users').findOneAsync({ '_id': ObjectId(jwt_payload.id), 'salt': jwt_payload.salt }).then(function (user) {
 	  	if (user) {
 	  		next(null, user);
