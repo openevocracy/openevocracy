@@ -60,17 +60,7 @@ export class UserService {
 	}
 	
 	public register(credentials) {
-		var self = this;
-		return this.http.post(cfg.BASE_URL + '/json/auth/register', credentials)
-			.map(raw => {
-				// Set ID and store token
-				self.setIdAndToken(raw);
-				
-				return true;
-			})
-			.catch(error => {
-				return self.httpManagerService.handleError(error);
-			});
+		return this.httpManagerService.post('/json/auth/register', credentials);
 	}
 	
 	public sendVerificationMailAgain(email) {
@@ -92,6 +82,10 @@ export class UserService {
 			// Redirect to any page after logout was successful
 			self.router.navigate(['/login']);
 		});
+	}
+	
+	public verifyEmail(uid) {
+		return this.httpManagerService.post('/json/auth/verifyEmail', {'uid': uid});
 	}
 
 }

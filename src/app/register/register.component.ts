@@ -67,6 +67,10 @@ export class RegisterComponent implements OnInit {
 		// Check login server side
 		this.user.register(credentials)
 			.subscribe(res => {
+				// First clear old alerts
+				this.alert.clear();
+				
+				// Alert result
 				this.alert.alertFromServer(res.alert);
 				
 				// Enable button again

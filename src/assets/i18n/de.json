@@ -60,7 +60,7 @@
 	"TOPIC_SUBTITLE_2": "um",
 	"TOPIC_SUBTITLE_3": "am",
 	
-	"USER_PASSWORT_NOT_CORRECT": "Das Passwort ist nicht korrekt. Hast du dein <a class=\"pwforgot\" href=\"{{email}}\">Passwort vergessen</a>?",
+	"USER_PASSWORT_NOT_CORRECT": "Das Passwort ist nicht korrekt. Hast du dein <a href=\"{{email}}\">Passwort vergessen</a>?",
 	"USER_FORM_EMAIL_MISSING": "Du hast keine E-Mail-Adresse eingegeben.",
 	"USER_FORM_VALIDATION_ERROR": "Deine Eingabe war nicht ganz korrekt, prüfe deine Änderung nochmal auf Richtigkeit.",
 	"USER_FORM_VALIDATION_ERROR_EMAIL": "Die eingegebe E-Mail-Adresse erfüllt nicht die nötige Form, prüfe das nochmal.",

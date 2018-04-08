@@ -60,7 +60,7 @@
 	"TOPIC_SUBTITLE_2": "at",
 	"TOPIC_SUBTITLE_3": "on",
 	
-	"USER_PASSWORT_NOT_CORRECT": "Password is not correct. Did you <a class=\"pwforgot\" href=\"{{email}}\">forget your password</a>?",
+	"USER_PASSWORT_NOT_CORRECT": "Password is not correct. Did you <a href=\"{{email}}\">forget your password</a>?",
 	"USER_FORM_EMAIL_MISSING": "You did not enter an email address.",
 	"USER_FORM_VALIDATION_ERROR": "There was something wrong with the entered data. Please check your input again.",
 	"USER_FORM_VALIDATION_ERROR_EMAIL": "The entered email address does not meet the necessary form, please check it.",
@@ -71,7 +71,7 @@
 	"USER_ACCOUNT_NOT_VERIFIED": "You have not verified your email-address. Click here to <a href=\"{{email}}\">send verification email again.</a>",
 	"USER_ACCOUNT_ALREADY_EXISTS": "Account already exists. Please just log in.",
 	"USER_ACCOUNT_VERIFICATION_LINK_SENT": "To verify your email address, we've sent an email to you. Please check your inbox and click the containing link.",
-	"USER_ACCOUNT_VERIFICATION_SUCCESS": "Congratulations, your verified! Log in and welcome at Evocracy.",
+	"USER_ACCOUNT_VERIFICATION_SUCCESS": "Congratulations, you're verified! Log in and welcome at Evocracy.",
 	"USER_ACCOUNT_VERIFICATION_ERROR": "The verification key is not correct.",
 	"USER_ACCOUNT_EMAIL_UPDATED": "The entered email-address was updated sucessfully.",
 	"USER_ACCOUNT_PASSWORD_UPDATED": "The entered password was updated sucessfully.",

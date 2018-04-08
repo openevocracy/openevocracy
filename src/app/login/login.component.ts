@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
+import { ActivatedRoute } from '@angular/router';
 
 import { ModalService } from '../_services/modal.service';
 import { UserService } from '../_services/user.service';
@@ -28,6 +29,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 		private fb: FormBuilder,
 		private alert: AlertService,
 		private modal: ModalService,
+		private activatedRoute: ActivatedRoute,
 		private translate: TranslateService,
 		private emailModalService: EmailModalService) {
 			
@@ -52,7 +54,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 				this.user.sendNewPassword(email).subscribe(res => {
 					this.alert.alertFromServer(res.alert);
 				});
-				return;
 			}
 			
 		});
@@ -61,28 +62,24 @@ export class LoginComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		var self = this;
 		
-		// Define node which should be observed
-		var node = document.querySelector('alert');
+		// Start mutation observer to check if alert was added
+		this.startMutationObserver();
 		
-		// Define mutation observer and check if alert was added
-		// if an added alert includes a link, add a click event to it
-		var observer = new MutationObserver((mutations) => {
-			// Get mutation of type "childList" (child element was added)
-			var mutation = _.findWhere(mutations, { type: "childList" });
-			
-			// Add click event to link
-			$(mutation.addedNodes).find('a').on('click', function(e) {
-				// Prevent default click behavior
-				e.preventDefault();
+		// Get query from URL to check if verification key was transmitted
+		this.activatedRoute.queryParams.subscribe(params => {
+			// Only go on if parameters 'v' (verification key) and 'm' (email) exist
+			if(!_.has(params, 'v') && !_.has(params, 'm'))
+				return;
 				
-				// Call evaluation function
-				self.evaluateLink(e);
+			// Send verification to server and check
+			this.user.verifyEmail(params.v).subscribe(res => {
+				
+				// Set email form field to email from parameter
+				this.loginForm.patchValue({'email': params.m});
+				
+				// Set alert message
+				this.alert.alertFromServer(res.alert);
 			});
-		});
-		
-		// Start observing if a child tag is added
-		observer.observe(node, {
-			childList: true
 		});
 	}
 	
@@ -150,6 +147,34 @@ export class LoginComponent implements OnInit, OnDestroy {
 		
 		// Open modal with proper title
 		this.modal.open({'email': '', 'title': 'MODAL_REQUEST_NEW_PASSWORD'});
+	}
+	
+	private startMutationObserver() {
+		var self = this;
+		
+		// Define node which should be observed
+		var node = document.querySelector('alert');
+		
+		// Define mutation observer and check if alert was added
+		// if an added alert includes a link, add a click event to it
+		var observer = new MutationObserver((mutations) => {
+			// Get mutation of type "childList" (child element was added)
+			var mutation = _.findWhere(mutations, { type: "childList" });
+			
+			// Add click event to link
+			$(mutation.addedNodes).find('a').on('click', function(e) {
+				// Prevent default click behavior
+				e.preventDefault();
+				
+				// Call evaluation function
+				self.evaluateLink(e);
+			});
+		});
+		
+		// Start observing if a child tag is added
+		observer.observe(node, {
+			childList: true
+		});
 	}
 	
 }

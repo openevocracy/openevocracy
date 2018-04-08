@@ -150,7 +150,7 @@ app.post('/json/auth/logout', auth(), users.logout);
 //app.post("/json/auth/remove_account", users.delete );
 
 // @desc: Verifies email address (if users clicks on verification link)
-app.get('/json/auth/verifyEmail/:id', users.verifyEmail);
+app.post('/json/auth/verifyEmail', users.verifyEmail);
 
 // @desc: Resends verification link via email
 app.post('/json/auth/verification', users.sendVerificationMailAgain);

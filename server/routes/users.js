@@ -157,7 +157,6 @@ exports.sendVerificationMailAgain = function(req, res) {
 			return;
 		}
 		
-		console.log('send mail');
 		// Send verification mail
 		user.email = email;
 		sendVerificationMail(user);
@@ -168,13 +167,13 @@ exports.sendVerificationMailAgain = function(req, res) {
 };
 
 function sendVerificationMail(user) {
-    console.log('sendVerificationMail');
     mail.sendMail(user.email,
         i18n.t('EMAIL_REGISTRATION_SUBJECT'),
-        strformat(i18n.t('EMAIL_REGISTRATION_MESSAGE'), user._id.toString(), cfg.BASE_URL)
+        strformat(i18n.t('EMAIL_REGISTRATION_MESSAGE'), cfg.BASE_URL, user._id.toString(), user.email)
     );
 }
 
+// @desc: Send a mail containing a new password for the user with the specific email
 exports.sendPassword = function(req, res) {
     // Get email from request
 	var email = req.body.email;
@@ -200,7 +199,7 @@ exports.sendPassword = function(req, res) {
     });
 };
 
-// register a new user
+// @desc: Register a new user
 exports.register = function(req, res) {
 	if(req.body.email && req.body.password){
 		var email = req.body.email;
@@ -228,11 +227,12 @@ exports.register = function(req, res) {
 	
 	// Find user with email, if no user was found, resolve promise (go on with registration)
 	db.collection('users').findOneAsync({ 'email': email }).then(function (user) {
-		// Check if user already exists and check verification status
-      if(!_.isNull(user) && user.verified)
+		// Check if user already exists
+      if(!_.isNull(user)) {
           return utils.rejectPromiseWithAlert(400, 'warning', 'USER_ACCOUNT_ALREADY_EXISTS');
-      else if(!_.isNull(user) && !user.verified)
-          return utils.rejectPromiseWithAlert(401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', { 'email': user.email });
+          //utils.sendAlert(400, 'warning', 'USER_ACCOUNT_ALREADY_EXISTS');
+          //return;
+      }
 	}).then(function() {
 		// Assemble user
 		var user = {
@@ -245,61 +245,15 @@ exports.register = function(req, res) {
 		// Add user to database and return user
 		return db.collection('users').insertAsync(user).return(user);
 	}).then(function(user) {
-		// From now on we'll identify the user by the id and its salt
-		// the id and the salt is the personalized value that goes into our token
-		var payload = { 'id': user._id, 'salt': user.salt };
-		var token = jwt.sign(payload, jwtOptions.secretOrKey);
-		
 		// Send email verification link to user
       sendVerificationMail(user);
       
       // Send result to client
-		res.json({ 'token': token, 'id': user._id });
+      return utils.rejectPromiseWithAlert(200, 'success', 'USER_ACCOUNT_VERIFICATION_LINK_SENT');
+      //utils.sendAlert(200, 'success', 'USER_ACCOUNT_VERIFICATION_LINK_SENT');
+      //return Promise.resolve();
 	}).catch(utils.isOwnError,utils.handleOwnError(res));  // Handle errors
 };
-
-// creates a user, delete after 01.05.2018
-/*exports.signup = function(req, res) {
-    var user = req.body;
-    
-    // Setup parseley
-    var constraints = {
-        email: { presence: true, email: true },
-        pass: { presence: true, format: /^\S+$/ } // no whitespace
-    };
-    var form = _.pick(user, 'email', 'pass');
-    
-    // check if values are valid
-    if(validate(form, constraints) !== undefined) {
-        // values are NOT valid
-        utils.sendAlert(res, 400, 'danger', 'USER_FORM_VALIDATION_ERROR');
-    } else {
-        // assemble user
-        user = {
-            email: user.email,
-            pass: bcrypt.hashSync(user.pass, 8),
-            auth_token: bcrypt.genSaltSync(8),
-            verified: false
-        };
-        
-        // url: https://www.npmjs.org/package/bcrypt-nodejs
-        db.collection('users').findOneAsync(_.pick(user, 'email'), {'verified': true}).then(function(user) {
-            // Check if user already exists and check verification status
-            if(!_.isNull(user) && user.verified)
-                return utils.rejectPromiseWithAlert(400, 'warning', 'USER_ACCOUNT_ALREADY_EXISTS');
-            else if(!_.isNull(user) && !user.verified)
-                return utils.rejectPromiseWithAlert(401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', user.email);
-        }).then(function() {
-            // Add user to database
-            return db.collection('users').insertAsync(user).return(user);
-        }).then(function(user) {
-            // Log and send verification mail to user
-            console.log('Saved user ' + JSON.stringify(user));
-            utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_VERIFICATION_LINK_SENT');
-            sendVerificationMail(user);
-        }).catch(utils.isOwnError,utils.handleOwnError(res));
-    }
-};*/
 
 // POST /json/auth/logout
 // @desc: logs out a user, deleting the salt for the user's token
@@ -332,16 +286,31 @@ exports.logout = function(req, res) {
 
 // POST /json/auth/verifyEmail
 exports.verifyEmail = function(req, res) {
-	// The verification key equals the user id
-	// if the user id (verification key) exists as user _id in databse, the user is verified
+	// Get user id from query and store as object id
+	try {
+		// Try to transform string to object id
+		var uid = ObjectId(req.body.uid);
+	} catch(error) {
+		// If not possible, throw error
+		utils.sendAlert(res, 401, 'danger', 'USER_ACCOUNT_VERIFICATION_ERROR');
+		return;
+	}
+	
+	// The verification key equals the user id. If the user id (verification key) exists
+	// and the 'verified' variable can be set, the user is verified
 	db.collection('users').updateAsync(
-		{'_id': ObjectId(req.params.id)}, { $set: {verified: true} }, {}
-	).then(function() {
-		// Update was successful (user was found), send success
-		utils.sendAlert(res, 200, 'success', 'USER_ACCOUNT_VERIFICATION_SUCCESS');
-	}).catch(function(e) {
-		// The user was not found, which means that the key was not correct, send error
-		utils.sendAlert(res, 401, 'success', 'USER_ACCOUNT_VERIFICATION_ERROR');
+		{'_id': uid}, { $set: {verified: true} }, {}
+	).then(function(user) {
+		if(user.result.nModified == 0) {
+			// If no modification was done, send error message
+			utils.sendAlert(res, 401, 'danger', 'USER_ACCOUNT_VERIFICATION_ERROR');
+		} else {
+			// Update was successful (user was found), send success
+			utils.sendAlert(res, 200, 'success', 'USER_ACCOUNT_VERIFICATION_SUCCESS');
+		}
+	}).catch(function(error) {
+		// Something else went wrong, send error directly
+		utils.sendAlert(res, 401, 'danger', error);
 	});
 };
 
@@ -364,7 +333,7 @@ exports.query = function(req, res) {
     var uid = ObjectId(req.params.id);
     
     db.collection('users').findOneAsync(
-        {'_id':uid},{'email':false,'pass':false,'auth_token':false}).
+        {'_id':uid},{'email':false,'password':false,'salt':false}).
         then(res.send.bind(res));
 };
 

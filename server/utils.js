@@ -12,9 +12,11 @@ function prepareAlert(type, content, vars) {
 exports.sendAlert = function(res, status, type, content, vars) {
     res.status(status).send({'alert': prepareAlert(type, content, vars)});
 };
+
 exports.rejectPromiseWithAlert = function(status, type, content, vars) {
     return Promise.reject({'status': status, 'alert': prepareAlert(type, content, vars)});
 };
+
 exports.isOwnError = function(error) {
     return _.has(error,'status') && _.has(error,'alert') || _.has(error,'reason');
 };
