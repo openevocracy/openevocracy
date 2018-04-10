@@ -10,7 +10,7 @@ var i18n = require('./i18n');
 var ratings = require('./routes/ratings');
 var groups = require('./routes/groups');
 
-var C = require('../shared/constants');
+var C = require('../shared/constants').C;
 var cfg = require('../shared/config').cfg;
 
 var transporter;

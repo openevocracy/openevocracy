@@ -26,7 +26,12 @@
 		</mat-card-content>
 		<mat-card-footer>
 			<p *ngIf="topic.stage == C.STAGE_REJECTED">{{'Rejected' | translate}}: {{topic.stageRejectedStarted | date: 'dd.MM.y'}}</p>
-			<p *ngIf="topic.stage == C.STAGE_SELECTION"><button mat-icon-button color="primary" (click)="vote($event, topic._id)"><span class="fa fa-hand-paper-o"></span></button></p>
+			<p *ngIf="topic.stage == C.STAGE_SELECTION">
+				<button mat-icon-button color="primary" (click)="toggleVote($event, topic._id)">
+					<fa-icon *ngIf="!topic.voted" class="not-voted" [icon]="faHandPaper"></fa-icon>
+					<fa-icon *ngIf="topic.voted" class="voted" [icon]="faHandPaper"></fa-icon>
+				</button>
+			</p>
 			<p *ngIf="topic.stage == C.STAGE_PROPOSAL">...</p>
 			<p *ngIf="topic.stage == C.STAGE_CONSENSUS">Level {{topic.level}} in ...</p>
 			<p *ngIf="topic.stage == C.STAGE_PASSED">{{'Finished' | translate}}: {{topic.stagePassedStarted | date: 'dd.MM.y'}}</p>

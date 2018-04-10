@@ -3,7 +3,7 @@ var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 
-var C = require('../../shared/constants');
+var C = require('../../shared/constants').C;
 var utils = require('../utils');
 var pads = require('../pads');
 

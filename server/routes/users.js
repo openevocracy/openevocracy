@@ -17,7 +17,7 @@ var topics = require('./topics');
 var mail = require('../mail');
 var utils = require('../utils');
 
-var C = require('../../shared/constants');
+var C = require('../../shared/constants').C;
 //var cfg = requirejs('public/js/setup/configs');
 var cfg = require('../../shared/config').cfg;
 
@@ -48,10 +48,6 @@ exports.getStrategy = function() {
 	return strategy;
 };
 
-function clean_user_data(user) {
-    return _.omit(user, ['pass', 'auth_token']);
-}
-
 function savePasswordInDatabaseAsync(uid, password) {
     var hash = bcrypt.hashSync(password, 8);
     return db.collection('users').updateAsync({ '_id': uid }, { $set: { 'password': hash } });
@@ -60,40 +56,6 @@ function savePasswordInDatabaseAsync(uid, password) {
 function getUserByMailAsync(email) {
     return db.collection('users').findOneAsync({'email': email}, {'_id': true});
 }
-
-// 
-// authentication wrapper, e.g. app.get('/json/topics', auth(req,res,function(req, res) ...
-/*exports.auth_wrapper = function(req, res, next) {
-	next(req, res);
-	return;
-	
-	db.collection('users').findOne({'_id': ObjectId(req.user._id),
-	                        'auth_token': req.signedCookies.auth_token },
-	function(err, user){
-		if(user){
-			// handle request
-			next(req, res);
-		} else {
-			// from https://vickev.com/?_escaped_fragment_=/article/authentication-in-single-page-applications-node-js-passportjs-angularjs#!/article/authentication-in-single-page-applications-node-js-passportjs-angularjs
-			res.status(401);
-			
-			console.log('User authentication invalid');
-		}
-	});
-};*/
-
-// authentification
-// TODO use middleware, e.g. Passport?
-/*exports.auth = function(req, res) {
-    db.collection('users').findOne({ '_id': ObjectId(req.user._id),
-                                     'auth_token': req.signedCookies.auth_token },
-    function(err, user){
-        if(user)
-            res.send({user: clean_user_data(user)});
-        else
-            res.status(403);
-    });
-};*/
 
 // POST /api/auth/login
 // @desc: logs in a user
@@ -228,8 +190,6 @@ exports.register = function(req, res) {
 		// Check if user already exists
       if(!_.isNull(user)) {
           return utils.rejectPromiseWithAlert(400, 'warning', 'USER_ACCOUNT_ALREADY_EXISTS');
-          //utils.sendAlert(400, 'warning', 'USER_ACCOUNT_ALREADY_EXISTS');
-          //return;
       }
 	}).then(function() {
 		// Assemble user
@@ -248,8 +208,6 @@ exports.register = function(req, res) {
       
       // Send result to client
       return utils.rejectPromiseWithAlert(200, 'success', 'USER_ACCOUNT_VERIFICATION_LINK_SENT');
-      //utils.sendAlert(200, 'success', 'USER_ACCOUNT_VERIFICATION_LINK_SENT');
-      //return Promise.resolve();
 	}).catch(utils.isOwnError,utils.handleOwnError(res));  // Handle errors
 };
 

@@ -49,11 +49,11 @@ export class ModalAddtopicComponent extends ModalComponent {
 	}
 	
 	open(data) {
-		this.translate.get("MODAL_NEW_TOPIC_NAME", {numChars: String(cfg.minLengthTopicName)}).subscribe(
+		this.translate.get("MODAL_NEW_TOPIC_NAME", {numChars: String(cfg.MIN_LETTERS_TOPIC_NAME)}).subscribe(
 			str => {this.topicnamePlaceholder = str; });
 			
 		//this.translate.get("MODAL_NEW_TOPIC_NAME").subscribe(
-		//	str => {this.topicnamePlaceholder = str + String(cfg.minLengthTopicName); });
+		//	str => {this.topicnamePlaceholder = str + String(cfg.MIN_LETTERS_TOPIC_NAME); });
 	    //this.translate.get("MODAL_NEW_TOPIC_NAME_SUFFIX").subscribe(
 		//	str => {this.topicnamePlaceholder += str; });
 			

@@ -4,7 +4,6 @@ import { Observable } from 'rxjs/Observable';
 import { Router } from '@angular/router';
 
 import { HttpManagerService } from './http-manager.service';
-import { TokenService } from './token.service';
 
 import { cfg } from '../../../shared/config';
 
@@ -15,39 +14,71 @@ class Credentials {
 
 @Injectable()
 export class UserService {
-	private userId: string;
+	private user;
 
 	constructor(
 		private http: Http,
 		private router: Router,
-		private httpManagerService: HttpManagerService,
-		private tokenService: TokenService) {
+		private httpManagerService: HttpManagerService) {
+		
+		var currentUser = JSON.parse(window.localStorage.getItem('currentUser'));
+		if(currentUser)
+			this.user = currentUser;
+	}
+	
+	public setUserId(_uid) {
+		this.user.uid = _uid;
 	}
 	
 	public getUserId() {
-		return this.userId;
+		return this.user.uid;
 	}
 	
-	public setUserId(uid) {
-		this.userId = uid;
+	public setToken(_token) {
+		this.user.token = _token;
 	}
 	
-	private setIdAndToken(raw) {
-		var res = raw.json();
+	public getToken() {
+		return this.user.token;
+	}
+	
+	public isToken() {
+		if(this.user.token)
+			return true
+		else
+			return false
+	}
+	
+	public setUser(uid, token) {
+		var _user = { 'uid': uid, 'token': token };
 		
-		// Set user ID
-		this.userId = res.id;
+		// Store user (including jwt token) in local storage to keep user logged in between page refreshes
+		window.localStorage.setItem('currentUser', JSON.stringify(_user));
 		
-		// Store token
-		this.tokenService.setToken(res.email, res.token);
+		// Store user in user service
+		this.user = _user;
+	}
+	
+	public getUser() {
+		return this.user;
+	}
+	
+	public removeUser() {
+		// Remove user from local storage
+		window.localStorage.removeItem('currentUser');
+		
+		// Remove user from service
+		delete this.user;
 	}
 	
 	public authenticate(credentials) {
 		var self = this;
 		return this.http.post(cfg.BASE_URL + '/json/auth/login', credentials)
 			.map(raw => {
+				var res = raw.json();
+				
 				// Set ID and store token
-				self.setIdAndToken(raw);
+				self.setUser(res.id, res.token);
 				
 				// Redirect to front page
 				self.router.navigate(['/']);
@@ -75,9 +106,9 @@ export class UserService {
 		var self = this;
 		
 		// Post logout, authentication needed
-		this.httpManagerService.post('/json/auth/logout', {'uid': this.userId}).subscribe(res => {
+		this.httpManagerService.post('/json/auth/logout', {'uid': this.user.uid}).subscribe(res => {
 			// Remove token from local storage
-			self.tokenService.removeToken();
+			self.removeUser();
 			
 			// Redirect to any page after logout was successful
 			self.router.navigate(['/login']);

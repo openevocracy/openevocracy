@@ -1,14 +1,17 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import * as _ from 'underscore';
 
 import { TopicListElement } from '../_models/topic-list-element';
 import { C } from '../../../shared/constants';
+import * as _ from 'underscore';
 
 import { TopicService } from '../_services/topic.service';
+import { UserService } from '../_services/user.service';
 import { TopicsListService } from '../_services/topics-list.service';
 import { ModalService } from '../_services/modal.service';
+
+import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-topics',
@@ -19,31 +22,50 @@ export class TopiclistComponent implements OnInit {
 	public C;
 	topicsList: TopicListElement[];
 	stageClass: string;
+	
+	faHandPaper = faHandPaper;
 
 	constructor(
 		private topicsListService: TopicsListService,
 		private topicService: TopicService,
+		private userService: UserService,
 		private modal: ModalService,
-		private router: Router) { }
+		private router: Router) {}
 	
 	ngOnInit() {
 		this.C = C;
 		this.topicsListService.getTopicsList().subscribe(res => {
+			// Add progress of stages to each topic for sorting purpose
 			let with_progress = _.each(res, obj => {
-				obj.progress = (obj.stage == -1) ? 9 : obj.stage;
+				// Rejected stage progress number is passed stage + 1
+				obj.progress = (obj.stage == C.STAGE_REJECTED) ? C.STAGE_PASSED+1 : obj.stage;
 			});
+			// Sort topics by progress and by name
 			this.topicsList = _.sortBy(_.sortBy(with_progress, 'name'), 'progress');
 		});
 	}
 	
-	private vote(e, tid) {
+	private toggleVote(e, tid) {
 		e.stopPropagation();
-		console.log('vote', tid);
-		/*this.topicService.vote(tid).subscribe(res => {
-			let body = res.json();
-			// Update topic in topiclist
-			console.log(body);
-		});*/
+		
+		// Get user id from user service
+		var uid = this.userService.getUserId();
+		
+		// Get topic from topic list
+		var topic = _.findWhere(this.topicsList, {'_id': tid});
+		
+		// Vote or unvote, depending of voted state
+		if(topic.voted) {
+			this.topicService.unvote(tid, uid).subscribe(res => {
+				topic.voted = res.voted;
+				topic.num_votes--;
+			});
+		} else {
+			this.topicService.vote(tid, uid).subscribe(res => {
+				topic.voted = res.voted;
+				topic.num_votes++;
+			});
+		}
 	}
 	
 	private openAddTopicModal(e) {

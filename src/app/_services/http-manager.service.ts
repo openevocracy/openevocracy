@@ -7,7 +7,6 @@ import { cfg } from '../../../shared/config';
 
 import { AlertService } from '../_services/alert.service';
 import { TranslateService } from '@ngx-translate/core';
-import { TokenService } from './token.service';
 
 import 'rxjs/add/observable/throw';
 import * as _ from 'underscore';
@@ -17,16 +16,18 @@ export class HttpManagerService {
 
 	constructor(
 		private http: Http,
-		private tokenService: TokenService,
 		private alert: AlertService,
 		private translate: TranslateService) { }
 		
 	private getOptions() {
-		let token = this.tokenService.getToken();
+		// Move to user service?
 		
-		if (_.isUndefined(token) || _.isNull(token)) {
+		var currentUser = window.localStorage.getItem('currentUser');
+		
+		if (_.isUndefined(currentUser) || _.isNull(currentUser)) {
 			return null;
 		} else {
+			var token = JSON.parse(currentUser).token;
 			let headers = new Headers({ 'Authorization': 'JWT ' + token});
 			let options = new RequestOptions({ headers: headers });
 			return options;

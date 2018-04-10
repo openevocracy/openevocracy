@@ -9,7 +9,7 @@ var appRoot = require('app-root-path');
 var AsyncLock = require('async-lock');
 var lock = new AsyncLock();
 
-var C = require('../../shared/constants');
+var C = require('../../shared/constants').C;
 //var cfg = requirejs('public/js/setup/configs');
 var cfg = require('../../shared/config').cfg;
 var groups = require('./groups');
@@ -391,7 +391,6 @@ function updateTopicStateAsync(topic,stageStartedEntryName) {
 }
 
 exports.query = function(req, res) {
-    console.log('req', req);
     var tid = ObjectId(req.params.id);
     var uid = ObjectId(req.user._id);
 
@@ -412,6 +411,7 @@ exports.query = function(req, res) {
 };
 
 exports.create = function(req, res) {
+    
     // Topic name is the only necessary request variable
     var data = req.body;
     var topic = {};
@@ -472,38 +472,32 @@ function countVotes(tid) {
 }
 
 exports.vote = function(req, res) {
-    var topic_vote = req.body;
-    
-    // assemble vote
-    topic_vote.tid = ObjectId(topic_vote.tid);
-    topic_vote.uid = ObjectId(req.user._id);
-    
-    // TODO use findAndModify as in proposal
-    db.collection('topic_votes').
-    find(_.pick(topic_vote, 'tid'), {'uid': true}).toArrayAsync().
-    then(function(topic_votes) {
-        var count = _.size(topic_votes);
-        
-        // check if vote exists already
-        // do not allow user to vote twice for the same topic
-        if(!utils.checkArrayEntryExists(topic_votes, _.pick(topic_vote, 'uid')))
-            return db.collection('topic_votes').insertAsync(topic_vote).return(++count);
-        
-        return count;
-    }).then(res.json.bind(res));
+	// Transmitted topic vote
+	var topic_vote = {
+		'tid': ObjectId(req.body.tid),
+		'uid': ObjectId(req.body.uid)
+	};
+	
+	// Update the particular topic vote
+	// If it already exists: Just update to the same (= do nothing)
+	// If it does'nt exist: Insert
+	db.collection('topic_votes')
+		.updateAsync(topic_vote, topic_vote, {'upsert': true})
+		.then(function(update_result) { return { 'voted': true }; })
+		.then(res.json.bind(res));
 };
 
 exports.unvote = function(req, res) {
-    var topic_vote = req.body;
+	// Trasmitted topic vote
+    var topic_vote = {
+		'tid': ObjectId(req.body.tid),
+		'uid': ObjectId(req.body.uid)
+	};
     
-    // assemble vote
-    topic_vote.tid = ObjectId(topic_vote.tid);
-    topic_vote.uid = ObjectId(req.user._id);
-    
-    // remove vote and return number of current votes
-    db.collection('topic_votes').removeAsync(topic_vote,true).
-        then(_.partial(countVotes,topic_vote.tid)).call('toString').
-        then(res.json.bind(res));
+    // Remove vote from database
+    db.collection('topic_votes').removeAsync(topic_vote)
+    	.then(function(remove_result) { return { 'voted': false }; })
+		.then(res.json.bind(res));
 };
 
 exports.final = function(req, res) {

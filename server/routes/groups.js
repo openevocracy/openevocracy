@@ -8,7 +8,7 @@ var bcrypt = require('bcrypt');
 //var requirejs = require('requirejs');
 var strformat = require('strformat');
 
-var C = require('../../shared/constants');
+var C = require('../../shared/constants').C;
 //var cfg = requirejs('public/js/setup/configs');
 var cfg = require('../../shared/config').cfg;
 var i18n = require('../i18n');

@@ -15,10 +15,13 @@ export class TopicService {
 	constructor(
 		private http: Http,
 		private httpManagerService: HttpManagerService) { }
-		
-	vote(tid: string) {
-		// FIXME: Cookie uid is necessary here!
-		//return this.http.post(cfg.BASE_URL + '/json/topic-vote', {'tid': tid});
+	
+	vote(tid: string, uid: string) {
+		return this.httpManagerService.post('/json/topic-vote', {'tid': tid, 'uid': uid});
+	}
+	
+	unvote(tid: string, uid: string) {
+		return this.httpManagerService.post('/json/topic-unvote', {'tid': tid, 'uid': uid});
 	}
 	
 	addTopic(topicName: string) {

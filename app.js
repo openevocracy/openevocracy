@@ -134,9 +134,6 @@ app.post('/json/ratings/rate', auth(), ratings.rate);
 // ###   A U T H   ###
 // ###################
 
-// @desc: Authentification, TODO required?
-//app.get('/json/auth', users.auth);
-
 // @desc: Logs in a user
 app.post('/json/auth/login', users.login);
 
@@ -147,7 +144,7 @@ app.post('/json/auth/register', users.register);
 app.post('/json/auth/logout', auth(), users.logout);
 
 // @desc: Deletes a user
-//app.post("/json/auth/remove_account", users.delete );
+//app.post("/json/auth/remove_account", users.delete);
 
 // @desc: Verifies email address (if users clicks on verification link)
 app.post('/json/auth/verifyEmail', users.verifyEmail);

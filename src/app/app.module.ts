@@ -10,6 +10,7 @@ import 'hammerjs';
 
 // Modules
 import { MaterialModule } from './_modules/material.module';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 
 // Routing
 import { AppRoutingModule } from './_routing/app-routing.module';
@@ -41,7 +42,6 @@ import { TopicService } from './_services/topic.service';
 import { HttpManagerService } from './_services/http-manager.service';
 import { Guard } from './_services/guard.service';
 import { UserService } from './_services/user.service';
-import { TokenService } from './_services/token.service';
 import { AlertService } from './_services/alert.service';
 import { ModalService } from './_services/modal.service';
 import { EmailModalService } from './_services/modal.email.service';
@@ -77,6 +77,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		BrowserModule,
 		BrowserAnimationsModule,
 		MaterialModule,
+		FontAwesomeModule,
 		AppRoutingModule,
 		PublicRoutingModule,
 		HttpModule,
@@ -96,7 +97,6 @@ export function HttpLoaderFactory(http: HttpClient) {
 		TopicService,
 		Guard,
 		UserService,
-		TokenService,
 		AlertService,
 		ModalService,
 		EmailModalService,
