@@ -45,6 +45,7 @@ import { UserService } from './_services/user.service';
 import { AlertService } from './_services/alert.service';
 import { ModalService } from './_services/modal.service';
 import { EmailModalService } from './_services/modal.email.service';
+import { UtilsService } from './_services/utils.service';
 
 // Shared
 //import { cfg } from './_shared/config';
@@ -100,6 +101,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		AlertService,
 		ModalService,
 		EmailModalService,
+		UtilsService,
 		{ provide: 'cfg', useValue: cfg },
 		{ provide: 'C', useValue: C }
 	],

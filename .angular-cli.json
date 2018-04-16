@@ -19,7 +19,6 @@
 			"testTsconfig": "tsconfig.spec.json",
 			"prefix": "app",
 			"styles": [
-				"../node_modules/font-awesome/scss/font-awesome.scss",
 				"styles/bootstrap.min.css",
 				"styles/evocracy-theme.scss",
 				"styles/variables.scss",

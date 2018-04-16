@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { Router } from '@angular/router';
 
 import { cfg } from '../../../shared/config';
 
@@ -16,12 +17,11 @@ export class HttpManagerService {
 
 	constructor(
 		private http: Http,
+		private router: Router,
 		private alert: AlertService,
 		private translate: TranslateService) { }
 		
 	private getOptions() {
-		// Move to user service?
-		
 		var currentUser = window.localStorage.getItem('currentUser');
 		
 		if (_.isUndefined(currentUser) || _.isNull(currentUser)) {
@@ -71,6 +71,15 @@ export class HttpManagerService {
 	}
 	
 	public handleError(raw: Response | any) {
+		// If server sends 401 'Unauthorized'
+		if(_.has(raw, 'status') && raw.status == 401 && raw._body == 'Unauthorized') {
+			// Delete token in local storage and redirect
+			window.localStorage.removeItem('currentUser');
+			this.router.navigate(['/login']);
+			
+			return Observable.throw(raw);
+		}
+		
 		var error = raw.json();
 		
 		// Show alert component if alert object is part of the server response

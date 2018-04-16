@@ -17,6 +17,7 @@ export class TopicListElement {
 	
 	/* Extended information */
 	 num_votes: number;
+	 num_proposals: number;
 	 voted: boolean;
 	 levels: Level[];
 	 
@@ -34,6 +35,7 @@ export class TopicListElement {
 		this.valid_participants = res.valid_participants;
 		this.finalDocument = res.finalDocument;
 		this.num_votes = res.num_votes;
+		this.num_proposals = res.num_proposals;
 		this.voted = res.voted;
 		this.levels = res.levels;
 	 }

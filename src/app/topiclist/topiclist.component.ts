@@ -2,6 +2,8 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import { CountdownComponent } from '../countdown/countdown.component';
+
 import { TopicListElement } from '../_models/topic-list-element';
 import { C } from '../../../shared/constants';
 import * as _ from 'underscore';
@@ -12,6 +14,7 @@ import { TopicsListService } from '../_services/topics-list.service';
 import { ModalService } from '../_services/modal.service';
 
 import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
+import { faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-topics',
@@ -24,6 +27,7 @@ export class TopiclistComponent implements OnInit {
 	stageClass: string;
 	
 	faHandPaper = faHandPaper;
+	faPlusSquare = faPlusSquare;
 
 	constructor(
 		private topicsListService: TopicsListService,

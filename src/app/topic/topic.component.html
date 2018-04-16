@@ -9,18 +9,18 @@
 			<p *ngIf="topic?.stage == C.STAGE_REJECTED">{{ topic?.stageName | translate }}, {{ topic?.rejectedReason | translate }}</p>
 		</div>
 		<span class="flex-spacer"></span>
-		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_SELECTION" title="Als relevant markieren"><span class="fa fa-hand-paper-o"></span></button>
-		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && true" title="Vorschlag erstellen"><span class="fa fa-file-text-o"></span></button>
-		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PASSED" title="Ergebnis herunterladen"><span class="fa fa-download"></span></button>
-		<button mat-icon-button *ngIf="topic?.stage >= C.STAGE_CONSENSUS || topic?.stage == C.STAGE_REJECTED" title="Prozessübersicht"><span class="fa fa-sitemap"></span></button>
-		<button mat-icon-button (click)="enterFullscreen()" title="Productive mode"><span class="fa fa-arrows-alt"></span></button>
+		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_SELECTION" title="Als relevant markieren"><fa-icon [icon]="faHandPaper"></fa-icon></button>
+		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && true" title="Vorschlag erstellen"><fa-icon [icon]="faFileMedical"></fa-icon></button>
+		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PASSED" title="Ergebnis herunterladen"><fa-icon [icon]="faDownload"></fa-icon></button>
+		<button mat-icon-button *ngIf="topic?.stage >= C.STAGE_CONSENSUS || topic?.stage == C.STAGE_REJECTED" title="Prozessübersicht"><fa-icon [icon]="faSitemap"></fa-icon></button>
+		<button mat-icon-button (click)="enterFullscreen()" title="Productive mode"><fa-icon [icon]="faExpandArrowsAlt"></fa-icon></button>
 		
 		<button mat-icon-button [matMenuTriggerFor]="more">
-			<span class="fa fa-ellipsis-v"></span>
+			<fa-icon [icon]="faEllipsisV"></fa-icon>
 		</button>
 		<mat-menu #more="matMenu" [overlapTrigger]="false">
-			<button mat-menu-item><span class="fa fa-user"></span> Autor</button>
-			<button mat-menu-item><span class="fa fa-share-alt"></span> Teilen</button>
+			<button mat-menu-item><fa-icon [icon]="faUser"></fa-icon> Autor</button>
+			<button mat-menu-item><fa-icon [icon]="faShareSquare"></fa-icon> Teilen</button>
 		</mat-menu>
 	</div>
 </mat-toolbar>

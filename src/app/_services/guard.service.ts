@@ -11,7 +11,7 @@ export class Guard implements CanActivate {
 	
 	canActivate() {
 		// If logged in so return true
-		if(this.userService.isToken())
+		if(this.userService.hasToken())
 			return true;
 
 		// Not logged in so redirect to login page

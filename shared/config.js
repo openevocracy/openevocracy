@@ -7,7 +7,7 @@ var BASE_URL = 'https://develop.openevocracy.org';
 var DATABASE_HOST = 'mongodb://127.0.0.1/evocracy';
 
 var DEBUG_CONFIG = {
-    DEBUG: false,
+    DEBUG: true,
     MAIL: true,
     CRON_INTERVAL: 1, // run cron every x minute(s)
     
@@ -38,7 +38,7 @@ var DEBUG_CONFIG = {
 };
 
 var RELEASE_CONFIG = {
-    DEBUG : true,
+    DEBUG : false,
     MAIL: true,
     CRON_INTERVAL: 1, // run cron every x minute(s)
     

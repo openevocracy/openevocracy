@@ -310,10 +310,11 @@ function appendTopicInfoAsync(topic, uid, with_details) {
     // Delete pad id if user is not owner, pid is removed from response
     if(!_.isEqual(topic.owner,uid))
         delete topic.pid;
-        
+    
     var topic_without_details_promise = Promise.props(_.extend(topic,{
         // basic
         'num_votes': topic_votes_promise.then(_.size),
+        'num_proposals': topic_proposals_promise.then(_.size),
         'voted': topic_votes_promise.then(function(topic_votes) {
             return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
         'levels': levels_promise

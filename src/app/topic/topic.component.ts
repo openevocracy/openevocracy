@@ -1,12 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 
-import { CountdownComponent } from '../countdown/countdown.component'
+import { CountdownComponent } from '../countdown/countdown.component';
 
 import { TopicService } from '../_services/topic.service';
 
 import { C } from '../../../shared/constants';
 import { Topic } from '../_models/topic';
+
+import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
+import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faShareSquare } from '@fortawesome/free-solid-svg-icons';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
+//import { faFileMedical } from '@fortawesome/free-solid-svg-icons';
+import { faFile } from '@fortawesome/free-solid-svg-icons';
+import { faSitemap } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-topic',
@@ -17,7 +27,16 @@ export class TopicComponent implements OnInit {
 	private C;
 	private tid: string;
 	private topic: Topic;
-
+	
+	faHandPaper = faHandPaper;
+	faExpandArrowsAlt = faExpandArrowsAlt;
+	faEllipsisV = faEllipsisV;
+	faUser = faUser;
+	faShareSquare = faShareSquare;
+	faDownload = faDownload;
+	faFileMedical = faFile;
+	faSitemap = faSitemap;
+	
 	constructor(
 		private topicService: TopicService,
 		private activatedRoute: ActivatedRoute) { }

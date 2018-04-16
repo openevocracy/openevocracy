@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { HttpManagerService } from './http-manager.service';
 
 import { cfg } from '../../../shared/config';
+import * as _ from 'underscore';
 
 class Credentials {
 	email: string;
@@ -14,36 +15,22 @@ class Credentials {
 
 @Injectable()
 export class UserService {
-	private user;
 
 	constructor(
 		private http: Http,
 		private router: Router,
-		private httpManagerService: HttpManagerService) {
-		
-		var currentUser = JSON.parse(window.localStorage.getItem('currentUser'));
-		if(currentUser)
-			this.user = currentUser;
-	}
-	
-	public setUserId(_uid) {
-		this.user.uid = _uid;
-	}
+		private httpManagerService: HttpManagerService) {}
 	
 	public getUserId() {
-		return this.user.uid;
-	}
-	
-	public setToken(_token) {
-		this.user.token = _token;
+		return this.getUser().uid;
 	}
 	
 	public getToken() {
-		return this.user.token;
+		return this.getUser().token;
 	}
 	
-	public isToken() {
-		if(this.user.token)
+	public hasToken() {
+		if(_.has(this.getUser(), 'token'))
 			return true
 		else
 			return false
@@ -54,21 +41,16 @@ export class UserService {
 		
 		// Store user (including jwt token) in local storage to keep user logged in between page refreshes
 		window.localStorage.setItem('currentUser', JSON.stringify(_user));
-		
-		// Store user in user service
-		this.user = _user;
 	}
 	
 	public getUser() {
-		return this.user;
+		return JSON.parse(window.localStorage.getItem('currentUser'));
+		//return this.user;
 	}
 	
 	public removeUser() {
 		// Remove user from local storage
 		window.localStorage.removeItem('currentUser');
-		
-		// Remove user from service
-		delete this.user;
 	}
 	
 	public authenticate(credentials) {
@@ -106,7 +88,7 @@ export class UserService {
 		var self = this;
 		
 		// Post logout, authentication needed
-		this.httpManagerService.post('/json/auth/logout', {'uid': this.user.uid}).subscribe(res => {
+		this.httpManagerService.post('/json/auth/logout', {'uid': this.getUserId()}).subscribe(res => {
 			// Remove token from local storage
 			self.removeUser();
 			

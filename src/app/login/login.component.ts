@@ -10,6 +10,8 @@ import { AlertService } from '../_services/alert.service';
 import { TranslateService } from '@ngx-translate/core';
 import { EmailModalService } from '../_services/modal.email.service';
 
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+
 import * as _ from 'underscore';
 import * as $ from 'jquery';
 
@@ -23,6 +25,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 	private modalSubscription: Subscription;
 	private awaitAuthentication: boolean = false;
 	private lastAlertKey: string;
+
+	faSpinner = faSpinner;
 
 	constructor(
 		public user: UserService,

@@ -4,7 +4,7 @@
 	<div class="flex container">
 		<h1>Topics</h1>
 		<span class="flex-spacer"></span>
-		<button mat-button title="{{'ADD_TOPIC' | translate}}" (click)="openAddTopicModal($event)"><span class="fa fa-plus"></span>{{"ADD_TOPIC" | translate}}</button>
+		<button mat-button title="{{'ADD_TOPIC' | translate}}" (click)="openAddTopicModal($event)"><fa-icon [icon]="faPlusSquare"></fa-icon> {{"ADD_TOPIC" | translate}}</button>
 	</div>
 </mat-toolbar>
 
@@ -17,24 +17,22 @@
 		<mat-card-content>
 			<mat-card-title>{{topic.name}}</mat-card-title>
 			<p *ngIf="topic.stage == C.STAGE_REJECTED">{{topic.rejectedReason | translate}}</p>
-			<p *ngIf="topic.stage == C.STAGE_SELECTION">
-				{{topic.num_votes}} votes
-			</p>
-			<p *ngIf="topic.stage == C.STAGE_PROPOSAL">...</p>
+			<p *ngIf="topic.stage == C.STAGE_SELECTION">{{topic.num_votes}} votes</p>
+			<p *ngIf="topic.stage == C.STAGE_PROPOSAL">{{topic.num_proposals}} proposals</p>
 			<p *ngIf="topic.stage == C.STAGE_CONSENSUS">Level {{topic.level}} in ...</p>
 			<p *ngIf="topic.stage == C.STAGE_PASSED">{{topic.valid_participants}} participants</p>
 		</mat-card-content>
 		<mat-card-footer>
-			<p *ngIf="topic.stage == C.STAGE_REJECTED">{{'Rejected' | translate}}: {{topic.stageRejectedStarted | date: 'dd.MM.y'}}</p>
+			<p *ngIf="topic.stage == C.STAGE_REJECTED">{{'Rejected' | translate}}: {{topic.stageRejectedStarted | date: 'y-MM-dd'}}</p>
 			<p *ngIf="topic.stage == C.STAGE_SELECTION">
 				<button mat-icon-button color="primary" (click)="toggleVote($event, topic._id)">
 					<fa-icon *ngIf="!topic.voted" class="not-voted" [icon]="faHandPaper"></fa-icon>
 					<fa-icon *ngIf="topic.voted" class="voted" [icon]="faHandPaper"></fa-icon>
 				</button>
 			</p>
-			<p *ngIf="topic.stage == C.STAGE_PROPOSAL">...</p>
+			<p *ngIf="topic.stage == C.STAGE_PROPOSAL"><countdown [time]="topic.nextDeadline"></countdown></p>
 			<p *ngIf="topic.stage == C.STAGE_CONSENSUS">Level {{topic.level}} in ...</p>
-			<p *ngIf="topic.stage == C.STAGE_PASSED">{{'Finished' | translate}}: {{topic.stagePassedStarted | date: 'dd.MM.y'}}</p>
+			<p *ngIf="topic.stage == C.STAGE_PASSED">{{'Finished' | translate}}: {{topic.stagePassedStarted | date: 'y-MM-dd'}}</p>
 		</mat-card-footer>
 	</mat-card>
 </div>
