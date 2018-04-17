@@ -43,8 +43,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 			// First clear old alerts
 			this.alert.clear();
 			
-			console.log('ok1');
-			
 			var key = this.lastAlertKey;
 			
 			if(key == "USER_ACCOUNT_NOT_VERIFIED") {
@@ -54,7 +52,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 			}
 			
 			if(key == "USER_PASSWORT_NOT_CORRECT") {
-				console.log('ok2');
 				this.user.sendNewPassword(email).subscribe(res => {
 					this.alert.alertFromServer(res.alert);
 				});

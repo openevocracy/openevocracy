@@ -66,6 +66,7 @@
     "mongoskin": "*",
     "morgan": "*",
     "multer": "*",
+    "ngx-quill": "^2.2.0",
     "node-crontab": "*",
     "nodemailer": "4.6.4",
     "passport": "^0.4.0",

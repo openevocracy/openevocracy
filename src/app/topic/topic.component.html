@@ -27,7 +27,12 @@
 
 <div class="container">
 	<mat-tab-group>
-		<mat-tab label="Beschreibung"><div [innerHtml]="topic?.body"></div></mat-tab>
+		<mat-tab label="Beschreibung">
+			<form [formGroup]="editorForm">
+				<quill-editor formControlName="editor" [style]="{height: '300px'}" (onContentChanged)="contentChanged($event)"></quill-editor>
+			</form>
+			<!--<div [innerHtml]="topic?.body"></div>-->
+		</mat-tab>
 		<!--<mat-tab label="Referenzen">Referenzen</mat-tab>-->
 		<mat-tab label="Mein Vorschlag" *ngIf="topic?.stage == C.STAGE_PROPOSAL">Mein Vorschlag</mat-tab>
 		<mat-tab label="Meine Gruppe" *ngIf="topic?.stage == C.STAGE_CONSENSUS">Meine Gruppe</mat-tab>

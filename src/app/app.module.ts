@@ -11,6 +11,7 @@ import 'hammerjs';
 // Modules
 import { MaterialModule } from './_modules/material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
+import { QuillModule } from 'ngx-quill';
 
 // Routing
 import { AppRoutingModule } from './_routing/app-routing.module';
@@ -86,6 +87,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		HttpModule,
 		HttpClientModule,
 		ReactiveFormsModule,
+		QuillModule,
 		TranslateModule.forRoot({
 			loader: {
 				provide: TranslateLoader,

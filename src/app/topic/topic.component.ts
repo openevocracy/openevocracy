@@ -1,5 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
+
+import { FormBuilder, FormGroup } from '@angular/forms';
+/*import 'rxjs/add/operator/debounceTime'
+import 'rxjs/add/operator/distinctUntilChanged';*/
 
 import { CountdownComponent } from '../countdown/countdown.component';
 
@@ -27,6 +31,7 @@ export class TopicComponent implements OnInit {
 	private C;
 	private tid: string;
 	private topic: Topic;
+	private editorForm: FormGroup;
 	
 	faHandPaper = faHandPaper;
 	faExpandArrowsAlt = faExpandArrowsAlt;
@@ -39,9 +44,10 @@ export class TopicComponent implements OnInit {
 	
 	constructor(
 		private topicService: TopicService,
-		private activatedRoute: ActivatedRoute) { }
+		private activatedRoute: ActivatedRoute,
+		private fb: FormBuilder) { }
 	
-	ngOnInit() {
+   ngOnInit() {
 		this.C = C;
 		
 		this.activatedRoute.params.subscribe(
@@ -50,9 +56,21 @@ export class TopicComponent implements OnInit {
 		this.topicService.getTopic(this.tid).subscribe(res => {
 			this.topic = new Topic(res);
 		});
+		
+		this.editorForm = this.fb.group({
+      	editor: ['...']
+   	});
 	}
 	
-	enterFullscreen() {
+	private contentChanged(e) {
+		console.log(e);
+	}
+	
+	private setText(text) {
+		this.editorForm.patchValue({'editor': text});
+	}
+	
+	private enterFullscreen() {
 		// TODO: It's just for testing purpose, should be used in group
 		
 		var element = document.documentElement;
