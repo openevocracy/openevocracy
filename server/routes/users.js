@@ -289,7 +289,7 @@ exports.query = function(req, res) {
     var uid = ObjectId(req.params.id);
     
     db.collection('users').findOneAsync(
-        {'_id':uid},{'email':false,'password':false,'salt':false}).
+        {'_id':uid},{'email':false, 'password':false, 'salt':false}).
         then(res.send.bind(res));
 };
 
@@ -298,7 +298,7 @@ exports.settings = function(req, res) {
     var uid = ObjectId(req.params.id);
     
     db.collection('users').findOneAsync(
-        {'_id':uid},{'pass':false,'auth_token':false}).
+        {'_id':uid},{'email': true}).
         then(res.send.bind(res));
 };
 

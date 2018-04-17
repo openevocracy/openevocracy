@@ -1,0 +1,32 @@
+<mat-toolbar color="primary" [ngClass]="'stage'+topic?.stage">
+	<div class="flex container">
+		<span class="flex-spacer"></span>
+		<button mat-button title="Speichern"><fa-icon [icon]="faSave"></fa-icon> {{ 'SAVE' | translate }}</button>
+	</div>
+</mat-toolbar>
+
+<div class="container">
+	<mat-tab-group>
+		<mat-tab label="Benutzerkonto">
+			<form [formGroup]="settingsForm" (ngSubmit)="onSubmit()" novalidate>
+				<p>
+					<mat-form-field>
+						<input matInput formControlName="email" type="email" placeholder="{{ 'FORM_LABEL_MAIL' | translate }}" required>
+					</mat-form-field>
+				</p>
+				
+				<p formGroupName="passwords">
+					<mat-form-field>
+						<input matInput formControlName="password" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD' | translate }}" required>
+					</mat-form-field>
+				</p>
+				
+				<p formGroupName="passwords">
+					<mat-form-field>
+						<input matInput formControlName="passwordrep" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD_REP' | translate }}" required>
+					</mat-form-field>
+				</p>
+			</form>
+		</mat-tab>
+	</mat-tab-group>
+</div>

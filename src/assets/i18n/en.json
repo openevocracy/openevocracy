@@ -99,5 +99,6 @@
 	"REJECTED_NO_VALID_GROUP_PROPOSAL": "No valid proposals in groups",
 	
 	"ADD_TOPIC": "Add topic",
-	"REFRESH_LIST": "Refresh list"
+	"REFRESH_LIST": "Refresh list",
+	"SAVE": "Save"
 }

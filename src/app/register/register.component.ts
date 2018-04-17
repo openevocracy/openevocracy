@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { Subscription } from 'rxjs/Subscription';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -8,6 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import { UserService } from '../_services/user.service';
 import { AlertService } from '../_services/alert.service';
 import { TranslateService } from '@ngx-translate/core';
+import { UtilsService } from '../_services/utils.service';
 
 @Component({
 	selector: 'app-register',
@@ -24,29 +24,20 @@ export class RegisterComponent implements OnInit {
 		public user: UserService,
 		private fb: FormBuilder,
 		private alert: AlertService,
+		private utilsService: UtilsService,
 		private translate: TranslateService) {
 		this.createForm();
 	}
 	
-	// from https://stackoverflow.com/questions/35474991/angular-2-form-validating-for-repeat-password
-	areEqual(c: AbstractControl): ValidationErrors | null {
-		const keys: string[] = Object.keys(c.value);
-		for (const i in keys) {
-			if (i !== '0' && c.value[ keys[ +i - 1 ] ] !== c.value[ keys[ i ] ]) {
-				return { areEqual: true };
-			}
-		}
-	}
-	
 	ngOnInit() {}
 	
-	createForm() {
+	private createForm() {
 		this.registerForm = this.fb.group({
 			'email': ['', Validators.email],
 			'passwords': this.fb.group({
 				'password': ['', Validators.required],
 				'passwordrep': ['', Validators.required]
-			}, {validator: this.areEqual})
+			}, {validator: this.utilsService.areEqual})
 		});
 	}
 	

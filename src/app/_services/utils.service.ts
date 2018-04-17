@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
 
 @Injectable()
 export class UtilsService {
@@ -12,6 +13,16 @@ export class UtilsService {
 		var intTimestamp = parseInt(hexTimestamp, 16);
 		// Return timestamp in milliseconds
 		return intTimestamp*1000;
+	}
+	
+	// from https://stackoverflow.com/questions/35474991/angular-2-form-validating-for-repeat-password
+	public areEqual(c: AbstractControl): ValidationErrors | null {
+		const keys: string[] = Object.keys(c.value);
+		for (const i in keys) {
+			if (i !== '0' && c.value[ keys[ +i - 1 ] ] !== c.value[ keys[ i ] ]) {
+				return { areEqual: true };
+			}
+		}
 	}
 
 }

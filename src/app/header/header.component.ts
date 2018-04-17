@@ -15,23 +15,27 @@ import { faCogs } from '@fortawesome/free-solid-svg-icons';
 
 export class HeaderComponent implements OnInit {
 	
-	faGlobe = faGlobe;
-	faCogs = faCogs;
+	private uid: string;
+	
+	private faGlobe = faGlobe;
+	private faCogs = faCogs;
 	
 	constructor(
 		private app: AppComponent,
-		private user: UserService) { }
+		private userService: UserService) {
+		this.uid = this.userService.getUserId();
+	}
 	
 	ngOnInit() {}
 	
-	setLanguage(key) {
+	private setLanguage(key) {
 		this.app.setLanguage(key);
 	}
 	
-	logout() {
+	private logout() {
 		let self = this;
 		
 		// Call logout function in user service
-		this.user.logout();
+		this.userService.logout();
 	}
 }

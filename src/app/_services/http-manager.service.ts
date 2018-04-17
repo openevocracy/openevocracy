@@ -66,7 +66,8 @@ export class HttpManagerService {
 	
 	public extractData(res: Response) {
 		let body = res.json();
-		console.log('http response', body);
+		if(cfg.DEBUG)
+			console.log('http response', body);
 		return body || { };
 	}
 	

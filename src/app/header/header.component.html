@@ -26,7 +26,7 @@
 				<fa-icon [icon]="faCogs"></fa-icon>
 			</button>
 			<mat-menu #settings="matMenu" [overlapTrigger]="false">
-				<button mat-menu-item routerLink="/settings">
+				<button mat-menu-item [routerLink]="['/settings', uid]">
 					<span>{{ 'HEADER_MAINMENU_SETTINGS' | translate }}</span>
 				</button>
 				<button mat-menu-item (click)="logout()">
