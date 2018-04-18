@@ -180,7 +180,9 @@ function getPadDocAsync(pad) {
 
 exports.startPadServer = function(io) {
     io.on('connection', function(socket) {
+        console.log('io: connection');
         socket.on('pad_identity', function(identity) {
+            console.log('socket: pad_identity');
             getPadAsync(ObjectId(identity.pid)).then(getPadDocAsync).then(function(masterDoc) {
                 gulfIO(masterDoc, socket);
             });

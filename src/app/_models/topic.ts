@@ -17,6 +17,7 @@ export class Topic extends TopicListElement {
 	body: string;
 	group_members: GroupMember[];
 	gid: string;
+	pid: string;
 	ppid: string;
 	
 	/* Locally calculated */
@@ -30,6 +31,7 @@ export class Topic extends TopicListElement {
 		this.body = res.body;
 		this.group_members = res.group_members;
 		this.gid = res.gid;
+		this.pid = res.pid;
 		this.ppid = res.ppid;
 		
 		this.stageName = this.getStageName();

@@ -3,7 +3,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { AlertService } from '../_services/alert.service';
 import { UtilsService } from '../_services/utils.service';
+import { UserService } from '../_services/user.service';
 import { SettingsService } from '../_services/settings.service';
+import { HttpManagerService } from '../_services/http-manager.service';
 
 import { faSave } from '@fortawesome/free-solid-svg-icons';
 
@@ -18,11 +20,26 @@ export class SettingsComponent implements OnInit {
 	
 	private faSave = faSave;
 	
+	private uid: string;
+	
 	constructor(
 		private fb: FormBuilder,
 		private utilsService: UtilsService,
-		private alert: AlertService) {
+		private userService: UserService,
+		private alert: AlertService,
+		private httpManagerService: HttpManagerService) {
 		this.createForm();
+	}
+	
+	ngOnInit() {
+		// Get user id from user service
+		this.uid = this.userService.getUserId();
+		
+		this.httpManagerService.get('/json/user/settings/' + this.uid)
+			.subscribe(res => {
+			// Set email field
+			this.settingsForm.patchValue({'email': res.email });
+		});
 	}
 	
 	private createForm() {
@@ -35,8 +52,13 @@ export class SettingsComponent implements OnInit {
 		});
 	}
 	
-	ngOnInit() {
-		// Get email ...
+	private submitForm() {
+		// Patch user account
+		
+		/*this.httpManagerService.patch('/json/user/settings/' + this.uid, {})
+			.subscribe(res => {
+				console.log(succesfully patched);
+			});*/
 	}
 
 }

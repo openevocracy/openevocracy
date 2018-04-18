@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
 import { Topic } from '../_models/topic';
@@ -12,9 +11,7 @@ import { HttpManagerService } from './http-manager.service';
 @Injectable()
 export class TopicService {
 
-	constructor(
-		private http: Http,
-		private httpManagerService: HttpManagerService) { }
+	constructor(private httpManagerService: HttpManagerService) { }
 	
 	vote(tid: string, uid: string) {
 		return this.httpManagerService.post('/json/topic-vote', {'tid': tid, 'uid': uid});

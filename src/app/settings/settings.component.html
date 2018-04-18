@@ -1,13 +1,18 @@
 <mat-toolbar color="primary" [ngClass]="'stage'+topic?.stage">
 	<div class="flex container">
+		<h1>{{ 'SETTINGS_TITLE' | translate }}</h1>
 		<span class="flex-spacer"></span>
-		<button mat-button title="Speichern"><fa-icon [icon]="faSave"></fa-icon> {{ 'SAVE' | translate }}</button>
+		<button mat-button title="Speichern" (click)="submitForm()"><fa-icon [icon]="faSave"></fa-icon> {{ 'SAVE' | translate }}</button>
 	</div>
 </mat-toolbar>
 
 <div class="container">
 	<mat-tab-group>
 		<mat-tab label="Benutzerkonto">
+			<h3>Your ID:</h3>
+			<strong>{{ uid }}</strong>
+			
+			<h3>Your credentials:</h3>
 			<form [formGroup]="settingsForm" (ngSubmit)="onSubmit()" novalidate>
 				<p>
 					<mat-form-field>

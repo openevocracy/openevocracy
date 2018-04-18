@@ -200,9 +200,10 @@ app.all('/*', function(req, res, next) {
 
 var httpServer = http.createServer(app);
 httpServer.listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+	console.log('Express server listening on port ' + app.get('port'));
 });
 
-var io = require('socket.io')(httpServer, {secure: true});
+var io = require('socket.io')(httpServer);
+//var io = require('socket.io')(httpServer, {secure: true});
 var padServer = pads.startPadServer(io);
-var chatServer = chats.startChatServer(io);
+//var chatServer = chats.startChatServer(io);

@@ -1,9 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 
 import { FormBuilder, FormGroup } from '@angular/forms';
-/*import 'rxjs/add/operator/debounceTime'
-import 'rxjs/add/operator/distinctUntilChanged';*/
 
 import { CountdownComponent } from '../countdown/countdown.component';
 
@@ -11,6 +9,8 @@ import { TopicService } from '../_services/topic.service';
 
 import { C } from '../../../shared/constants';
 import { Topic } from '../_models/topic';
+
+import * as io from 'socket.io-client';
 
 import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
 import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
@@ -27,11 +27,12 @@ import { faSitemap } from '@fortawesome/free-solid-svg-icons';
 	templateUrl: './topic.component.html',
 	styleUrls: ['./topic.component.scss']
 })
-export class TopicComponent implements OnInit {
+export class TopicComponent implements OnInit, OnDestroy {
 	private C;
 	private tid: string;
 	private topic: Topic;
 	private editorForm: FormGroup;
+	private socket;
 	
 	faHandPaper = faHandPaper;
 	faExpandArrowsAlt = faExpandArrowsAlt;
@@ -55,6 +56,8 @@ export class TopicComponent implements OnInit {
 		
 		this.topicService.getTopic(this.tid).subscribe(res => {
 			this.topic = new Topic(res);
+			
+			this.initalizeSocket();
 		});
 		
 		this.editorForm = this.fb.group({
@@ -62,8 +65,31 @@ export class TopicComponent implements OnInit {
    	});
 	}
 	
+	ngOnDestroy() {
+		this.socket.disconnect();
+	}
+	
+	private initalizeSocket() {
+		this.socket = io.connect('https://develop.openevocracy.org');
+		
+		this.socket.on('setContents', function(contents) {
+			console.log('setContents', contents);
+		});
+		
+		this.socket.on('change', function(change) {
+			console.log('change', change);
+		});
+		
+		this.socket.emit('pad_identity', {'pid': this.topic.pid});
+	}
+	
 	private contentChanged(e) {
 		console.log(e);
+		
+		if(e.source != 'user')
+			return;
+		
+		this.socket.emit('change', e.delta);
 	}
 	
 	private setText(text) {
