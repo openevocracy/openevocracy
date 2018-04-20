@@ -4,7 +4,6 @@
 	"HEADER_MAINMENU_SETTINGS": "Settings",
 	"HEADER_MAINMENU_LOGOUT": "Logout",
 	"HEADER_MAINMENU_LANGUAGE": "Select language",
-	"HEADER_MAINMENU_SETTINGS": "Settings",
 	
 	"FOOTER_MENU_ABOUT": "About",
 	"FOOTER_MENU_IMPRESS": "Imprint",
@@ -60,6 +59,10 @@
 	"TOPIC_SUBTITLE_2": "at",
 	"TOPIC_SUBTITLE_3": "on",
 	
+	"SETTINGS_TAB_TITLE_ACCOUNT": "User account",
+	"SETTINGS_ACCOUNT_TITLE_ID": "Your identification number",
+	"SETTINGS_ACCOUNT_TITLE_CREDENTIALS": "Your credentials",
+	
 	"USER_PASSWORT_NOT_CORRECT": "Password is not correct. Did you <a href=\"{{email}}\">forget your password</a>?",
 	"USER_FORM_EMAIL_MISSING": "You did not enter an email address.",
 	"USER_FORM_VALIDATION_ERROR": "There was something wrong with the entered data. Please check your input again.",
@@ -73,8 +76,7 @@
 	"USER_ACCOUNT_VERIFICATION_LINK_SENT": "To verify your email address, we've sent an email to you. Please check your inbox and click the containing link.",
 	"USER_ACCOUNT_VERIFICATION_SUCCESS": "Congratulations, you're verified! Log in and welcome at Evocracy.",
 	"USER_ACCOUNT_VERIFICATION_ERROR": "The verification key is not correct.",
-	"USER_ACCOUNT_EMAIL_UPDATED": "The entered email-address was updated sucessfully.",
-	"USER_ACCOUNT_PASSWORD_UPDATED": "The entered password was updated sucessfully.",
+	"USER_ACCOUNT_UPDATED": "Your account was successfully updated.",
 	"USER_ACCOUNT_PASSWORD_RESET": "A new password was sent to &raquo;{{email}}&laquo;. You should immediately change your password after log in.",
 	"USER_ACCOUNT_LOGOUT_SUCCESS": "You have sucessfully been logged out.",
 	

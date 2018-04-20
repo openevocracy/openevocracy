@@ -19,6 +19,7 @@ body.modal-open { overflow: hidden; }
 .flex-spacer { flex: 1 1 auto; }
 .text-muted { color: $grey700; }
 .mat-form-field { width: 100%; }
+.alert-box { margin-top: 15px; }
 
 /* Alert and Modal close button */
 button.close { padding: 0; background: transparent; border: 0; }

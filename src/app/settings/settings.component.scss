@@ -1,0 +1,12 @@
+/* Import variables */
+@import "~styles/variables";
+
+/* Form */
+
+app-settings .mat-form-field { max-width: 600px; width: 600px; }
+
+app-settings .mat-form-field.ng-dirty .mat-form-field-underline { background-color: $orange500; }
+app-settings .mat-form-field.ng-dirty .mat-form-field-label { color: $orange500; }
+
+app-settings .mat-form-field.ng-invalid .mat-form-field-underline { background-color: $red500; }
+app-settings .mat-form-field.ng-invalid .mat-form-field-label { color: $red500; }

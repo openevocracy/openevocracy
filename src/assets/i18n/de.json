@@ -4,7 +4,6 @@
 	"HEADER_MAINMENU_SETTINGS": "Einstellungen",
 	"HEADER_MAINMENU_LOGOUT": "Logout",
 	"HEADER_MAINMENU_LANGUAGE": "Sprache wählen",
-	"HEADER_MAINMENU_SETTINGS": "Einstellungen",
 	
 	"FOOTER_MENU_ABOUT": "Über uns",
 	"FOOTER_MENU_IMPRESS": "Impressum",
@@ -60,6 +59,10 @@
 	"TOPIC_SUBTITLE_2": "um",
 	"TOPIC_SUBTITLE_3": "am",
 	
+	"SETTINGS_TAB_TITLE_ACCOUNT": "Benutzerkonto",
+	"SETTINGS_ACCOUNT_TITLE_ID": "Deine Identifikationsnummer",
+	"SETTINGS_ACCOUNT_TITLE_CREDENTIALS": "Deine Zugangsdaten",
+	
 	"USER_PASSWORT_NOT_CORRECT": "Das Passwort ist nicht korrekt. Hast du dein <a href=\"{{email}}\">Passwort vergessen</a>?",
 	"USER_FORM_EMAIL_MISSING": "Du hast keine E-Mail-Adresse eingegeben.",
 	"USER_FORM_VALIDATION_ERROR": "Deine Eingabe war nicht ganz korrekt, prüfe deine Änderung nochmal auf Richtigkeit.",
@@ -73,8 +76,7 @@
 	"USER_ACCOUNT_VERIFICATION_LINK_SENT": "Zur Verifizierung deiner E-Mail-Adresse haben wir dir eine E-Mail gesendet. Schau in deinem Posteingang nach und klick auf den enthaltenen Link.",
 	"USER_ACCOUNT_VERIFICATION_SUCCESS": "Glückwunsch, du bist verifiziert! Log dich ein und sei herzlich Willkommen bei Evocracy.",
 	"USER_ACCOUNT_VERIFICATION_ERROR": "Die Verifikationsnummer ist nicht korrekt.",
-	"USER_ACCOUNT_EMAIL_UPDATED": "Die eingegebene E-Mail-Adresse wurde erfolgreich aktualisiert.",
-	"USER_ACCOUNT_PASSWORD_UPDATED": "Das eingegebene Passwort wurde erfolgreich aktualisiert",
+	"USER_ACCOUNT_UPDATED": "Dein Benutzerkonto wurde erfolgreich aktualisiert.",
 	"USER_ACCOUNT_PASSWORD_RESET": "An die E-Mail-Adresse &raquo;{{email}}&laquo; wurde ein neues Passwort versendet. Du solltest das Passwort direkt beim nächsten Login wieder ändern.",
 	"USER_ACCOUNT_LOGOUT_SUCCESS": "Du wurdest erfolgreich ausgeloggt.",
 	

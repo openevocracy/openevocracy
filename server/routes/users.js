@@ -304,52 +304,54 @@ exports.settings = function(req, res) {
 
 // PATCH /json/user/settings/:id
 exports.update = function(req, res) {
-    var uid = ObjectId(req.user._id);
-    var userUpdate = req.body;
-    var validation = null;
-        
-    // E-mail was updated
-    if(_.has(userUpdate, 'email')) {
-        // Validate email using parseley
-        validation = validate(_.pick(userUpdate, 'email'), { email: { presence: true, email: true } });
-        
-        if(!_.isUndefined(validation)) {
-            // If email is NOT valid
-            utils.sendAlert(res, 200, 'danger', 'USER_FORM_VALIDATION_ERROR_EMAIL');
-        } else {
-            // If email is valid
-            db.collection('users')
-                .updateAsync({ '_id': uid }, { $set: _.pick(userUpdate, "email") })
-                .then(function() {
-                    utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_EMAIL_UPDATED');
-                });
-        }
-    }
-    
-    // Language was updated
-    if(_.has(userUpdate, 'lang')) {
-        db.collection('users')
-            .updateAsync({ '_id': uid }, { $set: _.pick(userUpdate, "lang") })
-            .then(function() {
-                utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_LANG_UPDATED');
-            });
-    }
-    
-    // Password was updated
-    if(_.has(userUpdate, 'password')) {
-        // Validate password using parseley (no whitespace)
-        validation = validate(_.pick(userUpdate, 'password'), { 'password': { presence: true, format: /^\S+$/ } });
-        
-        if(!_.isUndefined(validation)) {
-            // If password is NOT valid
-            utils.sendAlert(res, 200, 'danger', 'USER_FORM_VALIDATION_ERROR_PASSWORD');
-        } else {
-            // If password is valid
-            savePasswordInDatabaseAsync(uid, userUpdate['password']).then(function() {
-                utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_UPDATED');
-            });
-        }
-    }
+	var uid = ObjectId(req.params.id);
+	var userUpdate = req.body;
+	var validation = null;
+	
+	var emailPromise;
+	var passwordPromise;
+	  
+	// E-mail was updated
+	if(_.has(userUpdate, 'email')) {
+		// Validate email using parseley
+		validation = validate(_.pick(userUpdate, 'email'), { email: { presence: true, email: true } });
+		
+		if(!_.isUndefined(validation))
+			utils.sendAlert(res, 200, 'danger', 'USER_FORM_VALIDATION_ERROR_EMAIL');
+		else
+			emailPromise = db.collection('users').updateAsync({ '_id': uid }, { $set: _.pick(userUpdate, 'email') });
+	       /*.then(function() {
+	           utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_EMAIL_UPDATED');
+	       });*/
+	}
+	 
+	 // Language was updated
+	 /*if(_.has(userUpdate, 'lang')) {
+	     db.collection('users')
+	         .updateAsync({ '_id': uid }, { $set: _.pick(userUpdate, 'lang') })
+	         .then(function() {
+	             utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_LANG_UPDATED');
+	         });
+	 }*/
+	 
+	 // Password was updated
+	if(_.has(userUpdate, 'password')) {
+		// Validate password using parseley (no whitespace)
+		validation = validate(_.pick(userUpdate, 'password'), { 'password': { presence: true, format: /^\S+$/ } });
+		
+		console.log(userUpdate.password);
+		
+		if(!_.isUndefined(validation))
+			utils.sendAlert(res, 200, 'danger', 'USER_FORM_VALIDATION_ERROR_PASSWORD');
+		else
+		   passwordPromise = savePasswordInDatabaseAsync(uid, userUpdate.password);/*.then(function() {
+		       utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_UPDATED');
+		   });*/
+	}
+	 
+	Promise.all([emailPromise, passwordPromise]).then(function() {
+		utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_UPDATED');
+	});
 };
 
 // GET /json/user/navi

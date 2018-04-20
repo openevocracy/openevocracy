@@ -1,34 +1,42 @@
 <mat-toolbar color="primary" [ngClass]="'stage'+topic?.stage">
 	<div class="flex container">
-		<h1>{{ 'SETTINGS_TITLE' | translate }}</h1>
+		<h1>{{ 'HEADER_MAINMENU_SETTINGS' | translate }}</h1>
 		<span class="flex-spacer"></span>
-		<button mat-button title="Speichern" (click)="submitForm()"><fa-icon [icon]="faSave"></fa-icon> {{ 'SAVE' | translate }}</button>
+		<button mat-button title="Speichern" (click)="onSubmit()" [disabled]="settingsForm.invalid || disableButton">
+			<fa-icon *ngIf="showSpinner" [icon]="faSpinner" [spin]="true"></fa-icon>
+			<fa-icon *ngIf="!showSpinner" [icon]="faSave"></fa-icon>
+			<span> {{ 'SAVE' | translate }}</span>
+		</button>
 	</div>
 </mat-toolbar>
 
+<div class="container alert-box">
+	<alert></alert>
+</div>
+
 <div class="container">
 	<mat-tab-group>
-		<mat-tab label="Benutzerkonto">
-			<h3>Your ID:</h3>
+		<mat-tab label="{{ 'SETTINGS_TAB_TITLE_ACCOUNT' | translate }}">
+			<h3>{{ 'SETTINGS_ACCOUNT_TITLE_ID' | translate }}:</h3>
 			<strong>{{ uid }}</strong>
 			
-			<h3>Your credentials:</h3>
-			<form [formGroup]="settingsForm" (ngSubmit)="onSubmit()" novalidate>
+			<h3>{{ 'SETTINGS_ACCOUNT_TITLE_CREDENTIALS' | translate }}:</h3>
+			<form [formGroup]="settingsForm" novalidate>
 				<p>
 					<mat-form-field>
-						<input matInput formControlName="email" type="email" placeholder="{{ 'FORM_LABEL_MAIL' | translate }}" required>
+						<input matInput formControlName="email" type="email" placeholder="{{ 'FORM_LABEL_MAIL' | translate }}">
 					</mat-form-field>
 				</p>
 				
 				<p formGroupName="passwords">
 					<mat-form-field>
-						<input matInput formControlName="password" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD' | translate }}" required>
+						<input matInput formControlName="password" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD' | translate }}">
 					</mat-form-field>
 				</p>
 				
 				<p formGroupName="passwords">
 					<mat-form-field>
-						<input matInput formControlName="passwordrep" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD_REP' | translate }}" required>
+						<input matInput formControlName="passwordrep" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD_REP' | translate }}">
 					</mat-form-field>
 				</p>
 			</form>
