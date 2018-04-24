@@ -111,7 +111,7 @@ app.get('/file/topic/final/:id', auth(), topics.final);
 // ### P R O P O S A L S ###
 // #########################
 
-app.get('/json/proposal/create/:id', auth(), proposals.create);
+app.post('/json/proposal/create', auth(), proposals.create);
 app.get('/json/proposal/:id', auth(), proposals.query);
 
 // ###################

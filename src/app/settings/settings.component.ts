@@ -89,8 +89,7 @@ export class SettingsComponent implements OnInit {
 				this.settingsForm.reset();
 				this.getFormData();
 				
-				// Enable button
-				this.disableButton = false;
+				// Disable spinner
 				this.showSpinner = false;
 				
 				// Show alert

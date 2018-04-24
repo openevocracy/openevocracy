@@ -20,9 +20,9 @@ var DEBUG_CONFIG = {
     
     GROUP_SIZE: 3, // Minimum 3
     
-    DURATION_SELECTION : 9999*ONE_MIN,
+    DURATION_SELECTION : 1*ONE_MIN, // actually 9999*ONE_MIN
     DURATION_PROPOSAL  : 9999*ONE_MIN,
-    DURATION_LEVEL     : 1*ONE_MIN,
+    DURATION_LEVEL     : 99999*ONE_MIN,
     DURATION_NONE      : -1,
     
     // Time before end

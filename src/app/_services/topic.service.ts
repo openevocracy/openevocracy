@@ -13,19 +13,19 @@ export class TopicService {
 
 	constructor(private httpManagerService: HttpManagerService) { }
 	
-	vote(tid: string, uid: string) {
+	public vote(tid: string, uid: string) {
 		return this.httpManagerService.post('/json/topic-vote', {'tid': tid, 'uid': uid});
 	}
 	
-	unvote(tid: string, uid: string) {
+	public unvote(tid: string, uid: string) {
 		return this.httpManagerService.post('/json/topic-unvote', {'tid': tid, 'uid': uid});
 	}
 	
-	addTopic(topicName: string) {
+	public addTopic(topicName: string) {
 		return this.httpManagerService.post('/json/topic', {'name': topicName});
 	}
 	
-	getTopic(tid): Observable<Topic> {
+	public getTopic(tid): Observable<Topic> {
 		return this.httpManagerService.get('/json/topic/' + tid);
 	}
 

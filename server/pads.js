@@ -20,8 +20,6 @@ var gulf = promisify(gulf);
 var pdfConvertAsync = Promise.promisify(pdf.convert);
 
 // all pads will be initialized with this
-// TODO allow individual starttext for every type of pad
-// TODO think about language handling
 var starttext = {
     "ops": [ { "insert": "\n" } ]
 };
@@ -70,6 +68,7 @@ function gulfIO(masterDoc, slaveSocket) {
     // slaveDoc -> quill
     slaveDoc._setContent = function(contents) {
         console.log('setContents', JSON.stringify(contents));
+        
         slaveSocket.emit('setContents', contents);
         return Promise.resolve();
     };
@@ -180,9 +179,7 @@ function getPadDocAsync(pad) {
 
 exports.startPadServer = function(io) {
     io.on('connection', function(socket) {
-        console.log('io: connection');
         socket.on('pad_identity', function(identity) {
-            console.log('socket: pad_identity');
             getPadAsync(ObjectId(identity.pid)).then(getPadDocAsync).then(function(masterDoc) {
                 gulfIO(masterDoc, socket);
             });

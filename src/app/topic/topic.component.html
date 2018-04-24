@@ -9,8 +9,16 @@
 			<p *ngIf="topic?.stage == C.STAGE_REJECTED">{{ topic?.stageName | translate }}, {{ topic?.rejectedReason | translate }}</p>
 		</div>
 		<span class="flex-spacer"></span>
-		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_SELECTION" title="Als relevant markieren"><fa-icon [icon]="faHandPaper"></fa-icon></button>
-		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && true" title="Vorschlag erstellen"><fa-icon [icon]="faFileMedical"></fa-icon></button>
+		<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION" title="Als relevant markieren">
+			<span><fa-icon [icon]="faHandPaper"></fa-icon> Relevance</span>
+		</button>
+		<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == meUid" title="Edit" (click)="toggleDescriptionEdit()">
+			<span *ngIf="!descriptionEdit"><fa-icon [icon]="faEdit"></fa-icon> Edit</span>
+			<span *ngIf="descriptionEdit"><fa-icon [icon]="faSave"></fa-icon> Save</span>
+		</button>
+		<button mat-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && !topic?.ppid" title="Vorschlag erstellen" (click)="createProposal()">
+			<span><fa-icon [icon]="faFileMedical"></fa-icon> Create proposal</span>
+		</button>
 		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PASSED" title="Ergebnis herunterladen"><fa-icon [icon]="faDownload"></fa-icon></button>
 		<button mat-icon-button *ngIf="topic?.stage >= C.STAGE_CONSENSUS || topic?.stage == C.STAGE_REJECTED" title="Prozessübersicht"><fa-icon [icon]="faSitemap"></fa-icon></button>
 		<button mat-icon-button (click)="enterFullscreen()" title="Productive mode"><fa-icon [icon]="faExpandArrowsAlt"></fa-icon></button>
@@ -25,18 +33,22 @@
 	</div>
 </mat-toolbar>
 
+<div class="container alert-box">
+	<alert></alert>
+</div>
+
 <div class="container">
 	<mat-tab-group>
-		<mat-tab label="Beschreibung">
-			<form [formGroup]="editorForm">
-				<quill-editor formControlName="editor" [style]="{height: '300px'}" (onContentChanged)="contentChanged($event)"></quill-editor>
-			</form>
-			<!--<div [innerHtml]="topic?.body"></div>-->
+		<mat-tab label="{{ 'TOPIC_TAB_LABEL_DESCRIPTION' | translate }}">
+			<div *ngIf="!descriptionEdit" [innerHtml]="topic?.body"></div>
+			<quill-editor *ngIf="descriptionEdit" [style]="{height: '300px'}" (onEditorCreated)="editorCreated($event, topic?.pid)" (onContentChanged)="contentChanged($event)"></quill-editor>
 		</mat-tab>
 		<!--<mat-tab label="Referenzen">Referenzen</mat-tab>-->
-		<mat-tab label="Mein Vorschlag" *ngIf="topic?.stage == C.STAGE_PROPOSAL">Mein Vorschlag</mat-tab>
-		<mat-tab label="Meine Gruppe" *ngIf="topic?.stage == C.STAGE_CONSENSUS">Meine Gruppe</mat-tab>
+		<mat-tab label="{{ 'TOPIC_TAB_LABEL_PROPOSAL' | translate }}" *ngIf="topic?.stage == C.STAGE_PROPOSAL && topic?.ppid">
+			<quill-editor *ngIf="topic?.stage == C.STAGE_PROPOSAL" [style]="{height: '300px'}" (onEditorCreated)="editorCreated($event, topic?.ppid)" (onContentChanged)="contentChanged($event)"></quill-editor>
+		</mat-tab>
+		<mat-tab label="{{ 'TOPIC_TAB_LABEL_GROUP' | translate }}" *ngIf="topic?.stage == C.STAGE_CONSENSUS">Meine Gruppe</mat-tab>
 		<!--<mat-tab label="Statistik">Statistik</mat-tab>-->
-		<mat-tab label="Ergebnis" *ngIf="topic?.stage == C.STAGE_PASSED"><div [innerHtml]="topic?.finalDocument"></div></mat-tab>
+		<mat-tab label="{{ 'TOPIC_TAB_LABEL_RESULT' | translate }}" *ngIf="topic?.stage == C.STAGE_PASSED"><div [innerHtml]="topic?.finalDocument"></div></mat-tab>
 	</mat-tab-group>
 </div>

@@ -8,34 +8,36 @@ var utils = require('../utils');
 var pads = require('../pads');
 
 exports.create = function(req, res) {
-    var tid = ObjectId(req.params.id);
-    var uid = ObjectId(req.user._id);
-    
-    db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
-        // Check if topic is at least in proposal stage to show proposal
-        if(topic.stage < C.STAGE_PROPOSAL)
-            return utils.rejectPromiseWithAlert(400, 'danger', 'TOPIC_REQUIREMENT_PROPOSAL_STAGE');
-        return topic;
-    }).then(function(topic) {
-        // Get proposal or create proposal if it does not exist
-        // From http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
-        var create_proposal_promise =
-        db.collection('proposals').findAndModifyAsync(
-            { 'tid':tid, 'source':uid },[],
-            { $setOnInsert: {pid: ObjectId()}},
-            { new: true, upsert: true }).get('value');
-        
-        return Promise.join(topic, create_proposal_promise);
-    }).spread(function(topic, proposal) {
-        return pads.createPadIfNotExistsAsync(proposal.pid, topic.nextDeadline).
-        then(function() {
-            proposal.body = pads.getPadHTMLAsync(proposal.pid);
-            proposal.expired = false;
-            
-            return Promise.props(proposal);
-        });
-    }).then(_.bind(res.json,res))
-      .catch(utils.isOwnError,utils.handleOwnError(res));
+	var tid = ObjectId(req.body.tid);
+	var uid = ObjectId(req.body.uid);
+	
+	db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
+		// Check if topic is at least in proposal stage to show proposal
+		if(topic.stage < C.STAGE_PROPOSAL)
+		   return utils.rejectPromiseWithAlert(400, 'danger', 'TOPIC_REQUIREMENT_PROPOSAL_STAGE');
+		return topic;
+	}).then(function(topic) {
+		// Get proposal or create proposal if it does not exist
+		// From http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
+		var create_proposal_promise =
+		db.collection('proposals').findAndModifyAsync(
+			{ 'tid': tid, 'source': uid },[],
+			{ $setOnInsert: { 'pid': ObjectId() }},
+			{ new: true, upsert: true }).get('value');
+		
+		return Promise.join(topic, create_proposal_promise);
+	}).spread(function(topic, proposal) {
+		return pads.createPadIfNotExistsAsync(proposal.pid, topic.nextDeadline).
+		then(function() {
+			proposal.body = pads.getPadHTMLAsync(proposal.pid);
+			proposal.expired = false;
+			
+			return Promise.props(proposal);
+		});
+	}).then(function(proposal) {
+		utils.sendAlert(res, 200, 'success', 'PROPOSAL_CREATED');
+		return;
+	}).catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
 exports.query = function(req, res) {
