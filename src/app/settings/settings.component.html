@@ -5,7 +5,7 @@
 		<button mat-button title="Speichern" (click)="onSubmit()" [disabled]="settingsForm.invalid || disableButton">
 			<fa-icon *ngIf="showSpinner" [icon]="faSpinner" [spin]="true"></fa-icon>
 			<fa-icon *ngIf="!showSpinner" [icon]="faSave"></fa-icon>
-			<span> {{ 'SAVE' | translate }}</span>
+			<span> {{ 'SETTINGS_BUTTON_SAVE' | translate }}</span>
 		</button>
 	</div>
 </mat-toolbar>

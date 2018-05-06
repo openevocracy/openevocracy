@@ -12,7 +12,6 @@
 	"FORM_LABEL_MAIL": "Your email address:",
 	"FORM_LABEL_PASSWORD": "Your password:",
 	"FORM_LABEL_PASSWORD_REP": "Repeat your password",
-	"FORM_ERROR_PASSWORDS_NO_MATCH": "Passwords do not match",
 	
 	"MODAL_CREATE_NEW_TOPIC": "Create new topic",
 	"MODAL_NEW_TOPIC_NAME": "Name of the new topic (min. {{numChars}} characters)",
@@ -31,7 +30,6 @@
 	"LOGIN_FORM_PASSWORD_FORGET_PREFIX": "Forgot your password?",
 	"LOGIN_FORM_PASSWORD_FORGET_LINK": "Get a new one",
 	"LOGIN_FORM_PASSWORD_FORGET_SUFFIX": ".",
-	"LOGIN_FORM_NEW_PASSWORD": "Get a new password",
 	
 	"REGISTER_FORM_TITLE": "Register",
 	"REGISTER_FORM_SUBMIT": "Register",
@@ -46,25 +44,21 @@
 	"STAGE_CONSENSUS": "Consensus stage",
 	"STAGE_PASSED": "Passed",
 	
-	"STAGE_COUNTDOWN_INTRO": ", next phase in:",
-	"STAGE_COUNTDOWN_HOURS": " {{hh}}:{{mm}}:{{ss}}",
-	"STAGE_COUNTDOWN_ONE_DAY": " 1 day +{{hh}}:{{mm}}:{{ss}}",
-	"STAGE_COUNTDOWN_DAYS": " {{dd}} days",
 	"STAGE_COUNTDOWN_DAYS_LEFT": "{{dd}} days remaining",
 	"STAGE_COUNTDOWN_HOURS_LEFT": "{{hh}} hrs. remaining",
 	"STAGE_COUNTDOWN_MINUTES_LEFT": "{{mm}} min. remaining",
 	"STAGE_COUNTDOWN_SECONDS_LEFT": "{{ss}} sec. remaining",
-	
 	"TOPIC_SUBTITLE_1": "ends on",
 	"TOPIC_SUBTITLE_2": "at",
 	"TOPIC_SUBTITLE_3": "on",
+	"TOPICLIST_BUTTON_ADD": "Add topic",
 	
 	"SETTINGS_TAB_TITLE_ACCOUNT": "User account",
 	"SETTINGS_ACCOUNT_TITLE_ID": "Your identification number",
 	"SETTINGS_ACCOUNT_TITLE_CREDENTIALS": "Your credentials",
+	"SETTINGS_BUTTON_SAVE": "Save",
 	
 	"USER_PASSWORT_NOT_CORRECT": "Password is not correct. Did you <a href=\"{{email}}\">forget your password</a>?",
-	"USER_FORM_EMAIL_MISSING": "You did not enter an email address.",
 	"USER_FORM_VALIDATION_ERROR": "There was something wrong with the entered data. Please check your input again.",
 	"USER_FORM_VALIDATION_ERROR_EMAIL": "The entered email address does not meet the necessary form, please check it.",
 	"USER_FORM_VALIDATION_ERROR_PASSWORD": "The entered password does not meet the necessary form, please check it.<br/>Hint: whitespace is not allowed.",
@@ -78,14 +72,10 @@
 	"USER_ACCOUNT_VERIFICATION_ERROR": "The verification key is not correct.",
 	"USER_ACCOUNT_UPDATED": "Your account was successfully updated.",
 	"USER_ACCOUNT_PASSWORD_RESET": "A new password was sent to &raquo;{{email}}&laquo;. You should immediately change your password after log in.",
-	"USER_ACCOUNT_LOGOUT_SUCCESS": "You have sucessfully been logged out.",
+	"USER_ACCOUNT_LANG_UPDATED": "The language was successfully changed.",
 	
 	"PROPOSAL_QUERIED_NOT_IN_PROPOSAL_STAGE": "The related topic is not in proposal stage any more.",
 	"GROUP_QUERIED_NOT_ACTIVE": "The group is not active any more.",
-	
-	"DEFAULT_TOPIC_TEXT": "Our suggestion: Write a short summary on top of your topic description, such that other readers can get a quick overview.",
-	"DEFAULT_PROPOSAL_TEXT": "Our suggestion: Write a short summary on top of your proposal, such that other readers can get a quick overview.",
-	"DEFAULT_GROUP_TEXT": "Our suggestion: Write a short summary on top of your document, such that other readers can get a quick overview. Also add a section in the end where you collect all aspects where no consensus was achieved, such that further groups can consider those aspects easier.",
 	
 	"TOPIC_NOT_FOUND": "Topic not found.",
 	"TOPIC_NOT_AUTHORISIZED_FOR_UPDATE": "Only the author can update the topic.",
@@ -98,9 +88,5 @@
 	"REJECTED_NOT_ENOUGH_VOTES": "Not enough participants in selection stage",
 	"REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Not enough valid proposals in proposal stage",
 	"REJECTED_UNSUFFICIENT_RATINGS": "Unsufficient ratings in groups",
-	"REJECTED_NO_VALID_GROUP_PROPOSAL": "No valid proposals in groups",
-	
-	"ADD_TOPIC": "Add topic",
-	"REFRESH_LIST": "Refresh list",
-	"SAVE": "Save"
+	"REJECTED_NO_VALID_GROUP_PROPOSAL": "No valid proposals in groups"
 }

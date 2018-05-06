@@ -7,9 +7,10 @@ var BASE_URL = 'https://develop.openevocracy.org';
 var DATABASE_HOST = 'mongodb://127.0.0.1/evocracy';
 
 var DEBUG_CONFIG = {
-    DEBUG: true,
-    MAIL: true,
-    CRON_INTERVAL: 1, // run cron every x minute(s)
+    DEBUG:         true,
+    MAIL:          true,
+    CRON_INTERVAL: 1,  // Run cron every x minute(s)
+    ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
     
     MIN_VOTES_PER_TOPIC : 1,
     MIN_GROUPS_PER_TOPIC: 1,
@@ -41,6 +42,7 @@ var RELEASE_CONFIG = {
     DEBUG : false,
     MAIL: true,
     CRON_INTERVAL: 1, // run cron every x minute(s)
+    ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
     
     MIN_VOTES_PER_TOPIC : 1,
     

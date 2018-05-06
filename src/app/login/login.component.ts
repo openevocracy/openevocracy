@@ -7,8 +7,9 @@ import { ActivatedRoute } from '@angular/router';
 import { ModalService } from '../_services/modal.service';
 import { UserService } from '../_services/user.service';
 import { AlertService } from '../_services/alert.service';
-import { TranslateService } from '@ngx-translate/core';
+import { HttpManagerService } from '../_services/http-manager.service';
 import { EmailModalService } from '../_services/modal.email.service';
+import { LanguageService } from '../_services/language.service';
 
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
@@ -29,31 +30,32 @@ export class LoginComponent implements OnInit, OnDestroy {
 	faSpinner = faSpinner;
 
 	constructor(
-		public user: UserService,
+		public userService: UserService,
 		private fb: FormBuilder,
-		private alert: AlertService,
-		private modal: ModalService,
+		private alertService: AlertService,
+		private modalService: ModalService,
+		private httpManagerService: HttpManagerService,
+		private languageService: LanguageService,
 		private activatedRoute: ActivatedRoute,
-		private translate: TranslateService,
 		private emailModalService: EmailModalService) {
 			
 		this.createForm();
 		
 		this.modalSubscription = this.emailModalService.getEmail().subscribe(email => {
 			// First clear old alerts
-			this.alert.clear();
+			this.alertService.clear();
 			
 			var key = this.lastAlertKey;
 			
 			if(key == "USER_ACCOUNT_NOT_VERIFIED") {
-				this.user.sendVerificationMailAgain(email).subscribe(res => {
-					this.alert.alertFromServer(res.alert);
+				this.userService.sendVerificationMailAgain(email).subscribe(res => {
+					this.alertService.alertFromServer(res.alert);
 				});
 			}
 			
 			if(key == "USER_PASSWORT_NOT_CORRECT") {
-				this.user.sendNewPassword(email).subscribe(res => {
-					this.alert.alertFromServer(res.alert);
+				this.userService.sendNewPassword(email).subscribe(res => {
+					this.alertService.alertFromServer(res.alert);
 				});
 			}
 			
@@ -73,13 +75,13 @@ export class LoginComponent implements OnInit, OnDestroy {
 				return;
 				
 			// Send verification to server and check
-			this.user.verifyEmail(params.v).subscribe(res => {
+			this.userService.verifyEmail(params.v).subscribe(res => {
 				
 				// Set email form field to email from parameter
 				this.loginForm.patchValue({'email': params.m});
 				
 				// Set alert message
-				this.alert.alertFromServer(res.alert);
+				this.alertService.alertFromServer(res.alert);
 			});
 		});
 	}
@@ -110,8 +112,11 @@ export class LoginComponent implements OnInit, OnDestroy {
 			
 			var self = this;
 			// Check login server side and handle login
-			this.user.authenticate(credentials)
-				.subscribe(res => {}, error => {
+			this.userService.authenticate(credentials)
+				.subscribe(res => {
+					// Initalize language for fresh logged in user
+					this.languageService.setClientLanguage();
+				}, error => {
 					// Store alert.content to direct link, if alert contains one
 					self.lastAlertKey = error.alert.content;
 					
@@ -128,12 +133,12 @@ export class LoginComponent implements OnInit, OnDestroy {
 		var key = this.lastAlertKey;
 		
 		if(key == "USER_ACCOUNT_NOT_VERIFIED") {
-			this.modal.open({'email': email, 'title': 'MODAL_SEND_VERIFICATION_MAIL_AGAIN'});
+			this.modalService.open({'email': email, 'title': 'MODAL_SEND_VERIFICATION_MAIL_AGAIN'});
 			return;
 		}
 		
 		if(key == "USER_PASSWORT_NOT_CORRECT") {
-			this.modal.open({'email': email, 'title': 'MODAL_REQUEST_NEW_PASSWORD'});
+			this.modalService.open({'email': email, 'title': 'MODAL_REQUEST_NEW_PASSWORD'});
 			return;
 		}
 		
@@ -147,7 +152,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 		this.lastAlertKey = "USER_PASSWORT_NOT_CORRECT"
 		
 		// Open modal with proper title
-		this.modal.open({'email': '', 'title': 'MODAL_REQUEST_NEW_PASSWORD'});
+		this.modalService.open({'email': '', 'title': 'MODAL_REQUEST_NEW_PASSWORD'});
 	}
 	
 	private startMutationObserver() {

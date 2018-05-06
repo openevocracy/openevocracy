@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { TopicListElement } from '../_models/topic-list-element';
+import { TopicListElement } from '../_models/topiclist-element';
 
 import { HttpManagerService } from './http-manager.service';
 
@@ -14,6 +14,6 @@ export class TopicsListService {
 		private httpManagerService: HttpManagerService) { }
 		
 	getTopicsList(): Observable<TopicListElement[]> {
-		return this.httpManagerService.get('/json/topics');
+		return this.httpManagerService.get('/json/topiclist');
 	}
 }

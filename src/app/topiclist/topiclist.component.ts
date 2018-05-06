@@ -4,13 +4,13 @@ import { Router } from '@angular/router';
 
 import { CountdownComponent } from '../countdown/countdown.component';
 
-import { TopicListElement } from '../_models/topic-list-element';
+import { TopicListElement } from '../_models/topiclist-element';
 import { C } from '../../../shared/constants';
 import * as _ from 'underscore';
 
 import { TopicService } from '../_services/topic.service';
 import { UserService } from '../_services/user.service';
-import { TopicsListService } from '../_services/topics-list.service';
+import { TopicsListService } from '../_services/topiclist.service';
 import { ModalService } from '../_services/modal.service';
 
 import { faHandPaper } from '@fortawesome/free-solid-svg-icons';

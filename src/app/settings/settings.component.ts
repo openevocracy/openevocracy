@@ -93,7 +93,6 @@ export class SettingsComponent implements OnInit {
 				this.showSpinner = false;
 				
 				// Show alert
-				this.alertService.clear();
 				this.alertService.alertFromServer(res.alert);
 			});
 	}

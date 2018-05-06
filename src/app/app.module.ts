@@ -38,7 +38,7 @@ import { TopiclistComponent } from './topiclist/topiclist.component';
 import { TopicComponent } from './topic/topic.component';
 
 // Services
-import { TopicsListService } from './_services/topics-list.service';
+import { TopicsListService } from './_services/topiclist.service';
 import { TopicService } from './_services/topic.service';
 import { HttpManagerService } from './_services/http-manager.service';
 import { Guard } from './_services/guard.service';
@@ -47,6 +47,7 @@ import { AlertService } from './_services/alert.service';
 import { ModalService } from './_services/modal.service';
 import { EmailModalService } from './_services/modal.email.service';
 import { UtilsService } from './_services/utils.service';
+import { LanguageService } from './_services/language.service';
 
 // Shared
 //import { cfg } from './_shared/config';
@@ -106,6 +107,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		ModalService,
 		EmailModalService,
 		UtilsService,
+		LanguageService,
 		{ provide: 'cfg', useValue: cfg },
 		{ provide: 'C', useValue: C }
 	],

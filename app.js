@@ -98,7 +98,7 @@ function auth() {
 	return passport.authenticate('jwt', { session: false });
 }
 
-app.get('/json/topics', auth(), topics.list);
+app.get('/json/topiclist', auth(), topics.list);
 app.patch('/json/topic/:id', auth(), topics.update);
 app.get('/json/topic/:id', auth(), topics.query);
 app.post('/json/topic', auth(), topics.create);
@@ -163,9 +163,17 @@ app.post('/json/auth/password', users.sendPassword);
 app.get('/json/user/profile/:id', auth(), users.query);
 app.get('/json/user/navi', auth(), users.navigation);
 
-// Get and edit own profile
+// @desc: Get settings form values from specific user in order to edit them
 app.get('/json/user/settings/:id', auth(), users.settings);
+
+// @desc: Patch new user settings
 app.patch('/json/user/settings/:id', auth(), users.update);
+
+// @desc: Get user language
+app.get('/json/user/lang/:id', auth(), users.getLanguage);
+
+// @desc: Store chosen user language in databse for email translation
+app.post('/json/user/lang', auth(), users.setLanguage);
 
 // ###################
 // ###   T E S T   ###

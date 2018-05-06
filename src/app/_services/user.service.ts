@@ -81,7 +81,7 @@ export class UserService {
 	}
 	
 	public sendNewPassword(email) {
-		return this.httpManagerService.post('/json/auth/password', {'email': email})
+		return this.httpManagerService.post('/json/auth/password', {'email': email});
 	}
 	
 	public logout() {

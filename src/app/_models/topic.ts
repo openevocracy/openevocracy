@@ -1,4 +1,4 @@
-import { TopicListElement } from './topic-list-element';
+import { TopicListElement } from './topiclist-element';
 import * as _ from 'underscore';
 
 import { C } from '../../../shared/constants';

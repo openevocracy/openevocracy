@@ -23,13 +23,6 @@
 		</mat-form-field>
 	</p>
 	
-	<!--span *ngIf="!registerForm.passwords.valid" class="help-block text-danger">
-		from https://stackoverflow.com/questions/35474991/angular-2-form-validating-for-repeat-password
-		<div *ngIf="registerForm.passwords?.errors?.areEqual">
-			{{ 'FORM_ERROR_PASSWORDS_NO_MATCH' | translate }}
-		</div>
-	</span-->
-	
 	<button mat-raised-button color="primary" type="submit" [disabled]="registerForm.invalid">
 		<span>{{ 'REGISTER_FORM_SUBMIT' | translate }}</span>
 	</button>

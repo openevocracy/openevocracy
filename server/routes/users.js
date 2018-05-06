@@ -255,7 +255,7 @@ exports.verifyEmail = function(req, res) {
 	// The verification key equals the user id. If the user id (verification key) exists
 	// and the 'verified' variable can be set, the user is verified
 	db.collection('users').updateAsync(
-		{'_id': uid}, { $set: {verified: true} }, {}
+		{'_id': uid}, { $set: { 'verified': true } }, {}
 	).then(function(user) {
 		if(user.result.nModified == 0) {
 			// If no modification was done, send error message
@@ -325,15 +325,6 @@ exports.update = function(req, res) {
 	       });*/
 	}
 	 
-	 // Language was updated
-	 /*if(_.has(userUpdate, 'lang')) {
-	     db.collection('users')
-	         .updateAsync({ '_id': uid }, { $set: _.pick(userUpdate, 'lang') })
-	         .then(function() {
-	             utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_LANG_UPDATED');
-	         });
-	 }*/
-	 
 	 // Password was updated
 	if(_.has(userUpdate, 'password')) {
 		// Validate password using parseley (no whitespace)
@@ -351,6 +342,26 @@ exports.update = function(req, res) {
 	 
 	Promise.all([emailPromise, passwordPromise]).then(function() {
 		utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_UPDATED');
+	});
+};
+
+// GET /json/user/lang/:id
+exports.getLanguage = function(req, res) {
+	var uid = ObjectId(req.params.id);
+	
+	db.collection('users')
+		.findOneAsync({ '_id': uid },  { 'lang': true })
+		.then(res.send.bind(res));
+};
+
+// POST /json/user/lang
+exports.setLanguage = function(req, res) {
+	var uid = ObjectId(req.body.uid);
+	var lang = req.body.lang;
+	
+	db.collection('users')
+		.updateAsync({ '_id': uid }, { $set: { 'lang': lang } }).then(function(test) {
+			utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_LANG_UPDATED');
 	});
 };
 

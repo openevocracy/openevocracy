@@ -16,7 +16,7 @@ export class AlertService {
 	constructor(
 		private router: Router,
 		private translate: TranslateService) {
-		// clear alert messages on route change unless 'keepAfterRouteChange' flag is true
+		// Clear alert messages on route change unless 'keepAfterRouteChange' flag is true
 		router.events.subscribe(event => {
 			if (event instanceof NavigationStart) {
 				if (this.keepAfterRouteChange) {

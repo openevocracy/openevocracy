@@ -5,6 +5,8 @@ import { Component, OnInit } from '@angular/core';
 import { Alert, AlertType } from '../_models/alert';
 import { AlertService } from '../_services/alert.service';
 
+import { cfg } from '../../../shared/config';
+
 @Component({
 	selector: 'alert',
 	templateUrl: './alert.component.html',
@@ -25,6 +27,11 @@ export class AlertComponent implements OnInit {
 			
 			// Add alert to array
 			this.alerts.push(alert);
+			
+			// Remove alert automatically after some time
+			setTimeout(function(){
+				this.alerts.shift();
+			}.bind(this), cfg.ALERT_REMOVAL_TIME);
 		});
 	}
 	
