@@ -3,6 +3,7 @@ import { Http, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import { Router } from '@angular/router';
 
+import { UtilsService } from './utils.service';
 import { HttpManagerService } from './http-manager.service';
 
 import { cfg } from '../../../shared/config';
@@ -19,6 +20,7 @@ export class UserService {
 	constructor(
 		private http: Http,
 		private router: Router,
+		private utilsService: UtilsService,
 		private httpManagerService: HttpManagerService) {}
 	
 	public getUserId() {
@@ -73,7 +75,9 @@ export class UserService {
 	}
 	
 	public register(credentials) {
-		return this.httpManagerService.post('/json/auth/register', credentials);
+		let langKey = this.utilsService.getBrowserLanguage();
+		let user = _.extend(credentials, {'lang': langKey});
+		return this.httpManagerService.post('/json/auth/register', user);
 	}
 	
 	public sendVerificationMailAgain(email) {

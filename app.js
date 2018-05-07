@@ -1,7 +1,3 @@
-/**
- * Module dependencies.
- */
-
 var Promise = require('bluebird');
 var favicon = require('serve-favicon');
 var session = require('express-session')
@@ -29,10 +25,10 @@ var passport = require('passport');
 
 var cfg = require('./shared/config').cfg;
 
-// initialize mail
+// Initalize mail
 mail.initializeMail();
 
-// import routes
+// Import routes
 var users = require('./server/routes/users');
 var topics = require('./server/routes/topics');
 var groups = require('./server/routes/groups');
@@ -40,19 +36,11 @@ var proposals = require('./server/routes/proposals');
 var ratings = require('./server/routes/ratings');
 var tests = require('./server/routes/tests');
 
-// set passport strategy
+// Set passport strategy
 var strategy = users.getStrategy();
 passport.use(strategy);
 
-/*passport.serializeUser(function(user, done) {
-	done(null, user._id);
-});
-
-passport.deserializeUser(function(uid, done) {
-	db.collection('users').findOne(done);
-});*/
-
-// all environments
+// All express environments
 app.set('port', process.env.PORT);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -66,15 +54,16 @@ app.use(methodOverride());
 var distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
 
-// setup cronjob to run every minute
+// Setup cronjob to run every minute
 var job = new CronJob({
-  cronTime: '*/'+cfg.CRON_INTERVAL+' * * * *',
-  onTick: function() {
-      topics.manageAndListTopicsAsync().then(function(topics) {
-        _.map(topics, mail.sendTopicReminderMessages); // Promise.map does not work above
-      });
-  },
-  start: true
+	cronTime: '*/'+cfg.CRON_INTERVAL+' * * * *',
+	onTick: function() {
+		topics.manageAndListTopicsAsync().then(function(topics) {
+			// FIXME: An error could occur if i18n and mail initialization is not ready when cronjob runs for the first time
+			_.map(topics, mail.sendTopicReminderMessages); // Promise.map does not work above
+		});
+	},
+	start: true
 });
 job.start();
 

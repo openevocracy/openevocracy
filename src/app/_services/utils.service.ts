@@ -24,5 +24,14 @@ export class UtilsService {
 			}
 		}
 	}
+	
+	/*
+	 * @desc: Get language from browser
+	 * Remark: this function cannot be in language service, because of circular dependencies
+	 */ 
+	public getBrowserLanguage() {
+		let browserLang = navigator.language || navigator['userLanguage'];
+		return browserLang.split('-')[0];
+	}
 
 }

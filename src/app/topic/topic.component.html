@@ -4,31 +4,31 @@
 			<h1>{{topic?.name}}</h1>
 			<p *ngIf="topic?.stage != C.STAGE_REJECTED && topic?.stage != C.STAGE_PASSED">
 				{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_1' | translate }} {{ topic?.nextDeadline | date:'y-MM-dd' }} {{ 'TOPIC_SUBTITLE_2' | translate }} {{ topic?.nextDeadline | date:'HH:mm:ss' }} (<countdown [time]="topic?.nextDeadline"></countdown>)
-				</p>
+			</p>
 			<p *ngIf="topic?.stage == C.STAGE_PASSED">{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_3' | translate }} {{ topic?.stagePassedStarted | date:'y-MM-dd' }}</p>
 			<p *ngIf="topic?.stage == C.STAGE_REJECTED">{{ topic?.stageName | translate }}, {{ topic?.rejectedReason | translate }}</p>
 		</div>
 		<span class="flex-spacer"></span>
-		<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION" title="Als relevant markieren">
-			<span><fa-icon [icon]="faHandPaper"></fa-icon> Relevance</span>
+		<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION" title="{{ 'TOPIC_BUTTON_MARK_RELEVANT' | translate }}">
+			<span><fa-icon [icon]="faHandPaper"></fa-icon> {{ 'TOPIC_BUTTON_MARK_RELEVANT' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == meUid" title="Edit" (click)="toggleDescriptionEdit()">
-			<span *ngIf="!descriptionEdit"><fa-icon [icon]="faEdit"></fa-icon> Edit</span>
-			<span *ngIf="descriptionEdit"><fa-icon [icon]="faSave"></fa-icon> Save</span>
+		<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == meUid" title="{{ 'TOPIC_BUTTON_EDIT' | translate }}" (click)="toggleDescriptionEdit()">
+			<span *ngIf="!descriptionEdit"><fa-icon [icon]="faEdit"></fa-icon> {{ 'TOPIC_BUTTON_EDIT' | translate }}</span>
+			<span *ngIf="descriptionEdit"><fa-icon [icon]="faSave"></fa-icon> {{ 'TOPIC_BUTTON_SAVE' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && !topic?.ppid" title="Vorschlag erstellen" (click)="createProposal()">
-			<span><fa-icon [icon]="faFileMedical"></fa-icon> Create proposal</span>
+		<button mat-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && !topic?.ppid" title="{{ 'PROPOSAL_BUTTON_CREATE' | translate }}" (click)="createProposal()">
+			<span><fa-icon [icon]="faFileMedical"></fa-icon> {{ 'PROPOSAL_BUTTON_CREATE' | translate }}</span>
 		</button>
-		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PASSED" title="Ergebnis herunterladen"><fa-icon [icon]="faDownload"></fa-icon></button>
-		<button mat-icon-button *ngIf="topic?.stage >= C.STAGE_CONSENSUS || topic?.stage == C.STAGE_REJECTED" title="Prozessübersicht"><fa-icon [icon]="faSitemap"></fa-icon></button>
-		<button mat-icon-button (click)="enterFullscreen()" title="Productive mode"><fa-icon [icon]="faExpandArrowsAlt"></fa-icon></button>
+		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PASSED" title="{{ 'TOPIC_BUTTON_RESULT_DOWNLOAD' | translate }}"><fa-icon [icon]="faDownload"></fa-icon></button>
+		<button mat-icon-button *ngIf="topic?.stage >= C.STAGE_CONSENSUS || topic?.stage == C.STAGE_REJECTED" title="{{ 'TOPIC_BUTTON_STRUCTURE' | translate }}"><fa-icon [icon]="faSitemap"></fa-icon></button>
+		<button mat-icon-button (click)="enterFullscreen()" title="{{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}"><fa-icon [icon]="faExpandArrowsAlt"></fa-icon></button>
 		
 		<button mat-icon-button [matMenuTriggerFor]="more">
 			<fa-icon [icon]="faEllipsisV"></fa-icon>
 		</button>
 		<mat-menu #more="matMenu" [overlapTrigger]="false">
-			<button mat-menu-item><fa-icon [icon]="faUser"></fa-icon> Autor</button>
-			<button mat-menu-item><fa-icon [icon]="faShareSquare"></fa-icon> Teilen</button>
+			<button mat-menu-item><fa-icon [icon]="faUser"></fa-icon> {{ 'TOPIC_BUTTON_AUTHOR' | translate }}</button>
+			<button mat-menu-item><fa-icon [icon]="faShareSquare"></fa-icon> {{ 'TOPIC_BUTTON_SHARE' | translate }}</button>
 		</mat-menu>
 	</div>
 </mat-toolbar>

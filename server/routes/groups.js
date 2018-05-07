@@ -4,14 +4,11 @@ var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var Chance = require('chance');
 var Color = require('color');
-var bcrypt = require('bcrypt');
 //var requirejs = require('requirejs');
-var strformat = require('strformat');
 
 var C = require('../../shared/constants').C;
 //var cfg = requirejs('public/js/setup/configs');
 var cfg = require('../../shared/config').cfg;
-var i18n = require('../i18n');
 var ratings = require('./ratings');
 var topics = require('./topics');
 var pads = require('../pads');
@@ -140,10 +137,9 @@ exports.createGroupsAsync = function(topic) {
         var send_mail_promise =
         db.collection('users').find({'_id': { $in: group_members }},{'email': true}).
         toArrayAsync().then(function(users) {
-            mail.sendMail(_.pluck(users,'email'),
-                strformat(i18n.t('EMAIL_CONSENSUS_START_SUBJECT'), topic.name),
-                strformat(i18n.t('EMAIL_CONSENSUS_START_MESSAGE'), topic.name, gid.toString())
-            );
+            mail.sendMailMulti(users,
+                'EMAIL_CONSENSUS_START_SUBJECT', [topic.name],
+                'EMAIL_CONSENSUS_START_MESSAGE', [topic.name, gid.toString(), cfg.BASE_URL]);
         });
         
         // store group in database
@@ -233,10 +229,9 @@ exports.remixGroupsAsync = function(topic) {
                 }).then(function(participants) {
                     return db.collection('users').find({'_id': { $in: _.pluck(participants, 'uid') }}, {'email': true}).
                         toArrayAsync().then(function(users) {
-                            mail.sendMail(_.pluck(users,'email'),
-                                strformat(i18n.t('EMAIL_TOPIC_PASSED_SUBJECT'), topic.name),
-                                strformat(i18n.t('EMAIL_TOPIC_PASSED_MESSAGE'), topic.name, topic._id)
-                            );
+                            mail.sendMailMulti(users,
+                                'EMAIL_TOPIC_PASSED_SUBJECT', [topic.name],
+                                'EMAIL_TOPIC_PASSED_MESSAGE', [topic.name, topic._id, cfg.BASE_URL]);
                         });
                 }).return({'nextStage': C.STAGE_PASSED});
         }
@@ -260,10 +255,9 @@ exports.remixGroupsAsync = function(topic) {
             var send_mail_promise =
             db.collection('users').find({'_id': { $in: group_members }},{'email': true}).
             toArrayAsync().then(function(users) {
-                mail.sendMail(_.pluck(users,'email'),
-                    strformat(i18n.t('EMAIL_LEVEL_CHANGE_SUBJECT'), topic.name),
-                    strformat(i18n.t('EMAIL_LEVEL_CHANGE_MESSAGE'), topic.name, gid.toString())
-                );
+                mail.sendMailMulti(users,
+                    'EMAIL_LEVEL_CHANGE_SUBJECT', [topic.name],
+                    'EMAIL_LEVEL_CHANGE_MESSAGE', [topic.name, gid.toString(), cfg.BASE_URL]);
             });
             
             // register as sink for source proposals

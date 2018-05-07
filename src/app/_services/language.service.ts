@@ -1,39 +1,55 @@
 import { Injectable } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, LangChangeEvent } from '@ngx-translate/core';
 
 import { AlertService } from './alert.service';
 import { UserService } from './user.service';
+import { UtilsService } from './utils.service';
 import { HttpManagerService } from './http-manager.service';
+
+import * as _ from 'underscore';
 
 @Injectable()
 export class LanguageService {
-	
-	private uid: string;
 
 	constructor(
 		private translateService: TranslateService,
 		private httpManagerService: HttpManagerService,
 		private userService: UserService,
-		private alertService: AlertService) {
+		private utilsService: UtilsService,
+		private alertService: AlertService) {}
 		
-		this.uid = this.userService.getUserId();
+	private getUid() {
+		return this.userService.getUserId();
 	}
 	
-	// @desc: Set language by lang key
+	// desc: Initializes translation after startup
+	public initializeTranslation() {
+		// This language will be used as a fallback when a translation isn't found in the current language
+		this.translateService.setDefaultLang('en');
+		
+		// Take lang from local storage, otherwise take browser lang
+		// If browser lang is not available, it will fall back to default lang
+		let key = localStorage.getItem('language') || this.utilsService.getBrowserLanguage();
+		this.translateService.use(key);
+	}
+	
+	// @desc: Set language by lang key, done after user interaction
 	public setLanguage(key) {
 		// Update language
 		this.translateService.use(key);
 		// Set/Update language in local storage for later use
 		localStorage.setItem('language', key);
 		// Update user language to server
-		this.httpManagerService.post('/json/user/lang', {'uid': this.uid, 'lang': key})
+		this.httpManagerService.post('/json/user/lang', {'uid': this.getUid(), 'lang': key})
 			.subscribe(res => this.alertService.alertFromServer(res.alert));
 	}
 	
-	// @desc: Get language from server and update client language
-	//        They should ideally already be the same
+	/*
+	 * @desc: Get language from server and update client language
+	 * They should ideally already be the same
+	 */
 	public setClientLanguage() {
-		this.httpManagerService.get('/json/user/lang/' + this.uid)
+		this.httpManagerService.get('/json/user/lang/' + this.getUid())
 			.subscribe(res => {
 				// Update language
 				this.translateService.use(res.lang);

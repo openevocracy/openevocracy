@@ -3,33 +3,20 @@ var bcrypt = require('bcrypt');
 var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
-//var requirejs = require('requirejs');
 var validate = require('validate.js');
-var strformat = require('strformat');
 
 var passportJWT = require("passport-jwt");
 var ExtractJwt = passportJWT.ExtractJwt;
 var JwtStrategy = passportJWT.Strategy;
 var jwt = require('jsonwebtoken');
 
-var i18n = require('../i18n');
-var topics = require('./topics');
 var mail = require('../mail');
 var utils = require('../utils');
 
 var C = require('../../shared/constants').C;
-//var cfg = requirejs('public/js/setup/configs');
 var cfg = require('../../shared/config').cfg;
 
-// cookie config, delte after 01.05.2018
-/*var config = {
-    port: 3000,
-    sessionSecret: 'bb-login-secret',
-    cookieSecret: 'bb-login-secret',
-    cookieMaxAge: (1000 * 60 * 60 * 24 * 36)
-};*/
-
-// initialize jwt authentification
+// Initialize jwt authentification
 var jwtOptions = {};
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
 jwtOptions.secretOrKey = bcrypt.genSaltSync(8);
@@ -54,7 +41,7 @@ function savePasswordInDatabaseAsync(uid, password) {
 }
 
 function getUserByMailAsync(email) {
-    return db.collection('users').findOneAsync({'email': email}, {'_id': true});
+    return db.collection('users').findOneAsync({'email': email}, {'_id': true, 'email': true, 'lang': true});
 }
 
 // POST /api/auth/login
@@ -127,40 +114,42 @@ exports.sendVerificationMailAgain = function(req, res) {
 };
 
 function sendVerificationMail(user) {
-    mail.sendMail(user.email,
-        i18n.t('EMAIL_REGISTRATION_SUBJECT'),
-        strformat(i18n.t('EMAIL_REGISTRATION_MESSAGE'), cfg.BASE_URL, user._id.toString(), user.email)
-    );
+	mail.sendMail(user,
+		'EMAIL_REGISTRATION_SUBJECT', [],
+		'EMAIL_REGISTRATION_MESSAGE', [cfg.BASE_URL, user._id.toString(), user.email]);
 }
 
 // @desc: Send a mail containing a new password for the user with the specific email
 exports.sendPassword = function(req, res) {
-    // Get email from request
+	// Get email from request
 	var email = req.body.email;
-    
-    getUserByMailAsync(email).then(function(user) {
-        // Break if no user was found
-        if(_.isNull(user)) {
-            utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', {'email': email});
-            return;
-        }
-        
-        // Generate new password
-        var password = Math.random().toString(36).slice(2);
-        
-        // Send password via email to user
-        mail.sendMail(email, i18n.t('EMAIL_PASSWORD_RESET_SUBJECT'),
-            strformat(i18n.t('EMAIL_PASSWORD_RESET_MESSAGE'), password));
-        
-        // Save new password in database and send response
-        return savePasswordInDatabaseAsync(user._id, password).then(function() {
-            utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_RESET', {'email': email});
-        });
-    });
+	
+	getUserByMailAsync(email).then(function(user) {
+		// Break if no user was found
+		if(_.isNull(user)) {
+			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', {'email': email});
+			return;
+		}
+		
+		// Generate new password
+		var password = Math.random().toString(36).slice(2);
+		
+		// Send password via email to user
+		mail.sendMail(user,
+			'EMAIL_PASSWORD_RESET_SUBJECT', [],
+			'EMAIL_PASSWORD_RESET_MESSAGE', [password]);
+		
+		// Save new password in database and send response
+		return savePasswordInDatabaseAsync(user._id, password).then(function() {
+			utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_RESET', {'email': email});
+		});
+	});
 };
 
 // @desc: Register a new user
 exports.register = function(req, res) {
+	var langKey = req.body.lang;
+	
 	if(req.body.email && req.body.password){
 		var email = req.body.email;
 		var password = req.body.password;
@@ -197,7 +186,8 @@ exports.register = function(req, res) {
 			email: email,
 			password: bcrypt.hashSync(password, 8),
 			salt: bcrypt.genSaltSync(8),
-			verified: false
+			verified: false,
+			lang: langKey
 		};
 	
 		// Add user to database and return user

@@ -41,15 +41,15 @@ export class Topic extends TopicListElement {
 	private getStageName() {
 		switch(this.stage) {
 			case C.STAGE_SELECTION:
-				return "STAGE_SELECTION";
+				return "TOPIC_STAGE_SELECTION";
 			case C.STAGE_PROPOSAL:
-				return "STAGE_PROPOSAL";
+				return "TOPIC_STAGE_PROPOSAL";
 			case C.STAGE_CONSENSUS:
-				return "STAGE_CONSENSUS";
+				return "TOPIC_STAGE_CONSENSUS";
 			case C.STAGE_PASSED:
-				return "STAGE_PASSED";
+				return "TOPIC_STAGE_PASSED";
 			case C.STAGE_REJECTED:
-				return "STAGE_REJECTED";
+				return "TOPIC_STAGE_REJECTED";
 		}
 	}
 	

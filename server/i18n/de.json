@@ -1,13 +1,34 @@
 {
     "EMAIL_ALL_LAZY_GROUP_MEMBERS_SUBJECT": "Inaktivitätserinnerung für deine Gruppe: {0}",
-    "EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE": "Hi,\n\n you are a member of a group in {0}. You were not active for 5 days in your group.\n Let's have a look at your common document, probably someone added something new.",
+    "EMAIL_ALL_LAZY_GROUP_MEMBERS_MESSAGE": "Hi,\n\ndu bist gerade in einer Gruppe zum Thema {0} aktiv. Du warst seit {1} nicht mehr aktiv in deiner Gruppe.\nSchau mal wieder in euer kollaborative Dokument rein.\n",
     
-    "EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT": "Vorschlag Erinnerung: {0}",
+    "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_SUBJECT": "Erinnerung an deine Gruppe: {0}",
+    "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_MESSAGE": "Hi,\n\ndu bist gerade in einer Gruppe zum Thema {0} aktiv. Das aktuelle Level wird in {1} beendet sein.\nWir empfehlen dir das kollaborative Dokument nochmal zu lesen um letzte Fehler in eurer gemeinsamen Arbeit verbessern zu können, bevor das Dokument geschlossen wird.\n",
+    
+    "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_SUBJECT": "Erinnerung an deine Gruppe: {0}",
+    "EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_MESSAGE": "Hi,\n\ndu bist gerade in einer Gruppe zum Thema {0} aktiv. Das aktuelle Level wird in {1} beendet sein.\nWir empfehlen zum jetzigen Zeitpunkt die letzten Arbeiten abzuschließen, da das Dokument nach Ablauf der Zeit nicht mehr zu editieren sein wird.\n",
+    
+    "EMAIL_RATING_REMINDER_GROUP_MEMBERS_SUBJECT": "Erinnerung an deine Bewertung: {0}",
+    "EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Bisher hat niemand in der Gruppe eine Bewertung abgegeben.\n Gib den anderen Mitgliedern der Gruppe eine Bewertung, um einen passenden Repräsentanten zu finden.\n",
+    
+    "EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT": "Erinnerung an deinen Vorschlag: {0}",
     "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Für dieses Thema wird in drei Tagen die Konsensphase starten.\n Es wird empfohlen, den eingereichten Vorschlag abschließend zu prüfen.",
     
-    "EMAIL_PASSWORD_RESET_SUBJECT": "Neues Passwort",
-    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n du hast dir ein neues Passwort zusenden lassen. Dein temporäres Passwort lautet:\n\n{0}\n\n Wir empfehlen dir das Passwort direkt nach dem nächsten Login wieder auf ein Passwort deiner Wahl zu ändern.",
+    "EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT": "Erinnerung an deinen Vorschlag: {0}",
+    "EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE": "Hi,\n\ndu bist Teilnehmer am Thema {0}. Das Thema wird die Konsensphase in {1} erreichen.\nWir empfehlen dir deinen Vorschlag nochmal zu lesen um letzte Fehler verbessern zu können, bevor das Dokument geschlossen wird.\n",
     
-    "EMAIL_RATING_REMINDER_GROUP_MEMBERS_SUBJECT": "Bewertungs Erinnerung: {0}",
-    "EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Bisher hat niemand in der Gruppe eine Bewertung abgegeben.\n Gib den anderen Mitgliedern der Gruppe eine Bewertung, um einen passenden Repräsentanten zu finden.\n"
+    "EMAIL_CONSENSUS_START_SUBJECT": "{0} hat die Konsensphase erreicht",
+    "EMAIL_CONSENSUS_START_MESSAGE": "Hi,\n\ndas Thema {0} hat gerade die Konsensphase erreicht. Du wurdest Gruppe #{1} zugewiesen. Du und deine anderen vier Mitglieder der Gruppe werdet ab sofort gemeinsam an einem kollaborativen Dokument arbeiten.\n\nHier geht es direkt zur Gruppe:\n{2}/group/{1}\n\nDanke für deine Beteiligung!\n",
+    
+    "EMAIL_TOPIC_PASSED_SUBJECT": "{0} ist beendet",
+    "EMAIL_TOPIC_PASSED_MESSAGE": "Hi,\n\ndas Thema {0} ist soeben zum Ende gekommen.\nHier kannst du direkt das Ergebnis anschauen:\n{2}/file/topic/final/{1}\n\nDane für deine Beteiligung!\n",
+    
+    "EMAIL_LEVEL_CHANGE_SUBJECT": "{0} hat das nächste Level erreicht",
+    "EMAIL_LEVEL_CHANGE_MESSAGE": "Hi,\n\ndas Thema {0} hat das nächste Lebel erreicht und du wirst wieder dabei sein.\nDu wurdest Gruppe #{1} zugewiesen. Du und deine anderen vier Mitglieder der Gruppe werdet erneut gemeinsam an einem kollaborativen Dokument arbeiten.\n\nHier geht es direkt zur Gruppe:\n{2}/group/{1}\n\nDanke für deine Beteiligung!\n",
+    
+    "EMAIL_REGISTRATION_SUBJECT": "Deine Registrierung bei Evocracy",
+    "EMAIL_REGISTRATION_MESSAGE": "Willkommen bei Evocracy,\n\nDu hast gerade auf {0} ein Benutzerkonto erstellt. Bitte bestätige deine E-Mail-Adresse, indem du auf folgenden Link klickst:\n\n{0}/login?v={1}&m={2}\n\nFalls du dich hier nicht registriert hast, ignodiere diese E-Mail einfach.\n",
+    
+    "EMAIL_PASSWORD_RESET_SUBJECT": "Neues Passwort",
+    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n du hast dir ein neues Passwort zusenden lassen. Dein temporäres Passwort lautet:\n\n{0}\n\n Wir empfehlen dir das Passwort direkt nach dem nächsten Login wieder auf ein Passwort deiner Wahl zu ändern."
 }
