@@ -7,12 +7,14 @@ import { Guard } from '../_services/guard.service';
 import { SecureComponent } from '../secure/secure.component';
 import { TopiclistComponent } from '../topiclist/topiclist.component';
 import { TopicComponent } from '../topic/topic.component';
+import { EditorComponent } from '../editor/editor.component';
 import { SettingsComponent } from '../settings/settings.component';
 
 const appChildRoutes: Routes = [
 	{ path: '', redirectTo: 'topics', pathMatch: 'full' },
 	{ path: 'topics', component: TopiclistComponent },
 	{ path: 'topic/:id', component: TopicComponent },
+	{ path: 'editor/:id', component: EditorComponent },
 	{ path: 'settings/:id', component: SettingsComponent }
 ];
 

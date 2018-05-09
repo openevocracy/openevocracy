@@ -54,6 +54,7 @@ import { LanguageService } from './_services/language.service';
 import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 import { SettingsComponent } from './settings/settings.component';
+import { EditorComponent } from './editor/editor.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -76,7 +77,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 		ModalAddtopicComponent,
 		TopicComponent,
 		CountdownComponent,
-		SettingsComponent
+		SettingsComponent,
+		EditorComponent
 	],
 	imports: [
 		BrowserModule,

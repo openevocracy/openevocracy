@@ -1,0 +1,14 @@
+<mat-toolbar color="primary">
+	<div class="flex container">
+		<div id="toolbar"></div>
+		<span class="saved-text">{{ savedStatus | translate }}</span>
+		<span class="flex-spacer"></span>
+		<button mat-button *ngIf="source" title="{{ 'EDITOR_BUTTON_CLOSE' | translate }}" [routerLink]="source">
+			<span><fa-icon [icon]="faTimes"></fa-icon> {{ 'EDITOR_BUTTON_CLOSE' | translate }}</span>
+		</button>
+	</div>
+</mat-toolbar>
+
+<div class="container">
+	<quill-editor [modules]="quillModule" [style]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event, pid)" (onContentChanged)="contentChanged($event)"></quill-editor>
+</div>

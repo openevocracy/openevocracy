@@ -81,7 +81,6 @@
 	"TOPIC_REQUIREMENT_PROPOSAL_STAGE": "Topic must be at least in proposal stage.",
 	"TOPIC_BUTTON_MARK_RELEVANT": "Mark as relavant",
 	"TOPIC_BUTTON_EDIT": "Edit",
-	"TOPIC_BUTTON_SAVE": "Save",
 	"TOPIC_BUTTON_RESULT_DOWNLOAD": "Download result",
 	"TOPIC_BUTTON_STRUCTURE": "Process overview",
 	"TOPIC_BUTTON_AUTHOR": "Author",
@@ -98,6 +97,10 @@
 	"PROPOSAL_CREATE": "Create proposal",
 	
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Productive mode",
+	
+	"EDITOR_BUTTON_CLOSE": "Close",
+	"EDITOR_SAVED_CHANGES": "All changes are saved.",
+	"EDITOR_UNSAVED_CHANGES": "Saving ...",
 	
 	"REJECTED_NOT_ENOUGH_VOTES": "Not enough participants in selection stage",
 	"REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Not enough valid proposals in proposal stage",

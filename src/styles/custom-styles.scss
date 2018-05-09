@@ -31,3 +31,10 @@ div.hspace { float: left; overflow: hidden; height: 1px; width: 0px; }
 
 /* Misc */
 .alert a { color: $black; }
+
+/* Quill editor overwrites */
+.ql-container.ql-snow, .ql-toolbar.ql-snow { border: none; }
+.ql-container { font-size: 1.5rem; font-family: 'Roboto'; }
+.ql-container.ql-snow { background-color: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+.ql-editor { padding: 50px; }
+.ql-editor.ql-blank::before { left: 50px; }

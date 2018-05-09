@@ -12,10 +12,6 @@
 		<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION" title="{{ 'TOPIC_BUTTON_MARK_RELEVANT' | translate }}">
 			<span><fa-icon [icon]="faHandPaper"></fa-icon> {{ 'TOPIC_BUTTON_MARK_RELEVANT' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == meUid" title="{{ 'TOPIC_BUTTON_EDIT' | translate }}" (click)="toggleDescriptionEdit()">
-			<span *ngIf="!descriptionEdit"><fa-icon [icon]="faEdit"></fa-icon> {{ 'TOPIC_BUTTON_EDIT' | translate }}</span>
-			<span *ngIf="descriptionEdit"><fa-icon [icon]="faSave"></fa-icon> {{ 'TOPIC_BUTTON_SAVE' | translate }}</span>
-		</button>
 		<button mat-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && !topic?.ppid" title="{{ 'PROPOSAL_BUTTON_CREATE' | translate }}" (click)="createProposal()">
 			<span><fa-icon [icon]="faFileMedical"></fa-icon> {{ 'PROPOSAL_BUTTON_CREATE' | translate }}</span>
 		</button>
@@ -40,14 +36,21 @@
 <div class="container">
 	<mat-tab-group>
 		<mat-tab label="{{ 'TOPIC_TAB_LABEL_DESCRIPTION' | translate }}">
-			<div *ngIf="!descriptionEdit" [innerHtml]="topic?.body"></div>
-			<quill-editor *ngIf="descriptionEdit" [style]="{height: '300px'}" (onEditorCreated)="editorCreated($event, topic?.pid)" (onContentChanged)="contentChanged($event)"></quill-editor>
+			<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == uid" title="{{ 'TOPIC_BUTTON_EDIT' | translate }}" (click)="openEditor(topic.pid)">
+				<span><fa-icon [icon]="faEdit"></fa-icon> {{ 'TOPIC_BUTTON_EDIT' | translate }}</span>
+			</button>
+			<div [innerHtml]="topic?.body"></div>
 		</mat-tab>
 		<!--<mat-tab label="Referenzen">Referenzen</mat-tab>-->
 		<mat-tab label="{{ 'TOPIC_TAB_LABEL_PROPOSAL' | translate }}" *ngIf="topic?.stage == C.STAGE_PROPOSAL && topic?.ppid">
-			<quill-editor *ngIf="topic?.stage == C.STAGE_PROPOSAL" [style]="{height: '300px'}" (onEditorCreated)="editorCreated($event, topic?.ppid)" (onContentChanged)="contentChanged($event)"></quill-editor>
+			<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == uid" title="{{ 'TOPIC_BUTTON_EDIT' | translate }}" (click)="openEditor(topic.ppid)">
+				<span><fa-icon [icon]="faEdit"></fa-icon> {{ 'TOPIC_BUTTON_EDIT' | translate }}</span>
+			</button>
+			Mein Proposal
 		</mat-tab>
-		<mat-tab label="{{ 'TOPIC_TAB_LABEL_GROUP' | translate }}" *ngIf="topic?.stage == C.STAGE_CONSENSUS">Meine Gruppe</mat-tab>
+		<mat-tab label="{{ 'TOPIC_TAB_LABEL_GROUP' | translate }}" *ngIf="topic?.stage == C.STAGE_CONSENSUS">
+			Meine Gruppe
+		</mat-tab>
 		<!--<mat-tab label="Statistik">Statistik</mat-tab>-->
 		<mat-tab label="{{ 'TOPIC_TAB_LABEL_RESULT' | translate }}" *ngIf="topic?.stage == C.STAGE_PASSED"><div [innerHtml]="topic?.finalDocument"></div></mat-tab>
 	</mat-tab-group>

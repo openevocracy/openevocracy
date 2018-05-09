@@ -1,0 +1,10 @@
+/* Import variables */
+@import "~styles/variables";
+
+.saved-text {
+	font-weight: 300;
+	font-size: 1.3rem;
+	line-height: 40px;
+	padding-top: 8px;
+	color: $grey100;
+}

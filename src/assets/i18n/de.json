@@ -81,7 +81,6 @@
 	"TOPIC_REQUIREMENT_PROPOSAL_STAGE": "Das Thema muss sich mindestens in der Vorschlagphase befinden.",
 	"TOPIC_BUTTON_MARK_RELEVANT": "Als relevant markieren",
 	"TOPIC_BUTTON_EDIT": "Bearbeiten",
-	"TOPIC_BUTTON_SAVE": "Speichern",
 	"TOPIC_BUTTON_RESULT_DOWNLOAD": "Ergebnis runterladen",
 	"TOPIC_BUTTON_STRUCTURE": "Prozessübersicht",
 	"TOPIC_BUTTON_AUTHOR": "Autor",
@@ -98,6 +97,10 @@
 	"PROPOSAL_CREATE": "Vorschlag erstellen",
 	
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Produktivmodus",
+	
+	"EDITOR_BUTTON_CLOSE": "Schließen",
+	"EDITOR_SAVED_CHANGES": "Alle Änderungen sind gespeichert.",
+	"EDITOR_UNSAVED_CHANGES": "Speichert ...",
 	
 	"REJECTED_NOT_ENOUGH_VOTES": "Nicht genügend Teilnehmer in der Selektionsphase",
 	"REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Nicht genügend gültige Entwürfe in der Vorschlagsphase",

@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs/Subscription';
-import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { UserService } from '../_services/user.service';
@@ -20,7 +19,6 @@ export class RegisterComponent implements OnInit {
 	private awaitAuthentication: boolean = false;
 	
 	constructor(
-		public router: Router,
 		public user: UserService,
 		private fb: FormBuilder,
 		private alert: AlertService,

@@ -19,6 +19,8 @@
 			"testTsconfig": "tsconfig.spec.json",
 			"prefix": "app",
 			"styles": [
+				"../node_modules/quill/dist/quill.core.css",
+				"../node_modules/quill/dist/quill.snow.css",
 				"styles/bootstrap.min.css",
 				"styles/evocracy-theme.scss",
 				"styles/variables.scss",

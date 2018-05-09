@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 
 import { CountdownComponent } from '../countdown/countdown.component';
@@ -11,9 +11,6 @@ import { UserService } from '../_services/user.service';
 import { C } from '../../../shared/constants';
 import { cfg } from '../../../shared/config';
 import { Topic } from '../_models/topic';
-
-import * as io from 'socket.io-client';
-import * as $ from 'jquery';
 
 import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
 import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
@@ -32,14 +29,11 @@ import { faEdit } from '@fortawesome/free-solid-svg-icons';
 	templateUrl: './topic.component.html',
 	styleUrls: ['./topic.component.scss']
 })
-export class TopicComponent implements OnInit, OnDestroy {
+export class TopicComponent implements OnInit {
 	private C;
-	private meUid;
+	private uid;
 	private tid: string;
 	private topic: Topic;
-	private socket;
-	private quillEditor;
-	private descriptionEdit: boolean = false;
 	
 	private faHandPaper = faHandPaper;
 	private faExpandArrowsAlt = faExpandArrowsAlt;
@@ -53,15 +47,16 @@ export class TopicComponent implements OnInit, OnDestroy {
 	private faEdit = faEdit;
 	
 	constructor(
+		private router: Router,
 		private alertService: AlertService,
 		private topicService: TopicService,
 		private userService: UserService,
 		private activatedRoute: ActivatedRoute,
-		private httpManagerService: HttpManagerService) { }
+		private httpManagerService: HttpManagerService) {}
 	
    ngOnInit() {
 		this.C = C;
-		this.meUid = this.userService.getUserId();
+		this.uid = this.userService.getUserId();
 		
 		this.activatedRoute.params.subscribe(
 			(params: Params) => this.tid = params['id']);
@@ -71,70 +66,13 @@ export class TopicComponent implements OnInit, OnDestroy {
 		});
 	}
 	
-	ngOnDestroy() {
-		if(this.socket)
-			this.socket.disconnect();
-	}
-	
-	private toggleDescriptionEdit() {
-		if (this.descriptionEdit) {
-			this.socket.disconnect();
-			this.descriptionEdit = false;
-		} else {
-			this.descriptionEdit = true;
-		}
-	}
-	
-	private editorCreated(editor, pid) {
-		// Disable editor body
-		this.disableEdit();
-		
-		// Set quill editor
-		this.quillEditor = editor;
-		
-		// Initialize socket
-		this.initalizeSocket(pid);
-	}
-	
-	private enableEdit() {
-		$('.ql-editor').attr('contenteditable', 'true').fadeIn(500)
-	}
-	
-	private disableEdit() {
-		$('.ql-editor').attr('contenteditable', 'false').hide();
-	}
-	
-	private initalizeSocket(pid) {
-		// Establish socket connection
-		this.socket = io.connect(cfg.BASE_URL);
-		
-		this.socket.on('setContents', function(contents) {
-			this.quillEditor.setContents(contents);
-			
-			// Enable editor body
-			this.enableEdit();
-		}.bind(this));
-		
-		this.socket.on('change', function(change) {
-			console.log('change', change);
-			this.quillEditor.updateContents(change);
-		});
-		
-		// Send pad id to server and ask for content
-		this.socket.emit('pad_identity', {'pid': pid});
-	}
-	
-	private contentChanged(e) {
-		// If input source is not user, do not send a change to server
-		if(e.source != 'user')
-			return;
-		
-		// Emit current change to server via socket
-		this.socket.emit('change', e.delta);
+	private openEditor(pid) {
+		// Redirect to editor view
+		this.router.navigate(['/editor/', pid, { 'source': '/topic/'+this.tid }]);
 	}
 	
 	private createProposal() {
-		this.httpManagerService.post('/json/proposal/create', {'tid': this.tid, 'uid': this.meUid}).subscribe(res => {
+		this.httpManagerService.post('/json/proposal/create', {'tid': this.tid, 'uid': this.uid}).subscribe(res => {
 			console.log('proposal created', res);
 			// Show alert
 			this.alertService.alertFromServer(res.alert);

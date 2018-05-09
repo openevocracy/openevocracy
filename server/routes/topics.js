@@ -276,7 +276,9 @@ function appendTopicInfoAsync(topic, uid, with_details) {
     
     if(with_details) {
         // get pad body
-        pad_body_promise = pads.getPadHTMLAsync(topic.pid);
+        pad_body_promise = db.collection('pads').findOneAsync({ '_id': topic.pid }).then(function(pad) {
+        	return pad.html;
+        });
         
         // get group members
         group_members_promise = groups_promise.then(function(groups) {
