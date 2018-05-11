@@ -1,5 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Subscription } from 'rxjs/Subscription';
+
+import { HttpManagerService } from '../_services/http-manager.service';
+import { ModalService } from '../_services/modal.service';
+import { CloseeditorModalService } from '../_services/modal.closeeditor.service';
 
 import { cfg } from '../../../shared/config';
 
@@ -16,18 +21,23 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 })
 export class EditorComponent implements OnInit, OnDestroy {
 	private pid: string;
-	private savedStatus: string;
+	private title: string;
+	private saved: boolean = true;
 	private source: string;
 	private quillModule;
 	private socket;
 	private quillEditor;
 	private placeholder: string;
+	private modalSubscription: Subscription;
 	
 	private faTimes = faTimes;
 
 	constructor(
 		private router: Router,
-		private activatedRoute: ActivatedRoute) {
+		private activatedRoute: ActivatedRoute,
+		private modalService: ModalService,
+		private closeeditorModalService: CloseeditorModalService,
+		private httpManagerService: HttpManagerService) {
 		
 		this.quillModule = {
 			toolbar: [
@@ -42,18 +52,35 @@ export class EditorComponent implements OnInit, OnDestroy {
 		}
 		
 		this.placeholder = "...";
+		
+		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe(close => {
+			// Close modal
+			this.modalService.close();
+			
+			// Navigate to source
+			if (close)
+				this.router.navigate(['/topic', this.source]);
+		});
 	}
 	
 	ngOnInit() {
 		this.activatedRoute.params.subscribe((params: Params) => {
 				this.pid = params.id;
-				this.source = params.source || false;
+				
+				this.httpManagerService.get('/json/editor/' + this.pid).subscribe(res => {
+					this.title = res.title;
+					this.source = res.source;
+				});
 			});
 	}
 	
 	ngOnDestroy() {
+		console.log('destroyed');
 		if(this.socket)
 			this.socket.disconnect();
+			
+		// Unsubscribe to avoid memory leak
+		this.modalSubscription.unsubscribe();
 	}
 	
 	private enableEdit() {
@@ -113,18 +140,26 @@ export class EditorComponent implements OnInit, OnDestroy {
 			return;
 			
 		// Set unsaved text
-		this.setUnsaved();
+		this.saved = false;
 		
 		// Emit current change to server via socket
 		this.socket.emit('change', e.delta);
 	}
 	
 	private setSaved() {
-		this.savedStatus = 'EDITOR_SAVED_CHANGES';
+		this.saved = true;
 	}
 	
-	private setUnsaved() {
-		this.savedStatus = 'EDITOR_UNSAVED_CHANGES';
+	private closeEditor() {
+		if (!this.saved) {
+		//if (true) {
+			this.modalService.open({});
+			return;
+		}
+			
+		
+		// Navigate to source
+		this.router.navigate(['/topic', this.source]);
 	}
 
 }

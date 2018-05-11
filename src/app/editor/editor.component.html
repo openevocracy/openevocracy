@@ -1,12 +1,21 @@
-<mat-toolbar color="primary">
+<modal-closeeditor></modal-closeeditor>
+
+<mat-toolbar class="first-toolbar" color="primary">
 	<div class="flex container">
-		<div id="toolbar"></div>
-		<span class="saved-text">{{ savedStatus | translate }}</span>
+		<h1>{{ title }}</h1>
+		<span class="saved-text">
+			<span *ngIf="saved">{{ 'EDITOR_SAVED_CHANGES' | translate }}</span>
+			<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
+		</span>
 		<span class="flex-spacer"></span>
-		<button mat-button *ngIf="source" title="{{ 'EDITOR_BUTTON_CLOSE' | translate }}" [routerLink]="source">
+		<button mat-button title="{{ 'EDITOR_BUTTON_CLOSE' | translate }}" (click)="closeEditor()">
 			<span><fa-icon [icon]="faTimes"></fa-icon> {{ 'EDITOR_BUTTON_CLOSE' | translate }}</span>
 		</button>
 	</div>
+</mat-toolbar>
+
+<mat-toolbar class="second-toolbar" color="primary">
+	<div id="toolbar" class="container"></div>
 </mat-toolbar>
 
 <div class="container">

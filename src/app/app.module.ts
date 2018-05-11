@@ -24,6 +24,7 @@ import { AlertComponent } from './alert/alert.component';
 import { ModalComponent } from './modals/modal.component';
 import { ModalEmailComponent } from './modals/email/email.modal.component';
 import { ModalAddtopicComponent } from './modals/addtopic/addtopic.modal.component';
+import { ModalCloseeditorComponent } from './modals/closeeditor/closeeditor.modal.component';
 
 // Components Public
 import { PublicComponent } from './public/public.component';
@@ -46,11 +47,11 @@ import { UserService } from './_services/user.service';
 import { AlertService } from './_services/alert.service';
 import { ModalService } from './_services/modal.service';
 import { EmailModalService } from './_services/modal.email.service';
+import { CloseeditorModalService } from './_services/modal.closeeditor.service';
 import { UtilsService } from './_services/utils.service';
 import { LanguageService } from './_services/language.service';
 
 // Shared
-//import { cfg } from './_shared/config';
 import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 import { SettingsComponent } from './settings/settings.component';
@@ -78,7 +79,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 		TopicComponent,
 		CountdownComponent,
 		SettingsComponent,
-		EditorComponent
+		EditorComponent,
+		ModalCloseeditorComponent
 	],
 	imports: [
 		BrowserModule,
@@ -108,6 +110,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		AlertService,
 		ModalService,
 		EmailModalService,
+		CloseeditorModalService,
 		UtilsService,
 		LanguageService,
 		{ provide: 'cfg', useValue: cfg },

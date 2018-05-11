@@ -229,3 +229,13 @@ exports.getPadPDFAsync = function(pid) {
 		return toBufferAsync();
 	});
 };
+
+// @desc: Gets title and source id from pad id
+exports.getPadDetails = function(req, res) {
+	var pid = ObjectId(req.params.id);
+	
+	db.collection('topics').findOneAsync({ 'pid': pid })
+		.then(function(topic) {
+			return { 'title': topic.name, 'source': topic._id };
+		}).then(res.send.bind(res));
+};

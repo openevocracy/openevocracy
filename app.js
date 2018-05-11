@@ -96,6 +96,13 @@ app.post('/json/topic-vote', auth(), topics.vote);
 app.post('/json/topic-unvote', auth(), topics.unvote);
 app.get('/file/topic/final/:id', auth(), topics.final);
 
+// ###################
+// ### E D I T O R ###
+// ###################
+
+// @desc: Get detailed information about pad
+app.get('/json/editor/:id', auth(), pads.getPadDetails);
+
 // #########################
 // ### P R O P O S A L S ###
 // #########################

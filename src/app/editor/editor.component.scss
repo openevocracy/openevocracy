@@ -1,10 +1,13 @@
 /* Import variables */
 @import "~styles/variables";
 
+.first-toolbar { height: 48px; padding-top: 8px; }
+.second-toolbar { height: 42px; padding-bottom: 10px; }
+
 .saved-text {
+	margin-left: 50px;
+	padding-top: 3px;
 	font-weight: 300;
 	font-size: 1.3rem;
-	line-height: 40px;
-	padding-top: 8px;
 	color: $grey100;
 }

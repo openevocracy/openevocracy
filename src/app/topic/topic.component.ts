@@ -68,7 +68,7 @@ export class TopicComponent implements OnInit {
 	
 	private openEditor(pid) {
 		// Redirect to editor view
-		this.router.navigate(['/editor/', pid, { 'source': '/topic/'+this.tid }]);
+		this.router.navigate(['/editor/', pid]);
 	}
 	
 	private createProposal() {

@@ -1,0 +1,19 @@
+<div class="modal">
+	<div class="modal-dialog">
+		<div class="modal-header">
+			<button class="close" (click)="close()">&times;</button>
+			<h2>{{'EDITOR_CLOSE_MODAL_TEXT' | translate }}</h2>
+		</div>
+			
+		<div class="modal-actions">
+			<span class="flex-spacer"></span>
+			<button mat-raised-button color="primary" (click)="setResponse(false)">
+				<span>{{'EDITOR_CLOSE_MODAL_STAY' | translate }}</span>
+			</button>
+			<button mat-raised-button color="warn" (click)="setResponse(true)">
+				<span>{{'EDITOR_CLOSE_MODAL_LEAVE' | translate }}</span>
+			</button>
+		</div>
+	</div>
+</div>
+<div class="modal-background"></div>
