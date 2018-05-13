@@ -20,27 +20,27 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 	styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit, OnDestroy {
-	private pid: string;
-	private xpid: string;
-	private title: string;
+	protected pid: string;
+	protected xpid: string;
+	protected title: string;
 	private saved: boolean = true;
-	private source: string;
-	private quillModule;
+	protected source: string;
+	protected quillModules;
 	private socket;
-	private quillEditor;
+	protected quillEditor;
 	private placeholder: string;
 	private modalSubscription: Subscription;
 	
 	private faTimes = faTimes;
 
 	constructor(
-		private router: Router,
-		private activatedRoute: ActivatedRoute,
-		private modalService: ModalService,
-		private closeeditorModalService: CloseeditorModalService,
-		private httpManagerService: HttpManagerService) {
+		protected router: Router,
+		protected activatedRoute: ActivatedRoute,
+		protected modalService: ModalService,
+		protected closeeditorModalService: CloseeditorModalService,
+		protected httpManagerService: HttpManagerService) {
 		
-		this.quillModule = {
+		this.quillModules = {
 			toolbar: [
 				['bold', 'italic', 'underline', 'strike'],
 				[{ 'header': 1 }, { 'header': 2 }],
@@ -64,9 +64,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		});
 	}
 	
-	ngOnInit() {
-		
-	}
+	ngOnInit() { }
 	
 	ngOnDestroy() {
 		if(this.socket)
@@ -76,15 +74,15 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.modalSubscription.unsubscribe();
 	}
 	
-	private enableEdit() {
+	protected enableEdit() {
 		$('.ql-editor').attr('contenteditable', 'true').fadeIn();
 	}
 	
-	private disableEdit() {
+	protected disableEdit() {
 		$('.ql-editor').attr('contenteditable', 'false').hide();
 	}
 	
-	private editorCreated(editor, pid) {
+	protected editorCreated(editor, pid) {
 		// Disable editor body
 		this.disableEdit();
 		
@@ -109,7 +107,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 			});
 	}
 	
-	private initalizeSocket(pid) {
+	protected initalizeSocket(pid) {
 		// Establish socket connection
 		this.socket = io.connect(cfg.BASE_URL);
 		
@@ -138,6 +136,20 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.socket.emit('pad_identity', {'pid': pid});
 	}
 	
+	protected closeEditor() {
+		if (!this.saved) {
+			this.modalService.open({});
+			return;
+		}
+		console.log('close', this.source);
+		// Navigate to source
+		this.router.navigate(['/topic', this.source]);
+	}
+	
+	private setSaved() {
+		this.saved = true;
+	}
+	
 	private contentChanged(e) {
 		// If input source is not user, do not send a change to server
 		if(e.source != 'user')
@@ -148,19 +160,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 		
 		// Emit current change to server via socket
 		this.socket.emit('change', e.delta);
-	}
-	
-	private setSaved() {
-		this.saved = true;
-	}
-	
-	private closeEditor() {
-		if (!this.saved) {
-			this.modalService.open({});
-			return;
-		}
-		// Navigate to source
-		this.router.navigate(['/topic', this.source]);
 	}
 
 }

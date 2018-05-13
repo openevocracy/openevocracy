@@ -59,6 +59,7 @@ import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
+import { GroupComponent } from './group/group.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -84,7 +85,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 		SettingsComponent,
 		EditorComponent,
 		ModalCloseeditorComponent,
-		AddonePipe
+		AddonePipe,
+		GroupComponent
 	],
 	imports: [
 		BrowserModule,

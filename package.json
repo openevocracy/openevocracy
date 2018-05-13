@@ -74,6 +74,7 @@
     "passport-local": "^1.0.0",
     "phantom-html2pdf": "*",
     "popper.js": "^1.12.5",
+    "quill-authorship": "^1.0.2",
     "quill-delta-to-html": "^0.3.0",
     "range-parser": "*",
     "request": "*",

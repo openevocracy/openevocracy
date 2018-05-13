@@ -16,6 +16,8 @@ export class Topic extends TopicListElement {
 	proposals: Proposal[];
 	group_members: GroupMember[];
 	gid: string;
+	gpid: string;
+	group_html: string;
 	dpid: string;
 	description_html: string;
 	ppid: string;
@@ -31,6 +33,8 @@ export class Topic extends TopicListElement {
 		this.proposals = res.proposals;
 		this.group_members = res.group_members;
 		this.gid = res.gid;
+		this.gpid = res.gpid;
+		this.group_html = res.group_html;
 		this.dpid = res.dpid;
 		this.description_html = res.description_html;
 		this.ppid = res.ppid;

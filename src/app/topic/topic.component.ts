@@ -23,6 +23,7 @@ import { faFile } from '@fortawesome/free-solid-svg-icons';
 import { faSitemap } from '@fortawesome/free-solid-svg-icons';
 import { faSave } from '@fortawesome/free-solid-svg-icons';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-topic',
@@ -45,6 +46,7 @@ export class TopicComponent implements OnInit {
 	private faSitemap = faSitemap;
 	private faSave = faSave;
 	private faEdit = faEdit;
+	private faUsers = faUsers;
 	
 	constructor(
 		private router: Router,

@@ -168,7 +168,6 @@ function getPadWithBodyAsync(pid) {
 exports.getPadWithBodyAsync = getPadWithBodyAsync;
 
 function getPadDocAsync(pad) {
-	console.log('getPadDocAsync', pad);
 	// check if document is in map first
 	var masterDoc = padIdToDocMap[pad._id];
 	if (!_.isUndefined(masterDoc))
@@ -202,8 +201,6 @@ function getDocHTMLAsync(doc) {
 	var cfg = {};
 	var converter = new QuillDeltaToHtmlConverter(doc.content.ops, cfg);
 	var html = converter.convert();
-	
-	console.log('getDocHTMLAsync', html);
 	
 	return html;
 }
@@ -264,8 +261,9 @@ exports.getPadProposalDetails = function(req, res) {
 
 // @desc: Gets more information for group pad
 exports.getPadGroupDetails = function(req, res) {
-	var ppid = ObjectId(req.params.id);
+	var gpid = ObjectId(req.params.id);
+	var collection = 'topic_proposals';
 	
-	// TODO
+	getPadDetails(gpid, collection).then(res.send.bind(res));
 };
 

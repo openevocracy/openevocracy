@@ -334,9 +334,36 @@ function getMemberRatingAsync(ruid, gid, uid, type) {
 
 // get group by id
 exports.query = function(req, res) {
+	//var gpid = ObjectId(req.params.id);
+	var gid = ObjectId(req.params.id);
+	var uid = ObjectId(req.user._id);
+	
+	/*var proposal_promise = db.collection('topic_proposals').findOneAsync({'_id': gpid});
+	
+	// Get group id
+	var gid_promise = proposal_promise.get('source');
+	
+	// Get topic
+	var topic_promise = proposal_promise.then(function(proposal) {
+		return db.collection('topics').findOneAsync(
+			{'_id': proposal.tid}, {'nextDeadline': true, 'name': true, 'stage': true, 'level': true});
+	});
+	
+	// Get all source proposals
+	var proposals_source_promise = proposal_promise.then(function(proposal) {
+		return db.collection('topic_proposals').find({'sink': proposal.source, 'tid': proposal.tid},
+			{'source': true, 'pid': true}).toArrayAsync();
+	});
+	
+	// Get group
+	var group_promise = gid_promise.then(function(gid) {
+		return db.collection('groups').findOneAsync({'_id': gid});
+	});
+	
+	// Get all group members
+	var get_members_promise = gid_promise.then(getGroupMembersAsync);*/
     
-    var gid = ObjectId(req.params.id);
-    var uid = ObjectId(req.user._id);
+    console.log(gid);
     
     // Get group
     var group_promise = db.collection('groups').findOneAsync({'_id': gid});
@@ -354,12 +381,12 @@ exports.query = function(req, res) {
     });
     
     // Count number of groups in current level to obtain if we are in last level
-    var last_level_promise = topic_promise.then(function(topic) {
-        return db.collection('groups').countAsync({'tid': topic._id, 'level': topic.level}).
-            then(function(numGroupsInCurrentLevel) {
-                return (numGroupsInCurrentLevel == 1) ? 1 : 0;
-            });
-    });
+	var last_level_promise = topic_promise.then(function(topic) {
+		return db.collection('groups').countAsync({'tid': topic._id, 'level': topic.level}).
+			then(function(numGroupsInCurrentLevel) {
+				return (numGroupsInCurrentLevel == 1) ? 1 : 0;
+		});
+	});
     
     // Get alls source proposals
     var proposals_source_promise = group_promise.then(function(group) {
@@ -373,7 +400,13 @@ exports.query = function(req, res) {
     // generate group specific color_offset
     var chance = new Chance(gid.toString());
     var offset = chance.integer({min: 0, max: 360});
-
+	
+	/*var offset_promise = gid_promise.then(function(gid) {
+		// generate group specific color_offset
+		var chance = new Chance(gid.toString());
+		return chance.integer({min: 0, max: 360});
+	});*/
+	
     // Additional member information
     var members_promise = get_members_promise.map(function(member) {
         return member.uid;
@@ -435,7 +468,7 @@ exports.query = function(req, res) {
             'pid': proposal.pid,
             'members': members,
             'nextDeadline': topic.nextDeadline,
-            'topicname': topic.name,
+            'title': topic.name,
             'lastLevel': lastLevel
         }));
     }).then(res.json.bind(res));

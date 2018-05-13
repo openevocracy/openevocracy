@@ -107,7 +107,7 @@ app.get('/json/topic/editor/:id', auth(), pads.getPadTopicDetails);
 app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
 
 // @desc: Get detailed information about group pad
-app.get('/json/group/editor/:id', auth(), pads.getPadGroupDetails);
+app.get('/json/group/editor/:id', auth(), groups.query);
 
 // #########################
 // ### P R O P O S A L S ###

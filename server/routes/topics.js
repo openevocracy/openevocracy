@@ -277,7 +277,9 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 	var description_promise = null;
 	var description_pad_html_promise = null;
 	var group_members_promise = null;
-	var find_user_group_promise = null;
+	var user_group_id_promise = null;
+	var user_group_pad_id_promise = null;
+	var user_group_pad_html_promise = null;
     
 	if(with_details) {
 		// Get user proposal id
@@ -308,8 +310,8 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 				.find({'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
 		});
 		
-		// Find the group that the current user is part of
-		find_user_group_promise = groups_promise.then(function(groups) {
+		// Find the group id that the current user is part of (in last level)
+		user_group_id_promise = groups_promise.then(function(groups) {
 			var highest_level = _.max(groups, function(group) {return group.level;}).level;
 			var highest_level_groups = _.filter(groups, function(group) {return group.level == highest_level;});
 			
@@ -317,6 +319,21 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 				.findOneAsync({'gid': { $in: _.pluck(highest_level_groups, '_id') }, 'uid': uid}, {'gid': true});
 		}).then(function(group_member) {
 			return group_member ? group_member.gid : null;
+		});
+		
+		// Find proposal id of user group
+		user_group_pad_id_promise = user_group_id_promise.then(function(gid) {
+			if (_.isNull(gid))
+				return null;
+			else
+				return db.collection('topic_proposals').findOneAsync({ 'source': gid }, { 'pid': true });
+		});
+		
+		// Get html of user group
+		user_group_pad_html_promise = user_group_pad_id_promise.then(function(topic_proposal) {
+			return db.collection('pads').findOneAsync({ '_id': topic_proposal.pid }).then(function(pad) {
+				return pad.html || "";
+			});
 		});
 	}
     
@@ -349,7 +366,9 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 				'dpid': description_promise.get('_id'),
 				'description_html': description_pad_html_promise,
 				'group_members': group_members_promise,
-				'gid': find_user_group_promise
+				'gid': user_group_id_promise,
+				'gpid': user_group_pad_id_promise.get('_id'),
+				'group_html': user_group_pad_html_promise
 			}));
 		});
 	} else {

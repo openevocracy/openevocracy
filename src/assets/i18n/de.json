@@ -96,6 +96,8 @@
 	"TOPIC_BUTTON_CREATE_PROPOSAL": "Vorschlag erstellen",
 	"TOPIC_BUTTON_EDIT_PROPOSAL": "Vorschlag bearbeiten",
 	"TOPIC_PROPOSAL_ALERT_CREATED": "Dein Vorschlag wurde erstellt. Ein neuer Tab wurde erstellt, dort kannst du einen Vorschlag einsehen und bearbeiten.",
+	"TOPIC_BUTTON_EDIT_CURRENT_GROUP": "Gruppenvorschlag bearbeiten",
+	"TOPIC_BUTTON_GOTO_CURRENT_GROUP": "Gruppe",
 	
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Produktivmodus",
 	

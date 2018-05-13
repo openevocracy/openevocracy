@@ -8,6 +8,7 @@ import { SecureComponent } from '../secure/secure.component';
 import { TopiclistComponent } from '../topiclist/topiclist.component';
 import { TopicComponent } from '../topic/topic.component';
 import { EditorComponent } from '../editor/editor.component';
+import { GroupComponent } from '../group/group.component';
 import { SettingsComponent } from '../settings/settings.component';
 
 const appChildRoutes: Routes = [
@@ -16,7 +17,7 @@ const appChildRoutes: Routes = [
 	{ path: 'topic/:id', component: TopicComponent },
 	{ path: 'topic/editor/:id', component: EditorComponent },
 	{ path: 'proposal/editor/:id', component: EditorComponent },
-	{ path: 'group/editor/:id', component: EditorComponent },
+	{ path: 'group/editor/:id', component: GroupComponent },
 	{ path: 'settings/:id', component: SettingsComponent }
 ];
 
