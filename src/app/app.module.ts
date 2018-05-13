@@ -17,6 +17,9 @@ import { QuillModule } from 'ngx-quill';
 import { AppRoutingModule } from './_routing/app-routing.module';
 import { PublicRoutingModule } from './_routing/public-routing.module';
 
+// Pipes
+import { AddonePipe } from './_pipes/addone.pipe';
+
 // Components Global
 import { AppComponent } from './app.component';
 import { CountdownComponent } from './countdown/countdown.component';
@@ -80,7 +83,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 		CountdownComponent,
 		SettingsComponent,
 		EditorComponent,
-		ModalCloseeditorComponent
+		ModalCloseeditorComponent,
+		AddonePipe
 	],
 	imports: [
 		BrowserModule,

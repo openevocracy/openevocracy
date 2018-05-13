@@ -79,7 +79,7 @@
 	"TOPIC_NAME_EMPTY": "Topic name is empty, please name it.",
 	"TOPIC_NAME_ALREADY_EXISTS": "A Topic with this name already exists.",
 	"TOPIC_REQUIREMENT_PROPOSAL_STAGE": "Topic must be at least in proposal stage.",
-	"TOPIC_BUTTON_MARK_RELEVANT": "Mark as relavant",
+	"TOPIC_BUTTON_MARK_RELEVANT": "Relevance",
 	"TOPIC_BUTTON_EDIT": "Edit",
 	"TOPIC_BUTTON_RESULT_DOWNLOAD": "Download result",
 	"TOPIC_BUTTON_STRUCTURE": "Process overview",
@@ -93,14 +93,18 @@
 	"TOPIC_TAB_LABEL_PROPOSAL": "My proposal",
 	"TOPIC_TAB_LABEL_GROUP": "My group",
 	"TOPIC_TAB_LABEL_RESULT": "Final result",
-	
-	"PROPOSAL_CREATE": "Create proposal",
+	"TOPIC_BUTTON_CREATE_PROPOSAL": "Create proposal",
+	"TOPIC_BUTTON_EDIT_PROPOSAL": "Edit proposal",
+	"TOPIC_PROPOSAL_ALERT_CREATED": "Your proposal was created. A new tab was created, where you can view and edit your proposal.",
 	
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Productive mode",
 	
 	"EDITOR_BUTTON_CLOSE": "Close",
 	"EDITOR_SAVED_CHANGES": "All changes are saved.",
 	"EDITOR_UNSAVED_CHANGES": "Saving ...",
+	"EDITOR_CLOSE_MODAL_TEXT": "The document is not fully saved yet, close anyway?",
+	"EDITOR_CLOSE_MODAL_STAY": "Cancel",
+	"EDITOR_CLOSE_MODAL_LEAVE": "Close",
 	
 	"REJECTED_NOT_ENOUGH_VOTES": "Not enough participants in selection stage",
 	"REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Not enough valid proposals in proposal stage",

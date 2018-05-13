@@ -14,11 +14,12 @@ export class Topic extends TopicListElement {
 	/* Extended information */
 	groups: Group[];
 	proposals: Proposal[];
-	body: string;
 	group_members: GroupMember[];
 	gid: string;
-	pid: string;
+	dpid: string;
+	description_html: string;
 	ppid: string;
+	proposal_html: string;
 	
 	/* Locally calculated */
 	stageName: string;
@@ -28,11 +29,12 @@ export class Topic extends TopicListElement {
 		super(res);
 		this.groups = res.groups;
 		this.proposals = res.proposals;
-		this.body = res.body;
 		this.group_members = res.group_members;
 		this.gid = res.gid;
-		this.pid = res.pid;
+		this.dpid = res.dpid;
+		this.description_html = res.description_html;
 		this.ppid = res.ppid;
+		this.proposal_html = res.proposal_html;
 		
 		this.stageName = this.getStageName();
 		this.creationDate = this.getCreationDate();

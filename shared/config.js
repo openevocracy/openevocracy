@@ -8,7 +8,7 @@ var DATABASE_HOST = 'mongodb://127.0.0.1/evocracy';
 
 var DEBUG_CONFIG = {
     DEBUG:         true,
-    MAIL:          true,
+    MAIL:          false,
     CRON_INTERVAL: 1,  // Run cron every x minute(s)
     ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
     

@@ -14,7 +14,9 @@ const appChildRoutes: Routes = [
 	{ path: '', redirectTo: 'topiclist', pathMatch: 'full' },
 	{ path: 'topiclist', component: TopiclistComponent },
 	{ path: 'topic/:id', component: TopicComponent },
-	{ path: 'editor/:id', component: EditorComponent },
+	{ path: 'topic/editor/:id', component: EditorComponent },
+	{ path: 'proposal/editor/:id', component: EditorComponent },
+	{ path: 'group/editor/:id', component: EditorComponent },
 	{ path: 'settings/:id', component: SettingsComponent }
 ];
 

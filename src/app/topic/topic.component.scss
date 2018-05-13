@@ -1,6 +1,8 @@
 /* Import variables */
 @import "~styles/variables";
 
+.voted { color: $orange500; }
+
 /* Toolbar */
 
 .mat-toolbar { border-bottom: 5px solid $grey400; height: 69px; }
@@ -19,3 +21,4 @@
 /* Tab content */
 
 .mat-tab-group { margin-top: 30px; }
+.mat-tab-group .mat-raised-button { float: right; margin-top: 10px; }

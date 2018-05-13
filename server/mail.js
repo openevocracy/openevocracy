@@ -127,9 +127,9 @@ exports.sendMail = sendMail;
  * @params:
  *   mailUsers: an array with mailUser elements (see 'sendMail' func)
  */
-function sendMailMulti(mailUsers, mailSubject, mailBody, mailBodyParams) {
+function sendMailMulti(mailUsers, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	_.each(mailUsers, function(mailUser) {
-		sendMail(mailUser, mailSubject, mailBody, mailBodyParams);
+		sendMail(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams);
 	});
 }
 exports.sendMailMulti = sendMailMulti;
@@ -154,7 +154,7 @@ exports.sendMailOnce = sendMailOnce;
 function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// Remind participants that the deadline of proposal stage is coming
 	// In proposal stage, all sources in proposals table are users
-	return db.collection('proposals').find({'tid': topic._id}, {'source': true})
+	return db.collection('topic_proposals').find({'tid': topic._id}, {'source': true})
 		.toArrayAsync().then(function(participants) {
 			return db.collection('users')
 				.find({ '_id': { $in: _.pluck(participants, 'source') } }, {'email': true, 'lang': true})

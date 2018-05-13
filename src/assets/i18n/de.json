@@ -79,7 +79,7 @@
 	"TOPIC_NAME_EMPTY": "Der Name des Themas ist leer, bitte vergib einen Namen.",
 	"TOPIC_NAME_ALREADY_EXISTS": "Ein Thema mit diesem Namen existiert bereits.",
 	"TOPIC_REQUIREMENT_PROPOSAL_STAGE": "Das Thema muss sich mindestens in der Vorschlagphase befinden.",
-	"TOPIC_BUTTON_MARK_RELEVANT": "Als relevant markieren",
+	"TOPIC_BUTTON_MARK_RELEVANT": "Relevanz",
 	"TOPIC_BUTTON_EDIT": "Bearbeiten",
 	"TOPIC_BUTTON_RESULT_DOWNLOAD": "Ergebnis runterladen",
 	"TOPIC_BUTTON_STRUCTURE": "Prozessübersicht",
@@ -93,14 +93,18 @@
 	"TOPIC_TAB_LABEL_PROPOSAL": "Mein Vorschlag",
 	"TOPIC_TAB_LABEL_GROUP": "Meine Gruppe",
 	"TOPIC_TAB_LABEL_RESULT": "Ergebnis",
-	
-	"PROPOSAL_CREATE": "Vorschlag erstellen",
+	"TOPIC_BUTTON_CREATE_PROPOSAL": "Vorschlag erstellen",
+	"TOPIC_BUTTON_EDIT_PROPOSAL": "Vorschlag bearbeiten",
+	"TOPIC_PROPOSAL_ALERT_CREATED": "Dein Vorschlag wurde erstellt. Ein neuer Tab wurde erstellt, dort kannst du einen Vorschlag einsehen und bearbeiten.",
 	
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Produktivmodus",
 	
 	"EDITOR_BUTTON_CLOSE": "Schließen",
 	"EDITOR_SAVED_CHANGES": "Alle Änderungen sind gespeichert.",
 	"EDITOR_UNSAVED_CHANGES": "Speichert ...",
+	"EDITOR_CLOSE_MODAL_TEXT": "Das Dokument ist noch nicht gespeichert, trotzdem schließen?",
+	"EDITOR_CLOSE_MODAL_STAY": "Abbrechen",
+	"EDITOR_CLOSE_MODAL_LEAVE": "Schließen",
 	
 	"REJECTED_NOT_ENOUGH_VOTES": "Nicht genügend Teilnehmer in der Selektionsphase",
 	"REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Nicht genügend gültige Entwürfe in der Vorschlagsphase",

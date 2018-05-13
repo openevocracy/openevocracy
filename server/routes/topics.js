@@ -13,7 +13,7 @@ var C = require('../../shared/constants').C;
 //var cfg = requirejs('public/js/setup/configs');
 var cfg = require('../../shared/config').cfg;
 var groups = require('./groups');
-var pads = require('../pads');
+var pads = require('./pads');
 var utils = require('../utils');
 var mail = require('../mail');
 
@@ -67,7 +67,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
             var finalDocumentPadIdPromise = db.collection('groups').
                 findOneAsync({'tid': tid, 'level': topic.level},{'ppid': true}).
                 get('ppid').then(function (ppid) {
-                    return db.collection('proposals').
+                    return db.collection('topic_proposals').
                         findOneAsync({'_id': ppid},{'pid': true});
                 }).get('pid');
             
@@ -192,8 +192,8 @@ function manageTopicStateAsync(topic) {
                 
                 topic[stageStartedEntryName] = Date.now();
                 return Promise.join(topic,stageStartedEntryName);
-            }).spread(function(topic,stageStartedEntryName) {
-                return updateTopicStateAsync(topic,stageStartedEntryName).
+            }).spread(function(topic, stageStartedEntryName) {
+                return updateTopicStateAsync(topic, stageStartedEntryName).
                        return(topic);
             });
         case C.STAGE_CONSENSUS: // we are currently in consensus stage
@@ -204,147 +204,158 @@ function manageTopicStateAsync(topic) {
 }
 
 function appendTopicInfoAsync(topic, uid, with_details) {
-    var tid = topic._id;
+	var tid = topic._id;
+	
+	// get number of participants and votes in this topic
+	var topic_votes_promise = db.collection('topic_votes')
+		.find({'tid': tid}, {'uid': true}).toArrayAsync();
+	var topic_proposals_promise = db.collection('topic_proposals')
+		.find({'tid': tid}).toArrayAsync();
     
-    // get number of participants and votes in this topic
-    var topic_votes_promise = db.collection('topic_votes').
-        find({'tid': tid}, {'uid': true}).toArrayAsync();
-    var topic_proposals_promise = db.collection('proposals').
-        find({'tid': tid}).toArrayAsync();
-    
-    // TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
-    
-    // get groups and sort by level
-    var groups_promise = db.collection('groups').find({ 'tid': tid }).
-        sort({ 'level': -1 }).toArrayAsync();
-    
-    var participants_per_levels_promise = groups_promise.then(function(groups) {
-        var member_counts_per_groups_promise =
-        db.collection('group_members').aggregateAsync( [
-            { $match: { 'gid': { $in: _.pluck(groups, '_id') } } },
-            { $group: { '_id': '$gid', member_count: { $sum : 1 } } } ] );
+	// TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
+	
+	// Get groups and sort by level
+	var groups_promise = db.collection('groups').find({ 'tid': tid })
+		.sort({ 'level': -1 }).toArrayAsync();
+	
+	// Number of participants per level
+	var participants_per_levels_promise = groups_promise.then(function(groups) {
+		var member_counts_per_groups_promise =
+		db.collection('group_members').aggregateAsync( [
+			{ $match: { 'gid': { $in: _.pluck(groups, '_id') } } },
+			{ $group: { '_id': '$gid', member_count: { $sum : 1 } } } ] );
+		
+		return Promise.join(groups, member_counts_per_groups_promise);
+	}).spread(function (groups, member_counts_per_groups) {
+		var member_counts_per_groups_sorted_by_levels =
+		_.groupBy(member_counts_per_groups, function(member_count) {
+			var groups_with_string_ids = _.map(groups, function(group) {
+				group._id = group._id.toString();
+				return group;
+			});
+			var gid_as_string = member_count._id.toString();
+			// NOTE: findWhere does not work with ObjectIds
+			var group = _.findWhere(groups_with_string_ids, {'_id': gid_as_string});
+			return group.level;
+		});
         
-        return Promise.join(groups, member_counts_per_groups_promise);
-    }).spread(function (groups, member_counts_per_groups) {
-        var member_counts_per_groups_sorted_by_levels =
-        _.groupBy(member_counts_per_groups, function(member_count) {
-            var groups_with_string_ids = _.map(groups, function(group) {
-                group._id = group._id.toString();
-                return group;
-            });
-            var gid_as_string = member_count._id.toString();
-            // NOTE: findWhere does not work with ObjectIds
-            var group = _.findWhere(groups_with_string_ids, {'_id': gid_as_string});
-            return group.level;
-        });
+		var member_counts_per_levels =
+		_.mapObject(member_counts_per_groups_sorted_by_levels,
+		function(member_counts_per_groups, level) {
+			var member_counts_per_level = _.reduce(member_counts_per_groups,
+				function(memo, member_counts_per_group) {
+					return memo + member_counts_per_group.member_count;
+				}, 0);
+				return member_counts_per_level;
+		});
         
-        var member_counts_per_levels =
-        _.mapObject(member_counts_per_groups_sorted_by_levels,
-        function(member_counts_per_groups, level) {
-            var member_counts_per_level = _.reduce(member_counts_per_groups,
-                function(memo, member_counts_per_group) {
-                    return memo + member_counts_per_group.member_count;
-                }, 0);
-            return member_counts_per_level;
-        });
-        
-        return member_counts_per_levels;
-    });
+		return member_counts_per_levels;
+	});
+	
+	// Number of groups per level
+	var groups_per_levels_promise = groups_promise.then(function(groups) {
+		if(_.isEmpty(groups))
+			return null;
+		
+		// count groups by level
+		return _.countBy(groups, function(group) {return group.level;});
+	});
+	
+	// Combine #participants and #groups
+	var levels_promise =
+		Promise.join(participants_per_levels_promise, groups_per_levels_promise)
+			.spread(function(participants_per_levels, groups_per_levels) {
+				var levels_object = _.mapObject(participants_per_levels,function(participants_per_level, level) {
+					return { 'participants': participants_per_level, 'groups': groups_per_levels[level] };
+			});
+		return _.toArray(levels_object);
+	});
+	
+	// Detailed data (not used in topic list, only in details)
+	var user_proposal_promise = null;
+	var user_proposal_pad_html_promise = null;
+	var description_promise = null;
+	var description_pad_html_promise = null;
+	var group_members_promise = null;
+	var find_user_group_promise = null;
     
-    var groups_per_levels_promise = groups_promise.then(function(groups) {
-        if(_.isEmpty(groups))
-            return null;
-            
-        // count groups by level
-        return _.countBy(groups, function(group) {return group.level;});
-    });
+	if(with_details) {
+		// Get user proposal id
+		user_proposal_promise = db.collection('topic_proposals').findOneAsync({ 'tid': tid, 'source': uid });
+		
+		// Get user proposal html
+		user_proposal_pad_html_promise = user_proposal_promise.then(function(topic_proposal) {
+			if (_.isNull(topic_proposal))
+				return "";
+			return db.collection('pads').findOneAsync({ '_id': topic_proposal.pid }).then(function(pad) {
+				return pad.html || "";
+			});
+		});
+		
+		// Get topic description id
+		description_promise = db.collection('topic_descriptions').findOneAsync({ 'tid': topic._id });
+		
+		// Get pad description html
+		description_pad_html_promise = description_promise.then(function(topic_description) {
+			return db.collection('pads').findOneAsync({ '_id': topic_description.pid }).then(function(pad) {
+				return pad.html || "";
+			});
+		});
+		
+		// Get group member uid's
+		group_members_promise = groups_promise.then(function(groups) {
+			return db.collection('group_members')
+				.find({'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
+		});
+		
+		// Find the group that the current user is part of
+		find_user_group_promise = groups_promise.then(function(groups) {
+			var highest_level = _.max(groups, function(group) {return group.level;}).level;
+			var highest_level_groups = _.filter(groups, function(group) {return group.level == highest_level;});
+			
+			return db.collection('group_members')
+				.findOneAsync({'gid': { $in: _.pluck(highest_level_groups, '_id') }, 'uid': uid}, {'gid': true});
+		}).then(function(group_member) {
+			return group_member ? group_member.gid : null;
+		});
+	}
     
-    var levels_promise =
-        Promise.join(participants_per_levels_promise, groups_per_levels_promise).
-        spread(function(participants_per_levels, groups_per_levels) {
-            var levels_object = _.mapObject(participants_per_levels,function(participants_per_level, level){
-                return { 'participants': participants_per_level, 'groups': groups_per_levels[level] };
-            });
-            return _.toArray(levels_object);
-        });
+	// Delete pad id if user is not owner, pid is removed from response
+	if(!_.isEqual(topic.owner, uid))
+		delete topic.dpid;
+	
+	// Basic topic details
+	var topic_without_details_promise = Promise.props(_.extend(topic,{
+		'num_votes': topic_votes_promise.then(_.size),
+		'num_proposals': topic_proposals_promise.then(_.size),
+		'voted': topic_votes_promise.then(function(topic_votes) {
+		return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
+		'levels': levels_promise
+	}));
     
-    // Detailed data (not used in topic list, only in details)
-    var pad_body_promise = null;
-    var group_members_promise = null;
-    var find_user_group_promise = null;
-    var user_proposal_id_promise = null;
-    
-    if(with_details) {
-        // get pad body
-        pad_body_promise = db.collection('pads').findOneAsync({ '_id': topic.pid }).then(function(pad) {
-        	return pad.html;
-        });
-        
-        // get group members
-        group_members_promise = groups_promise.then(function(groups) {
-            return db.collection('group_members').find(
-                {'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
-        });
-        
-        // find the group that the current user is part of
-        find_user_group_promise = groups_promise.then(function(groups) {
-            var highest_level = _.max(groups, function(group) {return group.level;}).level;
-            var highest_level_groups = _.filter(groups, function(group) {return group.level == highest_level;});
-        
-            return db.collection('group_members').findOneAsync(
-                {'gid': { $in: _.pluck(highest_level_groups, '_id') }, 'uid': uid}, {'gid': true});
-        }).then(function(group_member) {
-            return group_member ? group_member.gid : null;
-        });
-        
-        // get user proposal id
-        user_proposal_id_promise =
-            db.collection('proposals').findOneAsync(
-                { 'tid':tid, 'source':uid }).then(function(proposal) {
-                
-                if(_.isNull(proposal))
-                    return null;
-                
-                return proposal._id;
-            });
-    }
-    
-    // Delete pad id if user is not owner, pid is removed from response
-    if(!_.isEqual(topic.owner,uid))
-        delete topic.pid;
-    
-    var topic_without_details_promise = Promise.props(_.extend(topic,{
-        // basic
-        'num_votes': topic_votes_promise.then(_.size),
-        'num_proposals': topic_proposals_promise.then(_.size),
-        'voted': topic_votes_promise.then(function(topic_votes) {
-            return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
-        'levels': levels_promise
-        
-    }));
-    
-    // TODO Check if this is really a good way doing it
-    
-    if(with_details) {
-        // Extended topic information for topic view
-        return topic_without_details_promise.then(function(topic_without_details) {
-            return Promise.props(_.extend(topic_without_details,{
-                'groups': with_details ? groups_promise : null,
-                'proposals': with_details ? topic_proposals_promise : null,
-                
-                // detailed
-                'body': pad_body_promise,
-                'group_members': group_members_promise,
-                'gid': find_user_group_promise,
-                'ppid': user_proposal_id_promise
-            }));
-        });
-        
-        
-    } else {
-        // Basic topic information for topic list
-        return topic_without_details_promise;
-    }
+	// TODO Check if this is really a good way doing it
+	
+	if(with_details) {
+		// Extended topic information for topic view
+		return topic_without_details_promise.then(function(topic_without_details) {
+			return Promise.props(_.extend(topic_without_details,{
+				'groups': with_details ? groups_promise : null,
+				'proposals': with_details ? topic_proposals_promise : null,
+				
+				// detailed
+				'ppid': user_proposal_promise.then(function(proposal) {
+					return _.isNull(proposal) ? null : proposal._id }),
+				'proposal_html': user_proposal_pad_html_promise,
+				'dpid': description_promise.get('_id'),
+				'description_html': description_pad_html_promise,
+				'group_members': group_members_promise,
+				'gid': find_user_group_promise
+			}));
+		});
+	} else {
+		// Basic topic information for topic list
+		return topic_without_details_promise;
+	}
 }
 
 exports.list = function(req, res) {
@@ -352,7 +363,7 @@ exports.list = function(req, res) {
     
     manageAndListTopicsAsync().then(function(topics) {
         // Promise.map does not work above
-        Promise.map(topics, _.partial(appendTopicInfoAsync,_,uid,false)).
+        Promise.map(topics, _.partial(appendTopicInfoAsync, _, uid, false)).
         then(function(topics){
            //console.log(topics);
            return topics;
@@ -394,61 +405,61 @@ function updateTopicStateAsync(topic,stageStartedEntryName) {
 }
 
 exports.query = function(req, res) {
-    var tid = ObjectId(req.params.id);
-    var uid = ObjectId(req.user._id);
-
-    db.collection('topics').findOneAsync({ '_id': tid }).
-    then(manageTopicStateAsync).
-    then(function(topic) {
-        if(_.isNull(topic))
+   var tid = ObjectId(req.params.id);
+   var uid = ObjectId(req.user._id);
+   
+   db.collection('topics').findOneAsync({ '_id': tid })
+      .then(manageTopicStateAsync)
+      .then(function(topic) {
+         if(_.isNull(topic))
             return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
-        else
+         else
             return appendTopicInfoAsync(topic, uid, true);
-    }).
-    /*then(function(res) {
-       console.log(res);
-       return res;
-    }).*/
-    then(res.json.bind(res)).
-    catch(utils.isOwnError, utils.handleOwnError(res));
+      }).then(res.json.bind(res))
+      .catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 exports.create = function(req, res) {
     
-    // Topic name is the only necessary request variable
-    var data = req.body;
-    var topic = {};
-    topic.name = data.name;
-    
-    // reject empty topic names
-    if(_.isEmpty(topic.name)) {
-        utils.sendAlert(res, 400, 'danger', 'TOPIC_NAME_EMPTY');
-        return;
-    }
-    
-    // only allow new topics if they do not exist yet
-    db.collection('topics').countAsync({'name': topic.name}).then(function(count) {
-        // topic already exists
-        if(count > 0)
-            return utils.rejectPromiseWithAlert(409, 'danger', 'TOPIC_NAME_ALREADY_EXISTS');
-        
-        // create topic
-        topic.owner = ObjectId(req.user._id);
-        topic.pid = ObjectId(); // create random pad id
-        topic.stage = C.STAGE_SELECTION; // start in selection stage
-        topic.level = 0;
-        topic.nextDeadline = calculateDeadline(topic.stage);
-        var createTopicPromise = db.collection('topics').insertAsync(topic);
-        
-        // create pad
-        var createPadPromise = pads.createPadAsync(topic.pid, topic.nextDeadline);
-        
-        return Promise.join(createTopicPromise, createPadPromise).return(topic);
-    }).then(function(topics) {
-        topic.votes = 0;
-        
-        res.json(topic);
-    }).catch(utils.isOwnError,utils.handleOwnError(res));
+   // Topic name is the only necessary request variable
+   var data = req.body;
+   var topic = {};
+   topic.name = data.name;
+   
+   // reject empty topic names
+   if(_.isEmpty(topic.name)) {
+      utils.sendAlert(res, 400, 'danger', 'TOPIC_NAME_EMPTY');
+      return;
+   }
+   
+   // Only allow new topics if they do not exist yet
+   db.collection('topics').countAsync({'name': topic.name}).then(function(count) {
+      // Topic already exists
+      if(count > 0)
+         return utils.rejectPromiseWithAlert(409, 'danger', 'TOPIC_NAME_ALREADY_EXISTS');
+      
+      // Create topic
+      topic._id = ObjectId();
+      topic.owner = ObjectId(req.user._id);
+      topic.stage = C.STAGE_SELECTION; // start in selection stage
+      topic.level = 0;
+      topic.nextDeadline = calculateDeadline(topic.stage);
+      var createTopicPromise = db.collection('topics').insertAsync(topic);
+      
+      // Create description
+      var dpid = ObjectId(); // Create random pad id
+      var description = { 'pid': dpid, 'tid': topic._id };
+      var createTopicDescriptionPromise = db.collection('topic_descriptions').insertAsync(description);
+      
+      // create pad
+      var pad = { '_id': dpid, 'expiration': topic.nextDeadline };
+      var createPadPromise = pads.createPadAsync(pad);
+      
+      return Promise.join(createTopicPromise, createTopicDescriptionPromise, createPadPromise).return(topic);
+   }).then(function(topic) {
+      topic.votes = 0;
+      res.json(topic);
+   }).catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
 exports.delete = function(req,res) {

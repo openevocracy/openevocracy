@@ -5,7 +5,7 @@ var Promise = require('bluebird');
 
 var C = require('../../shared/constants').C;
 var utils = require('../utils');
-var pads = require('../pads');
+var pads = require('./pads');
 
 exports.create = function(req, res) {
 	var tid = ObjectId(req.body.tid);
@@ -20,14 +20,15 @@ exports.create = function(req, res) {
 		// Get proposal or create proposal if it does not exist
 		// From http://stackoverflow.com/questions/16358857/mongodb-atomic-findorcreate-findone-insert-if-nonexistent-but-do-not-update
 		var create_proposal_promise =
-		db.collection('proposals').findAndModifyAsync(
+		db.collection('topic_proposals').findAndModifyAsync(
 			{ 'tid': tid, 'source': uid },[],
 			{ $setOnInsert: { 'pid': ObjectId() }},
 			{ new: true, upsert: true }).get('value');
 		
 		return Promise.join(topic, create_proposal_promise);
 	}).spread(function(topic, proposal) {
-		return pads.createPadIfNotExistsAsync(proposal.pid, topic.nextDeadline).
+		var pad = { '_id': proposal.pid, 'expiration': topic.nextDeadline };
+		return pads.createPadIfNotExistsAsync(pad).
 		then(function() {
 			proposal.body = pads.getPadHTMLAsync(proposal.pid);
 			proposal.expired = false;
@@ -35,7 +36,7 @@ exports.create = function(req, res) {
 			return Promise.props(proposal);
 		});
 	}).then(function(proposal) {
-		utils.sendAlert(res, 200, 'success', 'PROPOSAL_CREATED');
+		utils.sendAlert(res, 200, 'success', 'TOPIC_PROPOSAL_ALERT_CREATED');
 		return;
 	}).catch(utils.isOwnError,utils.handleOwnError(res));
 };
@@ -43,7 +44,7 @@ exports.create = function(req, res) {
 exports.query = function(req, res) {
     var ppid = ObjectId(req.params.id);
     
-    return db.collection('proposals').findOneAsync({ '_id': ppid })
+    return db.collection('topic_proposals').findOneAsync({ '_id': ppid })
     .then(function(proposal) {
         return pads.getPadWithBodyAsync(proposal.pid).then(function(pad) {
             // Extend proposal object with html body of pad and expired status

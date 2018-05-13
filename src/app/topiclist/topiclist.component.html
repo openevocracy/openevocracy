@@ -19,19 +19,17 @@
 			<p *ngIf="topic.stage == C.STAGE_REJECTED">{{topic.rejectedReason | translate}}</p>
 			<p *ngIf="topic.stage == C.STAGE_SELECTION">{{topic.num_votes}} {{'TOPIC_LIST_LABEL_VOTES' | translate}}</p>
 			<p *ngIf="topic.stage == C.STAGE_PROPOSAL">{{topic.num_proposals}} {{'TOPIC_LIST_LABEL_PROPOSALS' | translate}}</p>
-			<p *ngIf="topic.stage == C.STAGE_CONSENSUS">{{'TOPIC_LIST_LABEL_LEVEL' | translate}} {{topic.level}}</p>
+			<p *ngIf="topic.stage == C.STAGE_CONSENSUS">{{'TOPIC_LIST_LABEL_LEVEL' | translate}} {{topic.level | addone}}</p>
 			<p *ngIf="topic.stage == C.STAGE_PASSED">{{topic.valid_participants}} {{'TOPIC_LIST_LABEL_PARTICIPANTS' | translate}}</p>
 		</mat-card-content>
 		<mat-card-footer>
 			<p *ngIf="topic.stage == C.STAGE_REJECTED">{{'TOPIC_STAGE_REJECTED' | translate}}: {{topic.stageRejectedStarted | date: 'y-MM-dd'}}</p>
 			<p *ngIf="topic.stage == C.STAGE_SELECTION">
 				<button mat-icon-button color="primary" (click)="toggleVote($event, topic._id)">
-					<fa-icon *ngIf="!topic.voted" class="not-voted" [icon]="faHandPaper"></fa-icon>
-					<fa-icon *ngIf="topic.voted" class="voted" [icon]="faHandPaper"></fa-icon>
+					<fa-icon [ngClass]="{'not-voted': !topic.voted}" [icon]="faHandPaper"></fa-icon>
 				</button>
 			</p>
-			<p *ngIf="topic.stage == C.STAGE_PROPOSAL"><countdown [time]="topic.nextDeadline"></countdown></p>
-			<p *ngIf="topic.stage == C.STAGE_CONSENSUS">{{'TOPIC_LIST_LABEL_LEVEL' | translate}} {{topic.level}}</p>
+			<p *ngIf="topic.stage == C.STAGE_PROPOSAL || topic.stage == C.STAGE_CONSENSUS"><countdown [time]="topic.nextDeadline"></countdown></p>
 			<p *ngIf="topic.stage == C.STAGE_PASSED">{{'TOPIC_STAGE_FINISHED' | translate}}: {{topic.stagePassedStarted | date: 'y-MM-dd'}}</p>
 		</mat-card-footer>
 	</mat-card>

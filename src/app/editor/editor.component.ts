@@ -21,6 +21,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 })
 export class EditorComponent implements OnInit, OnDestroy {
 	private pid: string;
+	private xpid: string;
 	private title: string;
 	private saved: boolean = true;
 	private source: string;
@@ -64,18 +65,10 @@ export class EditorComponent implements OnInit, OnDestroy {
 	}
 	
 	ngOnInit() {
-		this.activatedRoute.params.subscribe((params: Params) => {
-				this.pid = params.id;
-				
-				this.httpManagerService.get('/json/editor/' + this.pid).subscribe(res => {
-					this.title = res.title;
-					this.source = res.source;
-				});
-			});
+		
 	}
 	
 	ngOnDestroy() {
-		console.log('destroyed');
 		if(this.socket)
 			this.socket.disconnect();
 			
@@ -101,8 +94,19 @@ export class EditorComponent implements OnInit, OnDestroy {
 		// Set quill editor
 		this.quillEditor = editor;
 		
-		// Initialize socket
-		this.initalizeSocket(pid);
+		// Get additional information and initalize socket
+		this.activatedRoute.params.subscribe((params: Params) => {
+				this.xpid = params.id;
+				
+				this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
+					this.pid = res.pid;
+					this.title = res.title;
+					this.source = res.source;
+					
+					// Initialize socket
+					this.initalizeSocket(this.pid);
+				});
+			});
 	}
 	
 	private initalizeSocket(pid) {
@@ -152,12 +156,9 @@ export class EditorComponent implements OnInit, OnDestroy {
 	
 	private closeEditor() {
 		if (!this.saved) {
-		//if (true) {
 			this.modalService.open({});
 			return;
 		}
-			
-		
 		// Navigate to source
 		this.router.navigate(['/topic', this.source]);
 	}

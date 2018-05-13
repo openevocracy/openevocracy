@@ -61,7 +61,11 @@ export class TopicComponent implements OnInit {
 		this.activatedRoute.params.subscribe(
 			(params: Params) => this.tid = params['id']);
 		
-		this.topicService.getTopic(this.tid).subscribe(res => {
+		this.loadTopic(this.tid);
+	}
+	
+	private loadTopic(tid) {
+		this.topicService.getTopic(tid).subscribe(res => {
 			this.topic = new Topic(res);
 		});
 	}
@@ -76,7 +80,25 @@ export class TopicComponent implements OnInit {
 			console.log('proposal created', res);
 			// Show alert
 			this.alertService.alertFromServer(res.alert);
+			
+			// Reload topic data
+			this.loadTopic(this.tid);
 		});
+	}
+	
+	private toggleVote() {
+		// Vote or unvote, depending of voted state
+		if(this.topic.voted) {
+			this.topicService.unvote(this.topic._id, this.uid).subscribe(res => {
+				this.topic.voted = res.voted;
+				this.topic.num_votes--;
+			});
+		} else {
+			this.topicService.vote(this.topic._id, this.uid).subscribe(res => {
+				this.topic.voted = res.voted;
+				this.topic.num_votes++;
+			});
+		}
 	}
 	
 	private enterFullscreen() {

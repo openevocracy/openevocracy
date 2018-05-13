@@ -9,10 +9,12 @@ var Delta = richText.Delta;
 var QuillDeltaToHtmlConverter = require('quill-delta-to-html');
 var pdf = require('phantom-html2pdf');
 var ObjectId = require('mongodb').ObjectID;
-var db = require('./database').db;
 
-var utils = require('./utils');
-var promisify = require('./promisify');
+var C = require('../../shared/constants').C;
+
+var db = require('../database').db;
+var utils = require('../utils');
+var promisify = require('../promisify');
 
 // promisify gulf
 var gulf = promisify(gulf);
@@ -107,7 +109,7 @@ function gulfIO(masterDoc, slaveSocket) {
 var padIdToDocMap = {};
 var docIdToPadMap = {};
 
-function createPadAsync(pid, expiration) {
+function createPadAsync(pad) {
 	// Initalize MongoskinAdapter with db and document id
 	var did = ObjectId();
 	var adapter = new MongoskinAdapter(db, did);
@@ -118,28 +120,21 @@ function createPadAsync(pid, expiration) {
 	masterDoc.id = did;
 	
 	return masterDoc.initializeFromStorage(starttext).then(function() {
-		// Create pad object
-		var pad = {
-		   '_id': pid,
-		   'did': did,
-		   'expiration': expiration
-		};
-		
 		// Set values to maps (cache)
-		padIdToDocMap[pid] = masterDoc; // TODO Reset
+		padIdToDocMap[pad.pid] = masterDoc; // TODO Reset
 		docIdToPadMap[did] = pad;
 		
-		// Store pad object in pad collection
-		return db.collection('pads').insertAsync(pad).return(pad);
+		// Store pad object in pad collection (also extend pad with did)
+		return db.collection('pads').insertAsync(_.extend(pad, {'did': did})).return(pad);
 	});
 }
 exports.createPadAsync = createPadAsync; 
 
-exports.createPadIfNotExistsAsync = function(pid, expiration) {
+exports.createPadIfNotExistsAsync = function(pad) {
 	// Check if getPadDocAsync throws error which indicates that pad does not exist
-	return getPadAsync(pid).then(getPadDocAsync).catch(utils.isOwnError, function () {
+	return getPadAsync(pad._id).then(getPadDocAsync).catch(utils.isOwnError, function () {
 		// If pad does not already exist, create it
-		return createPadAsync(pid, expiration);
+		return createPadAsync(pad);
 	});
 };
 
@@ -173,6 +168,7 @@ function getPadWithBodyAsync(pid) {
 exports.getPadWithBodyAsync = getPadWithBodyAsync;
 
 function getPadDocAsync(pad) {
+	console.log('getPadDocAsync', pad);
 	// check if document is in map first
 	var masterDoc = padIdToDocMap[pad._id];
 	if (!_.isUndefined(masterDoc))
@@ -207,6 +203,8 @@ function getDocHTMLAsync(doc) {
 	var converter = new QuillDeltaToHtmlConverter(doc.content.ops, cfg);
 	var html = converter.convert();
 	
+	console.log('getDocHTMLAsync', html);
+	
 	return html;
 }
 
@@ -230,12 +228,44 @@ exports.getPadPDFAsync = function(pid) {
 	});
 };
 
-// @desc: Gets title and source id from pad id
-exports.getPadDetails = function(req, res) {
-	var pid = ObjectId(req.params.id);
+/*
+ * @desc: Gets more information for some pad
+ *        xpid can be ppid or dpid
+ */
+function getPadDetails(xpid, collection) {
+	// Get description, propsal, etc.
+	var topic_x_promise = db.collection(collection).findOneAsync({ '_id': xpid });
+	// Get topic details
+	var topic_promise = topic_x_promise.then(function(obj) {
+		return db.collection('topics').findOneAsync({ '_id': obj.tid }, { 'name': true });
+	});
 	
-	db.collection('topics').findOneAsync({ 'pid': pid })
-		.then(function(topic) {
-			return { 'title': topic.name, 'source': topic._id };
-		}).then(res.send.bind(res));
+	// Join and return necessary information
+	return Promise.join(topic_x_promise, topic_promise).spread(function(topic_x, topic) {
+		return { 'title': topic.name, 'source': topic._id, 'pid': topic_x.pid };
+	});
+}
+
+// @desc: Gets more information for topic description pad
+exports.getPadTopicDetails = function(req, res) {
+	var dpid = ObjectId(req.params.id);
+	var collection = 'topic_descriptions';
+	
+	getPadDetails(dpid, collection).then(res.send.bind(res));
 };
+
+// @desc: Gets more information for proposal pad
+exports.getPadProposalDetails = function(req, res) {
+	var ppid = ObjectId(req.params.id);
+	var collection = 'topic_proposals';
+	
+	getPadDetails(ppid, collection).then(res.send.bind(res));
+};
+
+// @desc: Gets more information for group pad
+exports.getPadGroupDetails = function(req, res) {
+	var ppid = ObjectId(req.params.id);
+	
+	// TODO
+};
+

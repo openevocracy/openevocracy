@@ -359,7 +359,7 @@ exports.setLanguage = function(req, res) {
 exports.navigation = function(req, res) {
     var uid = ObjectId(req.user._id);
 
-    var topicsPrePromise = db.collection('proposals').
+    var topicsPrePromise = db.collection('topic_proposals').
         find({'source': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
             return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
                 {'name': true, 'stage': true, 'level': true, 'nextDeadline': true}).toArrayAsync();
@@ -368,7 +368,7 @@ exports.navigation = function(req, res) {
     var proposalsPromise = topicsPrePromise.filter(function(topic) {
         return topic.stage == C.STAGE_PROPOSAL;
     }).map(function(topic){
-        return db.collection('proposals').
+        return db.collection('topic_proposals').
             findOneAsync({'source': uid, 'tid': topic._id}, {'_id': true}).
             then(function(proposal) {
                 if(proposal)

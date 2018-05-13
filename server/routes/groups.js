@@ -11,7 +11,7 @@ var C = require('../../shared/constants').C;
 var cfg = require('../../shared/config').cfg;
 var ratings = require('./ratings');
 var topics = require('./topics');
-var pads = require('../pads');
+var pads = require('./pads');
 var mail = require('../mail');
 var utils = require('../utils');
 
@@ -61,13 +61,14 @@ function assignParticipantsToGroups(participants) {
 function storeGroupAsync(gid, tid, nextDeadline, level, members) {
     // create group proposal's pad
     var pid = ObjectId();
-    var create_pad_promosal_promise =
-    pads.createPadAsync(pid, nextDeadline); // This is actually the deadline of the next stage (not the old one).
+    // The deadline is actually the deadline of the next stage (not the old one).
+    var pad = { '_id': pid, 'expiration': nextDeadline };
+    var create_pad_promosal_promise = pads.createPadAsync(pad);
     
     // create group's proposal
     var ppid = ObjectId();
     var create_proposal_promise =
-    db.collection('proposals').insertAsync({
+    db.collection('topic_proposals').insertAsync({
         '_id': ppid, 'tid': tid,
         'source': gid, 'pid': pid});
     
@@ -105,8 +106,8 @@ function isProposalValid(proposal) {
 exports.createGroupsAsync = function(topic) {
     var tid = topic._id;
     
-    var validParticipantsPromise = db.collection('proposals').find({ 'tid': tid }).
-    toArrayAsync().map(function(proposal) {
+    var validParticipantsPromise = db.collection('topic_proposals').find({ 'tid': tid })
+    .toArrayAsync().map(function(proposal) {
         return pads.getPadHTMLAsync(proposal.pid).then(function(body) {
             proposal.body = body;
             return proposal;
@@ -150,7 +151,7 @@ exports.createGroupsAsync = function(topic) {
         // create members for this group
         // append gid to proposal so we can identify it later
         var update_source_proposals_promise =
-        db.collection('proposals').updateAsync(
+        db.collection('topic_proposals').updateAsync(
             { 'tid': tid, 'source': { $in: group_members } },
             { $set: { 'sink': gid } }, {'upsert': false, 'multi': true});
         
@@ -172,7 +173,7 @@ exports.getGroupsOfSpecificLevelAsync = getGroupsOfSpecificLevelAsync;
 
 function getValidGroupsOfSpecificLevelAsync(tid, level) {
     return getGroupsOfSpecificLevelAsync(tid, level).filter(function (group) {
-        return db.collection('proposals').findOneAsync({'source': group._id}).
+        return db.collection('topic_proposals').findOneAsync({'source': group._id}).
         then(function(proposal) {
             // Get HTML from document
             proposal.body = pads.getPadHTMLAsync(proposal.pid);
@@ -276,7 +277,7 @@ exports.remixGroupsAsync = function(topic) {
                 var sources = _.pluck(source_groups,'_id');
                 
                 // update sink of previous proposals
-                return db.collection('proposals').updateAsync(
+                return db.collection('topic_proposals').updateAsync(
                     { 'tid': tid, 'source': { $in: sources } },
                     { $set: { 'sink': gid } }, {'upsert': false, 'multi': true});
             });
@@ -300,7 +301,7 @@ exports.list = function(req, res) {
 
 function getProposalBodyAsync(mid, gid, proposals_source_promise) {
     // mid: member id, gid: group id
-    return db.collection('proposals').findOneAsync(
+    return db.collection('topic_proposals').findOneAsync(
         {'source': mid, 'sink': gid},{'pid': true}).then(function(proposal) {
         
         // Proposal was found
@@ -342,7 +343,7 @@ exports.query = function(req, res) {
     
     // Get group proposal pad id
     var proposal_promise = group_promise.then(function(group) {
-        return db.collection('proposals').findOneAsync(
+        return db.collection('topic_proposals').findOneAsync(
             {'_id': group.ppid}, {'pid': true});
     });
     
@@ -362,7 +363,7 @@ exports.query = function(req, res) {
     
     // Get alls source proposals
     var proposals_source_promise = group_promise.then(function(group) {
-        return db.collection('proposals').find({'sink': gid, 'tid': group.tid},
+        return db.collection('topic_proposals').find({'sink': gid, 'tid': group.tid},
             {'source': true, 'pid': true}).toArrayAsync();
     });
     

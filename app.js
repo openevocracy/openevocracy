@@ -13,7 +13,6 @@ var logger = require('morgan');
 var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
 var http = require('http');
-var pads = require('./server/pads');
 var chats = require('./server/chats');
 var CronJob = require('cron').CronJob;
 
@@ -35,6 +34,7 @@ var groups = require('./server/routes/groups');
 var proposals = require('./server/routes/proposals');
 var ratings = require('./server/routes/ratings');
 var tests = require('./server/routes/tests');
+var pads = require('./server/routes/pads');
 
 // Set passport strategy
 var strategy = users.getStrategy();
@@ -100,8 +100,14 @@ app.get('/file/topic/final/:id', auth(), topics.final);
 // ### E D I T O R ###
 // ###################
 
-// @desc: Get detailed information about pad
-app.get('/json/editor/:id', auth(), pads.getPadDetails);
+// @desc: Get detailed information about topic description pad
+app.get('/json/topic/editor/:id', auth(), pads.getPadTopicDetails);
+
+// @desc: Get detailed information about proposal pad
+app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
+
+// @desc: Get detailed information about group pad
+app.get('/json/group/editor/:id', auth(), pads.getPadGroupDetails);
 
 // #########################
 // ### P R O P O S A L S ###
