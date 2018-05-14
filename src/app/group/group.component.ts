@@ -12,7 +12,6 @@ import { EditorComponent } from '../editor/editor.component';
 import { Group } from '../_models/group';
 
 import 'quill-authorship';
-//import 'quill-cursors';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 
@@ -23,12 +22,6 @@ import { faFile } from '@fortawesome/free-solid-svg-icons';
 import { faHandshake } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
-
-import * as QuillNamespace from 'quill';
-let Quill: any = QuillNamespace;
-
-import { QuillCursors } from 'quill-cursors';
-Quill.register('modules/cursors', QuillCursors);
 
 @Component({
 	selector: 'app-group',
@@ -59,8 +52,7 @@ export class GroupComponent extends EditorComponent implements OnInit {
 		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
-			'authorship': { 'enabled': true, 'authorId': this.uid },
-			'cursors': true
+			'authorship': { 'enabled': true, 'authorId': this.uid }
 		});
 	}
 	
@@ -107,24 +99,6 @@ export class GroupComponent extends EditorComponent implements OnInit {
 					this.initalizeSocket(res.pid);
 				});
 			});
-	}
-	
-	private slectionChanged(e) {
-		console.log(e.range);
-		if (!e.range)
-			return;
-			
-		var me = _.findWhere(this.group.members, { '_id': this.uid });
-		
-		/*var cursor = {
-			'id': me._id,
-			'name': me.name,
-			'color': me.color,
-			'range': e.range
-		};
-		this.quillEditor.getModule('cursors').setCursor(cursor);*/
-		
-		// Submit to server ..
 	}
 	
 	private rate(e, ruid, type) {

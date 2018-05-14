@@ -47,8 +47,6 @@ exports.rate = function(req, res) {
 	var type = parseInt(req.body.type, 10);
 	var score = parseInt(req.body.score, 10);
 	
-	console.log('rate', ruid, gid, uid, type, score);
-	
 	// Return 402: score is not between 1 and 5
 	if(score < 0 || score > 5) {
 		res.sendStatus(402);
