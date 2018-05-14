@@ -29,13 +29,24 @@ button.close { padding: 0; background: transparent; border: 0; }
 /* Horizontal space */
 div.hspace { float: left; overflow: hidden; height: 1px; width: 0px; }
 
+/* Rating */
+$color-negative-rating: $red700 !default;
+$color-ok-rating: $yellow700 !default;
+$color-positive-rating: $green700 !default;
+$color-default-rating: $grey700 !default;
+
+@import "~css-star-rating/scss/star-rating";
+
+.rating {
+	align-items: left; justify-content: left;
+	-webkit-box-align: left; -webkit-box-pack: left;
+	-ms-flex-align: left; -ms-flex-pack: left;
+	float: left;
+	display: block;
+	margin: 14px 0;
+	height: 20px;
+}
+
 /* Misc */
 .alert a { color: $black; }
 
-/* Quill editor overwrites */
-/*.ql-container.ql-snow, .ql-toolbar.ql-snow { border: none; }
-.ql-container { font-size: 1.5rem; font-family: 'Roboto'; }
-.ql-container.ql-snow { background-color: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-.ql-toolbar.ql-snow { padding: 0; }
-.ql-editor { padding: 50px; }
-.ql-editor.ql-blank::before { left: 50px; }*/

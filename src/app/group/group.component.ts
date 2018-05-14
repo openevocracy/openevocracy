@@ -9,10 +9,26 @@ import { CloseeditorModalService } from '../_services/modal.closeeditor.service'
 
 import { EditorComponent } from '../editor/editor.component';
 
-import 'quill-authorship';
+import { Group } from '../_models/group';
 
+import 'quill-authorship';
+//import 'quill-cursors';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
+
+import { C } from '../../../shared/constants';
+
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faFile } from '@fortawesome/free-solid-svg-icons';
+import { faHandshake } from '@fortawesome/free-solid-svg-icons';
+import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
+
+import * as QuillNamespace from 'quill';
+let Quill: any = QuillNamespace;
+
+import { QuillCursors } from 'quill-cursors';
+Quill.register('modules/cursors', QuillCursors);
 
 @Component({
 	selector: 'app-group',
@@ -20,7 +36,15 @@ import * as _ from 'underscore';
 	styleUrls: ['../editor/editor.component.scss', './group.component.scss']
 })
 export class GroupComponent extends EditorComponent implements OnInit {
+	private C;
 	private uid: string;
+	private group: Group;
+	
+	private faUser = faUser;
+	private faExpandArrowsAlt = faExpandArrowsAlt;
+	private faFile = faFile;
+	private faHandshake = faHandshake;
+	private faLightbulb = faLightbulb;
 	
 	constructor(
 		protected router: Router,
@@ -33,15 +57,18 @@ export class GroupComponent extends EditorComponent implements OnInit {
 		
 		this.uid = this.userService.getUserId();
 		
+		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
-			authorship: { 'enabled': true, 'authorId': this.uid }
+			'authorship': { 'enabled': true, 'authorId': this.uid },
+			'cursors': true
 		});
 	}
 	
 	ngOnInit() {
+		this.C = C;
 	}
 	
-	protected editorCreated(editor, pid) {
+	protected editorCreated(editor) {
 		// Disable editor body
 		this.disableEdit();
 		
@@ -56,26 +83,73 @@ export class GroupComponent extends EditorComponent implements OnInit {
 				this.xpid = params.id;
 				
 				this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
-					this.pid = res.pid;
-					this.title = res.title;
+					this.group = new Group(res);
 					this.source = res.tid;
 					
-					// Add authors
-					// Color of current member
+					// Add color of current member
 					var me = _.findWhere(res.members, { '_id': this.uid });
-					this.quillEditor.theme.modules.authorship.options.color = me.color;
-					// Colors of other members
+					this.quillEditor.getModule('authorship').addAuthor(this.uid, me.color);
+					
+					// Add colors of other members
 					_.map(res.members, function(member) {
 						if(member._id != me._id)
-							this.quillEditor.theme.modules.authorship.addAuthor(member._id, member.color);
-					});
-					//this.quillEditor.theme.modules.authorship.addAuthor(1, '#0f0');
-					console.log(this.quillEditor);
+							this.quillEditor.getModule('authorship').addAuthor(member._id, member.color);
+					}.bind(this));
+					
+					/*this.quillEditor.getModule('cursors').set({
+						id: me._id,
+						name: me.name,
+						color: me.color,
+						range: 1
+					});*/
 					
 					// Initialize socket
-					this.initalizeSocket(this.pid);
+					this.initalizeSocket(res.pid);
 				});
 			});
+	}
+	
+	private slectionChanged(e) {
+		console.log(e.range);
+		if (!e.range)
+			return;
+			
+		var me = _.findWhere(this.group.members, { '_id': this.uid });
+		
+		/*var cursor = {
+			'id': me._id,
+			'name': me.name,
+			'color': me.color,
+			'range': e.range
+		};
+		this.quillEditor.getModule('cursors').setCursor(cursor);*/
+		
+		// Submit to server ..
+	}
+	
+	private rate(e, ruid, type) {
+		var rating = {
+			'gid': this.group._id,
+			'ruid': ruid,
+			'score': e.rating,
+			'type': type
+		}
+		
+		this.httpManagerService.post('/json/ratings/rate', rating).subscribe();
+	}
+	
+	private enterFullscreen() {
+		var element = document.documentElement;
+		
+		if(element.requestFullscreen) {
+			element.requestFullscreen();
+		/*} else if(element.mozRequestFullScreen) {
+			element.mozRequestFullScreen();
+		} else if(element.msRequestFullscreen) {
+			element.msRequestFullscreen();*/
+		} else if(element.webkitRequestFullscreen) {
+			element.webkitRequestFullscreen();
+		}
 	}
 
 }

@@ -20,9 +20,9 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 	styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit, OnDestroy {
-	protected pid: string;
+	private pid: string;
 	protected xpid: string;
-	protected title: string;
+	private title: string;
 	private saved: boolean = true;
 	protected source: string;
 	protected quillModules;
@@ -123,7 +123,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.socket.on('change', function(change) {
 			console.log('change', change);
 			this.quillEditor.updateContents(change);
-		});
+		}.bind(this));
 		
 		// Define a debounced version of setSaved function
 		var lazySetSaved = _.debounce(this.setSaved.bind(this), 1000);
@@ -146,11 +146,11 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.router.navigate(['/topic', this.source]);
 	}
 	
-	private setSaved() {
+	protected setSaved() {
 		this.saved = true;
 	}
 	
-	private contentChanged(e) {
+	protected contentChanged(e) {
 		// If input source is not user, do not send a change to server
 		if(e.source != 'user')
 			return;

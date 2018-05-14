@@ -100,6 +100,10 @@
 	"TOPIC_BUTTON_GOTO_CURRENT_GROUP": "Group",
 	
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Productive mode",
+	"GROUP_MEMBER_BUTTON_PROPOSAL": "Member proposal",
+	"GROUP_MEMBER_BUTTON_SHOW": "Visit profile",
+	"GROUP_RATING_TOOLTIP_INTEGRATION": "Integration skill of this member, i.e. ability to cooperate and find consensus",
+	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Expertise of this member regarding the topic",
 	
 	"EDITOR_BUTTON_CLOSE": "Close",
 	"EDITOR_SAVED_CHANGES": "All changes are saved.",

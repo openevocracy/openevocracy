@@ -13,7 +13,6 @@ import { cfg } from '../../../shared/config';
 import { Topic } from '../_models/topic';
 
 import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
-import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { faShareSquare } from '@fortawesome/free-solid-svg-icons';
@@ -37,7 +36,6 @@ export class TopicComponent implements OnInit {
 	private topic: Topic;
 	
 	private faHandPaper = faHandPaper;
-	private faExpandArrowsAlt = faExpandArrowsAlt;
 	private faEllipsisV = faEllipsisV;
 	private faUser = faUser;
 	private faShareSquare = faShareSquare;
@@ -100,22 +98,6 @@ export class TopicComponent implements OnInit {
 				this.topic.voted = res.voted;
 				this.topic.num_votes++;
 			});
-		}
-	}
-	
-	private enterFullscreen() {
-		// TODO: It's just for testing purpose, should be used in group
-		
-		var element = document.documentElement;
-		
-		if(element.requestFullscreen) {
-			element.requestFullscreen();
-		/*} else if(element.mozRequestFullScreen) {
-			element.mozRequestFullScreen();
-		} else if(element.msRequestFullscreen) {
-			element.msRequestFullscreen();*/
-		} else if(element.webkitRequestFullscreen) {
-			element.webkitRequestFullscreen();
 		}
 	}
 

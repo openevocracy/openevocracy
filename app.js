@@ -130,6 +130,8 @@ app.get('/json/group/:id', auth(), groups.query);
 
 app.get('/json/ratings/count', auth(), ratings.count);
 app.get('/json/ratings/:id', auth(), ratings.query);
+
+// @desc: Store a new rating value
 app.post('/json/ratings/rate', auth(), ratings.rate);
 
 // ###################

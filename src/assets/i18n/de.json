@@ -100,6 +100,10 @@
 	"TOPIC_BUTTON_GOTO_CURRENT_GROUP": "Gruppe",
 	
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Produktivmodus",
+	"GROUP_MEMBER_BUTTON_PROPOSAL": "Mitgliedsvorschlag",
+	"GROUP_MEMBER_BUTTON_SHOW": "Zum Profil",
+	"GROUP_RATING_TOOLTIP_INTEGRATION": "Integrationsfähigkeit dieses Mitglieds, d.h. Kooperations- und Konsensfähigkeit",
+	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Fachwissen dieses Mitglieds bezüglich des Themas",
 	
 	"EDITOR_BUTTON_CLOSE": "Schließen",
 	"EDITOR_SAVED_CHANGES": "Alle Änderungen sind gespeichert.",

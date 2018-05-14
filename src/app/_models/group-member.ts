@@ -1,6 +1,9 @@
 export class GroupMember {
 	_id: string;
 	gid: string;
-	uid: string;
-	lastActivity: number;
+	name: string;
+	color: string;
+	proposal_body: string;
+	rating_integration: string;
+	rating_knowledge: string;
 }

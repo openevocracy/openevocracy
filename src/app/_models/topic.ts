@@ -5,7 +5,7 @@ import { C } from '../../../shared/constants';
 
 import { Group } from './group';
 import { Proposal } from './proposal';
-import { GroupMember } from './group-member';
+import { TopicGroupMember } from './topic-group-member';
 
 import { ReflectiveInjector } from '@angular/core';
 import { UtilsService } from '../_services/utils.service';
@@ -14,7 +14,7 @@ export class Topic extends TopicListElement {
 	/* Extended information */
 	groups: Group[];
 	proposals: Proposal[];
-	group_members: GroupMember[];
+	group_members: TopicGroupMember[];
 	gid: string;
 	gpid: string;
 	group_html: string;

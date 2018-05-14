@@ -12,6 +12,7 @@ import 'hammerjs';
 import { MaterialModule } from './_modules/material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { QuillModule } from 'ngx-quill';
+import { StarRatingModule } from 'angular-star-rating';
 
 // Routing
 import { AppRoutingModule } from './_routing/app-routing.module';
@@ -99,6 +100,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		HttpClientModule,
 		ReactiveFormsModule,
 		QuillModule,
+		StarRatingModule.forRoot(),
 		TranslateModule.forRoot({
 			loader: {
 				provide: TranslateLoader,

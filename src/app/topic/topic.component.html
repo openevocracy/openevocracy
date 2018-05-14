@@ -22,7 +22,6 @@
 		</button>
 		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PASSED" title="{{ 'TOPIC_BUTTON_RESULT_DOWNLOAD' | translate }}"><fa-icon [icon]="faDownload"></fa-icon></button>
 		<button mat-icon-button *ngIf="topic?.stage >= C.STAGE_CONSENSUS || topic?.stage == C.STAGE_REJECTED" title="{{ 'TOPIC_BUTTON_STRUCTURE' | translate }}"><fa-icon [icon]="faSitemap"></fa-icon></button>
-		<button mat-icon-button (click)="enterFullscreen()" title="{{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}"><fa-icon [icon]="faExpandArrowsAlt"></fa-icon></button>
 		
 		<button mat-icon-button [matMenuTriggerFor]="more">
 			<fa-icon [icon]="faEllipsisV"></fa-icon>

@@ -2,12 +2,15 @@
 
 <mat-toolbar class="first-toolbar" color="primary">
 	<div class="flex container">
-		<h1>{{ title }}</h1>
+		<h1>{{ group?.title }}</h1>
 		<span class="saved-text">
 			<span *ngIf="saved">{{ 'EDITOR_SAVED_CHANGES' | translate }}</span>
 			<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
 		</span>
 		<span class="flex-spacer"></span>
+		<button mat-button (click)="enterFullscreen()" title="{{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}">
+			<span><fa-icon [icon]="faExpandArrowsAlt"></fa-icon> {{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}</span>
+		</button>
 		<button mat-button title="{{ 'EDITOR_BUTTON_CLOSE' | translate }}" (click)="closeEditor()">
 			<span><fa-icon [icon]="faTimes"></fa-icon> {{ 'EDITOR_BUTTON_CLOSE' | translate }}</span>
 		</button>
@@ -15,9 +18,36 @@
 </mat-toolbar>
 
 <mat-toolbar class="second-toolbar" color="primary">
-	<div id="toolbar" class="container"></div>
+	<div class="flex container">
+		<div id="toolbar"></div>
+		<span class="flex-spacer"></span>
+		
+		<div *ngFor="let member of group?.members">
+			<button mat-button [matMenuTriggerFor]="menu">
+				<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}<span *ngIf="member._id == uid"> *</span></span>
+			</button>
+			<mat-menu #menu="matMenu" [overlapTrigger]="false">
+				<button mat-menu-item class="rating-button">
+					<span matTooltip="{{ 'GROUP_RATING_TOOLTIP_INTEGRATION' | translate }}" [matTooltipPosition]="'left'">
+						<fa-icon [icon]="faHandshake"></fa-icon> <star-rating [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.rating_integration" (ratingChange)="rate($event, member._id, C.RATING_INTEGRATION)"></star-rating>
+					</span>
+				</button>
+				<button mat-menu-item class="rating-button">
+					<span matTooltip="{{ 'GROUP_RATING_TOOLTIP_KNOWLEDGE' | translate }}" [matTooltipPosition]="'left'">
+						<fa-icon [icon]="faLightbulb"></fa-icon> <star-rating [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.rating_knowledge" (ratingChange)="rate($event, member._id, C.RATING_KNOWLEDGE)"></star-rating>
+					</span>
+				</button>
+				<button mat-menu-item>
+					<span><fa-icon [icon]="faUser"></fa-icon> {{ 'GROUP_MEMBER_BUTTON_SHOW' | translate }}</span>
+				</button>
+				<button mat-menu-item>
+					<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_MEMBER_BUTTON_PROPOSAL' | translate }}</span>
+				</button>
+			</mat-menu>
+		</div>
+	</div>
 </mat-toolbar>
 
 <div class="container">
-	<quill-editor [modules]="quillModules" [style]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event, pid)" (onContentChanged)="contentChanged($event)"></quill-editor>
+	<quill-editor [modules]="quillModules" [style]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)" (onSelectionChanged)="slectionChanged($event);"></quill-editor>
 </div>

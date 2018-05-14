@@ -331,6 +331,8 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 		
 		// Get html of user group
 		user_group_pad_html_promise = user_group_pad_id_promise.then(function(topic_proposal) {
+			if (_.isNull(topic_proposal))
+				return "";
 			return db.collection('pads').findOneAsync({ '_id': topic_proposal.pid }).then(function(pad) {
 				return pad.html || "";
 			});
@@ -367,7 +369,8 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 				'description_html': description_pad_html_promise,
 				'group_members': group_members_promise,
 				'gid': user_group_id_promise,
-				'gpid': user_group_pad_id_promise.get('_id'),
+				'gpid': user_group_pad_id_promise.then(function(proposal) {
+					return _.isNull(proposal) ? null : proposal._id	}),
 				'group_html': user_group_pad_html_promise
 			}));
 		});
