@@ -72,6 +72,7 @@ export class HttpManagerService {
 	}
 	
 	public handleError(raw: Response | any) {
+		console.error(raw);
 		// If server sends 401 'Unauthorized'
 		if(_.has(raw, 'status') && raw.status == 401 && raw._body == 'Unauthorized') {
 			// Delete token in local storage and redirect

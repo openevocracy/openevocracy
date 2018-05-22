@@ -13,13 +13,19 @@ exports.clean_database = function(req, res) {
     db.collection('group_members').drop();
     db.collection('mail').drop();
     db.collection('pads').drop();
-    db.collection('proposals').drop();
+    db.collection('topic_proposals').drop();
+    db.collection('topic_descriptions').drop();
     db.collection('topic_votes').drop();
     db.collection('topics').drop();
+    db.collection('ratings').drop();
+    
+    // ShareDB
+    db.collection('docs').drop();
+    db.collection('o_docs').drop();
     
     // Gulf
-    db.collection('gulf_lastrevision_id').drop();
-    db.collection('gulf_revisions').drop();
+    //db.collection('gulf_lastrevision_id').drop();
+    //db.collection('gulf_revisions').drop();
     
     res.sendStatus(200);
 };

@@ -3,14 +3,10 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 
 import { HttpManagerService } from '../_services/http-manager.service';
-import { UserService } from '../_services/user.service';
 import { ModalService } from '../_services/modal.service';
 import { CloseeditorModalService } from '../_services/modal.closeeditor.service';
 
 import { cfg } from '../../../shared/config';
-
-import * as sharedb from 'sharedb/lib/client';
-import * as richText from 'rich-text';
 
 import * as io from 'socket.io-client';
 import * as $ from 'jquery';
@@ -25,8 +21,6 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 })
 export class EditorComponent implements OnInit, OnDestroy {
 	private pid: string;
-	private did: string;
-	protected uid: string;
 	protected xpid: string;
 	private title: string;
 	private saved: boolean = true;
@@ -37,8 +31,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 	private placeholder: string;
 	private modalSubscription: Subscription;
 	
-	private doc;
-	
 	private faTimes = faTimes;
 
 	constructor(
@@ -46,10 +38,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		protected activatedRoute: ActivatedRoute,
 		protected modalService: ModalService,
 		protected closeeditorModalService: CloseeditorModalService,
-		protected httpManagerService: HttpManagerService,
-		protected userService: UserService) {
-			
-		this.uid = this.userService.getUserId();
+		protected httpManagerService: HttpManagerService) {
 		
 		this.quillModules = {
 			toolbar: [
@@ -79,7 +68,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 	
 	ngOnDestroy() {
 		if(this.socket)
-			this.socket.close();
+			this.socket.disconnect();
 			
 		// Unsubscribe to avoid memory leak
 		this.modalSubscription.unsubscribe();
@@ -109,49 +98,42 @@ export class EditorComponent implements OnInit, OnDestroy {
 				
 				this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
 					this.pid = res.pid;
-					this.did = res.did;
 					this.title = res.title;
 					this.source = res.source;
 					
 					// Initialize socket
-					this.initalizeSocket(this.did);
+					this.initalizeSocket(this.pid);
 				});
 			});
 	}
 	
-	protected initalizeSocket(did) {
-		sharedb.types.register(richText.type);
-
-		// Open WebSocket connection to ShareDB server
-		this.socket = new WebSocket('wss://develop.openevocracy.org/socket?uid='+this.uid);
+	protected initalizeSocket(pid) {
+		// Establish socket connection
+		this.socket = io.connect(cfg.BASE_URL);
 		
-		this.socket.onopen = function () {
-			console.log('Open');
-		};
-		
-		var connection = new sharedb.Connection(this.socket);
-		
-		// Create local Doc instance mapped to 'examples' collection document with id 'richtext'
-		var doc = connection.get('docs', did);
-		this.doc = doc;
-		doc.subscribe(function(err) {
-			console.log('doc subscribe', doc);
-			if (err) throw err;
+		// If 'setContents' event comes in, set contents to editor
+		this.socket.on('setContents', function(contents) {
+			this.quillEditor.setContents(contents);
 			
-			var quill = this.quillEditor;
-			
-			quill.setContents(doc.data);
-			quill.on('text-change', function(delta, oldDelta, source) {
-				if (source !== 'user') return;
-				doc.submitOp(delta, {source: quill});
-			});
-			doc.on('op', function(op, source) {
-				if (source === quill) return;
-				quill.updateContents(op);
-			});
+			// Enable editor body
+			this.enableEdit();
 		}.bind(this));
 		
-		this.enableEdit();
+		// If 'change' event comes in, update editor
+		this.socket.on('change', function(change) {
+			console.log('change', change);
+			this.quillEditor.updateContents(change);
+		}.bind(this));
+		
+		// Define a debounced version of setSaved function
+		var lazySetSaved = _.debounce(this.setSaved.bind(this), 1000);
+		this.socket.on('submitted', function(submitted) {
+			// Set saved text
+			lazySetSaved();
+		});
+		
+		// Send pad id to server and ask for content
+		this.socket.emit('pad_identity', {'pid': pid});
 	}
 	
 	protected closeEditor() {
@@ -177,7 +159,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.saved = false;
 		
 		// Emit current change to server via socket
-		//this.doc.submitOp(e.delta, {source: this.quillEditor});
+		this.socket.emit('change', e.delta);
 	}
 
 }

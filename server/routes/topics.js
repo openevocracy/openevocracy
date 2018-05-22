@@ -123,10 +123,10 @@ function isAccepted(topic) {
  * @return {object} topics - all adjusted topics
  */
 function manageAndListTopicsAsync() {
-    return lock.acquire('manageTopic', function() {
-        return db.collection('topics').find().toArrayAsync().
-            map(_.partial(manageTopicStateAsync));
-    });
+	return lock.acquire('manageTopic', function() {
+		return db.collection('topics').find().toArrayAsync()
+			.map(_.partial(manageTopicStateAsync));
+	});
 }
 exports.manageAndListTopicsAsync = manageAndListTopicsAsync;
 
@@ -385,12 +385,11 @@ exports.list = function(req, res) {
     
     manageAndListTopicsAsync().then(function(topics) {
         // Promise.map does not work above
-        Promise.map(topics, _.partial(appendTopicInfoAsync, _, uid, false)).
-        then(function(topics){
-           //console.log(topics);
+        Promise.map(topics, _.partial(appendTopicInfoAsync, _, uid, false))
+        .then(function(topics){
            return topics;
-        }).
-        then(res.json.bind(res));
+        })
+        .then(res.json.bind(res));
     });
 };
 

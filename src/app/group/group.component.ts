@@ -30,7 +30,6 @@ import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
 })
 export class GroupComponent extends EditorComponent implements OnInit {
 	private C;
-	private uid: string;
 	private group: Group;
 	
 	private faUser = faUser;
@@ -45,10 +44,8 @@ export class GroupComponent extends EditorComponent implements OnInit {
 		protected modalService: ModalService,
 		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
-		private userService: UserService,) {
+		protected userService: UserService) {
 		super(router, activatedRoute, modalService, closeeditorModalService, httpManagerService);
-		
-		this.uid = this.userService.getUserId();
 		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
