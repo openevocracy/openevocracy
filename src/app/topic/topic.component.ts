@@ -10,6 +10,8 @@ import { UserService } from '../_services/user.service';
 
 import { C } from '../../../shared/constants';
 import { cfg } from '../../../shared/config';
+import * as _ from 'underscore';
+
 import { Topic } from '../_models/topic';
 
 import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
@@ -31,8 +33,8 @@ import { faUsers } from '@fortawesome/free-solid-svg-icons';
 })
 export class TopicComponent implements OnInit {
 	private C;
-	private uid;
-	private tid: string;
+	private userId: string;
+	private topicId: string;
 	private topic: Topic;
 	
 	private faHandPaper = faHandPaper;
@@ -56,17 +58,18 @@ export class TopicComponent implements OnInit {
 	
    ngOnInit() {
 		this.C = C;
-		this.uid = this.userService.getUserId();
+		this.userId = this.userService.getUserId();
 		
 		this.activatedRoute.params.subscribe(
-			(params: Params) => this.tid = params['id']);
+			(params: Params) => this.topicId = params['id']);
 		
-		this.loadTopic(this.tid);
+		this.loadTopic(this.topicId);
 	}
 	
-	private loadTopic(tid) {
-		this.topicService.getTopic(tid).subscribe(res => {
+	private loadTopic(topicId) {
+		this.topicService.getTopic(topicId).subscribe(res => {
 			this.topic = new Topic(res);
+			console.log(this.topic);
 		});
 	}
 	
@@ -76,25 +79,24 @@ export class TopicComponent implements OnInit {
 	}
 	
 	private createProposal() {
-		this.httpManagerService.post('/json/proposal/create', {'tid': this.tid, 'uid': this.uid}).subscribe(res => {
-			console.log('proposal created', res);
+		this.httpManagerService.post('/json/proposal/create', {'topicId': this.topicId, 'userId': this.userId}).subscribe(res => {
 			// Show alert
 			this.alertService.alertFromServer(res.alert);
 			
 			// Reload topic data
-			this.loadTopic(this.tid);
+			this.loadTopic(this.topicId);
 		});
 	}
 	
 	private toggleVote() {
 		// Vote or unvote, depending of voted state
 		if(this.topic.voted) {
-			this.topicService.unvote(this.topic._id, this.uid).subscribe(res => {
+			this.topicService.unvote(this.topic._id, this.userId).subscribe(res => {
 				this.topic.voted = res.voted;
 				this.topic.num_votes--;
 			});
 		} else {
-			this.topicService.vote(this.topic._id, this.uid).subscribe(res => {
+			this.topicService.vote(this.topic._id, this.userId).subscribe(res => {
 				this.topic.voted = res.voted;
 				this.topic.num_votes++;
 			});

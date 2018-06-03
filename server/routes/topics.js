@@ -102,7 +102,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
         return Promise.props(update_set_promise).then(function(update_set) {
             return db.collection('topics').updateAsync(
                 _.pick(topic, '_id'), { $set: update_set }, {}).
-                return(_.extend(topic,update_set));
+                return(_.extend(topic, update_set));
         });
     });
 }
@@ -113,7 +113,7 @@ exports.manageConsensusStage = manageConsensusStageAsync;
  */
 function isAccepted(topic) {
     return db.collection('topic_votes').
-        countAsync({'tid': topic._id}).
+        countAsync({'topicId': topic._id}).
         then(function(count) {return count >= cfg.MIN_VOTES_PER_TOPIC;});
 }
 
@@ -140,102 +140,93 @@ exports.manageAndListTopicsAsync = manageAndListTopicsAsync;
  */
 function manageTopicStateAsync(topic) {
     
-    // exit this function if stage transition is not due yet
-    if(Date.now() < topic.nextDeadline)
-        return Promise.resolve(topic);
-    
-    // move to next stage
-    var prevDeadline = topic.nextDeadline;
-    switch (topic.stage) {
-        case C.STAGE_SELECTION: // we are currently in selection stage
-            return isAccepted(topic).then(function(isAccepted) {
-                var stageStartedEntryName;
-                if(isAccepted) {
-                    // topic does meet the minimum requirements for the next stage
-                    // move to next stage
-                    topic.stage = C.STAGE_PROPOSAL;
-                    topic.nextDeadline = calculateDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
-                    stageStartedEntryName = 'stageProposalStarted';
-                    topic[stageStartedEntryName] = Date.now();
-                } else {
-                    // topic has been rejected
-                    // move to rejection stage
-                    topic.stage = C.STAGE_REJECTED;
-                    topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VOTES';
-                    stageStartedEntryName = 'stageRejectedStarted';
-                    topic[stageStartedEntryName] = Date.now();
-                }
-                var updateTopicStatePromise =
-                    updateTopicStateAsync(topic,stageStartedEntryName);
-                var updatePadExpirationPromise =
-                    pads.updatePadExpirationAsync(topic.pid, Date.now());
-                
-                return Promise.join(updateTopicStatePromise, updatePadExpirationPromise).
-                       return(topic);
-            });
-        case C.STAGE_PROPOSAL: // we are currently in proposal stage
-            // Set the next deadline here, so we can use it in createGroupsAsync.
-            topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
-            
-            return groups.createGroupsAsync(topic).then(function(groups) {
-                var stageStartedEntryName;
-                
-                if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {
-                    topic.stage = C.STAGE_CONSENSUS;
-                    stageStartedEntryName = 'stageConsensusStarted';
-                } else {
-                    topic.stage = C.STAGE_REJECTED;
-                    topic.nextDeadline = cfg.DURATION_NONE;
-                    topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS';
-                    stageStartedEntryName = 'stageRejectedStarted';
-                }
-                
-                topic[stageStartedEntryName] = Date.now();
-                return Promise.join(topic,stageStartedEntryName);
-            }).spread(function(topic, stageStartedEntryName) {
-                return updateTopicStateAsync(topic, stageStartedEntryName).
-                       return(topic);
-            });
-        case C.STAGE_CONSENSUS: // we are currently in consensus stage
-            return manageConsensusStageAsync(topic);
-    }
-    
-    return Promise.resolve(topic);
+	// Exit this function if stage transition is not due yet
+	if(Date.now() < topic.nextDeadline)
+		return Promise.resolve(topic);
+			
+	// Move to next stage
+	var prevDeadline = topic.nextDeadline;
+	switch (topic.stage) {
+		case C.STAGE_SELECTION: // we are currently in selection stage
+			return isAccepted(topic).then(function(isAccepted) {
+				var stageStartedEntryName;
+				if(isAccepted) {
+					// Topic does meet the minimum requirements for the next stage, move to next stage
+					topic.stage = C.STAGE_PROPOSAL;
+					topic.nextDeadline = calculateDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
+					stageStartedEntryName = 'stageProposalStarted';
+					topic[stageStartedEntryName] = Date.now();
+				} else {
+					// Topic has been rejected, move to rejection stage
+					topic.stage = C.STAGE_REJECTED;
+					topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VOTES';
+					stageStartedEntryName = 'stageRejectedStarted';
+					topic[stageStartedEntryName] = Date.now();
+				}
+				var updateTopicStatePromise = updateTopicStateAsync(topic,stageStartedEntryName);
+				var updatePadExpirationPromise = db.collection('pads_topic_description').updateAsync(
+					{ '_id': topic.pid }, { $set: { 'expiration': Date.now() }}
+				);
+				
+				return Promise.join(updateTopicStatePromise, updatePadExpirationPromise).
+				return(topic);
+			});
+		case C.STAGE_PROPOSAL: // we are currently in proposal stage
+			// Set the next deadline here, so we can use it in createGroupsAsync.
+			topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
+			
+			return groups.createGroupsAsync(topic).then(function(groups) {
+				var stageStartedEntryName;
+				
+				if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {
+					topic.stage = C.STAGE_CONSENSUS;
+					stageStartedEntryName = 'stageConsensusStarted';
+				} else {
+					topic.stage = C.STAGE_REJECTED;
+					topic.nextDeadline = cfg.DURATION_NONE;
+					topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS';
+					stageStartedEntryName = 'stageRejectedStarted';
+				}
+				
+				topic[stageStartedEntryName] = Date.now();
+				return Promise.join(topic, stageStartedEntryName);
+			}).spread(function(topic, stageStartedEntryName) {
+				return updateTopicStateAsync(topic, stageStartedEntryName).return(topic);
+			});
+		case C.STAGE_CONSENSUS: // we are currently in consensus stage
+			return manageConsensusStageAsync(topic);
+	}
+	
+	return Promise.resolve(topic);
 }
 
-function appendTopicInfoAsync(topic, uid, with_details) {
-	var tid = topic._id;
+function appendTopicInfoAsync(topic, userId, with_details) {
+	var topicId = topic._id;
 	
 	// get number of participants and votes in this topic
 	var topic_votes_promise = db.collection('topic_votes')
-		.find({'tid': tid}, {'uid': true}).toArrayAsync();
-	var topic_proposals_promise = db.collection('topic_proposals')
-		.find({'tid': tid}).toArrayAsync();
+		.find({'topicId': topicId}, {'userId': true}).toArrayAsync();
+	var pads_proposal_count_promise = db.collection('pads_proposal').countAsync({'topicId': topicId});
     
 	// TODO http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
 	
 	// Get groups and sort by level
-	var groups_promise = db.collection('groups').find({ 'tid': tid })
+	var groups_promise = db.collection('groups')
+		.find({ 'topicId': topicId }, { 'level': true })
 		.sort({ 'level': -1 }).toArrayAsync();
 	
 	// Number of participants per level
 	var participants_per_levels_promise = groups_promise.then(function(groups) {
 		var member_counts_per_groups_promise =
 		db.collection('group_members').aggregateAsync( [
-			{ $match: { 'gid': { $in: _.pluck(groups, '_id') } } },
-			{ $group: { '_id': '$gid', member_count: { $sum : 1 } } } ] );
+			{ $match: { 'groupId': { $in: _.pluck(groups, '_id') } } },
+			{ $group: { '_id': '$groupId', member_count: { $sum : 1 } } } ] );
 		
 		return Promise.join(groups, member_counts_per_groups_promise);
 	}).spread(function (groups, member_counts_per_groups) {
 		var member_counts_per_groups_sorted_by_levels =
 		_.groupBy(member_counts_per_groups, function(member_count) {
-			var groups_with_string_ids = _.map(groups, function(group) {
-				group._id = group._id.toString();
-				return group;
-			});
-			var gid_as_string = member_count._id.toString();
-			// NOTE: findWhere does not work with ObjectIds
-			var group = _.findWhere(groups_with_string_ids, {'_id': gid_as_string});
+			var group = utils.findWhereObjectId(groups, {'_id': member_count._id});
 			return group.level;
 		});
         
@@ -272,83 +263,59 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 	});
 	
 	// Detailed data (not used in topic list, only in details)
-	var user_proposal_promise = null;
-	var user_proposal_pad_html_promise = null;
-	var description_promise = null;
-	var description_pad_html_promise = null;
+	var pad_description_promise = null;
 	var group_members_promise = null;
-	var user_group_id_promise = null;
-	var user_group_pad_id_promise = null;
-	var user_group_pad_html_promise = null;
+	var user_proposal_promise = null;
+	var user_group_promise = null;
     
 	if(with_details) {
-		// Get user proposal id
-		user_proposal_promise = db.collection('topic_proposals').findOneAsync({ 'tid': tid, 'source': uid });
-		
-		// Get user proposal html
-		user_proposal_pad_html_promise = user_proposal_promise.then(function(topic_proposal) {
-			if (_.isNull(topic_proposal))
-				return "";
-			return db.collection('pads').findOneAsync({ '_id': topic_proposal.pid }).then(function(pad) {
-				return pad.html || "";
-			});
+		// Get topic description
+		pad_description_promise = db.collection('pads_topic_description')
+			.findOneAsync({'topicId': topicId}, { 'docId': true, 'ownerId': true })
+			.then(function(pad) {
+				return addHtmlToPad('topic_description', pad);
 		});
 		
-		// Get topic description id
-		description_promise = db.collection('topic_descriptions').findOneAsync({ 'tid': topic._id });
-		
-		// Get pad description html
-		description_pad_html_promise = description_promise.then(function(topic_description) {
-			return db.collection('pads').findOneAsync({ '_id': topic_description.pid }).then(function(pad) {
-				return pad.html || "";
-			});
-		});
-		
-		// Get group member uid's
+		// Get group member user id's
 		group_members_promise = groups_promise.then(function(groups) {
 			return db.collection('group_members')
-				.find({'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
+				.find({'groupId': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
 		});
 		
-		// Find the group id that the current user is part of (in last level)
-		user_group_id_promise = groups_promise.then(function(groups) {
+		// Get proposal of user
+		user_proposal_promise = db.collection('pads_proposal')
+			.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { 'docId': true, 'ownerId': true })
+			.then(function(pad) {
+				return _.isNull(pad) ? null : addHtmlToPad('proposal', pad);
+		});
+		
+		// Find the group that the current user is part of (in last level)
+		user_group_promise = groups_promise.then(function(groups) {
+			// Get all groups in highest level
 			var highest_level = _.max(groups, function(group) {return group.level;}).level;
-			var highest_level_groups = _.filter(groups, function(group) {return group.level == highest_level;});
+			var highest_level_groups = _.filter(groups, function(group) { return group.level == highest_level; });
 			
+			// Find that highest_level_groups, where user is part of and return that group
 			return db.collection('group_members')
-				.findOneAsync({'gid': { $in: _.pluck(highest_level_groups, '_id') }, 'uid': uid}, {'gid': true});
-		}).then(function(group_member) {
-			return group_member ? group_member.gid : null;
+				.findOneAsync({'groupId': { $in: _.pluck(highest_level_groups, '_id') }, 'userId': userId})
+				.then(function(member) {
+					return utils.findWhereObjectId(highest_level_groups, {'_id': member.groupId});
+				});
 		});
 		
-		// Find proposal id of user group
-		user_group_pad_id_promise = user_group_id_promise.then(function(gid) {
-			if (_.isNull(gid))
-				return null;
-			else
-				return db.collection('topic_proposals').findOneAsync({ 'source': gid }, { 'pid': true });
-		});
 		
-		// Get html of user group
-		user_group_pad_html_promise = user_group_pad_id_promise.then(function(topic_proposal) {
-			if (_.isNull(topic_proposal))
-				return "";
-			return db.collection('pads').findOneAsync({ '_id': topic_proposal.pid }).then(function(pad) {
-				return pad.html || "";
-			});
-		});
+		// TODO Get group pad information
+		
+		
 	}
-    
-	// Delete pad id if user is not owner, pid is removed from response
-	if(!_.isEqual(topic.owner, uid))
-		delete topic.dpid;
 	
 	// Basic topic details
 	var topic_without_details_promise = Promise.props(_.extend(topic,{
 		'num_votes': topic_votes_promise.then(_.size),
-		'num_proposals': topic_proposals_promise.then(_.size),
+		'num_proposals': pads_proposal_count_promise,
 		'voted': topic_votes_promise.then(function(topic_votes) {
-		return utils.checkArrayEntryExists(topic_votes, {'uid': uid});}),
+			return utils.checkArrayEntryExists(topic_votes, {'userId': userId});
+		}),
 		'levels': levels_promise
 	}));
     
@@ -358,26 +325,23 @@ function appendTopicInfoAsync(topic, uid, with_details) {
 		// Extended topic information for topic view
 		return topic_without_details_promise.then(function(topic_without_details) {
 			return Promise.props(_.extend(topic_without_details,{
-				'groups': with_details ? groups_promise : null,
-				'proposals': with_details ? topic_proposals_promise : null,
-				
-				// detailed
-				'ppid': user_proposal_promise.then(function(proposal) {
-					return _.isNull(proposal) ? null : proposal._id }),
-				'proposal_html': user_proposal_pad_html_promise,
-				'dpid': description_promise.get('_id'),
-				'description_html': description_pad_html_promise,
-				'group_members': group_members_promise,
-				'gid': user_group_id_promise,
-				'gpid': user_group_pad_id_promise.then(function(proposal) {
-					return _.isNull(proposal) ? null : proposal._id	}),
-				'group_html': user_group_pad_html_promise
+				'group': user_group_promise,
+				'proposal': user_proposal_promise,
+				'description': pad_description_promise/*,
+				'group_members': group_members_promise*/ // Currently not necessary
 			}));
 		});
 	} else {
 		// Basic topic information for topic list
 		return topic_without_details_promise;
 	}
+}
+
+
+function addHtmlToPad(collection_suffix, pad) {
+	return pads.getPadHTMLAsync(collection_suffix, pad.docId).then(function(html) {
+		return _.extend(pad, {'html': html});
+	});
 }
 
 exports.list = function(req, res) {
@@ -426,16 +390,16 @@ function updateTopicStateAsync(topic,stageStartedEntryName) {
 }
 
 exports.query = function(req, res) {
-   var tid = ObjectId(req.params.id);
-   var uid = ObjectId(req.user._id);
+   var topicId = ObjectId(req.params.id);
+   var userId = ObjectId(req.user._id);
    
-   db.collection('topics').findOneAsync({ '_id': tid })
+   db.collection('topics').findOneAsync({ '_id': topicId })
       .then(manageTopicStateAsync)
       .then(function(topic) {
          if(_.isNull(topic))
             return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
          else
-            return appendTopicInfoAsync(topic, uid, true);
+            return appendTopicInfoAsync(topic, userId, true);
       }).then(res.json.bind(res))
       .catch(utils.isOwnError, utils.handleOwnError(res));
 };
@@ -444,6 +408,7 @@ exports.create = function(req, res) {
     
    // Topic name is the only necessary request variable
    var data = req.body;
+   var userId = ObjectId(req.user._id);
    var topic = {};
    topic.name = data.name;
    
@@ -465,18 +430,18 @@ exports.create = function(req, res) {
       topic.stage = C.STAGE_SELECTION; // start in selection stage
       topic.level = 0;
       topic.nextDeadline = calculateDeadline(topic.stage);
-      var createTopicPromise = db.collection('topics').insertAsync(topic);
+      var create_topic_promise = db.collection('topics').insertAsync(topic);
       
       // Create description
-      var dpid = ObjectId(); // Create random pad id
+      /*var dpid = ObjectId(); // Create random pad id
       var description = { 'pid': dpid, 'tid': topic._id };
-      var createTopicDescriptionPromise = db.collection('topic_descriptions').insertAsync(description);
+      var createTopicDescriptionPromise = db.collection('topic_descriptions').insertAsync(description);*/
       
-      // create pad
-      var pad = { '_id': dpid, 'expiration': topic.nextDeadline };
-      var createPadPromise = pads.createPadAsync(pad);
+      // Create pad
+      var pad = { 'topicId': topic._id, 'ownerId': userId, 'expiration': topic.nextDeadline };
+      var create_pad_promise = pads.createPadAsync(pad, 'topic_description');
       
-      return Promise.join(createTopicPromise, createTopicDescriptionPromise, createPadPromise).return(topic);
+      return Promise.join(create_topic_promise, create_pad_promise).return(topic);
    }).then(function(topic) {
       topic.votes = 0;
       res.json(topic);
@@ -484,10 +449,10 @@ exports.create = function(req, res) {
 };
 
 exports.delete = function(req,res) {
-    var tid = ObjectId(req.params.id);
+    var topicId = ObjectId(req.params.id);
     var uid = ObjectId(req.user._id);
     
-    db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': true, 'stage': true }).
+    db.collection('topics').findOneAsync({ '_id': topicId }, { 'owner': true, 'stage': true }).
     then(function(topic) {
         // only the owner can delete the topic
         // and if the selection stage has passed, nobody can
@@ -495,22 +460,22 @@ exports.delete = function(req,res) {
             return utils.rejectPromiseWithAlert(401, 'danger', 'TOPIC_NOT_AUTHORISIZED_FOR_DELETION');
         
         return Promise.join(
-            db.collection('topics').removeByIdAsync(tid),
-            db.collection('topic_votes').removeAsync({'tid': tid}),
-            db.collection('groups').removeAsync({'tid': tid}));
+            db.collection('topics').removeByIdAsync(topicId),
+            db.collection('topic_votes').removeAsync({'topicId': topicId}),
+            db.collection('groups').removeAsync({'tid': topicId}));
     }).then(res.sendStatus.bind(res,200))
       .catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
-function countVotes(tid) {
-    return db.collection('topic_votes').countAsync( {'tid': tid} );
+function countVotes(topicId) {
+    return db.collection('topic_votes').countAsync( {'topicId': topicId} );
 }
 
 exports.vote = function(req, res) {
 	// Transmitted topic vote
 	var topic_vote = {
-		'tid': ObjectId(req.body.tid),
-		'uid': ObjectId(req.body.uid)
+		'topicId': ObjectId(req.body.topicId),
+		'userId': ObjectId(req.body.userId)
 	};
 	
 	// Update the particular topic vote
@@ -525,8 +490,8 @@ exports.vote = function(req, res) {
 exports.unvote = function(req, res) {
 	// Trasmitted topic vote
     var topic_vote = {
-		'tid': ObjectId(req.body.tid),
-		'uid': ObjectId(req.body.uid)
+		'topicId': ObjectId(req.body.topicId),
+		'userId': ObjectId(req.body.userId)
 	};
     
     // Remove vote from database
@@ -537,6 +502,6 @@ exports.unvote = function(req, res) {
 
 exports.final = function(req, res) {
     var tid = req.params.id;
-    var filename = path.join(appRoot.path,'files/documents',tid+'.pdf');
+    var filename = path.join(appRoot.path, 'files/documents', tid+'.pdf');
     res.sendFile(filename);
 };

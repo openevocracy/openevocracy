@@ -36,14 +36,16 @@ var ObjectIdToStringMapperArray = exports.ObjectIdToStringMapperArray = function
     return _.map(objs,ObjectIdToStringMapper);
 };
 
+/*
+ * @desc: underscore.js _.findWhere function is not working if you want to find an ObjectId
+ *        therefore this function was written
+ */
 exports.findWhereObjectId = function(objs,obj) {
-    // underscore.js _.findWhere function is not working if you want to find a ObjectId
-    // therefore this function was written
-    return _.find(objs, function(el) {
-        return _.some(_.keys(el), function(key) {
-            return (key == _.keys(obj)[0] && el[key].equals(obj[key]));
-        });
-    });
+	return _.find(objs, function(el) {
+		return _.some(_.keys(el), function(key) {
+			return (key == _.keys(obj)[0] && el[key].equals(obj[key]));
+		});
+	});
 };
 
 exports.checkArrayEntryExists = function(objs,obj) {

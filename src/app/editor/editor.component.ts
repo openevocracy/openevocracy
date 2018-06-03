@@ -24,9 +24,9 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 	styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit, OnDestroy {
-	private pid: string;
-	private did: string;
-	protected uid: string;
+	private docId: string;
+	private padId: string;
+	protected userId: string;
 	protected xpid: string;
 	private title: string;
 	private saved: boolean = true;
@@ -49,7 +49,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService) {
 			
-		this.uid = this.userService.getUserId();
+		this.userId = this.userService.getUserId();
 		
 		this.quillModules = {
 			toolbar: [
@@ -105,53 +105,74 @@ export class EditorComponent implements OnInit, OnDestroy {
 		
 		// Get additional information and initalize socket
 		this.activatedRoute.params.subscribe((params: Params) => {
-				this.xpid = params.id;
+			this.padId = params.id;
+			
+			this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
+				this.title = res.title;
+				this.docId = res.docId;
+				this.source = res.source;
 				
-				this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
-					this.pid = res.pid;
-					this.did = res.did;
-					this.title = res.title;
-					this.source = res.source;
-					
-					// Initialize socket
-					this.initalizeSocket(this.did);
-				});
+				// Initialize socket
+				this.initalizeSocket(this.docId);
 			});
+		});
 	}
 	
-	protected initalizeSocket(did) {
+	protected initalizeSocket(docId) {
 		sharedb.types.register(richText.type);
 
 		// Open WebSocket connection to ShareDB server
-		this.socket = new WebSocket('wss://develop.openevocracy.org/socket?uid='+this.uid);
+		this.socket = new WebSocket('wss://develop.openevocracy.org/socket?userId='+this.userId);
 		
+		// WebSocket connection was established
 		this.socket.onopen = function () {
-			console.log('Open');
-		};
+			// Get ShareDB connection
+			var connection = new sharedb.Connection(this.socket);
 		
-		var connection = new sharedb.Connection(this.socket);
-		
-		// Create local Doc instance mapped to 'examples' collection document with id 'richtext'
-		var doc = connection.get('docs', did);
-		this.doc = doc;
-		doc.subscribe(function(err) {
-			console.log('doc subscribe', doc);
-			if (err) throw err;
+			// Create local Doc instance
+			var doc = connection.get(this.getCollectionFromURL(), docId);  // FIXME generalize, depending on URL?
+			this.doc = doc;
 			
-			var quill = this.quillEditor;
+			// Subscribe to specific doc
+			doc.subscribe(function(err) {
+				if (err) throw err;
+				
+				// Get quill
+				var quill = this.quillEditor;
+				
+				// Set quill contents from doc
+				quill.setContents(doc.data);
+				
+				// On text change, send changes to ShareDB
+				quill.on('text-change', function(delta, oldDelta, source) {
+					if (source !== 'user') return;
+					doc.submitOp(delta, {source: quill});
+				});
+				
+				// Define a debounced version of setSaved function
+				var lazySetSaved = _.debounce(this.setSaved.bind(this), 1000);
+				
+				// Is called when a operation was applied
+				doc.on('op', function(op, source) {
+					// If source is me, set saved and return
+					if (source === quill) {
+						lazySetSaved();
+						return;
+					}
+					// If source is server, apply operation
+					quill.updateContents(op);
+				});
+			}.bind(this));
 			
-			quill.setContents(doc.data);
-			quill.on('text-change', function(delta, oldDelta, source) {
-				if (source !== 'user') return;
-				doc.submitOp(delta, {source: quill});
-			});
-			doc.on('op', function(op, source) {
-				if (source === quill) return;
-				quill.updateContents(op);
-			});
-		}.bind(this));
-		
-		this.enableEdit();
+			this.enableEdit();
+		}.bind(this);
+	}
+	
+	private getCollectionFromURL() {
+		var key = this.router.url.split("/")[1];
+		if (key == "topic")
+			key = 'topic_description'
+		return 'docs_'+key;
 	}
 	
 	protected closeEditor() {

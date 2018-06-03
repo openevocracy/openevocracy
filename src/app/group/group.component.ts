@@ -45,11 +45,11 @@ export class GroupComponent extends EditorComponent implements OnInit {
 		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService) {
-		super(router, activatedRoute, modalService, closeeditorModalService, httpManagerService);
+		super(router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService);
 		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
-			'authorship': { 'enabled': true, 'authorId': this.uid }
+			'authorship': { 'enabled': true, 'authorId': this.userId }
 		});
 	}
 	
@@ -76,8 +76,8 @@ export class GroupComponent extends EditorComponent implements OnInit {
 					this.source = res.tid;
 					
 					// Add color of current member
-					var me = _.findWhere(res.members, { '_id': this.uid });
-					this.quillEditor.getModule('authorship').addAuthor(this.uid, me.color);
+					var me = _.findWhere(res.members, { '_id': this.userId });
+					this.quillEditor.getModule('authorship').addAuthor(this.userId, me.color);
 					
 					// Add colors of other members
 					_.map(res.members, function(member) {

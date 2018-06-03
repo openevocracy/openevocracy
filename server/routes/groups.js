@@ -32,138 +32,136 @@ function calculateNumberOfGroups(numTopicParticipants) {
 }
 
 function assignParticipantsToGroups(participants) {
-    // shuffle topic participants
-    _.shuffle(participants);
+	// Shuffle topic participants
+	_.shuffle(participants);
+	
+	// Compute number of groups
+	var numGroups = calculateNumberOfGroups(_.size(participants));
+	
+	// Initialize groups (as empty array)
+	var groups = new Array(numGroups);
+	for(var i=0; i<numGroups; ++i)
+		groups[i] = [];
     
-    // compute number of groups
-    var numGroups = calculateNumberOfGroups(_.size(participants));
+	// Push topic participants into groups
+	_.each(participants, function(participant) {
+		// Find first smallest group
+		var group = _.min(groups, function(group) {return _.size(group);});
+		group.push(participant);
+	});
     
-    // initialize empty groups
-    var groups = new Array(numGroups);
-    for(var i=0; i<numGroups; ++i)
-        groups[i] = [];
-    
-    // push topic participants into groups
-    _.each(participants, function(participant) {
-        // find first smallest group
-        var group = _.min(groups, function(group) {return _.size(group);});
-        group.push(participant);
-    });
-    
-    // TODO log with logging library
-    // log group member distribution
-    var counts = _.countBy(groups, function(group) {return _.size(group);});
-    console.log('groups filled: ' + JSON.stringify(counts));
-    
-    return groups;
+	// TODO log with logging library
+	// Log group member distribution
+	var counts = _.countBy(groups, function(group) {return _.size(group);});
+	console.log('groups filled: ' + JSON.stringify(counts));
+	
+	return groups;
 }
 
-function storeGroupAsync(gid, tid, nextDeadline, level, members) {
-    // create group proposal's pad
-    var pid = ObjectId();
-    // The deadline is actually the deadline of the next stage (not the old one).
-    var pad = { '_id': pid, 'expiration': nextDeadline };
-    var create_pad_promosal_promise = pads.createPadAsync(pad);
-    
-    // create group's proposal
-    var ppid = ObjectId();
-    var create_proposal_promise =
-    db.collection('topic_proposals').insertAsync({
-        '_id': ppid, 'tid': tid,
-        'source': gid, 'pid': pid});
-    
-    // create group itself
-    var crid = ObjectId();
-    var create_group_promise =
-    db.collection('groups').insertAsync({
-        '_id': gid, 'tid': tid,
-        'ppid': ppid, 'crid': crid,
-        'level': level});
-    
-    // insert group members
-    var insert_members_promise =
-    db.collection('group_members').insertAsync(
-        _.map(members, function(uid) {
-            return { 'gid': gid, 'uid': uid, 'lastActivity': -1 };
-        }));
-    
-    return Promise.join(create_pad_promosal_promise,
-                        create_proposal_promise,
-                        create_group_promise,
-                        insert_members_promise);
+/*
+ * @desc: Store group, group pad and members in database
+ * @params:
+ *    groupId: id of the new group
+ *    topicId: id of the related topic
+ *    padId: id of the related pad
+ *    nextDeadline: deadline of the next stage (not the old one)
+ *    level: new level (old level +1)
+ *    members: array of group members (user id's)
+ */
+function storeGroupAsync(groupId, topicId, padId, nextDeadline, level, members) {
+	// Create group itself
+	var chatRoomId = ObjectId();
+	var create_group_promise =
+	db.collection('groups').insertAsync({
+		'_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'level': level
+	});
+	
+	// Create group pad
+	var pad = { '_id': padId, 'topicId': topicId, 'groupId': groupId, 'expiration': nextDeadline };
+	var create_pad_proposal_promise = pads.createPadAsync(pad);
+	
+	// Insert group members to database
+	var insert_members_promise =
+	db.collection('group_members').insertAsync(
+		_.map(members, function(userId) {
+			return { 'groupId': groupId, 'userId': userId, 'lastActivity': -1 };
+		})
+	);
+	
+	return Promise.join(create_pad_proposal_promise, create_group_promise, insert_members_promise);
 }
 
-function isProposalValid(proposal) {
-    var proposal_words = proposal.body.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length;
-    return proposal_words >= cfg.MIN_WORDS_PROPOSAL;
+function isProposalValid(html) {
+	var num_words = html.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length;
+	return num_words >= cfg.MIN_WORDS_PROPOSAL;
 }
 
 /**
- * initial creation of groups after proposal stage
- * - check if user proposals are valid (filter participants)
- * - randomly assign participants to groups
+ * @desc: initial creation of groups after proposal stage
+ *        - check if user proposals are valid (filter participants)
+ *        - randomly assign participants to groups
  */
 exports.createGroupsAsync = function(topic) {
-    var tid = topic._id;
+	var topicId = topic._id;
+	
+	var valid_participants_promise = db.collection('pads_proposal')
+		.find({ 'topicId': topicId }).toArrayAsync()
+		.map(function(pad) {
+			// Get html of doc and add valid status to pad object
+			return pads.getPadHTMLAsync('proposal', pad.docId).then(function(html) {
+				return _.extend(pad, {'valid': isProposalValid(html)});
+			});
+		}).then(function(pads) {
+			// Filter by valid status and return id's of users
+			return _.pluck(_.filter(pads, function(pad) {
+				return pad.valid;
+			}), 'ownerId');
+	});
+	
+	var storeValidParticipantsPromise = valid_participants_promise.then(function(valid_participants) {
+		console.log(valid_participants);
+		return db.collection('topics').updateAsync(
+		{ '_id': topic._id },
+		{ $set: { 'valid_participants': _.size(valid_participants) } });
+	});
+	
+	// Create group and notify members
+	var createGroupsPromise = valid_participants_promise.then(function(valid_participants) {
+		return assignParticipantsToGroups(valid_participants);
+	}).map(function(group_members) {
+		// Create new group id
+		var groupId = ObjectId();
+		
+		// TODO Notifications
+		// Send mail to notify new group members
+		var send_mail_promise = db.collection('users')
+			.find({'_id': { $in: group_members }}, {'email': true}).toArrayAsync()
+			.then(function(users) {
+				mail.sendMailMulti(users,
+					'EMAIL_CONSENSUS_START_SUBJECT', [topic.name],
+					'EMAIL_CONSENSUS_START_MESSAGE', [topic.name, groupId.toString(), cfg.BASE_URL]);
+		});
+		
+		// Store group in database
+		var topicId = topic._id;
+		var padId = ObjectId();
+		var nextDeadline = topic.nextDeadline;
+		var store_group_promise = storeGroupAsync(groupId, topicId, padId, nextDeadline, 0, group_members);
+		
+		// Append group id to proposal so we can identify it later
+		var update_source_proposals_promise = db.collection('topic_proposals')
+			.updateAsync(
+				{ 'topicId': topicId, 'ownerId': { $in: group_members } },
+				{ $set: { 'nextPadId': padId } }, {'upsert': false, 'multi': true}
+		);
+		
+		// Join promises and return group members
+		return Promise
+			.join(send_mail_promise, store_group_promise, update_source_proposals_promise)
+			.return(group_members);
+	});
     
-    var validParticipantsPromise = db.collection('topic_proposals').find({ 'tid': tid })
-    .toArrayAsync().map(function(proposal) {
-        return pads.getPadHTMLAsync(proposal.pid).then(function(body) {
-            proposal.body = body;
-            return proposal;
-        });
-    }).then(function(proposals) {
-        return _.filter(_.pluck(proposals, 'source'), function(source) {
-            var proposal = utils.findWhereObjectId(proposals, {'source': source});
-            return _.isUndefined(proposal) ? false : isProposalValid(proposal);
-        });
-    });
-    
-    var storeValidParticipantsPromise =
-    validParticipantsPromise.then(function(valid_participants) {
-        return db.collection('topics').updateAsync(
-            { '_id': topic._id },
-            { $set: { 'valid_participants': _.size(valid_participants) } });
-    });
-    
-    var createGroupsPromise =
-    validParticipantsPromise.then(function(valid_participants) {
-        return assignParticipantsToGroups(valid_participants);
-    }).map(function(group_members) {
-        // create new group id
-        var gid = ObjectId();
-        
-        // TODO Notifications
-        // Send mail to notify new group members
-        var send_mail_promise =
-        db.collection('users').find({'_id': { $in: group_members }},{'email': true}).
-        toArrayAsync().then(function(users) {
-            mail.sendMailMulti(users,
-                'EMAIL_CONSENSUS_START_SUBJECT', [topic.name],
-                'EMAIL_CONSENSUS_START_MESSAGE', [topic.name, gid.toString(), cfg.BASE_URL]);
-        });
-        
-        // store group in database
-        var tid = topic._id;
-        var nextDeadline = topic.nextDeadline;
-        var store_group_promise = storeGroupAsync(gid, tid, nextDeadline, 0, group_members);
-        
-        // create members for this group
-        // append gid to proposal so we can identify it later
-        var update_source_proposals_promise =
-        db.collection('topic_proposals').updateAsync(
-            { 'tid': tid, 'source': { $in: group_members } },
-            { $set: { 'sink': gid } }, {'upsert': false, 'multi': true});
-        
-        return Promise.join(
-                send_mail_promise,
-                store_group_promise,
-                update_source_proposals_promise).return(group_members);
-    });
-    
-    return Promise.join(
-            createGroupsPromise,
-            storeValidParticipantsPromise).get(0);
+	return Promise.join(createGroupsPromise, storeValidParticipantsPromise).get(0);
 };
 
 function getGroupsOfSpecificLevelAsync(tid, level) {
@@ -248,9 +246,10 @@ exports.remixGroupsAsync = function(topic) {
             
             // store group in database
             var tid = topic._id;
+            var padId = ObjectId();
             var prevDeadline = topic.nextDeadline;
             var nextDeadline = topics.calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
-            var store_group_promise = storeGroupAsync(gid, tid, nextDeadline, nextLevel, group_members);
+            var store_group_promise = storeGroupAsync(gid, tid, padId, nextDeadline, nextLevel, group_members);
             
             // send mail to notify level change
             var send_mail_promise =

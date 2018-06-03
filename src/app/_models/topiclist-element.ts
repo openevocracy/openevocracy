@@ -16,12 +16,12 @@ export class TopicListElement {
 	finalDocument: string;
 	
 	/* Extended information */
-	 num_votes: number;
-	 num_proposals: number;
-	 voted: boolean;
-	 levels: Level[];
+	num_votes: number;
+	num_proposals: number;
+	voted: boolean;
+	levels: Level[];
 	 
-	 constructor(res: any) {
+	constructor(res: any) {
 		this._id = res._id;
 		this.name = res.name;
 		this.stage = res.stage;
@@ -38,5 +38,5 @@ export class TopicListElement {
 		this.num_proposals = res.num_proposals;
 		this.voted = res.voted;
 		this.levels = res.levels;
-	 }
+	}
 }

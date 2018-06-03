@@ -18,6 +18,8 @@ exports.clean_database = function(req, res) {
     db.collection('topic_votes').drop();
     db.collection('topics').drop();
     db.collection('ratings').drop();
+    db.collection('pads_topic_description').drop();
+    db.collection('o_pads_topic_description').drop();
     
     // ShareDB
     db.collection('docs').drop();

@@ -14,7 +14,7 @@
 		<button mat-button [ngClass]="{'voted': topic.voted}" *ngIf="topic?.stage == C.STAGE_SELECTION" title="{{ 'TOPIC_BUTTON_MARK_RELEVANT' | translate }}" (click)="toggleVote()">
 			<span><fa-icon [icon]="faHandPaper"></fa-icon> {{ 'TOPIC_BUTTON_MARK_RELEVANT' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && !topic?.ppid" title="{{ 'TOPIC_BUTTON_CREATE_PROPOSAL' | translate }}" (click)="createProposal()">
+		<button mat-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && !topic?.proposal" title="{{ 'TOPIC_BUTTON_CREATE_PROPOSAL' | translate }}" (click)="createProposal()">
 			<span><fa-icon [icon]="faFileMedical"></fa-icon> {{ 'TOPIC_BUTTON_CREATE_PROPOSAL' | translate }}</span>
 		</button>
 		<button mat-button *ngIf="topic?.stage == C.STAGE_CONSENSUS && topic?.gpid" title="{{ 'TOPIC_BUTTON_GOTO_CURRENT_GROUP' | translate }}" [routerLink]="['/group/editor', topic.gid]">
@@ -40,17 +40,17 @@
 <div class="container">
 	<mat-tab-group>
 		<mat-tab label="{{ 'TOPIC_TAB_LABEL_DESCRIPTION' | translate }}">
-			<button mat-raised-button color="primary" *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == uid" title="{{ 'TOPIC_BUTTON_EDIT' | translate }}" [routerLink]="['/topic/editor', topic.dpid]">
+			<button mat-raised-button color="primary" *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == uid" title="{{ 'TOPIC_BUTTON_EDIT' | translate }}" [routerLink]="['/topic/editor', topic.description._id]">
 				<span><fa-icon [icon]="faEdit"></fa-icon> {{ 'TOPIC_BUTTON_EDIT' | translate }}</span>
 			</button>
-			<div [innerHtml]="topic?.description_html"></div>
+			<div [innerHtml]="topic?.description.html"></div>
 		</mat-tab>
 		<!--<mat-tab label="Referenzen">Referenzen</mat-tab>-->
-		<mat-tab label="{{ 'TOPIC_TAB_LABEL_PROPOSAL' | translate }}" *ngIf="topic?.ppid">
-			<button mat-raised-button color="primary" *ngIf="topic?.stage == C.STAGE_PROPOSAL" title="{{ 'TOPIC_BUTTON_EDIT_PROPOSAL' | translate }}" [routerLink]="['/proposal/editor', topic.ppid]">
+		<mat-tab label="{{ 'TOPIC_TAB_LABEL_PROPOSAL' | translate }}" *ngIf="topic?.proposal">
+			<button mat-raised-button color="primary" *ngIf="topic?.stage == C.STAGE_PROPOSAL" title="{{ 'TOPIC_BUTTON_EDIT_PROPOSAL' | translate }}" [routerLink]="['/proposal/editor', topic.proposal._id]">
 				<span><fa-icon [icon]="faEdit"></fa-icon> {{ 'TOPIC_BUTTON_EDIT_PROPOSAL' | translate }}</span>
 			</button>
-			<div [innerHtml]="topic?.proposal_html"></div>
+			<div [innerHtml]="topic?.proposal.html"></div>
 		</mat-tab>
 		<mat-tab label="{{ 'TOPIC_TAB_LABEL_GROUP' | translate }}" *ngIf="topic?.gpid">
 			<button mat-raised-button color="primary" *ngIf="topic?.stage == C.STAGE_CONSENSUS" title="{{ 'TOPIC_BUTTON_EDIT_CURRENT_GROUP' | translate }}" [routerLink]="['/group/editor', topic.gid]">

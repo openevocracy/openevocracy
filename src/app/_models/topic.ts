@@ -5,6 +5,7 @@ import { C } from '../../../shared/constants';
 
 import { Group } from './group';
 import { Proposal } from './proposal';
+import { TopicDescription } from './topic-description';
 import { TopicGroupMember } from './topic-group-member';
 
 import { ReflectiveInjector } from '@angular/core';
@@ -12,16 +13,10 @@ import { UtilsService } from '../_services/utils.service';
 
 export class Topic extends TopicListElement {
 	/* Extended information */
-	groups: Group[];
-	proposals: Proposal[];
+	group: Group;
+	proposal: Proposal;
+	description: TopicDescription;
 	group_members: TopicGroupMember[];
-	gid: string;
-	gpid: string;
-	group_html: string;
-	dpid: string;
-	description_html: string;
-	ppid: string;
-	proposal_html: string;
 	
 	/* Locally calculated */
 	stageName: string;
@@ -29,16 +24,10 @@ export class Topic extends TopicListElement {
 	
 	constructor(res: any) {
 		super(res);
-		this.groups = res.groups;
-		this.proposals = res.proposals;
+		this.group = res.group;
+		this.proposal = res.proposal;
+		this.description = res.description;
 		this.group_members = res.group_members;
-		this.gid = res.gid;
-		this.gpid = res.gpid;
-		this.group_html = res.group_html;
-		this.dpid = res.dpid;
-		this.description_html = res.description_html;
-		this.ppid = res.ppid;
-		this.proposal_html = res.proposal_html;
 		
 		this.stageName = this.getStageName();
 		this.creationDate = this.getCreationDate();

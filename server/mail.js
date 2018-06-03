@@ -154,10 +154,10 @@ exports.sendMailOnce = sendMailOnce;
 function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// Remind participants that the deadline of proposal stage is coming
 	// In proposal stage, all sources in proposals table are users
-	return db.collection('topic_proposals').find({'tid': topic._id}, {'source': true})
+	return db.collection('pads_proposal').find({'topicId': topic._id}, {'ownerId': true})
 		.toArrayAsync().then(function(participants) {
 			return db.collection('users')
-				.find({ '_id': { $in: _.pluck(participants, 'source') } }, {'email': true, 'lang': true})
+				.find({ '_id': { $in: _.pluck(participants, 'ownerId') } }, {'email': true, 'lang': true})
 				.toArrayAsync();
 		}).map(function(user) {
 			sendMailOnce(user,
