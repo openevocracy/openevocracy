@@ -17,7 +17,7 @@
 		<button mat-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && !topic?.proposal" title="{{ 'TOPIC_BUTTON_CREATE_PROPOSAL' | translate }}" (click)="createProposal()">
 			<span><fa-icon [icon]="faFileMedical"></fa-icon> {{ 'TOPIC_BUTTON_CREATE_PROPOSAL' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="topic?.stage == C.STAGE_CONSENSUS && topic?.gpid" title="{{ 'TOPIC_BUTTON_GOTO_CURRENT_GROUP' | translate }}" [routerLink]="['/group/editor', topic.gid]">
+		<button mat-button *ngIf="topic?.stage == C.STAGE_CONSENSUS && topic?.group" title="{{ 'TOPIC_BUTTON_GOTO_CURRENT_GROUP' | translate }}" [routerLink]="['/group/editor', topic.group.padId]">
 			<span><fa-icon [icon]="faUsers"></fa-icon> {{ 'TOPIC_BUTTON_GOTO_CURRENT_GROUP' | translate }}</span>
 		</button>
 		<button mat-icon-button *ngIf="topic?.stage == C.STAGE_PASSED" title="{{ 'TOPIC_BUTTON_RESULT_DOWNLOAD' | translate }}"><fa-icon [icon]="faDownload"></fa-icon></button>
@@ -52,11 +52,11 @@
 			</button>
 			<div [innerHtml]="topic?.proposal.html"></div>
 		</mat-tab>
-		<mat-tab label="{{ 'TOPIC_TAB_LABEL_GROUP' | translate }}" *ngIf="topic?.gpid">
-			<button mat-raised-button color="primary" *ngIf="topic?.stage == C.STAGE_CONSENSUS" title="{{ 'TOPIC_BUTTON_EDIT_CURRENT_GROUP' | translate }}" [routerLink]="['/group/editor', topic.gid]">
+		<mat-tab label="{{ 'TOPIC_TAB_LABEL_GROUP' | translate }}" *ngIf="topic?.group">
+			<button mat-raised-button color="primary" *ngIf="topic?.stage == C.STAGE_CONSENSUS" title="{{ 'TOPIC_BUTTON_EDIT_CURRENT_GROUP' | translate }}" [routerLink]="['/group/editor', topic.group.padId]">
 				<span><fa-icon [icon]="faEdit"></fa-icon> {{ 'TOPIC_BUTTON_EDIT_CURRENT_GROUP' | translate }}</span>
 			</button>
-			<div [innerHtml]="topic?.group_html"></div>
+			<div [innerHtml]="topic?.group.html"></div>
 		</mat-tab>
 		<!--<mat-tab label="Statistik">Statistik</mat-tab>-->
 		<mat-tab label="{{ 'TOPIC_TAB_LABEL_RESULT' | translate }}" *ngIf="topic?.stage == C.STAGE_PASSED"><div [innerHtml]="topic?.finalDocument"></div></mat-tab>

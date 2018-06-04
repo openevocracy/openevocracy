@@ -69,31 +69,31 @@ export class GroupComponent extends EditorComponent implements OnInit {
 		
 		// Get additional information and initalize socket
 		this.activatedRoute.params.subscribe((params: Params) => {
-				this.xpid = params.id;
+				this.padId = params.id;
 				
 				this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
 					this.group = new Group(res);
-					this.source = res.tid;
+					this.source = res.topicId;
 					
 					// Add color of current member
-					var me = _.findWhere(res.members, { '_id': this.userId });
+					var me = _.findWhere(res.members, { 'userId': this.userId });
 					this.quillEditor.getModule('authorship').addAuthor(this.userId, me.color);
 					
 					// Add colors of other members
 					_.map(res.members, function(member) {
-						if(member._id != me._id)
-							this.quillEditor.getModule('authorship').addAuthor(member._id, member.color);
+						if(member.userId != me.userId)
+							this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
 					}.bind(this));
 					
 					/*this.quillEditor.getModule('cursors').set({
-						id: me._id,
+						id: me.userId,
 						name: me.name,
 						color: me.color,
 						range: 1
 					});*/
 					
 					// Initialize socket
-					this.initalizeSocket(res.pid);
+					this.initalizeSocket(this.group.docId);
 				});
 			});
 	}

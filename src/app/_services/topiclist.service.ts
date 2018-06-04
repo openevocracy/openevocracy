@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { TopicListElement } from '../_models/topiclist-element';
+import { TopicListElement } from '../_models/topic/topiclist-element';
 
 import { HttpManagerService } from './http-manager.service';
 

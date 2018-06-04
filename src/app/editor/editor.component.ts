@@ -25,9 +25,8 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 })
 export class EditorComponent implements OnInit, OnDestroy {
 	private docId: string;
-	private padId: string;
+	protected padId: string;
 	protected userId: string;
-	protected xpid: string;
 	private title: string;
 	private saved: boolean = true;
 	protected source: string;
@@ -93,7 +92,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		$('.ql-editor').attr('contenteditable', 'false').hide();
 	}
 	
-	protected editorCreated(editor, pid) {
+	protected editorCreated(editor) {
 		// Disable editor body
 		this.disableEdit();
 		
@@ -180,7 +179,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 			this.modalService.open({});
 			return;
 		}
-		console.log('close', this.source);
+		
 		// Navigate to source
 		this.router.navigate(['/topic', this.source]);
 	}

@@ -15,9 +15,8 @@ var pads = require('./pads');
 var mail = require('../mail');
 var utils = require('../utils');
 
-function getGroupMembersAsync(gid) {
-    return db.collection('group_members').find({'gid': gid}, {'uid': true}).
-        toArrayAsync();
+function getGroupMembersAsync(groupId) {
+	return db.collection('group_members').find({'groupId': groupId}, {'userId': true}).toArrayAsync();
 }
 
 function calculateNumberOfGroups(numTopicParticipants) {
@@ -78,7 +77,7 @@ function storeGroupAsync(groupId, topicId, padId, nextDeadline, level, members) 
 	
 	// Create group pad
 	var pad = { '_id': padId, 'topicId': topicId, 'groupId': groupId, 'expiration': nextDeadline };
-	var create_pad_proposal_promise = pads.createPadAsync(pad);
+	var create_pad_proposal_promise = pads.createPadAsync(pad, 'group');
 	
 	// Insert group members to database
 	var insert_members_promise =
@@ -164,8 +163,8 @@ exports.createGroupsAsync = function(topic) {
 	return Promise.join(createGroupsPromise, storeValidParticipantsPromise).get(0);
 };
 
-function getGroupsOfSpecificLevelAsync(tid, level) {
-    return db.collection('groups').find({ 'tid': tid, 'level': level }).toArrayAsync();
+function getGroupsOfSpecificLevelAsync(topicId, level) {
+    return db.collection('groups').find({ 'tid': topicId, 'level': level }).toArrayAsync();
 }
 exports.getGroupsOfSpecificLevelAsync = getGroupsOfSpecificLevelAsync;
 
@@ -174,7 +173,7 @@ function getValidGroupsOfSpecificLevelAsync(tid, level) {
         return db.collection('topic_proposals').findOneAsync({'source': group._id}).
         then(function(proposal) {
             // Get HTML from document
-            proposal.body = pads.getPadHTMLAsync(proposal.pid);
+            proposal.body = pads.getPadHTMLAsync('proposal', proposal.pid);
             return Promise.props(proposal);
         }).then(function(proposal) {
             // Check if proposal is valid
@@ -190,10 +189,10 @@ function getValidGroupsOfSpecificLevelAsync(tid, level) {
 }
 
 /**
- * create of groups after level is finished
- * - check if group proposals are valid (filter groups)
- * - find group leader (with highest rating)
- * - randomly assign participants to new groups
+ * @desc: create of groups after level is finished
+ *        - check if group proposals are valid (filter groups)
+ *        - find group leader (with highest rating)
+ *        - randomly assign participants to new groups
  */
 exports.remixGroupsAsync = function(topic) {
     var tid = topic._id;
@@ -319,7 +318,7 @@ function getProposalBodyAsync(mid, gid, proposals_source_promise) {
                 });
         });
     }).then(function(proposal) {
-        return pads.getPadHTMLAsync(proposal.pid);
+        return pads.getPadHTMLAsync('proposal', proposal.pid);
     });
 }
 
@@ -331,144 +330,113 @@ function getMemberRatingAsync(ruid, gid, uid, type) {
     });
 }
 
-// get group by id
+/* @desc: Gets group editor information, necessary information are:
+ *        - groupId, topicId, docId (can be found in pad)
+ *        - level, name, nextDeadline (can be found in topic)
+ *        - chatRoomId (can be found in group)
+ *        - isLastGroup
+ *        - members (includes: color, name, userId, ratingIntegration, ratingKnowledge)
+ */
 exports.query = function(req, res) {
-	//var gpid = ObjectId(req.params.id);
-	var gid = ObjectId(req.params.id);
-	var uid = ObjectId(req.user._id);
+	var padId = ObjectId(req.params.id);
+	var userId = ObjectId(req.user._id);
 	
-	/*var proposal_promise = db.collection('topic_proposals').findOneAsync({'_id': gpid});
+	// Get docId, groupId and topicId from group pad
+	var pad_promise = db.collection('pads_group')
+		.findOneAsync({'_id': padId}, { 'docId': true, 'groupId': true, 'topicId': true });
 	
-	// Get group id
-	var gid_promise = proposal_promise.get('source');
-	
-	// Get topic
-	var topic_promise = proposal_promise.then(function(proposal) {
-		return db.collection('topics').findOneAsync(
-			{'_id': proposal.tid}, {'nextDeadline': true, 'name': true, 'stage': true, 'level': true});
-	});
-	
-	// Get all source proposals
-	var proposals_source_promise = proposal_promise.then(function(proposal) {
-		return db.collection('topic_proposals').find({'sink': proposal.source, 'tid': proposal.tid},
-			{'source': true, 'pid': true}).toArrayAsync();
-	});
-	
-	// Get group
-	var group_promise = gid_promise.then(function(gid) {
-		return db.collection('groups').findOneAsync({'_id': gid});
-	});
-	
-	// Get all group members
-	var get_members_promise = gid_promise.then(getGroupMembersAsync);*/
-    
-    console.log(gid);
-    
-    // Get group
-    var group_promise = db.collection('groups').findOneAsync({'_id': gid});
-    
-    // Get group proposal pad id
-    var proposal_promise = group_promise.then(function(group) {
-        return db.collection('topic_proposals').findOneAsync(
-            {'_id': group.ppid}, {'pid': true});
-    });
-    
-    // Request topic to get info
-    var topic_promise = group_promise.then(function(group) {
-        return db.collection('topics').findOneAsync(
-            {'_id': group.tid}, {'nextDeadline': true, 'name': true, 'stage': true, 'level': true});
-    });
-    
-    // Count number of groups in current level to obtain if we are in last level
-	var last_level_promise = topic_promise.then(function(topic) {
-		return db.collection('groups').countAsync({'tid': topic._id, 'level': topic.level}).
-			then(function(numGroupsInCurrentLevel) {
-				return (numGroupsInCurrentLevel == 1) ? 1 : 0;
+	// Everything else depends on pad
+	var all_promise = pad_promise.then(function(pad) {
+		// Define some variables for simpler and more intuitie use
+		var groupId = pad.groupId;
+		var topicId = pad.topicId;
+		
+		/*
+		 * Simple stuff
+		 */
+		
+		// Get level, name and nextDeadline
+		var topic_promise = db.collection('topics')
+			.findOneAsync({'_id': topicId}, { 'level': true, 'name': true, 'nextDeadline': true });
+		
+		// Get chatRoomId from group
+		var group_promise = db.collection('groups')
+			.findOneAsync({'_id': pad.groupId}, {'chatRoomId': true});
+		
+		// Count number of groups in current level to obtain if we are in last group (last level)
+		var isLastGroup_promise = topic_promise.then(function(topic) {
+			return db.collection('groups').countAsync({ 'topicId': topic._id, 'level': topic.level })
+				.then(function(numGroupsInCurrentLevel) {
+					return (numGroupsInCurrentLevel == 1) ? true : false;
+			});
 		});
-	});
-    
-    // Get alls source proposals
-    var proposals_source_promise = group_promise.then(function(group) {
-        return db.collection('topic_proposals').find({'sink': gid, 'tid': group.tid},
-            {'source': true, 'pid': true}).toArrayAsync();
-    });
-    
-    // Get all group members
-    var get_members_promise = getGroupMembersAsync(gid);
-    
-    // generate group specific color_offset
-    var chance = new Chance(gid.toString());
-    var offset = chance.integer({min: 0, max: 360});
-	
-	/*var offset_promise = gid_promise.then(function(gid) {
-		// generate group specific color_offset
-		var chance = new Chance(gid.toString());
-		return chance.integer({min: 0, max: 360});
-	});*/
-	
-    // Additional member information
-    var members_promise = get_members_promise.map(function(member) {
-        return member.uid;
-    }).then(function(uids) {
-        return db.collection('users').
-            find({'_id': { $in: uids }},{'_id': true, 'name': true}).
-            toArrayAsync();
-    }).map(function (member, index) {
-        // generate member name and color
-        var member_color_promise = get_members_promise.then(function (members) {
-            var num_members = _.size(members);
-            var hue = offset + index*(360/num_members);
-
-            return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
-        });
-        
-        // get proposal body
-        var proposal_body_promise = getProposalBodyAsync(member._id, gid, proposals_source_promise);
-        
-        // get member rating
-        var member_rating_knowledge_promise = getMemberRatingAsync(member._id, gid, uid, C.RATING_KNOWLEDGE);
-        var member_rating_integration_promise = getMemberRatingAsync(member._id, gid, uid, C.RATING_INTEGRATION);
-        
-        return Promise.props(_.extend(member, {
-                             'name': chance.first(),
-                             'color': member_color_promise,
-                             'proposal_body': proposal_body_promise,
-                             'rating_knowledge': member_rating_knowledge_promise,
-                             'rating_integration': member_rating_integration_promise,
-                             'gid': gid}));
-    });
-    
-    // set the timestamp for the member just querying the group
-    var set_member_timestamp_promise =
-    db.collection('group_members').updateAsync(
-        {'gid': gid, 'uid': uid},
-        {$set: {'lastActivity': Date.now()}});
-    
-    Promise.join(group_promise,
-                 proposal_promise,
-                 members_promise,
-                 topic_promise,
-                 last_level_promise,
-                 set_member_timestamp_promise).
-    spread(function(group, proposal, members, topic, lastLevel) {
-        
-        // append proposal body
-        group.body = pads.getPadHTMLAsync(proposal.pid);
-        
-        // flash message in client if group not editable
-        if( topic.stage != C.STAGE_CONSENSUS ||
-           (topic.stage == C.STAGE_CONSENSUS && topic.level != group.level)) {
-            
-            // flash message in client
-            group.alert = {type: "info", content: "GROUP_QUERIED_NOT_ACTIVE"};
-        }
-        
-        return Promise.props(_.extend(group, {
-            'pid': proposal.pid,
-            'members': members,
-            'nextDeadline': topic.nextDeadline,
-            'title': topic.name,
-            'lastLevel': lastLevel
-        }));
-    }).then(res.json.bind(res));
+		
+		// TODO Get all source proposals
+		/*var proposals_source_promise = group_promise.then(function(group) {
+			return db.collection('topic_proposals').find({'sink': gid, 'tid': group.tid},
+				{'source': true, 'pid': true}).toArrayAsync();
+		});*/
+		
+		/*
+		 * Group Members
+		 */
+		
+		// Get group members
+		var group_members_promise = getGroupMembersAsync(groupId);
+		
+		// Get number of group members
+		var num_group_members_promise = group_members_promise.then(function(group_members) {
+			return _.size(group_members);
+		});
+		
+		// Generate group specific color_offset
+		var chance = new Chance(groupId.toString());
+		var offset = chance.integer({min: 0, max: 360});
+		
+		// Get group members
+		var group_members_details_promise = group_members_promise.map(function(member, index) {
+			
+			// Generate member color
+			var member_color_promise = num_group_members_promise.then(function(numMembers) {
+				var hue = offset + index*(360/numMembers);
+				return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
+			});
+         
+         // TODO Get proposal html
+			//var member_proposal_html_promise = getProposalBodyAsync(member.userId, groupId, proposals_source_promise);
+			
+			// Get member rating
+			var member_rating_knowledge_promise = getMemberRatingAsync(member.userId, groupId, userId, C.RATING_KNOWLEDGE);
+			var member_rating_integration_promise = getMemberRatingAsync(member.userId, groupId, userId, C.RATING_INTEGRATION);
+         
+         return Promise.props({
+         	'userId': member.userId,
+				'name': chance.first(),
+				'color': member_color_promise,
+				/*'proposal_html': member_proposal_html_promise,*/
+				'ratingKnowledge': member_rating_knowledge_promise,
+				'ratingIntegration': member_rating_integration_promise
+         });
+		});
+		
+		// Finally, set lastActivity for the member querying the group
+		var lastActivity_promise = db.collection('group_members')
+			.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
+		
+		// Collect all information and return
+		return Promise.join(topic_promise, group_promise, isLastGroup_promise, group_members_details_promise, lastActivity_promise)
+			.spread(function(topic, group, isLastGroup, group_members) {
+				return {
+					'groupId': groupId,
+					'topicId': topicId,
+					'docId': pad.docId,
+					'level': topic.level,
+					'title': topic.name,
+					'nextDeadline': topic.nextDeadline,
+					'chatRoomId': group.chatRoomId,
+					'isLastGroup': isLastGroup,
+					'members': group_members
+				};
+		});
+	}).then(res.json.bind(res));
 };

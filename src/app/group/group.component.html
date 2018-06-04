@@ -29,12 +29,12 @@
 			<mat-menu #menu="matMenu" [overlapTrigger]="false">
 				<button mat-menu-item class="rating-button">
 					<span matTooltip="{{ 'GROUP_RATING_TOOLTIP_INTEGRATION' | translate }}" [matTooltipPosition]="'left'">
-						<fa-icon [icon]="faHandshake"></fa-icon> <star-rating [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.rating_integration" (ratingChange)="rate($event, member._id, C.RATING_INTEGRATION)"></star-rating>
+						<fa-icon [icon]="faHandshake"></fa-icon> <star-rating [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingIntegration" (ratingChange)="rate($event, member._id, C.RATING_INTEGRATION)"></star-rating>
 					</span>
 				</button>
 				<button mat-menu-item class="rating-button">
 					<span matTooltip="{{ 'GROUP_RATING_TOOLTIP_KNOWLEDGE' | translate }}" [matTooltipPosition]="'left'">
-						<fa-icon [icon]="faLightbulb"></fa-icon> <star-rating [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.rating_knowledge" (ratingChange)="rate($event, member._id, C.RATING_KNOWLEDGE)"></star-rating>
+						<fa-icon [icon]="faLightbulb"></fa-icon> <star-rating [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingKnowledge" (ratingChange)="rate($event, member._id, C.RATING_KNOWLEDGE)"></star-rating>
 					</span>
 				</button>
 				<button mat-menu-item>

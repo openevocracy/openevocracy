@@ -82,7 +82,9 @@ function manageConsensusStageAsync(topic, levelDuration) {
                 'stage': (topic.stage = C.STAGE_PASSED),
                 'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_PASSED,prevDeadline)),
                 'stagePassedStarted': Date.now(),
-                'finalDocument': finalDocumentPadIdPromise.then(pads.getPadHTMLAsync)
+                'finalDocument': finalDocumentPadIdPromise.then(function(padId) {
+                	return pads.getPadHTMLAsync('group', padId);
+                })
             };
             break;
         case C.STAGE_REJECTED:
@@ -296,16 +298,27 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 			var highest_level_groups = _.filter(groups, function(group) { return group.level == highest_level; });
 			
 			// Find that highest_level_groups, where user is part of and return that group
-			return db.collection('group_members')
+			var group_promise = db.collection('group_members')
 				.findOneAsync({'groupId': { $in: _.pluck(highest_level_groups, '_id') }, 'userId': userId})
 				.then(function(member) {
 					return utils.findWhereObjectId(highest_level_groups, {'_id': member.groupId});
-				});
+			});
+			
+			// Get group pad information
+			var pad_promise = group_promise.then(function(group) {
+				return db.collection('pads_group').findOneAsync({'groupId': group._id}, {'docId': true});
+			});
+			
+			return Promise.join(group_promise, pad_promise);
+		}).spread(function(group, pad) {
+			if (_.isNull(group)) {
+				return null;
+			} else {
+				// Add pad id, doc id and html to group
+				var groupAndPad = _.extend(group, { 'padId': pad._id, 'docId': pad.docId });
+				return addHtmlToPad('group', groupAndPad);
+			}
 		});
-		
-		
-		// TODO Get group pad information
-		
 		
 	}
 	
@@ -324,7 +337,7 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 	if(with_details) {
 		// Extended topic information for topic view
 		return topic_without_details_promise.then(function(topic_without_details) {
-			return Promise.props(_.extend(topic_without_details,{
+			return Promise.props(_.extend(topic_without_details, {
 				'group': user_group_promise,
 				'proposal': user_proposal_promise,
 				'description': pad_description_promise/*,

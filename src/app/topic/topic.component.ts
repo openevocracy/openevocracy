@@ -12,7 +12,7 @@ import { C } from '../../../shared/constants';
 import { cfg } from '../../../shared/config';
 import * as _ from 'underscore';
 
-import { Topic } from '../_models/topic';
+import { Topic } from '../_models/topic/topic';
 
 import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
@@ -69,7 +69,6 @@ export class TopicComponent implements OnInit {
 	private loadTopic(topicId) {
 		this.topicService.getTopic(topicId).subscribe(res => {
 			this.topic = new Topic(res);
-			console.log(this.topic);
 		});
 	}
 	

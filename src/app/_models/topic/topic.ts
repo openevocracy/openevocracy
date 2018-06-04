@@ -1,22 +1,22 @@
 import { TopicListElement } from './topiclist-element';
 import * as _ from 'underscore';
 
-import { C } from '../../../shared/constants';
+import { C } from '../../../../shared/constants';
 
-import { Group } from './group';
-import { Proposal } from './proposal';
+import { Proposal } from '../proposal';
 import { TopicDescription } from './topic-description';
+import { TopicGroup } from './topic-group';
 import { TopicGroupMember } from './topic-group-member';
 
 import { ReflectiveInjector } from '@angular/core';
-import { UtilsService } from '../_services/utils.service';
+import { UtilsService } from '../../_services/utils.service';
 
 export class Topic extends TopicListElement {
 	/* Extended information */
-	group: Group;
+	group: TopicGroup;
 	proposal: Proposal;
 	description: TopicDescription;
-	group_members: TopicGroupMember[];
+	//group_members: TopicGroupMember[];
 	
 	/* Locally calculated */
 	stageName: string;
@@ -27,7 +27,7 @@ export class Topic extends TopicListElement {
 		this.group = res.group;
 		this.proposal = res.proposal;
 		this.description = res.description;
-		this.group_members = res.group_members;
+		//this.group_members = res.group_members;
 		
 		this.stageName = this.getStageName();
 		this.creationDate = this.getCreationDate();

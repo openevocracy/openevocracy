@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 
 import { CountdownComponent } from '../countdown/countdown.component';
 
-import { TopicListElement } from '../_models/topiclist-element';
+import { TopicListElement } from '../_models/topic/topiclist-element';
 import { C } from '../../../shared/constants';
 import * as _ from 'underscore';
 
