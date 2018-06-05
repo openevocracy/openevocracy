@@ -67,13 +67,11 @@ function assignParticipantsToGroups(participants) {
  *    level: new level (old level +1)
  *    members: array of group members (user id's)
  */
-function storeGroupAsync(groupId, topicId, padId, nextDeadline, level, members) {
+function storeGroupAsync(groupId, topicId, padId, prevPadIds, nextDeadline, level, members) {
 	// Create group itself
 	var chatRoomId = ObjectId();
-	var create_group_promise =
-	db.collection('groups').insertAsync({
-		'_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'level': level
-	});
+	var group = { '_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'level': level, 'prevPadIds': prevPadIds };
+	var create_group_promise =	db.collection('groups').insertAsync(group);
 	
 	// Create group pad
 	var pad = { '_id': padId, 'topicId': topicId, 'groupId': groupId, 'expiration': nextDeadline };
@@ -129,6 +127,7 @@ exports.createGroupsAsync = function(topic) {
 		return assignParticipantsToGroups(valid_participants);
 	}).map(function(group_members) {
 		// Create new group id
+		var topicId = topic._id;
 		var groupId = ObjectId();
 		
 		// TODO Notifications
@@ -141,22 +140,27 @@ exports.createGroupsAsync = function(topic) {
 					'EMAIL_CONSENSUS_START_MESSAGE', [topic.name, groupId.toString(), cfg.BASE_URL]);
 		});
 		
+		console.log('topicId', topicId);
+		console.log('group_members', group_members);
+		// Get previous pad ids as array
+		var prevPadIds_promise = db.collection('pads_proposal')
+			.find({ 'topicId': topicId, 'ownerId': {$in: group_members} }, {'_id': true}).toArrayAsync()
+			.then(function(prevPads) {
+				console.log(_.pluck(prevPads, '_id'));
+				return _.pluck(prevPads, '_id');	
+			});
+		
 		// Store group in database
-		var topicId = topic._id;
 		var padId = ObjectId();
 		var nextDeadline = topic.nextDeadline;
-		var store_group_promise = storeGroupAsync(groupId, topicId, padId, nextDeadline, 0, group_members);
-		
-		// Append group id to proposal so we can identify it later
-		var update_source_proposals_promise = db.collection('topic_proposals')
-			.updateAsync(
-				{ 'topicId': topicId, 'ownerId': { $in: group_members } },
-				{ $set: { 'nextPadId': padId } }, {'upsert': false, 'multi': true}
-		);
+		var store_group_promise = prevPadIds_promise.then(function(prevPadIds) {
+			console.log('prevPadIds', prevPadIds);
+			return storeGroupAsync(groupId, topicId, padId, prevPadIds, nextDeadline, 0, group_members);
+		});
 		
 		// Join promises and return group members
 		return Promise
-			.join(send_mail_promise, store_group_promise, update_source_proposals_promise)
+			.join(send_mail_promise, store_group_promise)
 			.return(group_members);
 	});
     
@@ -164,17 +168,17 @@ exports.createGroupsAsync = function(topic) {
 };
 
 function getGroupsOfSpecificLevelAsync(topicId, level) {
-    return db.collection('groups').find({ 'tid': topicId, 'level': level }).toArrayAsync();
+    return db.collection('groups').find({ 'topicId': topicId, 'level': level }).toArrayAsync();
 }
 exports.getGroupsOfSpecificLevelAsync = getGroupsOfSpecificLevelAsync;
 
-function getValidGroupsOfSpecificLevelAsync(tid, level) {
-    return getGroupsOfSpecificLevelAsync(tid, level).filter(function (group) {
-        return db.collection('topic_proposals').findOneAsync({'source': group._id}).
-        then(function(proposal) {
-            // Get HTML from document
-            proposal.body = pads.getPadHTMLAsync('proposal', proposal.pid);
-            return Promise.props(proposal);
+function getValidGroupsOfSpecificLevelAsync(topicId, level) {
+	return getGroupsOfSpecificLevelAsync(topicId, level).filter(function (group) {
+		return db.collection('pads_group').findOneAsync({'ownerId': group._id})
+			.then(function(proposal) {
+				// Get HTML from document
+				proposal.body = pads.getPadHTMLAsync('group', proposal.docId);
+				return Promise.props(proposal);
         }).then(function(proposal) {
             // Check if proposal is valid
             return isProposalValid(proposal);
@@ -189,108 +193,116 @@ function getValidGroupsOfSpecificLevelAsync(tid, level) {
 }
 
 /**
- * @desc: create of groups after level is finished
- *        - check if group proposals are valid (filter groups)
- *        - find group leader (with highest rating)
- *        - randomly assign participants to new groups
+ * @desc: Create groups after level is finished
+ *        - Check if group proposals are valid (filter groups)
+ *        - Find group leader (with highest rating)
+ *        - Randomly assign participants to new groups
+ *        - Store previous groups in new group
  */
 exports.remixGroupsAsync = function(topic) {
-    var tid = topic._id;
+    var topicId = topic._id;
     
     // Get groups with highest level
-    var groupsPromise = getValidGroupsOfSpecificLevelAsync(tid, topic.level);
+    var groups_promise = getValidGroupsOfSpecificLevelAsync(topicId, topic.level);
     
     // Get group leaders
-    var leadersPromise = groupsPromise.map(function(group_in) {
-        var gid = group_in._id;
+    var leaders_promise = groups_promise.map(function(group_in) {
+        var groupId = group_in._id;
         
-        return ratings.getGroupLeaderAsync(gid).then(function(leader) {
+        return ratings.getGroupLeaderAsync(groupId).then(function(leader) {
             if(!_.isUndefined(leader))
                 return Promise.resolve(leader);
             
-            // if group leader is undefined, pick one randomly
-            return getGroupMembersAsync(gid).then(function(members) {
+            // If group leader is undefined, pick one randomly
+            return getGroupMembersAsync(groupId).then(function(members) {
                 return Promise.resolve(_.sample(members).uid);
             });
         });
     });
     
-    return Promise.join(groupsPromise, leadersPromise).spread(function(groups, leaders) {
-        // If there is only ONE group in the current topic level,
-        // then the topic is finished/passed.
-        if(1 == _.size(groups)) {
-            // Send mail to notifiy about finished topic and return next stage.
-            return db.collection('groups').find({ 'tid': topic._id, 'level': 0 }).
-                toArrayAsync().then(function(groups) {
-                    return db.collection('group_members').find({'gid': { $in: _.pluck(groups, '_id') }}, {'uid': true}).
-                        toArrayAsync();
-                }).then(function(participants) {
-                    return db.collection('users').find({'_id': { $in: _.pluck(participants, 'uid') }}, {'email': true}).
-                        toArrayAsync().then(function(users) {
-                            mail.sendMailMulti(users,
-                                'EMAIL_TOPIC_PASSED_SUBJECT', [topic.name],
-                                'EMAIL_TOPIC_PASSED_MESSAGE', [topic.name, topic._id, cfg.BASE_URL]);
-                        });
-                }).return({'nextStage': C.STAGE_PASSED});
-        }
+	return Promise.join(groups_promise, leaders_promise).spread(function(groups, leaders) {
+		// If there is only ONE group in the current topic level, then the topic is finished/passed
+		if(_.size(groups) == 1) {
+			// Send mail to notifiy about finished topic and return next stage.
+			return db.collection('groups')
+				.find({ 'topicId': topic._id, 'level': 0 }). toArrayAsync()
+				.then(function(groups) {
+					return db.collection('group_members').find({'groupId': { $in: _.pluck(groups, '_id') }}, {'userId': true}).toArrayAsync();
+				}).then(function(participants) {
+					return db.collection('users')
+						.find({'_id': { $in: _.pluck(participants, 'userId') }}, {'email': true}).toArrayAsync()
+						.then(function(users) {
+							mail.sendMailMulti(users,
+								'EMAIL_TOPIC_PASSED_SUBJECT', [topic.name],
+								'EMAIL_TOPIC_PASSED_MESSAGE', [topic.name, topic._id, cfg.BASE_URL]);
+					});
+				}).return({'nextStage': C.STAGE_PASSED});
+		}
         
-        // assign members to groups
-        var groups_members = assignParticipantsToGroups(leaders);
-        
-        // insert all groups into database
-        var nextLevel = topic.level+1;
-        return Promise.map(groups_members, function(group_members) {
-            // create group new id
-            var gid = ObjectId();
+		// Assign members to groups
+		var groupsMemberIds_promise = assignParticipantsToGroups(leaders);
+		
+		// Insert all groups into database
+		var nextLevel = topic.level+1;
+		return Promise.map(groupsMemberIds_promise, function(groupMemberIds) {
+         // Get previous pad ids as array
+			var prevPadIds_promise = db.collection('group_members')
+				.find({ 'groupId': {$in: _.pluck(groups, '_id')}, 'userId': {$in: groupMemberIds} }).toArrayAsync()
+				.then(function(groupMembers) {
+					var groupIds = _.pluck(groupMembers, 'groupId');
+					return db.collection('pads_group').find({'groupId': {$in: groupIds}}).toArrayAsync().get('_id');
+			});
+         
+         // Initalize group variables
+         var groupId = ObjectId();
+         var topicId = topic._id;
+         var padId = ObjectId();
+         var prevDeadline = topic.nextDeadline;
+         var nextDeadline = topics.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
+         
+         // Store group in database
+         var store_group_promise = prevPadIds_promise.then(function(prevPadIds) {
+         	return storeGroupAsync(groupId, topicId, padId, prevPadIds, nextDeadline, nextLevel, groupMemberIds);
+         });
+         
+         // Send mail to notify level change
+         var send_mail_promise =
+         db.collection('users').find({'_id': {$in: groupMemberIds}}, {'email': true}).
+         toArrayAsync().then(function(users) {
+             mail.sendMailMulti(users,
+                 'EMAIL_LEVEL_CHANGE_SUBJECT', [topic.name],
+                 'EMAIL_LEVEL_CHANGE_MESSAGE', [topic.name, groupId.toString(), cfg.BASE_URL]);
+         });
+         
+         // register as sink for source proposals
+         // find previous gids corresponding uids in group_out (current group)
+         /*var update_source_proposals_promise =
+         db.collection('group_members').find({'userIds': { $in: groupsMemberIds }}).
+         toArrayAsync().then(function(members) {
+             var gids = _.pluck(members,'gid');
+             
+             // filter out only previous level proposals
+             var prevLevel = topic.level;
+             return db.collection('groups').find(
+                 {'_id': { $in: gids }, 'level': prevLevel}, {'_id': true}).
+                 toArrayAsync();
+         }).then(function(source_groups) {
+             var sources = _.pluck(source_groups,'_id');
+             
+             // update sink of previous proposals
+             return db.collection('topic_proposals').updateAsync(
+                 { 'tid': tid, 'source': { $in: sources } },
+                 { $set: { 'sink': gid } }, {'upsert': false, 'multi': true});
+         });*/
             
-            // store group in database
-            var tid = topic._id;
-            var padId = ObjectId();
-            var prevDeadline = topic.nextDeadline;
-            var nextDeadline = topics.calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
-            var store_group_promise = storeGroupAsync(gid, tid, padId, nextDeadline, nextLevel, group_members);
-            
-            // send mail to notify level change
-            var send_mail_promise =
-            db.collection('users').find({'_id': { $in: group_members }},{'email': true}).
-            toArrayAsync().then(function(users) {
-                mail.sendMailMulti(users,
-                    'EMAIL_LEVEL_CHANGE_SUBJECT', [topic.name],
-                    'EMAIL_LEVEL_CHANGE_MESSAGE', [topic.name, gid.toString(), cfg.BASE_URL]);
-            });
-            
-            // register as sink for source proposals
-            // find previous gids corresponding uids in group_out (current group)
-            var update_source_proposals_promise =
-            db.collection('group_members').find({'uid': { $in: group_members }}).
-            toArrayAsync().then(function(members) {
-                var gids = _.pluck(members,'gid');
-                
-                // filter out only previous level proposals
-                var prevLevel = topic.level;
-                return db.collection('groups').find(
-                    {'_id': { $in: gids }, 'level': prevLevel}, {'_id': true}).
-                    toArrayAsync();
-            }).then(function(source_groups) {
-                var sources = _.pluck(source_groups,'_id');
-                
-                // update sink of previous proposals
-                return db.collection('topic_proposals').updateAsync(
-                    { 'tid': tid, 'source': { $in: sources } },
-                    { $set: { 'sink': gid } }, {'upsert': false, 'multi': true});
-            });
-            
-            return Promise.join(
-                send_mail_promise,
-                store_group_promise,
-                update_source_proposals_promise);
-        }).return({'nextStage': C.STAGE_CONSENSUS}); // we stay in consensus stage
-    }).catch(utils.isOwnError,function(error) {
-        return {
-            'nextStage': C.STAGE_REJECTED,
-            'rejectedReason': error.reason
-        };
-    });
+			return Promise.join(send_mail_promise, store_group_promise);
+		}).return({'nextStage': C.STAGE_CONSENSUS}); // We stay in consensus stage
+	}).catch(utils.isOwnError,function(error) {
+		return {
+			'nextStage': C.STAGE_REJECTED,
+			'rejectedReason': error.reason
+		};
+	});
 };
 
 exports.list = function(req, res) {
@@ -319,14 +331,6 @@ function getProposalBodyAsync(mid, gid, proposals_source_promise) {
         });
     }).then(function(proposal) {
         return pads.getPadHTMLAsync('proposal', proposal.pid);
-    });
-}
-
-function getMemberRatingAsync(ruid, gid, uid, type) {
-    return db.collection('ratings').findOneAsync(
-        {'ruid': ruid, 'gid': gid, 'uid': uid, 'type': type},{'score': true}).
-    then(function(rating) {
-        return rating ? rating.score : 0;
     });
 }
 
@@ -361,7 +365,7 @@ exports.query = function(req, res) {
 		
 		// Get chatRoomId from group
 		var group_promise = db.collection('groups')
-			.findOneAsync({'_id': pad.groupId}, {'chatRoomId': true});
+			.findOneAsync({'_id': pad.groupId}, { 'chatRoomId': true, 'prevPadIds': true });
 		
 		// Count number of groups in current level to obtain if we are in last group (last level)
 		var isLastGroup_promise = topic_promise.then(function(topic) {
@@ -393,6 +397,11 @@ exports.query = function(req, res) {
 		var chance = new Chance(groupId.toString());
 		var offset = chance.integer({min: 0, max: 360});
 		
+		var prevPads_promise = group_promise.then(function(group) {
+			return db.collection('pads_proposal')
+				.find({ '_id': {$in: group.prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
+		});
+		
 		// Get group members
 		var group_members_details_promise = group_members_promise.map(function(member, index) {
 			
@@ -402,18 +411,21 @@ exports.query = function(req, res) {
 				return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
 			});
          
-         // TODO Get proposal html
-			//var member_proposal_html_promise = getProposalBodyAsync(member.userId, groupId, proposals_source_promise);
+         // Get proposal html
+         var member_proposal_html_promise = prevPads_promise.then(function(prevPads) {
+         	var prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': member.userId});
+         	return pads.getPadHTMLAsync('proposal', prevUserPad.docId);
+         });
 			
 			// Get member rating
-			var member_rating_knowledge_promise = getMemberRatingAsync(member.userId, groupId, userId, C.RATING_KNOWLEDGE);
-			var member_rating_integration_promise = getMemberRatingAsync(member.userId, groupId, userId, C.RATING_INTEGRATION);
+			var member_rating_knowledge_promise = ratings.getMemberRatingAsync(member.userId, groupId, userId, C.RATING_KNOWLEDGE);
+			var member_rating_integration_promise = ratings.getMemberRatingAsync(member.userId, groupId, userId, C.RATING_INTEGRATION);
          
          return Promise.props({
          	'userId': member.userId,
 				'name': chance.first(),
 				'color': member_color_promise,
-				/*'proposal_html': member_proposal_html_promise,*/
+				'proposal_html': member_proposal_html_promise,
 				'ratingKnowledge': member_rating_knowledge_promise,
 				'ratingIntegration': member_rating_integration_promise
          });

@@ -205,7 +205,7 @@ function manageTopicStateAsync(topic) {
 function appendTopicInfoAsync(topic, userId, with_details) {
 	var topicId = topic._id;
 	
-	// get number of participants and votes in this topic
+	// Get number of participants and votes in this topic
 	var topic_votes_promise = db.collection('topic_votes')
 		.find({'topicId': topicId}, {'userId': true}).toArrayAsync();
 	var pads_proposal_count_promise = db.collection('pads_proposal').countAsync({'topicId': topicId});
@@ -293,33 +293,37 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 		
 		// Find the group that the current user is part of (in last level)
 		user_group_promise = groups_promise.then(function(groups) {
-			// Get all groups in highest level
-			var highest_level = _.max(groups, function(group) {return group.level;}).level;
-			var highest_level_groups = _.filter(groups, function(group) { return group.level == highest_level; });
-			
-			// Find that highest_level_groups, where user is part of and return that group
-			var group_promise = db.collection('group_members')
-				.findOneAsync({'groupId': { $in: _.pluck(highest_level_groups, '_id') }, 'userId': userId})
-				.then(function(member) {
-					return utils.findWhereObjectId(highest_level_groups, {'_id': member.groupId});
-			});
-			
-			// Get group pad information
-			var pad_promise = group_promise.then(function(group) {
-				return db.collection('pads_group').findOneAsync({'groupId': group._id}, {'docId': true});
-			});
-			
-			return Promise.join(group_promise, pad_promise);
-		}).spread(function(group, pad) {
-			if (_.isNull(group)) {
+			if (_.isEmpty(groups))
 				return null;
-			} else {
-				// Add pad id, doc id and html to group
-				var groupAndPad = _.extend(group, { 'padId': pad._id, 'docId': pad.docId });
-				return addHtmlToPad('group', groupAndPad);
-			}
+			
+			return groups_promise.then(function(groups) {
+				// Get all groups in highest level
+				var highest_level = _.max(groups, function(group) {return group.level;}).level;
+				var highest_level_groups = _.filter(groups, function(group) { return group.level == highest_level; });
+				
+				// Find that highest_level_groups, where user is part of and return that group
+				var group_promise = db.collection('group_members')
+					.findOneAsync({'groupId': { $in: _.pluck(highest_level_groups, '_id') }, 'userId': userId})
+					.then(function(member) {
+						return utils.findWhereObjectId(highest_level_groups, {'_id': member.groupId});
+				});
+				
+				// Get group pad information
+				var pad_promise = group_promise.then(function(group) {
+					return db.collection('pads_group').findOneAsync({'groupId': group._id}, {'docId': true});
+				});
+				
+				return Promise.join(group_promise, pad_promise);
+			}).spread(function(group, pad) {
+				if (_.isNull(group)) {
+					return null;
+				} else {
+					// Add pad id, doc id and html to group
+					var groupAndPad = _.extend(group, { 'padId': pad._id, 'docId': pad.docId });
+					return addHtmlToPad('group', groupAndPad);
+				}
+			});
 		});
-		
 	}
 	
 	// Basic topic details

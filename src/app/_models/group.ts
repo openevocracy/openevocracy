@@ -1,24 +1,24 @@
 import { GroupMember } from './group-member';
 
 export class Group {
-	_id: string;
+	groupId: string;
 	topicId: string;
 	docId: string;
 	chatRoomId: string;
 	level: number;
 	title: string;
-	lastLevel: number;
+	isLastGroup: number;
 	nextDeadline: number;
 	members: GroupMember[];
 	
 	constructor(res: any) {
-		this._id = res._id;
+		this.groupId = res.groupId;
 		this.topicId = res.topicId;
 		this.docId = res.docId;
 		this.chatRoomId = res.chatRoomId;
 		this.level = res.level;
 		this.title = res.title;
-		this.lastLevel = res.lastLevel;
+		this.isLastGroup = res.isLastGroup;
 		this.nextDeadline = res.nextDeadline;
 		this.members = res.members;
 	}

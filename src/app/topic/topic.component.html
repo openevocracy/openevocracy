@@ -40,7 +40,7 @@
 <div class="container">
 	<mat-tab-group>
 		<mat-tab label="{{ 'TOPIC_TAB_LABEL_DESCRIPTION' | translate }}">
-			<button mat-raised-button color="primary" *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == uid" title="{{ 'TOPIC_BUTTON_EDIT' | translate }}" [routerLink]="['/topic/editor', topic.description._id]">
+			<button mat-raised-button color="primary" *ngIf="topic?.stage == C.STAGE_SELECTION && topic?.owner == userId" title="{{ 'TOPIC_BUTTON_EDIT' | translate }}" [routerLink]="['/topic/editor', topic.description._id]">
 				<span><fa-icon [icon]="faEdit"></fa-icon> {{ 'TOPIC_BUTTON_EDIT' | translate }}</span>
 			</button>
 			<div [innerHtml]="topic?.description.html"></div>

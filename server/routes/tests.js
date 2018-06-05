@@ -12,22 +12,20 @@ exports.clean_database = function(req, res) {
     db.collection('groups').drop();
     db.collection('group_members').drop();
     db.collection('mail').drop();
-    db.collection('pads').drop();
-    db.collection('topic_proposals').drop();
-    db.collection('topic_descriptions').drop();
     db.collection('topic_votes').drop();
     db.collection('topics').drop();
     db.collection('ratings').drop();
+    
+    // Pads and ShareDB
     db.collection('pads_topic_description').drop();
-    db.collection('o_pads_topic_description').drop();
-    
-    // ShareDB
-    db.collection('docs').drop();
-    db.collection('o_docs').drop();
-    
-    // Gulf
-    //db.collection('gulf_lastrevision_id').drop();
-    //db.collection('gulf_revisions').drop();
+    db.collection('docs_topic_description').drop();
+    db.collection('o_docs_topic_description').drop();
+    db.collection('pads_proposal').drop();
+    db.collection('docs_proposal').drop();
+    db.collection('o_docs_proposal').drop();
+    db.collection('pads_group').drop();
+    db.collection('docs_group').drop();
+    db.collection('o_docs_group').drop();
     
     res.sendStatus(200);
 };

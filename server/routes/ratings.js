@@ -3,47 +3,39 @@ var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var C = require('../../shared/constants').C;
 
-/*
- * Ratings can be either for knowledge or intigration skill.
- *
- * _id -> timestamp
- * uid -> user who rated
- * gid -> group
- * ruid -> rated user
- */
-
 // NOTE Currently not in use
 // called if ratings are queried, responds with rating from database
 exports.query = function(req, res) {
-	var rid = ObjectId(req.params.id);
-	var gid = ObjectId(req.params.gid);
-	var uid = ObjectId(req.user._id);
+	var ratedUserId = ObjectId(req.params.id);
+	var groupId = ObjectId(req.params.gid);
+	var userId = ObjectId(req.user._id);
 	var type = parseInt(req.params.type, 10);
 	
 	db.collection('ratings')
-		.findOneAsync({ 'gid': gid, 'uid': uid, 'ruid': rid, 'type': type })
+		.findOneAsync({ 'groupId': groupId, 'userId': userId, 'ratedUserId': ratedUserId, 'type': type })
 		.then(res.json.bind(res));
 };
 
 // NOTE Currently not in use
-// counts number of given ratings per group for specific type of rating
+// @desc: Counts number of given ratings per group for specific type of rating
 exports.count = function(req, res) {
-	var rid = ObjectId(req.body.id);
-	var gid = ObjectId(req.body.gid);
+	var ratedUserId = ObjectId(req.body.id);
+	var groupId = ObjectId(req.body.gid);
 	var type = parseInt(req.params.type, 10);
 	
 	db.collection('ratings')
-		.countAsync({ 'gid': gid, 'ruid': rid, 'type': type })
+		.countAsync({ 'groupId': groupId, 'ratedUserId': ratedUserId, 'type': type })
 		.then(res.json.bind(res));
 };
 
 /*
- * Save rating
+ * desc: Save rating
  */
 exports.rate = function(req, res) {
-	var ruid = ObjectId(req.body.ruid); // The user who was rated?
-	var gid = ObjectId(req.body.gid);
-	var uid = ObjectId(req.user._id);
+	var ratedUserId = ObjectId(req.body.ratedUserId); // The user who was rated
+	var groupId = ObjectId(req.body.groupId);
+	var userId = ObjectId(req.user._id);
+	console.log(ratedUserId, groupId, userId);
 	var type = parseInt(req.body.type, 10);
 	var score = parseInt(req.body.score, 10);
 	
@@ -54,45 +46,52 @@ exports.rate = function(req, res) {
 	}
     
 	db.collection('ratings').updateAsync(
-			{ 'ruid': ruid, 'gid': gid, 'uid': uid, 'type': type },
-			{ $set: { 'score': score } },
-			{ upsert: true })
-		.then(function(rating) {
-			return true;
-		}).then(res.json.bind(res));
+		{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type },
+		{ $set: { 'score': score } }, { upsert: true })
+	.then(function(rating) {
+		return true;
+	}).then(res.json.bind(res));
 };
 
 /*
- * Return the user with the highest overall ratings
- * @param gid group id
+ * @desc: Return the user with the highest overall ratings
+ * @param: group id
  */
-exports.getGroupLeaderAsync = function(gid) {
-	return db.collection('ratings').find(
-		{ 'gid': gid },
-		{ 'ruid': true, 'score': true }).
-		toArrayAsync().then(function(ratings) {
+exports.getGroupLeaderAsync = function(groupId) {
+	return db.collection('ratings')
+		.find({ 'groupId': groupId }, { 'ratedUserId': true, 'score': true }).toArrayAsync()
+		.then(function(ratings) {
 			if(_.isEmpty(ratings))
 			    return undefined;
 			
-			var grouped_ratings = _.groupBy(ratings, 'ruid');
-			// should now have the form: (where n is the number of ratings every user got)
-			// {ruid1: [{'ruid': ruid1, 'score': x_1},...,{'ruid': ruid1, 'score': x_n}], ruid2: [{'ruid': ruid2, score: x_1},...,{'ruid': ruid2, score: x_n}], ...}
+			var grouped_ratings = _.groupBy(ratings, 'ratedUserId');
+			// Should now have the form: (where n is the number of ratings every user got)
+			// {ratedUserId1: [{'ratedUserId': ratedUserId1, 'score': x_1},...,{'ratedUserId': ratedUserId1, 'score': x_n}], ratedUserId2: [{'ratedUserId': ratedUserId2, score: x_1},...,{'ratedUserId': ratedUserId2, score: x_n}], ...}
 			
-			var summed_ratings = _.map(grouped_ratings,function(array, ruid) {
-				// array contains multiple ratings, ruid contains the rated user
-				// array = [{'ruid': ruid1, 'score': x_1},...,{'ruid': ruid1, 'score': x_n}]
-				// ruid = ruid1
+			var summed_ratings = _.map(grouped_ratings,function(array, ratedUserId) {
+				// Array contains multiple ratings, ratedUserId contains the rated user
+				// array = [{'ratedUserId': ratedUserId1, 'score': x_1},...,{'ratedUserId': ratedUserId1, 'score': x_n}]
+				// ratedUserId = ratedUserId1
 				
 				var scores = _.pluck(array, 'score');
 				// scores = [x_1,...,x_n]
 				
-				return {'ruid': ruid, 'score': _.reduce(scores, function(memo, num){ return memo + num; }, 0)};
+				return {'ratedUserId': ratedUserId, 'score': _.reduce(scores, function(memo, num){ return memo + num; }, 0)};
 			});
-			// summed_ratings = [{'ruid': ruid1, 'score': sum1}, {'ruid': ruid2, 'score': sum2}, ...]
+			// summed_ratings = [{'ratedUserId': ratedUserId1, 'score': sum1}, {'ratedUserId': ratedUserId2, 'score': sum2}, ...]
 			
 			// TODO find better solution, if more than one have the same rating
-			var best_rating = _.max(summed_ratings,function(rating) {return rating.score;});
-			// best_rating = {'ruid': ruid_max, 'score': sum_max}
-			return ObjectId(best_rating.ruid);
+			var best_rating = _.max(summed_ratings, function(rating) {return rating.score;});
+			// best_rating = {'ratedUserId': ratedUserId_max, 'score': sum_max}
+			return ObjectId(best_rating.ratedUserId);
 	});
 };
+
+exports.getMemberRatingAsync = function(ratedUserId, groupId, userId, type) {
+	console.log(ratedUserId, groupId, userId, type);
+	return db.collection('ratings').findOneAsync(
+		{'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type}, {'score': true}).
+	then(function(rating) {
+		return rating ? rating.score : 0;
+	});
+}

@@ -30,7 +30,12 @@ import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
 })
 export class GroupComponent extends EditorComponent implements OnInit {
 	private C;
+	private proposal_html: string = "";
 	private group: Group;
+	
+	private classColEditor: string = 'col-xs-12';
+	private classColProposal: string = 'hidden';
+	private styleColProposal = {'background-color': '#fff'};
 	
 	private faUser = faUser;
 	private faExpandArrowsAlt = faExpandArrowsAlt;
@@ -98,14 +103,16 @@ export class GroupComponent extends EditorComponent implements OnInit {
 			});
 	}
 	
-	private rate(e, ruid, type) {
-		var rating = {
-			'gid': this.group._id,
-			'ruid': ruid,
-			'score': e.rating,
-			'type': type
-		}
-		
+	private rate(e, ratedUserId, type) {
+		// Do not post new rating to server, if the new rating is equal to the old rating
+		var ratedMember = _.findWhere(this.group.members, {'userId': ratedUserId});
+		if(type == C.RATING_INTEGRATION && ratedMember.ratingIntegration == e.rating)
+			return;
+		if(type == C.RATING_KNOWLEDGE && ratedMember.ratingKnowledge == e.rating)	
+			return;
+			
+		// Post rating to server
+		var rating = {	'groupId': this.group.groupId, 'ratedUserId': ratedUserId, 'score': e.rating, 'type': type };
 		this.httpManagerService.post('/json/ratings/rate', rating).subscribe();
 	}
 	
@@ -121,6 +128,19 @@ export class GroupComponent extends EditorComponent implements OnInit {
 		} else if(element.webkitRequestFullscreen) {
 			element.webkitRequestFullscreen();
 		}
+	}
+	
+	private openMemberProposal(html: string, color: string) {
+		this.classColEditor = 'col-xs-6';
+		this.classColProposal = 'col-xs-6';
+		this.styleColProposal = {'background-color': color};
+		this.proposal_html = html;
+	}
+	
+	private closeMemberProposal() {
+		this.classColEditor = 'col-xs-12';
+		this.classColProposal = 'hidden';
+		this.proposal_html = "";
 	}
 
 }

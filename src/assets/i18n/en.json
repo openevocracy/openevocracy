@@ -104,6 +104,7 @@
 	"GROUP_MEMBER_BUTTON_SHOW": "Visit profile",
 	"GROUP_RATING_TOOLTIP_INTEGRATION": "Integration skill of this member, i.e. ability to cooperate and find consensus",
 	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Expertise of this member regarding the topic",
+	"GROUP_MEMBER_PROPOSAL_CLOSE": "Schließen",
 	
 	"EDITOR_BUTTON_CLOSE": "Close",
 	"EDITOR_SAVED_CHANGES": "All changes are saved.",
