@@ -88,7 +88,6 @@ exports.getGroupLeaderAsync = function(groupId) {
 };
 
 exports.getMemberRatingAsync = function(ratedUserId, groupId, userId, type) {
-	console.log(ratedUserId, groupId, userId, type);
 	return db.collection('ratings').findOneAsync(
 		{'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type}, {'score': true}).
 	then(function(rating) {

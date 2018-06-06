@@ -20,6 +20,7 @@ var cfg = require('../../shared/config').cfg;
 var jwtOptions = {};
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
 jwtOptions.secretOrKey = bcrypt.genSaltSync(8);
+exports.jwtOptions = jwtOptions;
 
 var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
 	db.collection('users').findOneAsync({ '_id': ObjectId(jwt_payload.id), 'salt': jwt_payload.salt }).then(function (user) {

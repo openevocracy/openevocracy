@@ -3,6 +3,7 @@ var _ = require('underscore');
 var Promise = require('bluebird');
 var ObjectId = require('mongodb').ObjectID;
 var db = require('../database').db;
+var jwt = require('jsonwebtoken');
 
 // Collaborative libraries for pad synchronization
 var ShareDB = require('sharedb');
@@ -13,12 +14,18 @@ var ShareDBAccess = require('sharedb-access');
 var sharedb = ShareDBMongo('mongodb://127.0.0.1/evocracy');
 var QuillDeltaToHtmlConverter = require('quill-delta-to-html');
 
+// Own referecnes
+var users = require('./users');
+var utils = require('../utils');
+
 // ShareDB backend and connection
 var backend;
 var connection;
 
 // Pads cache
-var pads = {};
+var pads_topic_description = {};
+var pads_proposal = {};
+var pads_group = {};
 
 /*
  * @desc: Create shareDB connection and define socket events
@@ -36,16 +43,28 @@ exports.startPadServer = function(wss) {
 	
 	// Initialize stream and listener for WebSocket server
 	wss.on('connection', function(ws, req) {
-		// Get userId from client request
-		var userId = req.url.split("?userId=")[1];
+		// Get userToken from client request and decode
+		var userToken = req.url.split("?userToken=")[1];
+		var decodedUserToken = jwt.verify(userToken, users.jwtOptions.secretOrKey);
 		
-		// TODO Check token!? 
+		// Read userId and salt from decoded token
+		var userId = ObjectId(decodedUserToken.id);
+		var userSalt = decodedUserToken.salt;
 		
-		// Create stream
-		var stream = new WebSocketJSONStream(ws);
-		
-		// Let backend listen to stream, also hand over userId for middleware
-		backend.listen(stream, { 'userId': userId });
+		// Check if salt is correct; if yes, connect
+		return Promise.resolve(db.collection('users')
+			.findOneAsync({'_id': userId}, {'salt': true}).then(function(dbUser) {
+				// If salt is not correct, close connection and return
+				if (dbUser.salt != userSalt) {
+					console.log('Connection rejected, users salt not correct');  // TODO Add to logfile later
+					ws.close();
+					return;
+				}
+				
+				// If salt is correct, create stream, let backend listen to stream and hand over userId for middleware
+				var stream = new WebSocketJSONStream(ws);
+				backend.listen(stream, { 'userId': userId });
+		}));
 	});
 	
 	// Middleware to hook into connection process
@@ -77,6 +96,18 @@ function checkOwnerAndExpiration(session, pad) {
 }
 
 /*
+ * @desc: Similar to checkOwnerAndExpiration, but specific member of group has to be found
+ * @params:
+ *    session: contains the userId of the current user
+ *    pad: contains meta information about the pad (i.e. group members and expiration date)
+ */
+function checkOwnerAndExpirationGroup(session, pad) {
+	var isOwner = utils.containsObjectId(pad.ownerIds, session.userId);
+	var isExpired = (pad.expiration <= Date.now());
+	return isOwner && !isExpired;
+}
+
+/*
  * @desc: Initalize shareDB access control for the pads
  */
 function initializeAccessControl() {
@@ -88,14 +119,14 @@ function initializeAccessControl() {
 	});
 	backend.allowUpdate('docs_topic_description', function(docId, oldDoc, newDoc, ops, session) {
 		// If user is owner and document is not expired
-		if (pads[docId]) {
+		if (pads_topic_description[docId]) {
 			// If pad is already in cache, check condition
-			return checkOwnerAndExpiration(session, pads[docId]);
+			return checkOwnerAndExpiration(session, pads_topic_description[docId]);
 		} else {
-			// If pad is not in cache, get it from databse, store it in cache and check condition
+			// If pad is not in cache, get it from database, store it in cache and check condition
 			return Promise.resolve(db.collection('pads_topic_description').findOneAsync({'docId': ObjectId(docId)}, { 'ownerId': true, 'expiration': true })
 				.then(function(pad) {
-					pads[docId] = pad;
+					pads_topic_description[docId] = pad;
 					return checkOwnerAndExpiration(session, pad);
 			}));
 		}
@@ -106,13 +137,18 @@ function initializeAccessControl() {
 		return true;
 	});
 	backend.allowUpdate('docs_proposal', function(docId, oldDoc, newDoc, ops, session) {
-		console.log('allowUpdate docs_proposal');
 		// If user is owner and document is not expired
-		
-		// TODO
-		
-		console.log(session.userId);
-		return true;
+		if (pads_proposal[docId]) {
+			// If pad is already in cache, check condition
+			return checkOwnerAndExpiration(session, pads_proposal[docId]);
+		} else {
+			// If pad is not in cache, get it from database, store it in cache and check condition
+			return Promise.resolve(db.collection('pads_proposal').findOneAsync({'docId': ObjectId(docId)}, { 'ownerId': true, 'expiration': true })
+				.then(function(pad) {
+					pads_proposal[docId] = pad;
+					return checkOwnerAndExpiration(session, pad);
+			}));
+		}
 	});
 	
 	// Group pad
@@ -120,14 +156,25 @@ function initializeAccessControl() {
 		return true;
 	});
 	backend.allowUpdate('docs_group', function(docId, oldDoc, newDoc, ops, session) {
-		console.log('allowUpdate docs_group');
-		// If user is member and document is not expired
-		
-		// TODO
-		
-		console.log(oldDoc);
-		console.log(session.userId);
-		return true;
+		// If user is member of group and document is not expired
+		if (pads_group[docId]) {
+			// If pad is already in cache, check condition
+			return checkOwnerAndExpirationGroup(session, pads_group[docId]);
+		} else {
+			// If pad is not in cache, get it from database, store it in cache and check condition
+			return Promise.resolve(db.collection('pads_group').findOneAsync({'docId': ObjectId(docId)}, { 'groupId': true, 'expiration': true })
+				.then(function(pad) {
+					var members_promise = db.collection('group_members').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
+					return Promise.join(pad, members_promise);
+				}).spread(function(pad, members) {
+					// Add owners to pad
+					pad.ownerIds = _.pluck(members, 'userId');
+					// Store pad in cache
+					pads_group[docId] = pad;
+					// Check condition
+					return checkOwnerAndExpirationGroup(session, pad);
+			}));
+		}
 	});
 }
 

@@ -19,7 +19,10 @@
 			<p *ngIf="topic.stage == C.STAGE_REJECTED">{{topic.rejectedReason | translate}}</p>
 			<p *ngIf="topic.stage == C.STAGE_SELECTION">{{topic.num_votes}} {{'TOPIC_LIST_LABEL_VOTES' | translate}}</p>
 			<p *ngIf="topic.stage == C.STAGE_PROPOSAL">{{topic.num_proposals}} {{'TOPIC_LIST_LABEL_PROPOSALS' | translate}}</p>
-			<p *ngIf="topic.stage == C.STAGE_CONSENSUS">{{'TOPIC_LIST_LABEL_LEVEL' | translate}} {{topic.level | addone}}</p>
+			<div *ngIf="topic.stage == C.STAGE_CONSENSUS">
+				<p>{{'TOPIC_LIST_LABEL_LEVEL' | translate}} {{topic.level | addone}}</p>
+				<p>{{topic.numActiveGroups}} {{'TOPICLIST_LABEL_NUMGROUPS' | translate}}</p>
+			</div>
 			<p *ngIf="topic.stage == C.STAGE_PASSED">{{topic.valid_participants}} {{'TOPIC_LIST_LABEL_PARTICIPANTS' | translate}}</p>
 		</mat-card-content>
 		<mat-card-footer>

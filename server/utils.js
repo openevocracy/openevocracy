@@ -33,14 +33,20 @@ var ObjectIdToStringMapper = exports.ObjectIdToStringMapper = function(obj) {
 };
 
 var ObjectIdToStringMapperArray = exports.ObjectIdToStringMapperArray = function(objs) {
-    return _.map(objs,ObjectIdToStringMapper);
+    return _.map(objs, ObjectIdToStringMapper);
+};
+
+/*
+ * @desc: Simple helper function to simplify toString calls in underscore functions
+ */
+var toStr = function(str) {
+	return str.toString();
 };
 
 /*
  * @desc: underscore.js _.findWhere function is not working if you want to find an ObjectId
- *        therefore this function was written
  */
-exports.findWhereObjectId = function(objs,obj) {
+exports.findWhereObjectId = function(objs, obj) {
 	return _.find(objs, function(el) {
 		return _.some(_.keys(el), function(key) {
 			return (key == _.keys(obj)[0] && el[key].equals(obj[key]));
@@ -48,7 +54,15 @@ exports.findWhereObjectId = function(objs,obj) {
 	});
 };
 
-exports.checkArrayEntryExists = function(objs,obj) {
+/*
+ * @desc: underscore.js _.contains function is not working if you want to find an ObjectId
+ *        note that this function is simplified, compared to the original _.contains function
+ */
+exports.containsObjectId = function(arr, item) {
+	return _.indexOf(_.map(arr, toStr), item.toString()) >= 0;
+};
+
+exports.checkArrayEntryExists = function(objs, obj) {
     return _.findWhere(ObjectIdToStringMapperArray(objs),
                        ObjectIdToStringMapper(obj)) != undefined;
 };

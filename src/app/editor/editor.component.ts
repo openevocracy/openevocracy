@@ -74,7 +74,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		});
 	}
 	
-	ngOnInit() { }
+	ngOnInit() {}
 	
 	ngOnDestroy() {
 		if(this.socket)
@@ -121,7 +121,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 		sharedb.types.register(richText.type);
 
 		// Open WebSocket connection to ShareDB server
-		this.socket = new WebSocket('wss://develop.openevocracy.org/socket?userId='+this.userId);
+		var userToken = this.userService.getToken();
+		this.socket = new WebSocket('wss://develop.openevocracy.org/socket?userToken='+userToken);
 		
 		// WebSocket connection was established
 		this.socket.onopen = function () {

@@ -1,7 +1,9 @@
 import { Level } from '../level';
 
+import * as _ from 'underscore';
+
 export class TopicListElement {
-	/* Original topic */
+	/* Original topic (as it is stored in db) */
 	_id: string;
 	name: string;
 	stage: number;
@@ -15,12 +17,15 @@ export class TopicListElement {
 	valid_participants: number;
 	finalDocument: string;
 	
-	/* Extended information */
+	/* Extended information (additional to db info) */
 	num_votes: number;
 	num_proposals: number;
 	voted: boolean;
 	levels: Level[];
-	 
+	
+	/* Locally created */
+	numActiveGroups: number;
+	
 	constructor(res: any) {
 		this._id = res._id;
 		this.name = res.name;
@@ -37,6 +42,7 @@ export class TopicListElement {
 		this.num_votes = res.num_votes;
 		this.num_proposals = res.num_proposals;
 		this.voted = res.voted;
-		this.levels = res.levels;
+		this.levels = res.levels
+		this.numActiveGroups = res.levels[_.size(res.levels)-1].groups;
 	}
 }

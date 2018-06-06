@@ -23,11 +23,11 @@ import { faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 })
 export class TopiclistComponent implements OnInit {
 	public C;
-	topicsList: TopicListElement[];
-	stageClass: string;
+	private topicsList: TopicListElement[];
+	private stageClass: string;
 	
-	faHandPaper = faHandPaper;
-	faPlusSquare = faPlusSquare;
+	private faHandPaper = faHandPaper;
+	private faPlusSquare = faPlusSquare;
 
 	constructor(
 		private topicsListService: TopicsListService,
@@ -45,7 +45,15 @@ export class TopiclistComponent implements OnInit {
 				obj.progress = (obj.stage == C.STAGE_REJECTED) ? C.STAGE_PASSED+1 : obj.stage;
 			});
 			// Sort topics by progress and by name
-			this.topicsList = _.sortBy(_.sortBy(with_progress, 'name'), 'progress');
+			let sortedTopicsList = _.sortBy(_.sortBy(with_progress, 'name'), 'progress');
+			
+			// Initialize topicsList and construct all elements
+			this.topicsList = [];
+			_.each(sortedTopicsList, function(topicListElement) {
+				this.topicsList.push(new TopicListElement(topicListElement));
+			}.bind(this));
+			
+			console.log(this.topicsList);
 		});
 	}
 	
