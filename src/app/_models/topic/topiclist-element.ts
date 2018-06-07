@@ -43,6 +43,14 @@ export class TopicListElement {
 		this.num_proposals = res.num_proposals;
 		this.voted = res.voted;
 		this.levels = res.levels
-		this.numActiveGroups = res.levels[_.size(res.levels)-1].groups;
+		this.numActiveGroups = this.getNumActiveGroups();
+	}
+	
+	private getNumActiveGroups() {
+		let numLevels = _.size(this.levels);
+		if(numLevels != 0)
+			return this.levels[numLevels-1].groups;
+		else
+			return null;
 	}
 }

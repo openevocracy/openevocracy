@@ -122,20 +122,22 @@ export class EditorComponent implements OnInit, OnDestroy {
 
 		// Open WebSocket connection to ShareDB server
 		var userToken = this.userService.getToken();
-		this.socket = new WebSocket('wss://develop.openevocracy.org/socket?userToken='+userToken);
+		this.socket = new WebSocket('wss://develop.openevocracy.org/socket/pad/'+userToken);
 		
 		// WebSocket connection was established
 		this.socket.onopen = function () {
 			// Get ShareDB connection
 			var connection = new sharedb.Connection(this.socket);
-		
+			
 			// Create local Doc instance
-			var doc = connection.get(this.getCollectionFromURL(), docId);  // FIXME generalize, depending on URL?
+			var doc = connection.get(this.getCollectionFromURL(), docId);
 			this.doc = doc;
 			
 			// Subscribe to specific doc
 			doc.subscribe(function(err) {
 				if (err) throw err;
+				
+				console.log(doc);
 				
 				// Get quill
 				var quill = this.quillEditor;

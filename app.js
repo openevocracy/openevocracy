@@ -212,11 +212,7 @@ app.all('/*', function(req, res, next) {
 
 app.use(express.static('node_modules/quill/dist'));
 
-//var WebSocketServer = require('websocket').server;
 var WebSocket = require('ws');
-
-//app.use(express.static('static'));
-//app.use(express.static('node_modules/quill/dist'));
 
 var httpServer = http.createServer(app);
 
@@ -227,48 +223,4 @@ httpServer.listen(app.get('port'), function(){
 var wss = new WebSocket.Server({'server': httpServer});
 
 pads.startPadServer(wss);
-
-//var richText = require('rich-text');
-//var WebSocket = require('ws');
-
-
-
-/*ShareDB.types.register(richText.type);
-var backend = new ShareDB();
-createDoc(startServer);
-
-// Create initial document then fire callback
-function createDoc(callback) {
-	var connection = backend.connect();
-	var doc = connection.get('examples', 'richtext');
-	doc.fetch(function(err) {
-		console.log(doc);
-		if (err) throw err;
-		if (doc.type === null) {
-			console.log('create doc');
-			doc.create([{insert: 'Hi!'}], 'rich-text', callback);
-			return;
-		}
-		callback();
-	});
-}
-
-function startServer() {
-	// Connect any incoming WebSocket connection to ShareDB
-	var wss = new WebSocket.Server({ 'server': httpServer });
-	wss.on('connection', function(ws, req) {
-		console.log('connection');
-		var stream = new WebSocketJSONStream(ws);
-		backend.listen(stream);
-	});
-
-	httpServer.listen(app.get('port'), function(){
-		console.log('Express server listening on port ' + app.get('port'));
-	});
-}*/
-
-/*var io = require('socket.io')(httpServer);*/
-//var io = require('socket.io')(httpServer, {secure: true});
-/*var padServer = pads.startPadServer(io);*/
-//var chatServer = chats.startChatServer(io);
-
+chats.startChatServer(wss);

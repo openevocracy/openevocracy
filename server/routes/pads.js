@@ -3,7 +3,6 @@ var _ = require('underscore');
 var Promise = require('bluebird');
 var ObjectId = require('mongodb').ObjectID;
 var db = require('../database').db;
-var jwt = require('jsonwebtoken');
 
 // Collaborative libraries for pad synchronization
 var ShareDB = require('sharedb');
@@ -14,7 +13,7 @@ var ShareDBAccess = require('sharedb-access');
 var sharedb = ShareDBMongo('mongodb://127.0.0.1/evocracy');
 var QuillDeltaToHtmlConverter = require('quill-delta-to-html');
 
-// Own referecnes
+// Own references
 var users = require('./users');
 var utils = require('../utils');
 
@@ -36,35 +35,26 @@ exports.startPadServer = function(wss) {
 	ShareDB.types.register(richText.type);
 	
 	// Create shareDB backend with mongo adapter
-	backend = new ShareDB({ 'db': sharedb });
+	backend = new ShareDB({'db': sharedb});
 	
 	// Register ShareDBAccess middleware
 	ShareDBAccess(backend);
 	
 	// Initialize stream and listener for WebSocket server
 	wss.on('connection', function(ws, req) {
-		// Get userToken from client request and decode
-		var userToken = req.url.split("?userToken=")[1];
-		var decodedUserToken = jwt.verify(userToken, users.jwtOptions.secretOrKey);
+		var queryArr = req.url.split("/socket/")[1].split("/");
+		var connectionType = queryArr[0];
 		
-		// Read userId and salt from decoded token
-		var userId = ObjectId(decodedUserToken.id);
-		var userSalt = decodedUserToken.salt;
-		
-		// Check if salt is correct; if yes, connect
-		return Promise.resolve(db.collection('users')
-			.findOneAsync({'_id': userId}, {'salt': true}).then(function(dbUser) {
-				// If salt is not correct, close connection and return
-				if (dbUser.salt != userSalt) {
-					console.log('Connection rejected, users salt not correct');  // TODO Add to logfile later
-					ws.close();
-					return;
-				}
-				
+		// Check if socket is of type pad
+		if(connectionType == 'pad') {
+			var userToken = queryArr[1];
+			// Authenticate user and initialize sharedb afterwards
+			users.socketAuthentication(ws, userToken, function(userId) {
 				// If salt is correct, create stream, let backend listen to stream and hand over userId for middleware
 				var stream = new WebSocketJSONStream(ws);
-				backend.listen(stream, { 'userId': userId });
-		}));
+				backend.listen(stream, {'userId': userId});
+			});
+		}
 	});
 	
 	// Middleware to hook into connection process
@@ -90,7 +80,7 @@ exports.startPadServer = function(wss) {
  *    pad: contains meta information about the pad (i.e. owner and expiration date)
  */
 function checkOwnerAndExpiration(session, pad) {
-	var isOwner = (session.userId == pad.ownerId);
+	var isOwner = (session.userId.toString() == pad.ownerId.toString());
 	var isExpired = (pad.expiration <= Date.now());
 	return isOwner && !isExpired;
 }
@@ -189,11 +179,10 @@ function createPadAsync(pad, collection_suffix) {
 	// Create new pad id and get define doc
 	var docId = ObjectId();
 	var doc = connection.get('docs_' + collection_suffix, docId);
-	doc.ownerId = 'test';
 	
 	// Create doc and add meta information afterwards (in callback)
 	return new Promise( (resolve, reject) => {
-		doc.create([{insert: 'Hi!'}], richText.type.name, function(err) {
+		doc.create([], richText.type.name, function(err) {
 			if (err) reject(err);
 			// After doc was created, add meta information in pads collection
 			

@@ -87,14 +87,10 @@ function joinChatRoom(socket, crid, uid, uname) {
     });
 }
 
-exports.startChatServer = function(wss) {
-	/*wss.on('connection', function(ws, req) {
-		ws.on('message', function(data) {
-			if(data.type == 'chat') {
-				var token = data.userToken;
-				// Initialize chat
-				//joinChatRoom(socket, identity.crid, identity.uid, identity.uname);
-			}
-		});
-	});*/
+exports.startChatServer = function(io) {
+    io.on('connection', function(socket) {
+        socket.on('chat_identity', function(identity) {
+            joinChatRoom(socket, identity.crid, identity.uid, identity.uname);
+        });
+    });
 };

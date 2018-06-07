@@ -305,11 +305,15 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 				var group_promise = db.collection('group_members')
 					.findOneAsync({'groupId': { $in: _.pluck(highest_level_groups, '_id') }, 'userId': userId})
 					.then(function(member) {
+						if (_.isNull(member))
+							return null;
 						return utils.findWhereObjectId(highest_level_groups, {'_id': member.groupId});
 				});
 				
 				// Get group pad information
 				var pad_promise = group_promise.then(function(group) {
+					if (_.isNull(group))
+						return null;
 					return db.collection('pads_group').findOneAsync({'groupId': group._id}, {'docId': true});
 				});
 				

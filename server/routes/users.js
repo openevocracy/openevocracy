@@ -408,3 +408,33 @@ exports.navigation = function(req, res) {
     }).then(res.json.bind(res)).
     catch(utils.isOwnError,utils.handleOwnError(res));
 };
+
+/*
+ * @desc: Authentication for socket connection
+ * @params:
+ *    ws: socket
+ *    userToken: token of user, contains userId and salt
+ *    cb: callback function
+ */
+exports.socketAuthentication = function(ws, userToken, cb) {
+	// Get userToken from client request and decode
+	var decodedUserToken = jwt.verify(userToken, jwtOptions.secretOrKey);
+	
+	// Read userId and salt from decoded token
+	var userId = ObjectId(decodedUserToken.id);
+	var userSalt = decodedUserToken.salt;
+	
+	// Check if salt is correct; if yes, connect
+	return Promise.resolve(db.collection('users')
+		.findOneAsync({'_id': userId}, {'salt': true}).then(function(dbUser) {
+			// If salt is not correct, close connection and return
+			if (dbUser.salt != userSalt) {
+				console.log('Connection rejected, users salt not correct');  // TODO Add to logfile later
+				ws.close();
+				return;
+			}
+			
+			// Callback
+			cb(userId);
+	}));
+};
