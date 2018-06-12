@@ -1,100 +1,118 @@
+// General libraries
 var _ = require('underscore');
 var ObjectId = require('mongodb').ObjectID;
 var db = require('./database').db;
 
+// Own references
+var users = require('./routes/users');
+
+// rooms cache
 var rooms = {};
 
-function sendToSocketsInRoom(type, room, msg) {
-    _.each(room.sockets, function(other) {
-        // send message to all other users
-        other.emit(type, msg);
-    });
+/*
+ * @desc: sends a message to all other clients in chatroom
+ * @params:
+ *    roomUsers: user of a particular chat room, contains userId's and sockets
+ *    data: can either be a single message (object) or a collection of messages (array)
+ */
+function sendToSocketsInRoom(roomUsers, data) {
+	_.each(roomUsers, function(user) {
+		// Send message to all users in rooom
+		user.socket.send(JSON.stringify(data));
+	});
 }
 
-function joinChatRoom(socket, crid, uid, uname) {
-    // initialize chat
-    var initRoomPromise;
-    var room = rooms[crid];
-    if(_.isUndefined(room)) {
-        // try to load the chat messages from database
-        initRoomPromise = db.collection('chat_messages').
-        find({'crid': crid}, {'crid': false}).
-        toArrayAsync().then(function (messages) {
-            if(_.isNull(messages)) {
-                // chat does not exist yet, create it in cache
-                room = {'messages': [], 'sockets': [], 'users': []};
-            } else {
-                // chat exists but it is not cached yet
-                room = {'messages': messages, 'sockets': [], 'users': []};
-            }
-            
-            return (rooms[crid] = room);
-        });
-    } else
-        initRoomPromise = Promise.resolve(room);
-    
-    // initialize socket
-    initRoomPromise.then(function(room) {
-        // add socket to room
-        room.sockets.push(socket);
-        // add user to room
-        room.users.push(uid);
-        
-        // send all messages to socket if there are any
-        if(0 != _.size(room.messages))
-            socket.emit('messages', room.messages);
-        
-        // notify about changed user online status in room
-        sendToSocketsInRoom('online', room, room.users);
-        // send message to other sockets in room
-        sendToSocketsInRoom('message', room, {'uid': uid, 'info': '{0} entered the chat room.', 'arg': uname});
-    });
-    
-    // when socket receives a message
-    socket.on('message', function(msg) {
-        // append message attributes
-        msg._id  = ObjectId();
-        msg.crid = crid;
-        msg.uid  = uid;
-        // strip html tags
-        msg.text = msg.text.replace(/(<([^>]+)>)/ig, '');
-        
-        // save in cache
-        rooms[crid].messages.push(msg);
-        // save in database
-        db.collection('chat_messages').insertAsync(msg);
-        // send message to other sockets in room
-        sendToSocketsInRoom('message', room, msg);
-    });
-    
-    // when socket disconnects
-    socket.on('disconnect', function() {
-        var room = rooms[crid];
-        if(_.isUndefined(room))
-            return;
-        
-        // remove socket from room
-        room.sockets.splice(room.sockets.indexOf(socket), 1);
-        // remove user from room
-        room.users.splice(room.users.indexOf(uid), 1);
-        // remove room from cache if no more sockets present
-        if(_.isEmpty(room.sockets))
-            delete rooms[crid];
-        // notify about changed user online status in room
-        sendToSocketsInRoom('online', room, room.users);
-        // notify with info
-        sendToSocketsInRoom('message', room, {'uid': uid, 'info': '{0} left the chat room.', 'arg': uname});
-    });
-}
-
-exports.startChatServer = function(wss) {
-	/*wss.on('connection', function(ws, req) {
-		ws.on('message', function(data) {
-			if(data.type == 'chat') {
-				var token = data.userToken;
-				// Initialize chat
-				//joinChatRoom(socket, identity.crid, identity.uid, identity.uname);
-			}
+function joinChatRoom(socket, chatRoomId, userId) {
+	// Initialize chat
+	var initRoom_promise;
+	var room = rooms[chatRoomId];
+	if (_.isUndefined(room)) {
+		// Try to load the chat messages from database
+		initRoom_promise = db.collection('chat_messages')
+			.find({'chatRoomId': ObjectId(chatRoomId)}, {'chatRoomId': false}).toArrayAsync()
+			.then(function (messages) {
+				if(_.isNull(messages)) {
+					// Chat does not exist yet, create it in cache
+					room = { 'messages': [], 'users': [] };
+				} else {
+					// Chat exists but it is not cached yet
+					room = { 'messages': messages, 'users': [] };
+				}
+				return (rooms[chatRoomId] = room);
 		});
-	});*/
+	} else {
+		initRoom_promise = Promise.resolve(room);
+	}
+	
+	// Initialize socket
+	initRoom_promise.then(function(room) {
+		
+		var user = _.findWhere(room.users, {'id': userId});
+		
+		// Add userId and user socket to users list in that particular chat room
+		// if user is not already part of the room
+		if (_.isUndefined(user)) {
+			room.users.push({
+				'id': userId,
+				'socket': socket
+			});
+		}
+		
+		// Send all messages to socket if there are any
+		if (_.size(room.messages) != 0)
+			socket.send(JSON.stringify(room.messages));
+	});
+	
+	// When socket receives a message
+	socket.on('message', function(msg) {
+		console.log(msg);
+		msg = JSON.parse(msg);
+		// Append message attributes
+		msg.messageId  = ObjectId();
+		msg.chatRoomId = ObjectId(chatRoomId);
+		msg.userId  = userId;
+		// Strip html tags
+		msg.text = msg.text.replace(/(<([^>]+)>)/ig, '');
+		
+		// Save in cache
+		rooms[chatRoomId].messages.push(msg);
+		// Save in database
+		db.collection('chat_messages').insertAsync(msg);
+		// Send message to all users in room
+		sendToSocketsInRoom(room.users, msg);
+	});
+    
+	// when socket disconnects
+	socket.on('close', function() {
+		var room = rooms[chatRoomId];
+		
+		// Remove user from room
+		if(_.isUndefined(room))
+			return;
+		room.users = _.reject(room.users, function(user) {
+			return (user.id.toString() == userId.toString());
+		});
+		
+		// Remove whole room from cache if no more users present
+		if(_.isEmpty(room.users))
+			delete rooms[chatRoomId];
+	});
+	}
+
+/*
+ * @desc: initializes chat socket connection
+ * @params: wss: the ws socket
+ */
+exports.startChatServer = function(wss) {
+	wss.on('connection', function(ws, req) {
+		var vars = req.url.split("/socket/chat/")[1].split("/");
+		var chatRoomId = vars[0];
+		var userToken = vars[1];
+		
+		// Authenticate user and initialize sharedb afterwards
+		users.socketAuthentication(ws, userToken, function(userId) {
+			// Initialize chat
+			joinChatRoom(ws, chatRoomId, userId);
+		});
+	});
 };

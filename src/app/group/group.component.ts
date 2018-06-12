@@ -28,10 +28,12 @@ import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
 	templateUrl: './group.component.html',
 	styleUrls: ['../editor/editor.component.scss', './group.component.scss']
 })
-export class GroupComponent extends EditorComponent implements OnInit {
+export class GroupComponent extends EditorComponent implements OnInit, OnDestroy {
 	private C;
 	private proposal_html: string = "";
 	private group: Group;
+	private chatSocket;
+	private userName: string;
 	
 	private classColEditor: string = 'col-xs-12';
 	private classColProposal: string = 'hidden';
@@ -62,6 +64,53 @@ export class GroupComponent extends EditorComponent implements OnInit {
 		this.C = C;
 	}
 	
+	ngOnDestroy() {
+		if(this.chatSocket) {
+			// Send offline status message
+			this.chatSocket.send(JSON.stringify({
+				'type': C.CHATMSG_OFFLINE,
+				'text': this.userName + " left the chat room."
+			}));
+			
+			// Close connection
+			this.chatSocket.close();
+		}
+	}
+	
+	private setChatPositionAndSize() {
+		let top = $('.editor-toolbars').offset().top + $('.editor-toolbars').height();
+		let left = $('quill-editor').offset().left + $('quill-editor').outerWidth();
+		let width = $("body").innerWidth()-left;
+		let height = $('footer').offset().top-top;
+		
+		$('#chat-wrapper').css({
+			'top': top+'px',
+			'left': left+'px',
+			'width': width+'px',
+			'height': height+'px'
+		});
+		
+		// TODO add responsive functionallity
+	}
+	
+	private initalizeChatSocket(chatRoomId, userName) {
+		// Open WebSocket connection
+		this.chatSocket = new WebSocket('wss://develop.openevocracy.org/socket/chat/'+chatRoomId+'/'+this.userToken);
+		
+		// WebSocket connection was established
+		this.chatSocket.onopen = function () {
+			// Send online status message
+			this.chatSocket.send(JSON.stringify({
+				'type': C.CHATMSG_ONLINE,
+				'text': userName+" entered the chat room."
+			}));
+		}.bind(this);
+		
+		this.chatSocket.onmessage = function (e) {
+			console.log(JSON.parse(e.data));
+		};
+	}
+	
 	protected editorCreated(editor) {
 		// Disable editor body
 		this.disableEdit();
@@ -71,6 +120,10 @@ export class GroupComponent extends EditorComponent implements OnInit {
 		
 		// Set quill editor
 		this.quillEditor = editor;
+		
+		// Set position of chat area
+		this.setChatPositionAndSize();  // Initially
+		$(window).on('resize', this.setChatPositionAndSize);  // While resize
 		
 		// Get additional information and initalize socket
 		this.activatedRoute.params.subscribe((params: Params) => {
@@ -98,7 +151,11 @@ export class GroupComponent extends EditorComponent implements OnInit {
 					});*/
 					
 					// Initialize socket
-					this.initalizeSocket(this.group.docId);
+					this.initalizePadSocket(this.group.docId);
+					
+					// Initialize chat
+					this.userName = me.name;
+					this.initalizeChatSocket(this.group.chatRoomId, me.name);
 				});
 			});
 	}

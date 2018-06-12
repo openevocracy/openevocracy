@@ -1,5 +1,6 @@
 <modal-closeeditor></modal-closeeditor>
 
+<div class="editor-toolbars">
 <mat-toolbar class="first-toolbar" color="primary">
 	<div class="flex container">
 		<h1>{{ group?.title }}</h1>
@@ -43,8 +44,9 @@
 		</div>
 	</div>
 </mat-toolbar>
+</div>
 
-<div class="container">
+<div class="group-editor container">
 	<div class="row">
 		<quill-editor class="col" [ngClass]="classColEditor" [modules]="quillModules" [style]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>
 		<div id="member-proposal" class="col" [ngClass]="classColProposal">
@@ -53,5 +55,9 @@
 			</button>
 			<div id="member-proposal-content" [ngStyle]="styleColProposal" [innerHtml]="proposal_html"></div>
 		</div>
+	</div>
+	
+	<div id="chat-wrapper">
+		<input type="text" />
 	</div>
 </div>

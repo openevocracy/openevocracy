@@ -417,6 +417,12 @@ exports.navigation = function(req, res) {
  *    cb: callback function
  */
 exports.socketAuthentication = function(ws, userToken, cb) {
+	// If token was not transmitted, return  and close connection
+	if(!userToken) {
+		ws.close();
+		return;
+	}
+	
 	// Get userToken from client request and decode
 	var decodedUserToken = jwt.verify(userToken, jwtOptions.secretOrKey);
 	

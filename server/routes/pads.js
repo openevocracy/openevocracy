@@ -42,19 +42,13 @@ exports.startPadServer = function(wss) {
 	
 	// Initialize stream and listener for WebSocket server
 	wss.on('connection', function(ws, req) {
-		var queryArr = req.url.split("/socket/")[1].split("/");
-		var connectionType = queryArr[0];
-		
-		// Check if socket is of type pad
-		if(connectionType == 'pad') {
-			var userToken = queryArr[1];
-			// Authenticate user and initialize sharedb afterwards
-			users.socketAuthentication(ws, userToken, function(userId) {
-				// If salt is correct, create stream, let backend listen to stream and hand over userId for middleware
-				var stream = new WebSocketJSONStream(ws);
-				backend.listen(stream, {'userId': userId});
-			});
-		}
+		var userToken = req.url.split("/socket/pad/")[1];
+		// Authenticate user and initialize sharedb afterwards
+		users.socketAuthentication(ws, userToken, function(userId) {
+			// If salt is correct, create stream, let backend listen to stream and hand over userId for middleware
+			var stream = new WebSocketJSONStream(ws);
+			backend.listen(stream, {'userId': userId});
+		});
 	});
 	
 	// Middleware to hook into connection process

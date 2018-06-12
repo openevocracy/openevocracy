@@ -1,6 +1,7 @@
 /* Import variables */
 @import "~styles/variables";
 
+.editor-toolbars { position: fixed; width: 100%; z-index: 1; }
 .first-toolbar { height: 48px; padding-top: 8px; }
 .second-toolbar { height: 42px; padding-bottom: 10px; }
 

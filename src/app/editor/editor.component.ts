@@ -31,10 +31,11 @@ export class EditorComponent implements OnInit, OnDestroy {
 	private saved: boolean = true;
 	protected source: string;
 	protected quillModules;
-	private socket;
+	private padSocket;
 	protected quillEditor;
 	private placeholder: string;
 	private modalSubscription: Subscription;
+	protected userToken: string;
 	
 	private doc;
 	
@@ -49,6 +50,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		protected userService: UserService) {
 			
 		this.userId = this.userService.getUserId();
+		this.userToken = this.userService.getToken();
 		
 		this.quillModules = {
 			toolbar: [
@@ -77,8 +79,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 	ngOnInit() {}
 	
 	ngOnDestroy() {
-		if(this.socket)
-			this.socket.close();
+		if(this.padSocket)
+			this.padSocket.close();
 			
 		// Unsubscribe to avoid memory leak
 		this.modalSubscription.unsubscribe();
@@ -112,22 +114,21 @@ export class EditorComponent implements OnInit, OnDestroy {
 				this.source = res.source;
 				
 				// Initialize socket
-				this.initalizeSocket(this.docId);
+				this.initalizePadSocket(this.docId);
 			});
 		});
 	}
 	
-	protected initalizeSocket(docId) {
+	protected initalizePadSocket(docId) {
 		sharedb.types.register(richText.type);
 
 		// Open WebSocket connection to ShareDB server
-		var userToken = this.userService.getToken();
-		this.socket = new WebSocket('wss://develop.openevocracy.org/socket/pad/'+userToken);
+		this.padSocket = new WebSocket('wss://develop.openevocracy.org/socket/pad/'+this.userToken);
 		
 		// WebSocket connection was established
-		this.socket.onopen = function () {
+		this.padSocket.onopen = function () {
 			// Get ShareDB connection
-			var connection = new sharedb.Connection(this.socket);
+			var connection = new sharedb.Connection(this.padSocket);
 			
 			// Create local Doc instance
 			var doc = connection.get(this.getCollectionFromURL(), docId);
@@ -136,8 +137,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 			// Subscribe to specific doc
 			doc.subscribe(function(err) {
 				if (err) throw err;
-				
-				console.log(doc);
 				
 				// Get quill
 				var quill = this.quillEditor;

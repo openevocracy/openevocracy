@@ -1,5 +1,6 @@
 <modal-closeeditor></modal-closeeditor>
 
+<div class="editor-toolbars">
 <mat-toolbar class="first-toolbar" color="primary">
 	<div class="flex container">
 		<h1>{{ title }}</h1>
@@ -17,6 +18,7 @@
 <mat-toolbar class="second-toolbar" color="primary">
 	<div id="toolbar" class="container"></div>
 </mat-toolbar>
+</div>
 
 <div class="container">
 	<quill-editor [modules]="quillModules" [style]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>

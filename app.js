@@ -220,7 +220,28 @@ httpServer.listen(app.get('port'), function(){
 	console.log('Express server listening on port ' + app.get('port'));
 });
 
-var wss = new WebSocket.Server({'server': httpServer});
+var wssPad = new WebSocket.Server({ noServer: true });
+var wssChat = new WebSocket.Server({ noServer: true });
 
-pads.startPadServer(wss);
-chats.startChatServer(wss);
+pads.startPadServer(wssPad);
+chats.startChatServer(wssChat);
+
+httpServer.on('upgrade', function upgrade(request, socket, head) {
+	var queryArr = request.url.split("/socket/")[1].split("/");
+	var connectionType = queryArr[0];
+
+	if (connectionType === 'pad') {
+		wssPad.handleUpgrade(request, socket, head, function done(ws) {
+			wssPad.emit('connection', ws, request);
+		});
+	} else if (connectionType === 'chat') {
+		wssChat.handleUpgrade(request, socket, head, function done(ws) {
+			wssChat.emit('connection', ws, request);
+		});
+	} else {
+		socket.destroy();
+	}
+});
+
+//var wss = new WebSocket.Server({'server': httpServer});
+
