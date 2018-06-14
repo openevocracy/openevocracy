@@ -106,6 +106,7 @@
 	"GROUP_RATING_TOOLTIP_INTEGRATION": "Integration skill of this member, i.e. ability to cooperate and find consensus",
 	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Expertise of this member regarding the topic",
 	"GROUP_MEMBER_PROPOSAL_CLOSE": "Schließen",
+	"GROUP_CHATMESSAGE_LABEL": "Your message to the group...",
 	
 	"EDITOR_BUTTON_CLOSE": "Close",
 	"EDITOR_SAVED_CHANGES": "All changes are saved.",

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
@@ -22,6 +23,7 @@ import { faFile } from '@fortawesome/free-solid-svg-icons';
 import { faHandshake } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-group',
@@ -33,17 +35,21 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	private proposal_html: string = "";
 	private group: Group;
 	private chatSocket;
+	private chatForm: FormGroup;
 	private userName: string;
 	
+	// Classes and styles for member proposal column
 	private classColEditor: string = 'col-xs-12';
 	private classColProposal: string = 'hidden';
 	private styleColProposal = {'background-color': '#fff'};
 	
+	// FontAwesome icons
 	private faUser = faUser;
 	private faExpandArrowsAlt = faExpandArrowsAlt;
 	private faFile = faFile;
 	private faHandshake = faHandshake;
 	private faLightbulb = faLightbulb;
+	private faPlay = faPlay;
 	
 	constructor(
 		protected router: Router,
@@ -51,8 +57,14 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		protected modalService: ModalService,
 		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
-		protected userService: UserService) {
+		protected userService: UserService,
+		private fb: FormBuilder) {
 		super(router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService);
+		
+		// Initialize form
+		this.chatForm = this.fb.group({
+			'msg': ['', null]
+		});
 		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
@@ -94,6 +106,8 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	}
 	
 	private initalizeChatSocket(chatRoomId, userName) {
+		// TODO Get former messages from server, before starting the websocket connection
+		
 		// Open WebSocket connection
 		this.chatSocket = new WebSocket('wss://develop.openevocracy.org/socket/chat/'+chatRoomId+'/'+this.userToken);
 		
@@ -198,6 +212,14 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		this.classColEditor = 'col-xs-12';
 		this.classColProposal = 'hidden';
 		this.proposal_html = "";
+	}
+
+	private sendChatMessage() {
+		if(!this.chatForm.valid)
+			return;
+		
+		console.log('sendChatMessage', this.chatForm.value.msg);
+		this.chatForm.setValue({'msg': ''});
 	}
 
 }

@@ -58,6 +58,13 @@
 	</div>
 	
 	<div id="chat-wrapper">
-		<input type="text" />
+		<form [formGroup]="chatForm" (ngSubmit)="sendChatMessage()" novalidate><mat-form-field>
+				<input matInput formControlName="msg" type="text" placeholder="{{ 'GROUP_CHATMESSAGE_LABEL' | translate }}">
+			</mat-form-field>
+			
+			<button mat-raised-button color="primary" type="submit">
+				<fa-icon [icon]="faPlay"></fa-icon>
+			</button>
+		</form>
 	</div>
 </div>

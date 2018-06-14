@@ -27,7 +27,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 	private awaitAuthentication: boolean = false;
 	private lastAlertKey: string;
 
-	faSpinner = faSpinner;
+	private faSpinner = faSpinner;
 
 	constructor(
 		public userService: UserService,
@@ -99,31 +99,32 @@ export class LoginComponent implements OnInit, OnDestroy {
 	}
 	
 	private onSubmit() {
-		// If form is valid, go for login
-		if(this.loginForm.valid) {
-			// Disable button
-			this.awaitAuthentication = true;
+		// If form is not valid, return
+		if(!this.loginForm.valid)
+			return;
 			
-			// Read credentials from form
-			var credentials = {
-				'email': this.loginForm.value.email,
-				'password': this.loginForm.value.password
-			};
-			
-			var self = this;
-			// Check login server side and handle login
-			this.userService.authenticate(credentials)
-				.subscribe(res => {
-					// Initalize language for fresh logged in user
-					this.languageService.setClientLanguage();
-				}, error => {
-					// Store alert.content to direct link, if alert contains one
-					self.lastAlertKey = error.alert.content;
-					
-					// Enable button again
-					self.awaitAuthentication = false;
-				});
-		}
+		// Disable button
+		this.awaitAuthentication = true;
+		
+		// Read credentials from form
+		var credentials = {
+			'email': this.loginForm.value.email,
+			'password': this.loginForm.value.password
+		};
+		
+		var self = this;
+		// Check login server side and handle login
+		this.userService.authenticate(credentials)
+			.subscribe(res => {
+				// Initalize language for fresh logged in user
+				this.languageService.setClientLanguage();
+			}, error => {
+				// Store alert.content to direct link, if alert contains one
+				self.lastAlertKey = error.alert.content;
+				
+				// Enable button again
+				self.awaitAuthentication = false;
+		});
 	}
 	
 	private evaluateLink(e) {

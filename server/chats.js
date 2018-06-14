@@ -22,8 +22,27 @@ function sendToSocketsInRoom(roomUsers, data) {
 	});
 }
 
+/*
+ * @desc: remove a specific user from chat room
+ */
+function removeUserFromRoom(roomUsers, userId) {
+	return _.reject(roomUsers, function(user) {
+		return (user.id.toString() == userId.toString());
+	});
+}
+
+/*
+ * @desc:
+ *    Reads/writes chat room from/to database/cache
+ *    Sends incoming messages to all users in chat room
+ *    Handles disconnecting users
+ * @params:
+ *    socket: socket of currently connecting user
+ *    chatRoomId: id of the chat room the user is part of
+ *    userId: the id of the currently connecting user
+ */
 function joinChatRoom(socket, chatRoomId, userId) {
-	// Initialize chat
+	// Load chat room from either cache or database
 	var initRoom_promise;
 	var room = rooms[chatRoomId];
 	if (_.isUndefined(room)) {
@@ -44,19 +63,19 @@ function joinChatRoom(socket, chatRoomId, userId) {
 		initRoom_promise = Promise.resolve(room);
 	}
 	
-	// Initialize socket
+	// Add current user to chat room and transmit all former messages to the user
 	initRoom_promise.then(function(room) {
-		
-		var user = _.findWhere(room.users, {'id': userId});
+		// If user is already part of the room, remove old entry
+		var oldUser = _.findWhere(room.users, {'id': userId});
+		if (!_.isUndefined(oldUser)) {
+			room.users = removeUserFromRoom(room.users, oldUser.id);
+		}
 		
 		// Add userId and user socket to users list in that particular chat room
-		// if user is not already part of the room
-		if (_.isUndefined(user)) {
-			room.users.push({
-				'id': userId,
-				'socket': socket
-			});
-		}
+		room.users.push({
+			'id': userId,
+			'socket': socket
+		});
 		
 		// Send all messages to socket if there are any
 		if (_.size(room.messages) != 0)
@@ -82,26 +101,29 @@ function joinChatRoom(socket, chatRoomId, userId) {
 		sendToSocketsInRoom(room.users, msg);
 	});
     
-	// when socket disconnects
+	// When socket disconnects
 	socket.on('close', function() {
 		var room = rooms[chatRoomId];
 		
 		// Remove user from room
-		if(_.isUndefined(room))
-			return;
-		room.users = _.reject(room.users, function(user) {
-			return (user.id.toString() == userId.toString());
-		});
+		var users = removeUserFromRoom(room.users, userId);
 		
-		// Remove whole room from cache if no more users present
-		if(_.isEmpty(room.users))
+		// Remove whole room from cache if no more user is present
+		if(_.isEmpty(users))
 			delete rooms[chatRoomId];
+			
+		// TODO this solution is not optimal (deleting the group from cache)
+		// if only one user is active in the group and changes the view quite often,
+		// the whole chat room is removed from cache and has to be loaded from database all the time
+		// maybe add a cache expiration timestamp, which is renewed when a user is back in chat room again
+		// (analog to group inactivity email reminder)
 	});
-	}
+}
 
 /*
- * @desc: initializes chat socket connection
- * @params: wss: the ws socket
+ * @desc: Initializes chat socket connection
+ * @params:
+ *    wss: the ws socket
  */
 exports.startChatServer = function(wss) {
 	wss.on('connection', function(ws, req) {
