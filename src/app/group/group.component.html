@@ -24,15 +24,15 @@
 		<span class="flex-spacer"></span>
 		
 		<div *ngFor="let member of group?.members">
-			<button mat-button [matMenuTriggerFor]="menu">
-				<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}<span *ngIf="member.userId == userId"> *</span></span>
+			<button mat-button [matMenuTriggerFor]="menu" [ngClass]="{'me': member.userId == userId}">
+				<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}<span *ngIf="online[member.userId]"> *</span></span>
 			</button>
 			<mat-menu #menu="matMenu" [overlapTrigger]="false">
 				<button mat-menu-item class="rating-button" matTooltip="{{ 'GROUP_RATING_TOOLTIP_INTEGRATION' | translate }}" [matTooltipPosition]="'left'">
-					<fa-icon [icon]="faHandshake"></fa-icon> <star-rating [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingIntegration" (ratingChange)="rate($event, member.userId, C.RATING_INTEGRATION)"></star-rating>
+					<fa-icon [icon]="faHandshake"></fa-icon> <star-rating staticColor="123" [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingIntegration" (ratingChange)="rate($event, member.userId, C.RATING_INTEGRATION)"></star-rating>
 				</button>
 				<button mat-menu-item class="rating-button" matTooltip="{{ 'GROUP_RATING_TOOLTIP_KNOWLEDGE' | translate }}" [matTooltipPosition]="'left'">
-					<fa-icon [icon]="faLightbulb"></fa-icon> <star-rating [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingKnowledge" (ratingChange)="rate($event, member.userId, C.RATING_KNOWLEDGE)"></star-rating>
+					<fa-icon [icon]="faLightbulb"></fa-icon> <star-rating staticColor="123" [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingKnowledge" (ratingChange)="rate($event, member.userId, C.RATING_KNOWLEDGE)"></star-rating>
 				</button>
 				<button mat-menu-item (click)="openMemberProposal(member.proposal_html, member.color)">
 					<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_MEMBER_BUTTON_PROPOSAL' | translate }}</span>
@@ -57,7 +57,16 @@
 		</div>
 	</div>
 	
-	<div id="chat-wrapper">
+	<div id="chat-wrapper" [ngClass]="{'hidden': !chatReady}">
+		<div id="chat-messages">
+			<div [ngClass]="{'chat-message': true, 'me': userId == message.userId}" *ngFor="let message of messages">
+				<div class="message-header">
+					<small class="message-date">{{ message._id | timestamp | date:'HH:mm, yyyy-MM-dd' }}</small>
+					<strong class="message-username" [ngStyle]="{'color': memberColors[message.userId]}">{{ memberNames[message.userId] }}</strong>
+				</div>
+				<div class="message-body">{{ message.text }}</div>
+			</div>
+		</div>
 		<form [formGroup]="chatForm" (ngSubmit)="sendChatMessage()" novalidate><mat-form-field>
 				<input matInput formControlName="msg" type="text" placeholder="{{ 'GROUP_CHATMESSAGE_LABEL' | translate }}">
 			</mat-form-field>

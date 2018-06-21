@@ -36,7 +36,13 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	private group: Group;
 	private chatSocket;
 	private chatForm: FormGroup;
-	private userName: string;
+	
+	private chatReady: boolean = false;
+	private me;
+	private messages;
+	private memberColors = {};
+	private memberNames = {};
+	private online = {};
 	
 	// Classes and styles for member proposal column
 	private classColEditor: string = 'col-xs-12';
@@ -72,16 +78,22 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		});
 	}
 	
+	/*
+	 * @desc: Lifecylce hook, used to set constants initially
+	 */
 	ngOnInit() {
 		this.C = C;
 	}
 	
+	/*
+	 * @desc: Lifecylce hook, used to close socket connection properly if view is destroyed
+	 */
 	ngOnDestroy() {
 		if(this.chatSocket) {
 			// Send offline status message
 			this.chatSocket.send(JSON.stringify({
 				'type': C.CHATMSG_OFFLINE,
-				'text': this.userName + " left the chat room."
+				'text': this.me.name + " left the chat room."
 			}));
 			
 			// Close connection
@@ -89,42 +101,15 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	private setChatPositionAndSize() {
-		let top = $('.editor-toolbars').offset().top + $('.editor-toolbars').height();
-		let left = $('quill-editor').offset().left + $('quill-editor').outerWidth();
-		let width = $("body").innerWidth()-left;
-		let height = $('footer').offset().top-top;
-		
-		$('#chat-wrapper').css({
-			'top': top+'px',
-			'left': left+'px',
-			'width': width+'px',
-			'height': height+'px'
-		});
-		
-		// TODO add responsive functionallity
-	}
-	
-	private initalizeChatSocket(chatRoomId, userName) {
-		// TODO Get former messages from server, before starting the websocket connection
-		
-		// Open WebSocket connection
-		this.chatSocket = new WebSocket('wss://develop.openevocracy.org/socket/chat/'+chatRoomId+'/'+this.userToken);
-		
-		// WebSocket connection was established
-		this.chatSocket.onopen = function () {
-			// Send online status message
-			this.chatSocket.send(JSON.stringify({
-				'type': C.CHATMSG_ONLINE,
-				'text': userName+" entered the chat room."
-			}));
-		}.bind(this);
-		
-		this.chatSocket.onmessage = function (e) {
-			console.log(JSON.parse(e.data));
-		};
-	}
-	
+	/*
+	 * @desc: Overwrites editorCreated in editor component.
+	 *        Mainly gets further information about group from server and
+	 *        adds chat functionallity in addition to editor.
+	 *        The function is called from editor component.
+	 *
+	 * @params:
+	 *    editor: quill editor object
+	 */
 	protected editorCreated(editor) {
 		// Disable editor body
 		this.disableEdit();
@@ -135,10 +120,6 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		// Set quill editor
 		this.quillEditor = editor;
 		
-		// Set position of chat area
-		this.setChatPositionAndSize();  // Initially
-		$(window).on('resize', this.setChatPositionAndSize);  // While resize
-		
 		// Get additional information and initalize socket
 		this.activatedRoute.params.subscribe((params: Params) => {
 				this.padId = params.id;
@@ -148,19 +129,19 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 					this.source = res.topicId;
 					
 					// Add color of current member
-					var me = _.findWhere(res.members, { 'userId': this.userId });
-					this.quillEditor.getModule('authorship').addAuthor(this.userId, me.color);
+					this.me = _.findWhere(res.members, { 'userId': this.userId });
+					this.quillEditor.getModule('authorship').addAuthor(this.userId, this.me.color);
 					
 					// Add colors of other members
 					_.map(res.members, function(member) {
-						if(member.userId != me.userId)
+						if(member.userId != this.me.userId)
 							this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
 					}.bind(this));
 					
 					/*this.quillEditor.getModule('cursors').set({
-						id: me.userId,
-						name: me.name,
-						color: me.color,
+						id: this.me.userId,
+						name: this.me.name,
+						color: this.me.color,
 						range: 1
 					});*/
 					
@@ -168,12 +149,114 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 					this.initalizePadSocket(this.group.docId);
 					
 					// Initialize chat
-					this.userName = me.name;
-					this.initalizeChatSocket(this.group.chatRoomId, me.name);
+					this.initalizeChatSocket(this.group.chatRoomId);
 				});
 			});
 	}
 	
+	/*
+	 * @desc: Initializes socket connection.
+	 *        First do get request in order to get chat room information (including past messages),
+	 *        then obtain who is online and initialize socker listener (onOpen, onMessage).
+	 *
+	 * @params:
+	 *    chatRoomId: the id of the chat room to open
+	 */
+	private initalizeChatSocket(chatRoomId) {
+		// Add member color and member name map
+		_.each(this.group.members, function(member) {
+			this.memberColors[member.userId] = member.color;
+			this.memberNames[member.userId] = member.name;
+		}.bind(this));
+		
+		// Get all existing messages in chat room
+		this.httpManagerService.get('/json/chat/room/' + chatRoomId).subscribe(res => {
+			// Store existing messages
+			this.messages = res.messages;
+			
+			// Add member online map
+			_.each(this.group.members, function(mb) {
+				this.online[mb.userId] = _.contains(res.users, mb.userId);
+			}.bind(this));
+			
+			// Open WebSocket connection
+			this.chatSocket = new WebSocket('wss://develop.openevocracy.org/socket/chat/'+chatRoomId+'/'+this.userToken);
+			
+			// WebSocket connection was established
+			this.chatSocket.onopen = function () {
+				// Send online status message
+				this.chatSocket.send(JSON.stringify({
+					'type': C.CHATMSG_ONLINE,
+					'text': this.me.name+" entered the chat room."
+				}));
+				
+				// Start mutation observer to check if alert was added
+				this.startMutationObserver();
+			}.bind(this);
+			
+			this.chatSocket.onmessage = function (e) {
+				var msg = JSON.parse(e.data);
+				// Add message to messages array
+				this.messages.push(msg);
+			}.bind(this);
+			
+			// Show chat
+			this.chatReady = true;
+			
+			// Initalize chat message view
+			setTimeout(function() {
+				// Set position of chat area
+				this.setChatPositionAndSize();  // Initially
+				$(window).on('resize', this.setChatPositionAndSize.bind(this));  // While resize
+			}.bind(this), 500);
+		});
+	}
+	
+	/*
+	 * @desc: Calculates fixed position of chat window.
+	 */
+	private setChatPositionAndSize() {
+		// Position and size of wrapper box
+		let top = $('.editor-toolbars').position().top + $('.editor-toolbars').height();
+		let left = $('quill-editor').position().left + $('quill-editor').outerWidth();
+		let width = $('body').innerWidth()-left;
+		let height = $('footer').position().top-top;
+		$('#chat-wrapper').css({
+			'top': top+'px',
+			'left': left+'px',
+			'width': width+'px',
+			'height': height+'px'
+		});
+		
+		// Height of chat messages box
+		let msgHeight = height - $('#chat-wrapper form').outerHeight() - 10;  // 10px is the bottom distance from form
+		//let $chatMessages = $('#chat-messages');
+		$('#chat-messages').css({
+			'height': msgHeight+'px'
+		});
+		
+		// Scroll to bottom of messages
+		this.scrollDown();
+		
+		// TODO add responsive functionallity
+	}
+	
+	/*
+	 * @desc: Scrolls chat messages list down to the end.
+	 *        Is called e.g. after loading or when new message comes in.
+	 */
+	private scrollDown() {
+		$('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+	}
+	
+	/*
+	 * @desc: Posts rating of user to server
+	 *
+	 * @params:
+	 *    e:           event (given by rate component)
+	 *    ratedUserId: user which was rated
+	 *    type:        type of rating (e.g. default message, online message)
+	 */
 	private rate(e, ratedUserId, type) {
 		// Do not post new rating to server, if the new rating is equal to the old rating
 		var ratedMember = _.findWhere(this.group.members, {'userId': ratedUserId});
@@ -187,6 +270,9 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		this.httpManagerService.post('/json/ratings/rate', rating).subscribe();
 	}
 	
+	/*
+	 * @desc: Opens 'productive mode'
+	 */
 	private enterFullscreen() {
 		var element = document.documentElement;
 		
@@ -201,6 +287,9 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		}
 	}
 	
+	/*
+	 * @desc: Opens a member proposal
+	 */
 	private openMemberProposal(html: string, color: string) {
 		this.classColEditor = 'col-xs-6';
 		this.classColProposal = 'col-xs-6';
@@ -208,18 +297,54 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		this.proposal_html = html;
 	}
 	
+	/*
+	 * @desc: When a member proposal was open and user closes or
+	 *        chooses antoher member proposal, this function is called
+	 *        in order to close the particular member proposal. 
+	 */
 	private closeMemberProposal() {
 		this.classColEditor = 'col-xs-12';
 		this.classColProposal = 'hidden';
 		this.proposal_html = "";
 	}
 
+	/*
+	 * @desc: Function is called when user filled out the form and
+	 *        clicked the send button or pressed enter.
+	 *        Message will be send via socket and form will be cleard after sending.
+	 */
 	private sendChatMessage() {
 		if(!this.chatForm.valid)
 			return;
 		
-		console.log('sendChatMessage', this.chatForm.value.msg);
+		// Send message
+		this.chatSocket.send(JSON.stringify({
+			'type': C.CHATMSG_DEFAULT,
+			'text': this.chatForm.value.msg
+		}));
+		
+		// Clear form
 		this.chatForm.setValue({'msg': ''});
+	}
+	
+	/*
+	 * @desc: Observes if a chat message is added to the list,
+	 *        if so, scroll down to new message.
+	 */
+	private startMutationObserver() {
+		// Define node which should be observed
+		var node = document.querySelector('#chat-messages');
+		
+		// Define mutation observer and check if chat message was added
+		var observer = new MutationObserver(function(mutations) {
+			// Scroll chat messages down
+			this.scrollDown();
+		}.bind(this));
+		
+		// Start observing if a child tag is added
+		observer.observe(node, {
+			childList: true
+		});
 	}
 
 }

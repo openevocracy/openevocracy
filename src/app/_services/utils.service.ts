@@ -6,9 +6,9 @@ export class UtilsService {
 	
 	constructor() { }
 	
-	public getTimestampFromObjectId(tid) {
+	public getTimestampFromObjectId(id) {
 		// Get timestamp from topic id in hex format from Object Id
-		var hexTimestamp = tid.toString().substring(0,8);
+		var hexTimestamp = id.toString().substring(0,8);
 		// Parse hex timestamp to integer
 		var intTimestamp = parseInt(hexTimestamp, 16);
 		// Return timestamp in milliseconds

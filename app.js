@@ -67,6 +67,9 @@ var job = new CronJob({
 });
 job.start();
 
+function auth() {
+	return passport.authenticate('jwt', { session: false });
+}
 
 // ###################
 // ### T O P I C S ###
@@ -82,10 +85,6 @@ Routes plan:
 /topic:id - Single topic with extended information
 
 */
-
-function auth() {
-	return passport.authenticate('jwt', { session: false });
-}
 
 app.get('/json/topiclist', auth(), topics.list);
 app.patch('/json/topic/:id', auth(), topics.update);
@@ -178,6 +177,13 @@ app.get('/json/user/lang/:id', auth(), users.getLanguage);
 
 // @desc: Store chosen user language in databse for email translation
 app.post('/json/user/lang', auth(), users.setLanguage);
+
+// ###################
+// ###   C H A T   ###
+// ###################
+
+// @desc: Get chat room
+app.get('/json/chat/room/:id', auth(), chats.getChatRoomMessages);
 
 // ###################
 // ###   T E S T   ###

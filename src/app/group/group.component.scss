@@ -4,12 +4,24 @@
 .rating-button span { display: inline-block; }
 .rating-button fa-icon { float: left; min-width: 20px; }
 
+button.me { background-color: rgba(255,255,255,0.2); }
+
 #member-proposal button { margin: 15px 15px 0 0; }
 #member-proposal-content { margin: 0; padding: 50px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); min-height: 300px; }
 
-#chat-wrapper { position: fixed; padding: 10px 10px 0 10px; /*background-color: #f00;*/ }
+#chat-wrapper { position: fixed; /*background-color: #f00;*/ }
 #chat-wrapper form { position: absolute; bottom: 10px; left: 0; width: 100%; padding: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); background-color: $white; }
 #chat-wrapper .mat-input-container { width: calc(100% - 70px); }
 #chat-wrapper .mat-raised-button { min-width: 0; max-width: 50px; margin-left: 10px; }
+
+#chat-messages { overflow-y: scroll; }
+
+.chat-message { background-color: $white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); padding: 10px; margin: 0 0 10px 15px; }
+.chat-message.me { margin: 0 15px 10px 0; }
+.message-username { filter: saturate(8); }
+.message-date { float: right; color: $grey500; }
+
+.message-header {}
+.message-body { padding: 5px 0; }
 
 .group-editor { padding-top: 90px; }

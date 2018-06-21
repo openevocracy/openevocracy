@@ -17,13 +17,23 @@
 		<mat-card-content>
 			<mat-card-title>{{topic.name}}</mat-card-title>
 			<p *ngIf="topic.stage == C.STAGE_REJECTED">{{topic.rejectedReason | translate}}</p>
-			<p *ngIf="topic.stage == C.STAGE_SELECTION">{{topic.num_votes}} {{'TOPIC_LIST_LABEL_VOTES' | translate}}</p>
-			<p *ngIf="topic.stage == C.STAGE_PROPOSAL">{{topic.num_proposals}} {{'TOPIC_LIST_LABEL_PROPOSALS' | translate}}</p>
-			<div *ngIf="topic.stage == C.STAGE_CONSENSUS">
-				<p>{{'TOPIC_LIST_LABEL_LEVEL' | translate}} {{topic.level | addone}}</p>
-				<p>{{topic.numActiveGroups}} {{'TOPICLIST_LABEL_NUMGROUPS' | translate}}</p>
+			<div *ngIf="topic.stage == C.STAGE_SELECTION">
+				<p *ngIf="topic.num_votes == 1">1 {{'TOPICLIST_LABEL_VOTE' | translate}}</p>
+				<p *ngIf="topic.num_votes > 1">{{topic.num_votes}} {{'TOPICLIST_LABEL_VOTES' | translate}}</p>
 			</div>
-			<p *ngIf="topic.stage == C.STAGE_PASSED">{{topic.valid_participants}} {{'TOPIC_LIST_LABEL_PARTICIPANTS' | translate}}</p>
+			<div *ngIf="topic.stage == C.STAGE_PROPOSAL">
+				<p *ngIf="topic.num_proposals == 1">1 {{'TOPICLIST_LABEL_PROPOSAL' | translate}}</p>
+				<p *ngIf="topic.num_proposals > 1">{{topic.num_proposals}} {{'TOPICLIST_LABEL_PROPOSALS' | translate}}</p>
+			</div>
+			<div *ngIf="topic.stage == C.STAGE_CONSENSUS">
+				<p>{{'TOPICLIST_LABEL_LEVEL' | translate}} {{topic.level | addone}}</p>
+				<p *ngIf="topic.numActiveGroups == 1">1 {{'TOPICLIST_LABEL_GROUP' | translate}}</p>
+				<p *ngIf="topic.numActiveGroups > 1">{{topic.numActiveGroups}} {{'TOPICLIST_LABEL_GROUPS' | translate}}</p>
+			</div>
+			<div *ngIf="topic.stage == C.STAGE_PASSED">
+				<p *ngIf="topic.valid_participants == 1">1 {{'TOPICLIST_LABEL_PARTICIPANT' | translate}}</p>
+				<p *ngIf="topic.valid_participants > 1">{{topic.valid_participants}} {{'TOPICLIST_LABEL_PARTICIPANTS' | translate}}</p>
+			</div>
 		</mat-card-content>
 		<mat-card-footer>
 			<p *ngIf="topic.stage == C.STAGE_REJECTED">{{'TOPIC_STAGE_REJECTED' | translate}}: {{topic.stageRejectedStarted | date: 'y-MM-dd'}}</p>

@@ -20,6 +20,7 @@ import { PublicRoutingModule } from './_routing/public-routing.module';
 
 // Pipes
 import { AddonePipe } from './_pipes/addone.pipe';
+import { TimestampPipe } from './_pipes/timestamp.pipe';
 
 // Components Global
 import { AppComponent } from './app.component';
@@ -86,8 +87,9 @@ export function HttpLoaderFactory(http: HttpClient) {
 		SettingsComponent,
 		EditorComponent,
 		ModalCloseeditorComponent,
+		GroupComponent,
 		AddonePipe,
-		GroupComponent
+		TimestampPipe
 	],
 	imports: [
 		BrowserModule,
