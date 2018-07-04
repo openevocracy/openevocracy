@@ -16,7 +16,7 @@ var mail = require('../mail');
 var utils = require('../utils');
 
 function getGroupMembersAsync(groupId) {
-	return db.collection('group_members').find({'groupId': groupId}, {'userId': true}).toArrayAsync();
+	return db.collection('group_relations').find({'groupId': groupId}).toArrayAsync();
 }
 
 function calculateNumberOfGroups(numTopicParticipants) {
@@ -63,14 +63,14 @@ function assignParticipantsToGroups(participants) {
  *    groupId: id of the new group
  *    topicId: id of the related topic
  *    padId: id of the related pad
+ *    groupRelations: relations of group (user, previous pad, previous group)
  *    nextDeadline: deadline of the next stage (not the old one)
  *    level: new level (old level +1)
- *    members: array of group members (user id's)
  */
-function storeGroupAsync(groupId, topicId, padId, prevPadIds, nextDeadline, level, members) {
+function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, level) {
 	// Create group itself
 	var chatRoomId = ObjectId();
-	var group = { '_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'level': level, 'prevPadIds': prevPadIds };
+	var group = { '_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'level': level };
 	var create_group_promise =	db.collection('groups').insertAsync(group);
 	
 	// Create group pad
@@ -79,16 +79,23 @@ function storeGroupAsync(groupId, topicId, padId, prevPadIds, nextDeadline, leve
 	
 	// Insert group members to database
 	var insert_members_promise =
-	db.collection('group_members').insertAsync(
-		_.map(members, function(userId) {
-			return { 'groupId': groupId, 'userId': userId, 'lastActivity': -1 };
+	db.collection('group_relations').insertAsync(
+		_.map(groupRelations, function(rel) {
+			var prevGroupId = _.isUndefined(rel.prevGroupId) ? null : rel.prevGroupId;
+			return { 'groupId': groupId, 'userId': rel.userId, 'prevGroupId': prevGroupId, 'prevPadId': rel.prevPadId, 'lastActivity': -1 };
 		})
 	);
 	
 	return Promise.join(create_pad_proposal_promise, create_group_promise, insert_members_promise);
 }
 
+/**
+ * @desc: check if specific proposal is valid, return true or false
+ * @param:
+ *     html: text of the proposal as html
+ */
 function isProposalValid(html) {
+	// Remove tags, split and get length
 	var num_words = html.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length;
 	return num_words >= cfg.MIN_WORDS_PROPOSAL;
 }
@@ -140,22 +147,22 @@ exports.createGroupsAsync = function(topic) {
 					'EMAIL_CONSENSUS_START_MESSAGE', [topic.name, groupId.toString(), cfg.BASE_URL]);
 		});
 		
-		console.log('topicId', topicId);
-		console.log('group_members', group_members);
-		// Get previous pad ids as array
-		var prevPadIds_promise = db.collection('pads_proposal')
-			.find({ 'topicId': topicId, 'ownerId': {$in: group_members} }, {'_id': true}).toArrayAsync()
-			.then(function(prevPads) {
-				console.log(_.pluck(prevPads, '_id'));
-				return _.pluck(prevPads, '_id');	
+		// Get group relations (previous pad ids and member ids)
+		// Note: previous group id is not possible here, since initially there is no previous group
+		var groupRelations_promise = db.collection('pads_proposal')
+			.find({ 'topicId': topicId, 'ownerId': {$in: group_members} }, {'_id': true, 'ownerId': true}).toArrayAsync()
+			.map(function(rawGroupRelation) {
+				return { 'prevPadId': rawGroupRelation._id, 'userId': rawGroupRelation.ownerId };
 			});
+			
+			
 		
 		// Store group in database
 		var padId = ObjectId();
 		var nextDeadline = topic.nextDeadline;
-		var store_group_promise = prevPadIds_promise.then(function(prevPadIds) {
-			console.log('prevPadIds', prevPadIds);
-			return storeGroupAsync(groupId, topicId, padId, prevPadIds, nextDeadline, 0, group_members);
+		var store_group_promise = groupRelations_promise.then(function(groupRelations) {
+			console.log('groupRelations', groupRelations);
+			return storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 0);
 		});
 		
 		// Join promises and return group members
@@ -227,7 +234,7 @@ exports.remixGroupsAsync = function(topic) {
 			return db.collection('groups')
 				.find({ 'topicId': topic._id, 'level': 0 }). toArrayAsync()
 				.then(function(groups) {
-					return db.collection('group_members').find({'groupId': { $in: _.pluck(groups, '_id') }}, {'userId': true}).toArrayAsync();
+					return db.collection('group_relations').find({'groupId': { $in: _.pluck(groups, '_id') }}, {'userId': true}).toArrayAsync();
 				}).then(function(participants) {
 					return db.collection('users')
 						.find({'_id': { $in: _.pluck(participants, 'userId') }}, {'email': true}).toArrayAsync()
@@ -245,12 +252,24 @@ exports.remixGroupsAsync = function(topic) {
 		// Insert all groups into database
 		var nextLevel = topic.level+1;
 		return Promise.map(groupsMemberIds_promise, function(groupMemberIds) {
-         // Get previous pad ids as array
-			var prevPadIds_promise = db.collection('group_members')
-				.find({ 'groupId': {$in: _.pluck(groups, '_id')}, 'userId': {$in: groupMemberIds} }).toArrayAsync()
-				.then(function(groupMembers) {
-					var groupIds = _.pluck(groupMembers, 'groupId');
-					return db.collection('pads_group').find({'groupId': {$in: groupIds}}).toArrayAsync().get('_id');
+         // Get group relations (prevPadIds, prevGroupIds and member ids)
+			var groupRelations_promise = db.collection('group_relations')
+				.find({ 'groupId': {$in: _.pluck(groups, '_id')}, 'userId': {$in: groupMemberIds} }, { 'groupId': true, 'userId': true }).toArrayAsync()
+				.then(function(prevGroups) {
+					// prevGroupIds and member ids are already given, prevPadIds need to be found
+					var prevGroupIds = _.pluck(prevGroups, 'groupId');
+					var prevPads_promise = db.collection('pads_group').find({'groupId': {$in: prevGroupIds}}, {'_id': true, 'groupId': true}).toArrayAsync();
+					// Return both information
+					return Promise.join(prevGroups, prevPads_promise);
+			}).spread(function(prevGroups, prevPads) {
+				// Bring both information in form
+				prevGroups = _.map(function(g) {
+					return { 'prevGroupId': g.groupId, 'userId': g.userId };
+				});
+				prevPads = _.map(function(p) {
+					return { 'prevGroupId': p.groupId, 'prevPadId': p._id };
+				});
+				return utils.mergeCollections(prevGroups, prevPads, 'prevGroupId');
 			});
          
          // Initalize group variables
@@ -261,8 +280,8 @@ exports.remixGroupsAsync = function(topic) {
          var nextDeadline = topics.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
          
          // Store group in database
-         var store_group_promise = prevPadIds_promise.then(function(prevPadIds) {
-         	return storeGroupAsync(groupId, topicId, padId, prevPadIds, nextDeadline, nextLevel, groupMemberIds);
+         var store_group_promise = groupRelations_promise.then(function(groupRelations) {
+         	return storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, nextLevel);
          });
          
          // Send mail to notify level change
@@ -277,7 +296,7 @@ exports.remixGroupsAsync = function(topic) {
          // register as sink for source proposals
          // find previous gids corresponding uids in group_out (current group)
          /*var update_source_proposals_promise =
-         db.collection('group_members').find({'userIds': { $in: groupsMemberIds }}).
+         db.collection('group_relations').find({'userIds': { $in: groupsMemberIds }}).
          toArrayAsync().then(function(members) {
              var gids = _.pluck(members,'gid');
              
@@ -323,7 +342,7 @@ function getProposalBodyAsync(mid, gid, proposals_source_promise) {
         // Find group where user was member in level before
         // and get proposal from that group
         return proposals_source_promise.then(function(proposals) {
-            return db.collection('group_members').
+            return db.collection('group_relations').
                 findOneAsync({'gid': {$in: _.pluck(proposals, 'source')}, 'uid': mid },{'gid': true}).
                 then(function(group_member) {
                     return utils.findWhereObjectId(proposals, {'source': group_member.gid});
@@ -350,7 +369,7 @@ exports.query = function(req, res) {
 		.findOneAsync({'_id': padId}, { 'docId': true, 'groupId': true, 'topicId': true });
 	
 	// Everything else depends on pad
-	var all_promise = pad_promise.then(function(pad) {
+	pad_promise.then(function(pad) {
 		// Define some variables for simpler and more intuitie use
 		var groupId = pad.groupId;
 		var topicId = pad.topicId;
@@ -364,8 +383,7 @@ exports.query = function(req, res) {
 			.findOneAsync({'_id': topicId}, { 'level': true, 'name': true, 'nextDeadline': true });
 		
 		// Get chatRoomId from group
-		var group_promise = db.collection('groups')
-			.findOneAsync({'_id': pad.groupId}, { 'chatRoomId': true, 'prevPadIds': true });
+		var group_promise = db.collection('groups').findOneAsync({'_id': pad.groupId}, { 'chatRoomId': true });
 		
 		// Count number of groups in current level to obtain if we are in last group (last level)
 		var isLastGroup_promise = topic_promise.then(function(topic) {
@@ -375,21 +393,15 @@ exports.query = function(req, res) {
 			});
 		});
 		
-		// TODO Get all source proposals
-		/*var proposals_source_promise = group_promise.then(function(group) {
-			return db.collection('topic_proposals').find({'sink': gid, 'tid': group.tid},
-				{'source': true, 'pid': true}).toArrayAsync();
-		});*/
-		
 		/*
 		 * Group Members
 		 */
 		
 		// Get group members
-		var group_members_promise = getGroupMembersAsync(groupId);
+		var groupRelations_promise = getGroupMembersAsync(groupId);
 		
 		// Get number of group members
-		var num_group_members_promise = group_members_promise.then(function(group_members) {
+		var num_group_members_promise = groupRelations_promise.then(function(group_members) {
 			return _.size(group_members);
 		});
 		
@@ -397,13 +409,15 @@ exports.query = function(req, res) {
 		var chance = new Chance(groupId.toString());
 		var offset = chance.integer({min: 0, max: 360});
 		
-		var prevPads_promise = group_promise.then(function(group) {
+		// Get privious pads
+		var prevPads_promise = groupRelations_promise.then(function(groupRelations) {
+			var prevPadIds = _.pluck(groupRelations, 'prevPadId');
 			return db.collection('pads_proposal')
-				.find({ '_id': {$in: group.prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
+				.find({ '_id': {$in: prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
 		});
 		
 		// Get group members
-		var group_members_details_promise = group_members_promise.map(function(member, index) {
+		var group_members_details_promise = groupRelations_promise.map(function(member, index) {
 			
 			// Generate member color
 			var member_color_promise = num_group_members_promise.then(function(numMembers) {
@@ -432,7 +446,7 @@ exports.query = function(req, res) {
 		});
 		
 		// Finally, set lastActivity for the member querying the group
-		var lastActivity_promise = db.collection('group_members')
+		var lastActivity_promise = db.collection('group_relations')
 			.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
 		
 		// Collect all information and return

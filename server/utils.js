@@ -66,3 +66,14 @@ exports.checkArrayEntryExists = function(objs, obj) {
     return _.findWhere(ObjectIdToStringMapperArray(objs),
                        ObjectIdToStringMapper(obj)) != undefined;
 };
+
+/*
+ * @desc: Merges two collections by specific id
+ *        Function is taken from: https://stackoverflow.com/a/32701655/2692283
+ */
+exports.mergeCollections = function(listA, listB, idField) {
+	var indexB = _.indexBy(listB, idField);
+	return _.map(listA, function(obj, key) {
+		return _.extend(obj, indexB[obj[idField]]);
+	});
+};

@@ -33,7 +33,7 @@ exports.getChatRoomMessages = function(req, res) {
 	if (_.isUndefined(room)) {
 		// Try to load the chat messages from database
 		chatRoom_promise = db.collection('chat_messages')
-			.find({'chatRoomId': chatRoomId}, { 'text': true, 'userId': true }).toArrayAsync()
+			.find({'chatRoomId': chatRoomId}, { 'text': true, 'userId': true, 'type': true }).toArrayAsync()
 			.then(function (messages) {
 				if(_.isNull(messages)) {
 					// Chat does not exist yet, create it in cache
@@ -124,7 +124,7 @@ function joinChatRoom(socket, chatRoomId, userId) {
 		}
 		
 		// Send message to all users in room
-		sendToSocketsInRoom(room.users, _.pick(msg, '_id', 'text', 'userId'));
+		sendToSocketsInRoom(room.users, _.pick(msg, '_id', 'text', 'userId', 'type'));
 	});
 	
 	// When socket disconnects

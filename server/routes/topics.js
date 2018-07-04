@@ -220,7 +220,7 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 	// Number of participants per level
 	var participants_per_levels_promise = groups_promise.then(function(groups) {
 		var member_counts_per_groups_promise =
-		db.collection('group_members').aggregateAsync( [
+		db.collection('group_relations').aggregateAsync( [
 			{ $match: { 'groupId': { $in: _.pluck(groups, '_id') } } },
 			{ $group: { '_id': '$groupId', member_count: { $sum : 1 } } } ] );
 		
@@ -280,7 +280,7 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 		
 		// Get group member user id's
 		group_members_promise = groups_promise.then(function(groups) {
-			return db.collection('group_members')
+			return db.collection('group_relations')
 				.find({'groupId': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
 		});
 		
@@ -302,7 +302,7 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 				var highest_level_groups = _.filter(groups, function(group) { return group.level == highest_level; });
 				
 				// Find that highest_level_groups, where user is part of and return that group
-				var group_promise = db.collection('group_members')
+				var group_promise = db.collection('group_relations')
 					.findOneAsync({'groupId': { $in: _.pluck(highest_level_groups, '_id') }, 'userId': userId})
 					.then(function(member) {
 						if (_.isNull(member))

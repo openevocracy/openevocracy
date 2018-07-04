@@ -20,6 +20,6 @@
 </mat-toolbar>
 </div>
 
-<div class="container">
+<div class="editor-wrapper container">
 	<quill-editor [modules]="quillModules" [style]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>
 </div>

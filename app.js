@@ -113,7 +113,7 @@ app.get('/json/group/editor/:id', auth(), groups.query);
 // #########################
 
 app.post('/json/proposal/create', auth(), proposals.create);
-app.get('/json/proposal/:id', auth(), proposals.query);
+//app.get('/json/proposal/:id', auth(), proposals.query);
 
 // ###################
 // ### G R O U P S ###

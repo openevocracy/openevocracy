@@ -148,7 +148,7 @@ function initializeAccessControl() {
 			// If pad is not in cache, get it from database, store it in cache and check condition
 			return Promise.resolve(db.collection('pads_group').findOneAsync({'docId': ObjectId(docId)}, { 'groupId': true, 'expiration': true })
 				.then(function(pad) {
-					var members_promise = db.collection('group_members').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
+					var members_promise = db.collection('group_relations').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
 					return Promise.join(pad, members_promise);
 				}).spread(function(pad, members) {
 					// Add owners to pad

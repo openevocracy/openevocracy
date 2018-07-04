@@ -35,7 +35,7 @@ exports.create = function(req, res) {
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
-exports.query = function(req, res) {
+/*exports.query = function(req, res) {
     var ppid = ObjectId(req.params.id);
     
     return db.collection('topic_proposals').findOneAsync({ '_id': ppid })
@@ -57,4 +57,4 @@ exports.query = function(req, res) {
         });
     }).then(_.bind(res.json,res))
       .catch(utils.isOwnError,utils.handleOwnError(res));
-};
+};*/

@@ -46,7 +46,7 @@
 </mat-toolbar>
 </div>
 
-<div class="group-editor container">
+<div class="editor-wrapper container">
 	<div class="row">
 		<quill-editor class="col" [ngClass]="classColEditor" [modules]="quillModules" [style]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>
 		<div id="member-proposal" class="col" [ngClass]="classColProposal">
@@ -60,11 +60,17 @@
 	<div id="chat-wrapper" [ngClass]="{'hidden': !chatReady}">
 		<div id="chat-messages">
 			<div [ngClass]="{'chat-message': true, 'me': userId == message.userId}" *ngFor="let message of messages">
-				<div class="message-header">
-					<small class="message-date">{{ message._id | timestamp | date:'HH:mm, yyyy-MM-dd' }}</small>
-					<strong class="message-username" [ngStyle]="{'color': memberColors[message.userId]}">{{ memberNames[message.userId] }}</strong>
+				<div *ngIf="message.type == C.CHATMSG_DEFAULT" class="default-message">
+					<div class="message-header">
+						<small class="message-date">{{ message._id | timestamp | date:'HH:mm, yyyy-MM-dd' }}</small>
+						<strong class="message-username" [ngStyle]="{'color': memberColors[message.userId]}">{{ memberNames[message.userId] }}</strong>
+					</div>
+					<div class="message-body">{{ message.text }}</div>
 				</div>
-				<div class="message-body">{{ message.text }}</div>
+				<div *ngIf="message.type == C.CHATMSG_ONLINE || message.type == C.CHATMSG_OFFLINE" class="status-message">
+					<small class="message-date">{{ message._id | timestamp | date:'HH:mm, yyyy-MM-dd' }}</small>
+					<span class="message-body">{{ message.text }}</span>
+				</div>
 			</div>
 		</div>
 		<form [formGroup]="chatForm" (ngSubmit)="sendChatMessage()" novalidate><mat-form-field>

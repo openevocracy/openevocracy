@@ -10,11 +10,12 @@ var tid = ObjectId('54f646ccc3a414a60d40d660');
 
 exports.clean_database = function(req, res) {
     db.collection('groups').drop();
-    db.collection('group_members').drop();
+    db.collection('group_relations').drop();
     db.collection('mail').drop();
     db.collection('topic_votes').drop();
     db.collection('topics').drop();
     db.collection('ratings').drop();
+    db.collection('chat_messages').drop();
     
     // Pads and ShareDB
     db.collection('pads_topic_description').drop();
@@ -72,7 +73,7 @@ exports.create_topic_consensus_stage = function(req, res) {
     },function (){});
     
     // create members for this group
-    db.collection('group_members').insert(
+    db.collection('group_relations').insert(
                   [{'gid':gid,'uid':upatrick},
                    {'gid':gid,'uid':ucarlo}],
                   function (){});
@@ -124,7 +125,7 @@ function fill_topic_user_ratings(topic) {
         {'tid': topic._id, 'level': topic.level}, {'_id': true}).
     // get the corresponding group members
     toArrayAsync().then(function(groups) {
-        return db.collection('group_members').
+        return db.collection('group_relations').
             find({'gid': { $in: _.pluck(groups,'_id') }}, {'_id': false}).
             toArrayAsync();
     // create a rating for each member
@@ -184,7 +185,7 @@ exports.remix_groups = function(req, res) {
                     response_text += "<br/>level: " + topic.level + ", number of groups: " + _.size(groups) + ", sizes of each group: ";
                     return groups;
                 }).map(function(group) {
-                    return db.collection('group_members').countAsync({'gid': group._id}).
+                    return db.collection('group_relations').countAsync({'gid': group._id}).
                     then(function(count) {
                         response_text += count + " ";
                     });

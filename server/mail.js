@@ -177,7 +177,7 @@ function sendEmailToMembersOfSpecificGroups(mailType, gids, tid, mailSubject, ma
 		gids = [gids];
 	
 	// Send mail to group members of groups with gid in gids
-	return db.collection('group_members')
+	return db.collection('group_relations')
 			.find({ 'gid': { $in: gids }
 		}).toArrayAsync().then(function(members) {
 			return db.collection('users')
@@ -210,7 +210,7 @@ function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailSubjec
 	// Remind members who where not active in that group for a specific time
 	return db.collection('groups').find({ 'tid': topic._id, 'level': topic.level })
 		.toArrayAsync().then(function(groups) {
-		return db.collection('group_members')
+		return db.collection('group_relations')
 			.find({ 'gid': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
 		}).filter(function(member) {
 			// Only notify group members with timestamps older than REMINDER_GROUP_LAZY

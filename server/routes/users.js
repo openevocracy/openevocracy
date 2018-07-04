@@ -382,8 +382,8 @@ exports.navigation = function(req, res) {
     var groupsPromise = topicsPrePromise.filter(function(topic) {
         return topic.stage == C.STAGE_CONSENSUS;
     }).map(function(topic) {
-        return db.collection('group_members').
-            find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
+        return db.collection('group_relations')
+            .find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
                 return db.collection('groups').findOneAsync(
                     {'_id': { $in: _.pluck(group_members, 'gid')}, 'tid': topic._id, 'level': topic.level },
                     {'_id': true});
