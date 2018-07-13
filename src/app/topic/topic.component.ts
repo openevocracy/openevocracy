@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 
 import { CountdownComponent } from '../countdown/countdown.component';
+import { GroupvisComponent } from '../groupvis/groupvis.component';
 
 import { HttpManagerService } from '../_services/http-manager.service';
 import { AlertService } from '../_services/alert.service';
@@ -32,6 +33,11 @@ import { faUsers } from '@fortawesome/free-solid-svg-icons';
 	styleUrls: ['./topic.component.scss']
 })
 export class TopicComponent implements OnInit {
+	//@ViewChild(GroupvisComponent)
+	//private groupvis: GroupvisComponent;
+	
+	private showGraph: boolean = false;
+	
 	private C;
 	private userId: string;
 	private topicId: string;
@@ -100,6 +106,11 @@ export class TopicComponent implements OnInit {
 				this.topic.num_votes++;
 			});
 		}
+	}
+	
+	private openGraph() {
+		this.showGraph = true;
+		//this.groupvis.initGraph(this.topicId);
 	}
 
 }

@@ -27,8 +27,9 @@ export class CountdownComponent implements OnDestroy {
 		this._startTimer();
 	}
 
-	constructor(private changeDetectorRef: ChangeDetectorRef,
-					private translate: TranslateService) { }
+	constructor(
+		private changeDetectorRef: ChangeDetectorRef,
+		private translate: TranslateService) { }
 	
 	ngOnDestroy() {
 		this.changeDetectorRef.detach();

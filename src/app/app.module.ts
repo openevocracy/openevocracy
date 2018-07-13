@@ -62,6 +62,7 @@ import { C } from '../../shared/constants';
 import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
 import { GroupComponent } from './group/group.component';
+import { GroupvisComponent } from './groupvis/groupvis.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -89,7 +90,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 		ModalCloseeditorComponent,
 		GroupComponent,
 		AddonePipe,
-		TimestampPipe
+		TimestampPipe,
+		GroupvisComponent
 	],
 	imports: [
 		BrowserModule,

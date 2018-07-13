@@ -35,6 +35,7 @@ var proposals = require('./server/routes/proposals');
 var ratings = require('./server/routes/ratings');
 var tests = require('./server/routes/tests');
 var pads = require('./server/routes/pads');
+var groupvis = require('./server/routes/groupvis');
 
 // Set passport strategy
 var strategy = users.getStrategy();
@@ -132,6 +133,13 @@ app.get('/json/ratings/:id', auth(), ratings.query);
 
 // @desc: Store a new rating value
 app.post('/json/ratings/rate', auth(), ratings.rate);
+
+// #############################
+// ###   G R O U P - V I S   ###
+// #############################
+
+// @desc: Get group vis data to visualize topic hierarchy
+app.get('/json/groupvis/:id', auth(), groupvis.query);
 
 // ###################
 // ###   A U T H   ###

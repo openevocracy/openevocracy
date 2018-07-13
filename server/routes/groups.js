@@ -1,13 +1,13 @@
+// General libraries
 var _ = require('underscore');
 var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 var Chance = require('chance');
 var Color = require('color');
-//var requirejs = require('requirejs');
 
+// Own references
 var C = require('../../shared/constants').C;
-//var cfg = requirejs('public/js/setup/configs');
 var cfg = require('../../shared/config').cfg;
 var ratings = require('./ratings');
 var topics = require('./topics');
@@ -222,15 +222,18 @@ exports.remixGroupsAsync = function(topic) {
             
             // If group leader is undefined, pick one randomly
             return getGroupMembersAsync(groupId).then(function(members) {
-                return Promise.resolve(_.sample(members).uid);
+                return Promise.resolve(_.sample(members).userId);
             });
         });
     });
     
 	return Promise.join(groups_promise, leaders_promise).spread(function(groups, leaders) {
-		// If there is only ONE group in the current topic level, then the topic is finished/passed
+		/*
+		 * If there is only ONE group in the current topic level, then the topic is finished/passed
+		 */
 		if(_.size(groups) == 1) {
-			// Send mail to notifiy about finished topic and return next stage.
+			// Send mail to ALL initial participants and notifiy about finished topic
+			// finally return next stage
 			return db.collection('groups')
 				.find({ 'topicId': topic._id, 'level': 0 }). toArrayAsync()
 				.then(function(groups) {
@@ -245,7 +248,10 @@ exports.remixGroupsAsync = function(topic) {
 					});
 				}).return({'nextStage': C.STAGE_PASSED});
 		}
-        
+       
+      /* 
+       * If there is more than one group in the current topic level, prepare next level
+       */
 		// Assign members to groups
 		var groupsMemberIds_promise = assignParticipantsToGroups(leaders);
 		
@@ -256,7 +262,7 @@ exports.remixGroupsAsync = function(topic) {
 			var groupRelations_promise = db.collection('group_relations')
 				.find({ 'groupId': {$in: _.pluck(groups, '_id')}, 'userId': {$in: groupMemberIds} }, { 'groupId': true, 'userId': true }).toArrayAsync()
 				.then(function(prevGroups) {
-					// prevGroupIds and member ids are already given, prevPadIds need to be found
+					// prevGroupIds and member ids are already given, prevPadIds need to be found (= current group pads)
 					var prevGroupIds = _.pluck(prevGroups, 'groupId');
 					var prevPads_promise = db.collection('pads_group').find({'groupId': {$in: prevGroupIds}}, {'_id': true, 'groupId': true}).toArrayAsync();
 					// Return both information
@@ -280,42 +286,20 @@ exports.remixGroupsAsync = function(topic) {
          var nextDeadline = topics.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
          
          // Store group in database
-         var store_group_promise = groupRelations_promise.then(function(groupRelations) {
+         var storeGroup_promise = groupRelations_promise.then(function(groupRelations) {
          	return storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, nextLevel);
          });
          
          // Send mail to notify level change
-         var send_mail_promise =
-         db.collection('users').find({'_id': {$in: groupMemberIds}}, {'email': true}).
-         toArrayAsync().then(function(users) {
-             mail.sendMailMulti(users,
-                 'EMAIL_LEVEL_CHANGE_SUBJECT', [topic.name],
-                 'EMAIL_LEVEL_CHANGE_MESSAGE', [topic.name, groupId.toString(), cfg.BASE_URL]);
+         var sendMail_promise = db.collection('users')
+				.find({'_id': {$in: groupMemberIds}}, {'email': true}).toArrayAsync().then(function(users) {
+					mail.sendMailMulti(users,
+						'EMAIL_LEVEL_CHANGE_SUBJECT', [topic.name],
+						'EMAIL_LEVEL_CHANGE_MESSAGE', [topic.name, groupId.toString(), cfg.BASE_URL]);
          });
-         
-         // register as sink for source proposals
-         // find previous gids corresponding uids in group_out (current group)
-         /*var update_source_proposals_promise =
-         db.collection('group_relations').find({'userIds': { $in: groupsMemberIds }}).
-         toArrayAsync().then(function(members) {
-             var gids = _.pluck(members,'gid');
-             
-             // filter out only previous level proposals
-             var prevLevel = topic.level;
-             return db.collection('groups').find(
-                 {'_id': { $in: gids }, 'level': prevLevel}, {'_id': true}).
-                 toArrayAsync();
-         }).then(function(source_groups) {
-             var sources = _.pluck(source_groups,'_id');
-             
-             // update sink of previous proposals
-             return db.collection('topic_proposals').updateAsync(
-                 { 'tid': tid, 'source': { $in: sources } },
-                 { $set: { 'sink': gid } }, {'upsert': false, 'multi': true});
-         });*/
             
-			return Promise.join(send_mail_promise, store_group_promise);
-		}).return({'nextStage': C.STAGE_CONSENSUS}); // We stay in consensus stage
+			return Promise.join(sendMail_promise, storeGroup_promise);
+		}).return({'nextStage': C.STAGE_CONSENSUS});  // We stay in consensus stage
 	}).catch(utils.isOwnError,function(error) {
 		return {
 			'nextStage': C.STAGE_REJECTED,
@@ -327,31 +311,6 @@ exports.remixGroupsAsync = function(topic) {
 exports.list = function(req, res) {
     db.collection('groups').find().toArrayAsync().then(_.bind(res.json,res));
 };
-
-function getProposalBodyAsync(mid, gid, proposals_source_promise) {
-    // mid: member id, gid: group id
-    return db.collection('topic_proposals').findOneAsync(
-        {'source': mid, 'sink': gid},{'pid': true}).then(function(proposal) {
-        
-        // Proposal was found
-        // This means it was a user-created proposal
-        if(!_.isNull(proposal))
-            return Promise.resolve(proposal);
-        
-        // Proposal was not found: We have a group proposal
-        // Find group where user was member in level before
-        // and get proposal from that group
-        return proposals_source_promise.then(function(proposals) {
-            return db.collection('group_relations').
-                findOneAsync({'gid': {$in: _.pluck(proposals, 'source')}, 'uid': mid },{'gid': true}).
-                then(function(group_member) {
-                    return utils.findWhereObjectId(proposals, {'source': group_member.gid});
-                });
-        });
-    }).then(function(proposal) {
-        return pads.getPadHTMLAsync('proposal', proposal.pid);
-    });
-}
 
 /* @desc: Gets group editor information, necessary information are:
  *        - groupId, topicId, docId (can be found in pad)

@@ -1,6 +1,9 @@
+// General libraries
 var _ = require('underscore');
 var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
+
+// Own references
 var C = require('../../shared/constants').C;
 
 // NOTE Currently not in use

@@ -57,6 +57,7 @@ exports.findWhereObjectId = function(objs, obj) {
 /*
  * @desc: underscore.js _.contains function is not working if you want to find an ObjectId
  *        note that this function is simplified, compared to the original _.contains function
+ *        returns true or false
  */
 exports.containsObjectId = function(arr, item) {
 	return _.indexOf(_.map(arr, toStr), item.toString()) >= 0;
@@ -76,4 +77,11 @@ exports.mergeCollections = function(listA, listB, idField) {
 	return _.map(listA, function(obj, key) {
 		return _.extend(obj, indexB[obj[idField]]);
 	});
+};
+
+/*
+ * @desc: Check if two objects id's are equal, returns true or false
+ */
+exports.equalId = function(a, b) {
+	return (a.toString() == b.toString());
 };

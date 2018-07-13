@@ -104,6 +104,9 @@
 	"TOPIC_BUTTON_EDIT_CURRENT_GROUP": "Edit group proposal",
 	"TOPIC_BUTTON_GOTO_CURRENT_GROUP": "Group",
 	
+	"GROUPVIS_GROUP_LABEL": "Group",
+	"GROUPVIS_PROPOSAL_LABEL": "Proposal",
+	
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Productive mode",
 	"GROUP_MEMBER_BUTTON_PROPOSAL": "Member proposal",
 	"GROUP_MEMBER_BUTTON_SHOW": "Visit profile",

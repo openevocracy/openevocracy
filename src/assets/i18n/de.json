@@ -104,6 +104,9 @@
 	"TOPIC_BUTTON_EDIT_CURRENT_GROUP": "Gruppenvorschlag bearbeiten",
 	"TOPIC_BUTTON_GOTO_CURRENT_GROUP": "Gruppe",
 	
+	"GROUPVIS_GROUP_LABEL": "Gruppe",
+	"GROUPVIS_PROPOSAL_LABEL": "Vorschlag",
+	
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Produktivmodus",
 	"GROUP_MEMBER_BUTTON_PROPOSAL": "Mitgliedsvorschlag",
 	"GROUP_MEMBER_BUTTON_SHOW": "Zum Profil",

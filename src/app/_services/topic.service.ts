@@ -10,7 +10,6 @@ import { HttpManagerService } from './http-manager.service';
 
 @Injectable()
 export class TopicService {
-
 	constructor(private httpManagerService: HttpManagerService) { }
 	
 	public vote(topicId: string, userId: string) {
@@ -28,5 +27,4 @@ export class TopicService {
 	public getTopic(tid): Observable<Topic> {
 		return this.httpManagerService.get('/json/topic/' + tid);
 	}
-
 }
