@@ -20,14 +20,14 @@ function getGroupMembersAsync(groupId) {
 }
 
 function calculateNumberOfGroups(numTopicParticipants) {
-    
-    // TODO throw error if group size is smaller than 3
-    //if(cfg.GROUP_SIZE < 3)
-    
-    var numGroups = Math.ceil(numTopicParticipants/cfg.GROUP_SIZE); // round up to next integer
-    console.log('number of groups: ', numGroups);
-    
-    return numGroups;
+	
+	// TODO throw error if group size is smaller than 3
+	//if(cfg.GROUP_SIZE < 3)
+	
+	var numGroups = Math.ceil(numTopicParticipants/cfg.GROUP_SIZE); // round up to next integer
+	console.log('number of groups: ', numGroups);
+	
+	return numGroups;
 }
 
 function assignParticipantsToGroups(participants) {
@@ -181,22 +181,25 @@ exports.getGroupsOfSpecificLevelAsync = getGroupsOfSpecificLevelAsync;
 
 function getValidGroupsOfSpecificLevelAsync(topicId, level) {
 	return getGroupsOfSpecificLevelAsync(topicId, level).filter(function (group) {
-		return db.collection('pads_group').findOneAsync({'ownerId': group._id})
+		return db.collection('pads_group').findOneAsync({'groupId': group._id})
 			.then(function(proposal) {
 				// Get HTML from document
 				proposal.body = pads.getPadHTMLAsync('group', proposal.docId);
 				return Promise.props(proposal);
-        }).then(function(proposal) {
-            // Check if proposal is valid
-            return isProposalValid(proposal);
-        });
-    }).then(function (groups) {
-        // If no valid proposal exists: reject, otherwise return all valid groups
-        if(_.isEmpty(groups))
-            return Promise.reject({reason: 'REJECTED_NO_VALID_GROUP_PROPOSAL'});
-        else
-            return Promise.resolve(groups);
-    });
+			}).then(function(proposal) {
+				console.log('html', proposal.body);
+				console.log('isValid', isProposalValid(proposal.body));
+				// Check if proposal is valid
+				return isProposalValid(proposal.body);
+			});
+	}).then(function(groups) {
+		console.log('groups', groups);
+		// If no valid proposal exists: reject, otherwise return all valid groups
+		if(_.isEmpty(groups))
+			return Promise.reject({reason: 'REJECTED_NO_VALID_GROUP_PROPOSAL'});
+		else
+			return Promise.resolve(groups);
+	});
 }
 
 /**
@@ -212,20 +215,20 @@ exports.remixGroupsAsync = function(topic) {
     // Get groups with highest level
     var groups_promise = getValidGroupsOfSpecificLevelAsync(topicId, topic.level);
     
-    // Get group leaders
-    var leaders_promise = groups_promise.map(function(group_in) {
-        var groupId = group_in._id;
-        
-        return ratings.getGroupLeaderAsync(groupId).then(function(leader) {
-            if(!_.isUndefined(leader))
-                return Promise.resolve(leader);
-            
-            // If group leader is undefined, pick one randomly
-            return getGroupMembersAsync(groupId).then(function(members) {
-                return Promise.resolve(_.sample(members).userId);
-            });
-        });
-    });
+	// Get group leaders
+	var leaders_promise = groups_promise.map(function(group_in) {
+		var groupId = group_in._id;
+		
+		return ratings.getGroupLeaderAsync(groupId).then(function(leader) {
+			if(!_.isUndefined(leader))
+				return Promise.resolve(leader);
+			
+			// If group leader is undefined, pick one randomly
+			return getGroupMembersAsync(groupId).then(function(members) {
+				return Promise.resolve(_.sample(members).userId);
+			});
+		});
+	});
     
 	return Promise.join(groups_promise, leaders_promise).spread(function(groups, leaders) {
 		/*
@@ -262,19 +265,22 @@ exports.remixGroupsAsync = function(topic) {
 			var groupRelations_promise = db.collection('group_relations')
 				.find({ 'groupId': {$in: _.pluck(groups, '_id')}, 'userId': {$in: groupMemberIds} }, { 'groupId': true, 'userId': true }).toArrayAsync()
 				.then(function(prevGroups) {
+					console.log('groupRelations_promise', prevGroups);
 					// prevGroupIds and member ids are already given, prevPadIds need to be found (= current group pads)
 					var prevGroupIds = _.pluck(prevGroups, 'groupId');
 					var prevPads_promise = db.collection('pads_group').find({'groupId': {$in: prevGroupIds}}, {'_id': true, 'groupId': true}).toArrayAsync();
 					// Return both information
 					return Promise.join(prevGroups, prevPads_promise);
 			}).spread(function(prevGroups, prevPads) {
+				console.log('BEFORE', prevGroups, prevPads);
 				// Bring both information in form
-				prevGroups = _.map(function(g) {
+				prevGroups = _.map(prevGroups, function(g) {
 					return { 'prevGroupId': g.groupId, 'userId': g.userId };
 				});
-				prevPads = _.map(function(p) {
+				prevPads = _.map(prevPads, function(p) {
 					return { 'prevGroupId': p.groupId, 'prevPadId': p._id };
 				});
+				console.log('AFTER', prevGroups, prevPads);
 				return utils.mergeCollections(prevGroups, prevPads, 'prevGroupId');
 			});
          
@@ -368,39 +374,49 @@ exports.query = function(req, res) {
 		var chance = new Chance(groupId.toString());
 		var offset = chance.integer({min: 0, max: 360});
 		
-		// Get privious pads
-		var prevPads_promise = groupRelations_promise.then(function(groupRelations) {
+		// Get previous pads
+		var prevPads_promise = Promise.join(topic_promise, groupRelations_promise).spread(function(topic, groupRelations) {
 			var prevPadIds = _.pluck(groupRelations, 'prevPadId');
-			return db.collection('pads_proposal')
-				.find({ '_id': {$in: prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
+			if (topic.level == 0) {
+				return db.collection('pads_proposal')
+					.find({ '_id': {$in: prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
+			} else {
+				return db.collection('pads_group')
+					.find({ '_id': {$in: prevPadIds} }, { 'groupId': true, 'docId': true }).toArrayAsync();
+			}
 		});
 		
 		// Get group members
-		var group_members_details_promise = groupRelations_promise.map(function(member, index) {
+		var groupMembersDetails_promise = groupRelations_promise.map(function(relation, index) {
 			
 			// Generate member color
-			var member_color_promise = num_group_members_promise.then(function(numMembers) {
+			var memberColor_promise = num_group_members_promise.then(function(numMembers) {
 				var hue = offset + index*(360/numMembers);
 				return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
 			});
          
          // Get proposal html
-         var member_proposal_html_promise = prevPads_promise.then(function(prevPads) {
-         	var prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': member.userId});
-         	return pads.getPadHTMLAsync('proposal', prevUserPad.docId);
+         var prevPadHtml_promise = Promise.join(topic_promise, prevPads_promise).spread(function(topic, prevPads) {
+         	if (topic.level == 0) {
+	         	var prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': relation.userId});
+	         	return pads.getPadHTMLAsync('proposal', prevUserPad.docId);
+         	} else {
+         		var prevGroupPad = utils.findWhereObjectId(prevPads, {'groupId': relation.prevGroupId});
+         		return pads.getPadHTMLAsync('group', prevGroupPad.docId);
+         	}
          });
 			
 			// Get member rating
-			var member_rating_knowledge_promise = ratings.getMemberRatingAsync(member.userId, groupId, userId, C.RATING_KNOWLEDGE);
-			var member_rating_integration_promise = ratings.getMemberRatingAsync(member.userId, groupId, userId, C.RATING_INTEGRATION);
+			var memberRatingKnowledge_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_KNOWLEDGE);
+			var memberRatingIntegration_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_INTEGRATION);
          
          return Promise.props({
-         	'userId': member.userId,
+         	'userId': relation.userId,
 				'name': chance.first(),
-				'color': member_color_promise,
-				'proposal_html': member_proposal_html_promise,
-				'ratingKnowledge': member_rating_knowledge_promise,
-				'ratingIntegration': member_rating_integration_promise
+				'color': memberColor_promise,
+				'prevPadHtml': prevPadHtml_promise,
+				'ratingKnowledge': memberRatingKnowledge_promise,
+				'ratingIntegration': memberRatingIntegration_promise
          });
 		});
 		
@@ -409,7 +425,7 @@ exports.query = function(req, res) {
 			.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
 		
 		// Collect all information and return
-		return Promise.join(topic_promise, group_promise, isLastGroup_promise, group_members_details_promise, lastActivity_promise)
+		return Promise.join(topic_promise, group_promise, isLastGroup_promise, groupMembersDetails_promise, lastActivity_promise)
 			.spread(function(topic, group, isLastGroup, group_members) {
 				return {
 					'groupId': groupId,

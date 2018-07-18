@@ -52,8 +52,6 @@ export class TopiclistComponent implements OnInit {
 			_.each(sortedTopicsList, function(topicListElement) {
 				this.topicsList.push(new TopicListElement(topicListElement));
 			}.bind(this));
-			
-			console.log(this.topicsList);
 		});
 	}
 	

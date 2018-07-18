@@ -108,9 +108,19 @@ export class TopicComponent implements OnInit {
 		}
 	}
 	
+	/*
+	 * @desc: Open graph to visualize topic hierarchy
+	 */
 	private openGraph() {
 		this.showGraph = true;
 		//this.groupvis.initGraph(this.topicId);
+	}
+	
+	/*
+	 * @desc: Download final document as pdf (open in new tab)
+	 */
+	private downloadPdf() {
+		this.httpManagerService.getFile('/file/topic/'+this.topicId);
 	}
 
 }

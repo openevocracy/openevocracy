@@ -92,9 +92,13 @@ app.patch('/json/topic/:id', auth(), topics.update);
 app.get('/json/topic/:id', auth(), topics.query);
 app.post('/json/topic', auth(), topics.create);
 app.delete('/json/topic/:id', auth(), topics.delete);
+
+// @desc: Vote and unvote for specific topic from specific user
 app.post('/json/topic-vote', auth(), topics.vote);
 app.post('/json/topic-unvote', auth(), topics.unvote);
-app.get('/file/topic/final/:id', auth(), topics.final);
+
+// @desc: Download final document as pdf
+app.get('/file/topic/:id', auth(), topics.download);
 
 // ###################
 // ### E D I T O R ###
@@ -224,13 +228,13 @@ app.all('/*', function(req, res, next) {
 // ### S E R V E R ###
 // ###################
 
+// Is this necessary?
 app.use(express.static('node_modules/quill/dist'));
 
 var WebSocket = require('ws');
-
 var httpServer = http.createServer(app);
 
-httpServer.listen(app.get('port'), function(){
+httpServer.listen(app.get('port'), function() {
 	console.log('Express server listening on port ' + app.get('port'));
 });
 

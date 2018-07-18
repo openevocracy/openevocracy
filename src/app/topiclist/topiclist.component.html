@@ -43,7 +43,7 @@
 				</button>
 			</p>
 			<p *ngIf="topic.stage == C.STAGE_PROPOSAL || topic.stage == C.STAGE_CONSENSUS"><countdown [time]="topic.nextDeadline"></countdown></p>
-			<p *ngIf="topic.stage == C.STAGE_PASSED">{{'TOPIC_STAGE_FINISHED' | translate}}: {{topic.stagePassedStarted | date: 'y-MM-dd'}}</p>
+			<p *ngIf="topic.stage == C.STAGE_PASSED">{{'TOPIC_STAGE_PASSED' | translate}}: {{topic.stagePassedStarted | date: 'y-MM-dd'}}</p>
 		</mat-card-footer>
 	</mat-card>
 </div>

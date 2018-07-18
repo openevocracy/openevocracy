@@ -3,6 +3,7 @@ var _ = require('underscore');
 var Promise = require('bluebird');
 var ObjectId = require('mongodb').ObjectID;
 var db = require('../database').db;
+var pdf = require('phantom-html2pdf');
 
 // Collaborative libraries for pad synchronization
 var ShareDB = require('sharedb');
@@ -257,5 +258,28 @@ exports.getPadHTMLAsync = function(collection_suffix, docId) {
 			var html = converter.convert();
 			resolve(html);
 		});
+	});
+};
+
+/*
+ * @desc:
+ *    Create pdf file from pad html
+ * @params:
+ *    html: html of the pad
+ */
+exports.getPadPDFAsync = function(html) {
+	console.log('getPadPDFAsync', html);
+	var pdfConvertAsync = Promise.promisify(pdf.convert);
+	
+	return pdfConvertAsync({'html': html})
+		.then(function(result) {
+		// This is required to convert the callback into a format
+		// suitable for promises, e.g. error is first parameter
+		function toBufferWrapper(bluebirdCallback) {
+		   result.toBuffer(_.partial(bluebirdCallback,undefined));
+		}
+		
+		var toBufferAsync = Promise.promisify(toBufferWrapper);
+		return toBufferAsync();
 	});
 };

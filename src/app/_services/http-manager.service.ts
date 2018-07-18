@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
 import { Router } from '@angular/router';
 
 import { cfg } from '../../../shared/config';
@@ -38,6 +38,22 @@ export class HttpManagerService {
 		return this.http.get(cfg.BASE_URL + url, this.getOptions())
 			.map(res => { return this.extractData(res); })
 			.catch(error => { return this.handleError(error); });
+	}
+	
+	public getFile(url) {
+		var options = this.getOptions();
+		options.responseType = ResponseContentType.ArrayBuffer;
+		return this.http.get(cfg.BASE_URL + url, options)
+			.map(res => {
+				var body = res['_body'];
+				var blob = new Blob([body], {type: 'application/pdf'});
+				return blob;
+			})
+			.catch(error => { return this.handleError(error); })
+			.subscribe(blob => {
+				var url = window.URL.createObjectURL(blob);
+				window.open(url);
+			});
 	}
 	
 	public post(url, body) {

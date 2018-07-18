@@ -60,31 +60,30 @@ function manageConsensusStageAsync(topic, levelDuration) {
             };
             break;
         case C.STAGE_PASSED:
-            var tid = topic._id;
+				var topicId = topic._id;
+				
+				// get the pad id of final document
+				// e.g. the proposal pad id of the group in the last level
+				var finalDocumentHtmlPromise = db.collection('groups')
+					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
+					.then(function(group) {
+						return db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
+				    }).then(function(docId) {
+				    	return pads.getPadHTMLAsync('group', docId);
+				    });
             
-            // get the pad id of final document
-            // e.g. the proposal pad id of the group in the last level
-            var finalDocumentPadIdPromise = db.collection('groups').
-                findOneAsync({'tid': tid, 'level': topic.level},{'ppid': true}).
-                get('ppid').then(function (ppid) {
-                    return db.collection('topic_proposals').
-                        findOneAsync({'_id': ppid},{'pid': true});
-                }).get('pid');
-            
-            // get pad pdf and save it
-            finalDocumentPadIdPromise.then(pads.getPadPDFAsync).then(function(data) {
-                var filename = path.join(appRoot.path, 'files/documents', tid+'.pdf');
+            // Get pad PDF and save it in file system
+            finalDocumentHtmlPromise.then(pads.getPadPDFAsync).then(function(data) {
+                var filename = path.join(appRoot.path, 'files/documents', topicId+'.pdf');
                 return fs.writeFileAsync(filename,data);
             });
             
-            // updates below are only required if consensus stage is over
+            // Updates below are only required if consensus stage is over
             update_set_promise = {
                 'stage': (topic.stage = C.STAGE_PASSED),
                 'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_PASSED,prevDeadline)),
                 'stagePassedStarted': Date.now(),
-                'finalDocument': finalDocumentPadIdPromise.then(function(padId) {
-                	return pads.getPadHTMLAsync('group', padId);
-                })
+                'finalDocument': finalDocumentHtmlPromise
             };
             break;
         case C.STAGE_REJECTED:
@@ -492,6 +491,9 @@ function countVotes(topicId) {
     return db.collection('topic_votes').countAsync( {'topicId': topicId} );
 }
 
+/*
+ * @desc: User votes for specific topic
+ */
 exports.vote = function(req, res) {
 	// Transmitted topic vote
 	var topic_vote = {
@@ -508,21 +510,30 @@ exports.vote = function(req, res) {
 		.then(res.json.bind(res));
 };
 
+/*
+ * @desc: User unvotes for specific topic
+ */
 exports.unvote = function(req, res) {
 	// Trasmitted topic vote
-    var topic_vote = {
+	var topic_vote = {
 		'topicId': ObjectId(req.body.topicId),
 		'userId': ObjectId(req.body.userId)
 	};
     
-    // Remove vote from database
-    db.collection('topic_votes').removeAsync(topic_vote)
-    	.then(function(remove_result) { return { 'voted': false }; })
+	// Remove vote from database
+	db.collection('topic_votes').removeAsync(topic_vote)
+		.then(function(remove_result) { return {'voted': false}; })
 		.then(res.json.bind(res));
 };
 
-exports.final = function(req, res) {
-    var tid = req.params.id;
-    var filename = path.join(appRoot.path, 'files/documents', tid+'.pdf');
-    res.sendFile(filename);
+/*
+ * @desc: Download finished topic document
+ */
+exports.download = function(req, res) {
+	console.log('download');
+	
+	var topicId = req.params.id;
+	var filename = path.join(appRoot.path, 'files/documents', topicId+'.pdf');
+	//res.sendFile(filename);
+	res.download(filename);
 };
