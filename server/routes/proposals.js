@@ -7,6 +7,9 @@ var C = require('../../shared/constants').C;
 var utils = require('../utils');
 var pads = require('./pads');
 
+/*
+ * @desc: Create new proposal
+ */
 exports.create = function(req, res) {
 	var topicId = ObjectId(req.body.topicId);
 	var userId = ObjectId(req.body.userId);
@@ -34,27 +37,3 @@ exports.create = function(req, res) {
 		});
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
-
-/*exports.query = function(req, res) {
-    var ppid = ObjectId(req.params.id);
-    
-    return db.collection('topic_proposals').findOneAsync({ '_id': ppid })
-    .then(function(proposal) {
-        return pads.getPadWithBodyAsync(proposal.pid).then(function(pad) {
-            // Extend proposal object with html body of pad and expired status
-            proposal.body = pad.body;
-            proposal.expired = pad.isExpired();
-            
-            // Delete pid from proposal object if we are not in proposal stage
-            if(proposal.expired) {
-                delete proposal.pid;
-                
-                // flash message in client that proposal not editable
-                proposal.alert = {type: 'info', content: 'PROPOSAL_QUERIED_NOT_IN_PROPOSAL_STAGE'};
-            }
-            
-            return proposal;
-        });
-    }).then(_.bind(res.json,res))
-      .catch(utils.isOwnError,utils.handleOwnError(res));
-};*/

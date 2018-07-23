@@ -9,6 +9,7 @@ import { TopiclistComponent } from '../topiclist/topiclist.component';
 import { TopicComponent } from '../topic/topic.component';
 import { EditorComponent } from '../editor/editor.component';
 import { GroupComponent } from '../group/group.component';
+import { PadviewComponent } from '../padview/padview.component';
 import { SettingsComponent } from '../settings/settings.component';
 
 const appChildRoutes: Routes = [
@@ -18,6 +19,8 @@ const appChildRoutes: Routes = [
 	{ path: 'topic/editor/:id', component: EditorComponent },
 	{ path: 'proposal/editor/:id', component: EditorComponent },
 	{ path: 'group/editor/:id', component: GroupComponent },
+	{ path: 'proposal/view/:id', component: PadviewComponent },
+	{ path: 'group/view/:id', component: PadviewComponent },
 	{ path: 'settings/:id', component: SettingsComponent }
 ];
 

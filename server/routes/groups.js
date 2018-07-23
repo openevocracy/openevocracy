@@ -90,14 +90,13 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 }
 
 /**
- * @desc: check if specific proposal is valid, return true or false
+ * @desc: Check if specific proposal is valid, return true or false
  * @param:
  *     html: text of the proposal as html
  */
 function isProposalValid(html) {
-	// Remove tags, split and get length
-	var num_words = html.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length;
-	return num_words >= cfg.MIN_WORDS_PROPOSAL;
+	// Valid if number of words in html is greater than configured threshold
+	return utils.countHtmlWords(html) >= cfg.MIN_WORDS_PROPOSAL;
 }
 
 /**
@@ -312,10 +311,6 @@ exports.remixGroupsAsync = function(topic) {
 			'rejectedReason': error.reason
 		};
 	});
-};
-
-exports.list = function(req, res) {
-    db.collection('groups').find().toArrayAsync().then(_.bind(res.json,res));
 };
 
 /* @desc: Gets group editor information, necessary information are:

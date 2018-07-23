@@ -18,12 +18,7 @@ import * as _ from 'underscore';
 
 import { C } from '../../../shared/constants';
 
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { faFile } from '@fortawesome/free-solid-svg-icons';
-import { faHandshake } from '@fortawesome/free-solid-svg-icons';
-import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
-import { faExpandArrowsAlt } from '@fortawesome/free-solid-svg-icons';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-group',

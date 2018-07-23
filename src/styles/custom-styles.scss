@@ -19,7 +19,6 @@ body.modal-open { overflow: hidden; }
 .flex-spacer { flex: 1 1 auto; }
 .text-muted { color: $grey700; }
 .mat-form-field { width: 100%; }
-.alert-box { margin-top: 15px; }
 
 /* Alert and Modal close button */
 button.close { padding: 0; background: transparent; border: 0; }
@@ -47,6 +46,13 @@ $color-default-rating: $grey700 !default;
 	height: 20px;
 }
 
-/* Misc */
-.alert a { color: $black; }
-
+/* Group vis */
+.vis-navigation .vis-button { width: 30px; font-size: 30px; line-height: 30px; cursor: pointer; }
+.vis-navigation .vis-button:before { font-family: 'FontAwesome'; position: absolute; bottom: 0; }
+.vis-navigation .vis-up:before { content: '\f139'; right: 30px; bottom: 60px; }
+.vis-navigation .vis-down:before { content: '\f13a'; right: 30px; }
+.vis-navigation .vis-left:before { content: '\f137'; right: 60px; bottom: 30px; }
+.vis-navigation .vis-right:before { content: '\f138'; right: 0; bottom: 30px; }
+.vis-navigation .vis-zoomIn:before { content: '\f055'; right: 130px; }
+.vis-navigation .vis-zoomOut:before { content: '\f056'; right: 100px; }
+.vis-navigation .vis-zoomExtends:before { content: '\f0b2'; width: 25px; right: 30px; bottom: 30px; }

@@ -235,13 +235,47 @@ exports.getPadProposalDetails = function(req, res) {
 };
 
 /*
+ * @desc: Query information about proposal or group for simple view
+ */
+function queryViewAsync(collection_suffix, padId) {
+	return db.collection('pads_'+collection_suffix).findOneAsync({ '_id': padId }).then(function(pad) {
+		// Get pad html
+		var html_promise = getPadHTMLAsync(collection_suffix, pad.docId);
+		// Get topic name
+		var topicName_promise = db.collection('topics').findOneAsync({'_id': pad.topicId}).get('name');
+		
+		// Join all information and return
+		return Promise.join(html_promise, topicName_promise).spread(function(html, topicName) {
+			var ownerId = (collection_suffix == 'proposal') ? pad.ownerId : null;
+			return { 'topicId': pad.topicId, 'title': topicName, 'html': html, 'expiration': pad.expiration, 'ownerId': ownerId };
+		});
+	});
+}
+
+/*
+ * @desc: Query information about proposal for simple view
+ */
+exports.getPadProposalView = function(req, res) {
+	var padId = ObjectId(req.params.id);
+	queryViewAsync('proposal', padId).then(res.json.bind(res));
+};
+
+/*
+ * @desc: Query information about group for simple view
+ */
+exports.getPadGroupView = function(req, res) {
+	var padId = ObjectId(req.params.id);
+	queryViewAsync('group', padId).then(res.json.bind(res));
+};
+
+/*
  * @desc:
  *    Get assembled html from pad as promise
  * @params:
  *    collection: collection to store pad in
  *    docId: id of the particular doc
  */
-exports.getPadHTMLAsync = function(collection_suffix, docId) {
+function getPadHTMLAsync(collection_suffix, docId) {
 	// TODO: Do not call this function anytime when opening a topic. Instead, if connection is disconnected, store html in pad meta. Always just read html meta data from pad to show contents in topic.
 	
 	// Connect to the particular pad
@@ -260,6 +294,7 @@ exports.getPadHTMLAsync = function(collection_suffix, docId) {
 		});
 	});
 };
+exports.getPadHTMLAsync = getPadHTMLAsync;
 
 /*
  * @desc:

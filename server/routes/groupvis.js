@@ -6,6 +6,7 @@ var Promise = require('bluebird');
 
 // Own references
 var utils = require('../utils');
+var pads = require('./pads');
 
 /*
  * @desc: get group relations for a specific group as array
@@ -70,5 +71,40 @@ exports.query = function(req, res) {
 			'nodes': nodes,
 			'edges': edges
 		};
+	}).then(res.json.bind(res));
+};
+
+/*
+ * @desc: Get details about specific proposal when user clicked on it in graph
+ */
+exports.getProposal = function(req, res) {
+	var padId = ObjectId(req.params.id);
+	
+	db.collection('pads_proposal').findOneAsync({'_id': padId}, {'docId': true, 'expiration': true}).then(function(pad) {
+		// Get html with docId
+		return pads.getPadHTMLAsync('proposal', pad.docId).then(function(html) {
+			// Return number of words and expiration timestamp
+			return { 'padId': pad._id, 'numWords': utils.countHtmlWords(html), 'expiration': pad.expiration };
+		});
+	}).then(res.json.bind(res));
+};
+
+/*
+ * @desc: Get details about specific group when user clicked on it in graph
+ */
+exports.getGroup = function(req, res) {
+	var padId = ObjectId(req.params.id);
+	
+	db.collection('pads_group').findOneAsync({'_id': padId}, {'docId': true, 'groupId': true, 'expiration': true}).then(function(pad) {
+		// Get number of words in group pad
+		var numWords_promise = pads.getPadHTMLAsync('group', pad.docId).then(utils.countHtmlWords);
+		
+		// Get amount of members in group
+		var numMembers_promise = db.collection('group_relations').countAsync({'groupId': pad.groupId});
+		
+		// Join all information and send response
+		return Promise.join(numWords_promise, numMembers_promise).spread(function(numWords, numMembers) {
+			return { 'padId': pad._id, 'numWords': numWords, 'numMembers': numMembers, 'expiration': pad.expiration };
+		});
 	}).then(res.json.bind(res));
 };

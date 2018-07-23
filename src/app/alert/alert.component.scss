@@ -3,7 +3,10 @@
 
 /* Component Styles */
 
-.alert { color: $white; padding: 15px; margin-bottom: .5rem; }
+.alert { color: $white; padding: 15px; margin-bottom: 0.5rem; }
+.alert:first-child { margin-top: 1rem; }
+.alert:last-child { margin-bottom: 1rem; }
+.alert a { color: $black; }
 .alert-success { background-color: $green700; }
 .alert-info { background-color: $blue700; }
 .alert-warning { background-color: $orange700; }

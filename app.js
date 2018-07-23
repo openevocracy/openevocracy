@@ -100,33 +100,27 @@ app.post('/json/topic-unvote', auth(), topics.unvote);
 // @desc: Download final document as pdf
 app.get('/file/topic/:id', auth(), topics.download);
 
-// ###################
-// ### E D I T O R ###
-// ###################
+// ###############
+// ### P A D S ###
+// ###############
 
 // @desc: Get detailed information about topic description pad
 app.get('/json/topic/editor/:id', auth(), pads.getPadTopicDetails);
 
+// @desc: Create new proposal
+app.post('/json/proposal/create', auth(), proposals.create);
+
 // @desc: Get detailed information about proposal pad
 app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
+
+// @desc: Get proposal information
+app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
 
 // @desc: Get detailed information about group pad
 app.get('/json/group/editor/:id', auth(), groups.query);
 
-// #########################
-// ### P R O P O S A L S ###
-// #########################
-
-app.post('/json/proposal/create', auth(), proposals.create);
-//app.get('/json/proposal/:id', auth(), proposals.query);
-
-// ###################
-// ### G R O U P S ###
-// ###################
-
-app.get('/json/groups', auth(), groups.list);
-// get group by id
-app.get('/json/group/:id', auth(), groups.query);
+// @desc: Get group information
+app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 
 // #####################
 // ### R A T I N G S ###
@@ -144,6 +138,12 @@ app.post('/json/ratings/rate', auth(), ratings.rate);
 
 // @desc: Get group vis data to visualize topic hierarchy
 app.get('/json/groupvis/:id', auth(), groupvis.query);
+
+// @desc: Get details about specific proposal
+app.get('/json/groupvis/proposal/:id', auth(), groupvis.getProposal);
+
+// @desc: Get details about specific group
+app.get('/json/groupvis/group/:id', auth(), groupvis.getGroup);
 
 // ###################
 // ###   A U T H   ###

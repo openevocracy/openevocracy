@@ -85,3 +85,11 @@ exports.mergeCollections = function(listA, listB, idField) {
 exports.equalId = function(a, b) {
 	return (a.toString() == b.toString());
 };
+
+/*
+ * @desc: Count number of words from html document
+ */
+exports.countHtmlWords = function(html) {
+	// Remove tags, split and get length
+	return html.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length;
+};

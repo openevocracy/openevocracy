@@ -63,6 +63,7 @@ import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
 import { GroupComponent } from './group/group.component';
 import { GroupvisComponent } from './groupvis/groupvis.component';
+import { PadviewComponent } from './padview/padview.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -91,7 +92,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 		GroupComponent,
 		AddonePipe,
 		TimestampPipe,
-		GroupvisComponent
+		GroupvisComponent,
+		PadviewComponent
 	],
 	imports: [
 		BrowserModule,

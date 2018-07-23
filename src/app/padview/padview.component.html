@@ -1,0 +1,33 @@
+<mat-toolbar color="primary">
+	<div class="flex container">
+		<div class="topic-title">
+			<h1>{{pad?.title}}</h1>
+			<p>
+				<span>{{ 'PADVIEW_EXPIRATION_LABEL' | translate }}: {{ pad?.expiration | date:'y-MM-dd' }} {{ 'PADVIEW_SUBTITLE_DATE' | translate }} {{ pad?.expiration | date:'HH:mm:ss' }}</span>
+				<span *ngIf="pad?.expiration > now">(<countdown [time]="pad?.expiration"></countdown>)</span>
+			</p>
+		</div>
+		
+		<span class="flex-spacer"></span>
+		
+		<button mat-button title="{{ 'PADVIEW_BUTTON_GOTO_TOPIC' | translate }}" [routerLink]="['/topic', pad?.topicId]">
+			<span><fa-icon [icon]="faComments"></fa-icon> {{ 'PADVIEW_BUTTON_GOTO_TOPIC' | translate }}</span>
+		</button>
+		
+		<button mat-icon-button [matMenuTriggerFor]="more">
+			<fa-icon [icon]="faEllipsisV"></fa-icon>
+		</button>
+		<mat-menu #more="matMenu" [overlapTrigger]="false">
+			<button mat-menu-item *ngIf="pad?.ownerId"><fa-icon [icon]="faUser"></fa-icon> {{ 'TOPIC_BUTTON_AUTHOR' | translate }}</button>
+			<button mat-menu-item><fa-icon [icon]="faShareSquare"></fa-icon> {{ 'TOPIC_BUTTON_SHARE' | translate }}</button>
+		</mat-menu>
+	</div>
+</mat-toolbar>
+
+<div class="container alert-box">
+	<alert></alert>
+</div>
+
+<div class="container">
+	<div class="pad-html" [innerHtml]="pad?.html"></div>
+</div>
