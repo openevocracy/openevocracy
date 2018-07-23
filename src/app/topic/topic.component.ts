@@ -15,17 +15,7 @@ import * as _ from 'underscore';
 
 import { Topic } from '../_models/topic/topic';
 
-import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
-import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { faShareSquare } from '@fortawesome/free-solid-svg-icons';
-import { faDownload } from '@fortawesome/free-solid-svg-icons';
-//import { faFileMedical } from '@fortawesome/free-solid-svg-icons';
-import { faFile } from '@fortawesome/free-solid-svg-icons';
-import { faSitemap } from '@fortawesome/free-solid-svg-icons';
-import { faSave } from '@fortawesome/free-solid-svg-icons';
-import { faEdit } from '@fortawesome/free-solid-svg-icons';
-import { faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faHandPaper, faEllipsisV, faUser, faShareSquare, faDownload, faFile, /*faFileMedical, */ faSitemap, faSave, faEdit, faUsers } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-topic',
@@ -98,12 +88,12 @@ export class TopicComponent implements OnInit {
 		if(this.topic.voted) {
 			this.topicService.unvote(this.topic._id, this.userId).subscribe(res => {
 				this.topic.voted = res.voted;
-				this.topic.num_votes--;
+				this.topic.numVotes--;
 			});
 		} else {
 			this.topicService.vote(this.topic._id, this.userId).subscribe(res => {
 				this.topic.voted = res.voted;
-				this.topic.num_votes++;
+				this.topic.numVotes++;
 			});
 		}
 	}
@@ -120,7 +110,7 @@ export class TopicComponent implements OnInit {
 	 * @desc: Download final document as pdf (open in new tab)
 	 */
 	private downloadPdf() {
-		this.httpManagerService.getFile('/file/topic/'+this.topicId);
+		this.topicService.downloadResultPdf(this.topicId);
 	}
 
 }

@@ -13,7 +13,11 @@ export class TopicsListService {
 	constructor(
 		private httpManagerService: HttpManagerService) { }
 		
-	getTopicsList(): Observable<TopicListElement[]> {
+	public getTopicsList(): Observable<TopicListElement[]> {
 		return this.httpManagerService.get('/json/topiclist');
+	}
+	
+	public getTopicsListElement(topicId: string): Observable<TopicListElement[]> {
+		return this.httpManagerService.get('/json/topiclist/'+topicId);
 	}
 }

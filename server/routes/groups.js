@@ -107,7 +107,7 @@ function isProposalValid(html) {
 exports.createGroupsAsync = function(topic) {
 	var topicId = topic._id;
 	
-	var valid_participants_promise = db.collection('pads_proposal')
+	var validParticipants_promise = db.collection('pads_proposal')
 		.find({ 'topicId': topicId }).toArrayAsync()
 		.map(function(pad) {
 			// Get html of doc and add valid status to pad object
@@ -121,16 +121,16 @@ exports.createGroupsAsync = function(topic) {
 			}), 'ownerId');
 	});
 	
-	var storeValidParticipantsPromise = valid_participants_promise.then(function(valid_participants) {
-		console.log(valid_participants);
+	var storeValidParticipantsPromise = validParticipants_promise.then(function(validParticipants) {
+		console.log(validParticipants);
 		return db.collection('topics').updateAsync(
 		{ '_id': topic._id },
-		{ $set: { 'valid_participants': _.size(valid_participants) } });
+		{ $set: { 'validParticipants': _.size(validParticipants) } });
 	});
 	
 	// Create group and notify members
-	var createGroupsPromise = valid_participants_promise.then(function(valid_participants) {
-		return assignParticipantsToGroups(valid_participants);
+	var createGroupsPromise = validParticipants_promise.then(function(validParticipants) {
+		return assignParticipantsToGroups(validParticipants);
 	}).map(function(group_members) {
 		// Create new group id
 		var topicId = topic._id;

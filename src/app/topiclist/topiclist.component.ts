@@ -13,8 +13,7 @@ import { UserService } from '../_services/user.service';
 import { TopicsListService } from '../_services/topiclist.service';
 import { ModalService } from '../_services/modal.service';
 
-import { faHandPaper } from '@fortawesome/free-solid-svg-icons';
-import { faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { faHandPaper, faPlusSquare, faDownload } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-topics',
@@ -28,6 +27,7 @@ export class TopiclistComponent implements OnInit {
 	
 	private faHandPaper = faHandPaper;
 	private faPlusSquare = faPlusSquare;
+	private faDownload = faDownload;
 
 	constructor(
 		private topicsListService: TopicsListService,
@@ -40,12 +40,12 @@ export class TopiclistComponent implements OnInit {
 		this.C = C;
 		this.topicsListService.getTopicsList().subscribe(res => {
 			// Add progress of stages to each topic for sorting purpose
-			let with_progress = _.each(res, obj => {
+			let withProgress = _.each(res, obj => {
 				// Rejected stage progress number is passed stage + 1
 				obj.progress = (obj.stage == C.STAGE_REJECTED) ? C.STAGE_PASSED+1 : obj.stage;
 			});
 			// Sort topics by progress and by name
-			let sortedTopicsList = _.sortBy(_.sortBy(with_progress, 'name'), 'progress');
+			let sortedTopicsList = _.sortBy(_.sortBy(withProgress, 'name'), 'progress');
 			
 			// Initialize topicsList and construct all elements
 			this.topicsList = [];
@@ -55,6 +55,9 @@ export class TopiclistComponent implements OnInit {
 		});
 	}
 	
+	/*
+	 * @desc: Toggle vote (relevance) of topic in selection stage
+	 */
 	private toggleVote(e, tid) {
 		e.stopPropagation();
 		
@@ -68,18 +71,52 @@ export class TopiclistComponent implements OnInit {
 		if(topic.voted) {
 			this.topicService.unvote(tid, uid).subscribe(res => {
 				topic.voted = res.voted;
-				topic.num_votes--;
+				topic.numVotes--;
 			});
 		} else {
 			this.topicService.vote(tid, uid).subscribe(res => {
 				topic.voted = res.voted;
-				topic.num_votes++;
+				topic.numVotes++;
 			});
 		}
 	}
 	
+	/*
+	 * @desc: Open modal to add new topic
+	 */
 	private openAddTopicModal(e) {
 		e.preventDefault();
 		this.modal.open({});
+	}
+	
+	/*
+	 * @desc: Download final document as pdf (open in new tab)
+	 */
+	private downloadPdf(e, topicId) {
+		e.stopPropagation();
+		this.topicService.downloadResultPdf(topicId);
+	}
+	
+	/*
+	 * @desc: Update specific topic list element, when its countdown has finished
+	 * @param:
+	 *    - topicId: topic id of topic which should be updated
+	 */
+	private updateElement(topicId) {
+		// Wait 5 seconds after countdown has finished to avoid that old topic will be returned
+		setTimeout(function() {
+			// Get topic list element of specific topic element
+			this.topicsListService.getTopicsListElement(topicId).subscribe(res => {
+				// Make object
+				let newTopicElement = new TopicListElement(res);
+				// Map through all topics and update the chosen one, keep all other
+				this.topicsList = _.map(this.topicsList, function(el) {
+					if (el._id == topicId)
+						return newTopicElement;
+					else
+						return el;
+				});
+			});
+		}.bind(this), 5000);
 	}
 }

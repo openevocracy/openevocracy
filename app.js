@@ -77,20 +77,27 @@ function auth() {
 // ###################
 
 /*
-Routes plan:
+ * Routes:
+ *
+ * /topiclist - Collection of topics with extended information
+ * /topiclist/:id - Single topic list element with sparse information (currently not used)
+ *
+ * /topic - Collection of topics with extended information (currently not used)
+ * /topic:id - Single topic with extended information
+ */
 
-/topiclist - Collection of topics with extended information
-/topiclist/:id - Single topic list element with sparse information (currently not used)
+/*
+ * @desc: Get whole topiclist or specific element from topic list
+ */
+app.get('/json/topiclist', auth(), topics.getTopiclist);
+app.get('/json/topiclist/:id', auth(), topics.getTopiclistElement);
 
-/topic - Collection of topics with extended information (currently not used)
-/topic:id - Single topic with extended information
-
-*/
-
-app.get('/json/topiclist', auth(), topics.list);
-app.patch('/json/topic/:id', auth(), topics.update);
+/*
+ * @desc: Get, create, update and delete topic
+ */
 app.get('/json/topic/:id', auth(), topics.query);
-app.post('/json/topic', auth(), topics.create);
+app.post('/json/topic/create', auth(), topics.create);
+app.patch('/json/topic/:id', auth(), topics.update);
 app.delete('/json/topic/:id', auth(), topics.delete);
 
 // @desc: Vote and unvote for specific topic from specific user

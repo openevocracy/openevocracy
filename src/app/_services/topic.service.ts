@@ -21,10 +21,14 @@ export class TopicService {
 	}
 	
 	public addTopic(topicName: string) {
-		return this.httpManagerService.post('/json/topic', {'name': topicName});
+		return this.httpManagerService.post('/json/topic/create', {'name': topicName});
 	}
 	
 	public getTopic(tid): Observable<Topic> {
 		return this.httpManagerService.get('/json/topic/' + tid);
+	}
+	
+	public downloadResultPdf(topicId) {
+		this.httpManagerService.getFile('/file/topic/'+topicId);
 	}
 }

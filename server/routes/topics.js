@@ -265,7 +265,6 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 	
 	// Detailed data (not used in topic list, only in details)
 	var pad_description_promise = null;
-	var group_members_promise = null;
 	var user_proposal_promise = null;
 	var user_group_promise = null;
     
@@ -275,12 +274,6 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 			.findOneAsync({'topicId': topicId}, { 'docId': true, 'ownerId': true })
 			.then(function(pad) {
 				return addHtmlToPad('topic_description', pad);
-		});
-		
-		// Get group member user id's
-		group_members_promise = groups_promise.then(function(groups) {
-			return db.collection('group_relations')
-				.find({'groupId': { $in: _.pluck(groups, '_id') } }).toArrayAsync();
 		});
 		
 		// Get proposal of user
@@ -331,8 +324,8 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 	
 	// Basic topic details
 	var topic_without_details_promise = Promise.props(_.extend(topic,{
-		'num_votes': topic_votes_promise.then(_.size),
-		'num_proposals': pads_proposal_count_promise,
+		'numVotes': topic_votes_promise.then(_.size),
+		'numProposals': pads_proposal_count_promise,
 		'voted': topic_votes_promise.then(function(topic_votes) {
 			return utils.checkArrayEntryExists(topic_votes, {'userId': userId});
 		}),
@@ -347,8 +340,7 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 			return Promise.props(_.extend(topic_without_details, {
 				'group': user_group_promise,
 				'proposal': user_proposal_promise,
-				'description': pad_description_promise/*,
-				'group_members': group_members_promise*/ // Currently not necessary
+				'description': pad_description_promise
 			}));
 		});
 	} else {
@@ -364,17 +356,29 @@ function addHtmlToPad(collection_suffix, pad) {
 	});
 }
 
-exports.list = function(req, res) {
-    var uid = ObjectId(req.user._id);
-    
-    manageAndListTopicsAsync().then(function(topics) {
-        // Promise.map does not work above
-        Promise.map(topics, _.partial(appendTopicInfoAsync, _, uid, false))
-        .then(function(topics){
-           return topics;
-        })
-        .then(res.json.bind(res));
-    });
+/*
+ * @desc: Get whole topiclist
+ */
+exports.getTopiclist = function(req, res) {
+	var userId = ObjectId(req.user._id);
+	
+	manageAndListTopicsAsync().then(function(topics) {
+		// Promise.map does not work above
+		Promise.map(topics, _.partial(appendTopicInfoAsync, _, userId, false)).then(res.json.bind(res));
+	});
+};
+
+/*
+ * @desc: Get a specific topiclist element
+ */
+exports.getTopiclistElement = function(req, res) {
+	var topicId = ObjectId(req.params.id);
+	var userId = ObjectId(req.user._id);
+	
+	db.collection('topics').findOneAsync({'_id': topicId})
+		.then(manageTopicStateAsync).then(function(topic) {
+			return appendTopicInfoAsync(topic, userId, false);
+	}).then(res.json.bind(res));
 };
 
 exports.update = function(req, res) {
@@ -530,8 +534,6 @@ exports.unvote = function(req, res) {
  * @desc: Download finished topic document
  */
 exports.download = function(req, res) {
-	console.log('download');
-	
 	var topicId = req.params.id;
 	var filename = path.join(appRoot.path, 'files/documents', topicId+'.pdf');
 	//res.sendFile(filename);

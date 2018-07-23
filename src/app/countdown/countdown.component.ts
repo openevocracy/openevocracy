@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, OnDestroy, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
 
@@ -26,6 +26,9 @@ export class CountdownComponent implements OnDestroy {
 		this.timestamp = parseInt(value as string);
 		this._startTimer();
 	}
+	
+	@Output()
+	private passed = new EventEmitter<string>();
 
 	constructor(
 		private changeDetectorRef: ChangeDetectorRef,
@@ -94,8 +97,11 @@ export class CountdownComponent implements OnDestroy {
 			this.changeDetectorRef.markForCheck();
 			
 			// If timer is over, stop countdown
-			if(this.delta <= 0)
+			if(this.delta <= 0) {
 				this._stopTimer();
+				// Inform parent that countdown has finished
+				this.passed.emit(null);
+			}
 		}, 1000);
 	}
 
