@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
@@ -12,7 +13,7 @@ import { EditorComponent } from '../editor/editor.component';
 
 import { Group } from '../_models/group';
 
-import 'quill-authorship';
+import 'quill-authorship-evo';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 
@@ -33,6 +34,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	private chatForm: FormGroup;
 	
 	private chatReady: boolean = false;
+	private chatHide: boolean = false;
 	private me;
 	private messages;
 	private memberColors = {};
@@ -59,7 +61,8 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
-		private fb: FormBuilder) {
+		private fb: FormBuilder,
+		private translateService: TranslateService) {
 		super(router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService);
 		
 		// Initialize form
@@ -88,7 +91,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 			// Send offline status message
 			this.chatSocket.send(JSON.stringify({
 				'type': C.CHATMSG_OFFLINE,
-				'text': this.me.name + " left the chat room."
+				'text': 'CHAT_ROOM_LEAVE'
 			}));
 			
 			// Close connection
@@ -182,17 +185,37 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 				// Send online status message
 				this.chatSocket.send(JSON.stringify({
 					'type': C.CHATMSG_ONLINE,
-					'text': this.me.name+" entered the chat room."
+					'text': 'CHAT_ROOM_ENTER'
 				}));
 				
 				// Start mutation observer to check if alert was added
 				this.startMutationObserver();
 			}.bind(this);
 			
+			// New Websocket message comes in
 			this.chatSocket.onmessage = function (e) {
+				// Parse message from server
 				var msg = JSON.parse(e.data);
-				// Add message to messages array
-				this.messages.push(msg);
+				
+				// If it's a normal message, just add message to messages array
+				if (msg.type == C.CHATMSG_DEFAULT) {
+					this.messages.push(msg);
+					return;
+				}
+				
+				// If message contains online or offline type, translate text
+				if (msg.type == C.CHATMSG_ONLINE || msg.type == C.CHATMSG_OFFLINE) {
+					this.translateService.get(msg.text).subscribe(label => {
+						msg.text = this.memberNames[msg.userId] + " " + label;
+						this.messages.push(msg);
+					});
+					
+					// Update status of specific user
+					if (msg.type == C.CHATMSG_ONLINE)
+						this.online[msg.userId] = true;
+					else if (msg.type == C.CHATMSG_OFFLINE)
+						this.online[msg.userId] = false;
+				}
 			}.bind(this);
 			
 			// Show chat
@@ -202,7 +225,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 			setTimeout(function() {
 				// Set position of chat area
 				this.setChatPositionAndSize();  // Initially
-				$(window).on('resize', this.setChatPositionAndSize.bind(this));  // While resize
+				$(window).on('resize', _.debounce(this.setChatPositionAndSize.bind(this), 250));  // While resize
 			}.bind(this), 500);
 		});
 	}
@@ -211,6 +234,12 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	 * @desc: Calculates fixed position of chat window.
 	 */
 	private setChatPositionAndSize() {
+		if($('body').innerWidth() < 1200) {
+			this.chatHide = true;
+			return;
+		}
+		this.chatHide = false;
+		
 		// Position and size of wrapper box
 		let top = $('.editor-toolbars').position().top + $('.editor-toolbars').height();
 		let left = $('quill-editor').position().left + $('quill-editor').outerWidth();
@@ -241,7 +270,10 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	 *        Is called e.g. after loading or when new message comes in.
 	 */
 	private scrollDown() {
-		$('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+		let $chat = $('#chat-messages')[0];
+		// Avoid error after re-showing chat view (undefined in some cases)
+		if ($chat)
+			$('#chat-messages').scrollTop($chat.scrollHeight);
 	}
 	
 	/*

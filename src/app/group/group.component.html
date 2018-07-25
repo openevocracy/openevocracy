@@ -28,12 +28,12 @@
 				<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}<span *ngIf="online[member.userId]"> *</span></span>
 			</button>
 			<mat-menu #menu="matMenu" [overlapTrigger]="false">
-				<button mat-menu-item class="rating-button" matTooltip="{{ 'GROUP_RATING_TOOLTIP_INTEGRATION' | translate }}" [matTooltipPosition]="'left'">
+				<a mat-menu-item class="rating-button" matTooltip="{{ 'GROUP_RATING_TOOLTIP_INTEGRATION' | translate }}" [matTooltipPosition]="'left'">
 					<fa-icon [icon]="faHandshake"></fa-icon> <star-rating staticColor="123" [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingIntegration" (ratingChange)="rate($event, member.userId, C.RATING_INTEGRATION)"></star-rating>
-				</button>
-				<button mat-menu-item class="rating-button" matTooltip="{{ 'GROUP_RATING_TOOLTIP_KNOWLEDGE' | translate }}" [matTooltipPosition]="'left'">
+				</a>
+				<a mat-menu-item class="rating-button" matTooltip="{{ 'GROUP_RATING_TOOLTIP_KNOWLEDGE' | translate }}" [matTooltipPosition]="'left'">
 					<fa-icon [icon]="faLightbulb"></fa-icon> <star-rating staticColor="123" [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingKnowledge" (ratingChange)="rate($event, member.userId, C.RATING_KNOWLEDGE)"></star-rating>
-				</button>
+				</a>
 				<button mat-menu-item (click)="openMemberProposal(member.proposal_html, member.color)">
 					<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_MEMBER_BUTTON_PROPOSAL' | translate }}</span>
 				</button>
@@ -57,7 +57,7 @@
 		</div>
 	</div>
 	
-	<div id="chat-wrapper" [ngClass]="{'hidden': !chatReady}">
+	<div id="chat-wrapper" *ngIf="!chatHide" [ngClass]="{'hidden': !chatReady}">
 		<div id="chat-messages">
 			<div [ngClass]="{'chat-message': true, 'me': userId == message.userId}" *ngFor="let message of messages">
 				<div *ngIf="message.type == C.CHATMSG_DEFAULT" class="default-message">
@@ -74,7 +74,7 @@
 			</div>
 		</div>
 		<form [formGroup]="chatForm" (ngSubmit)="sendChatMessage()" novalidate><mat-form-field>
-				<input matInput formControlName="msg" type="text" placeholder="{{ 'GROUP_CHATMESSAGE_LABEL' | translate }}">
+				<input matInput formControlName="msg" type="text" placeholder="{{ 'CHAT_MESSAGE_LABEL' | translate }}">
 			</mat-form-field>
 			
 			<button mat-raised-button color="primary" type="submit">

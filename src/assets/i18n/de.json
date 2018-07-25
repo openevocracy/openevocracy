@@ -120,7 +120,10 @@
 	"GROUP_RATING_TOOLTIP_INTEGRATION": "Integrationsfähigkeit dieses Mitglieds, d.h. Kooperations- und Konsensfähigkeit",
 	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Fachwissen dieses Mitglieds bezüglich des Themas",
 	"GROUP_MEMBER_PROPOSAL_CLOSE": "Schließen",
-	"GROUP_CHATMESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
+	
+	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
+	"CHAT_ROOM_ENTER": "hat den Raum betreten.",
+	"CHAT_ROOM_LEAVE": "hat den Raum verlassen.",
 	
 	"EDITOR_BUTTON_CLOSE": "Schließen",
 	"EDITOR_SAVED_CHANGES": "Alle Änderungen sind gespeichert.",

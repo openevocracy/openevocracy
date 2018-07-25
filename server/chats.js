@@ -72,7 +72,10 @@ exports.getChatRoomMessages = function(req, res) {
 function sendToSocketsInRoom(roomUsers, msg) {
 	_.each(roomUsers, function(user) {
 		// Send message to all users in rooom
-		user.socket.send(JSON.stringify(msg));
+		user.socket.send(JSON.stringify(msg), function(err) {
+			if (!_.isUndefined(err))
+				console.error(err);
+		});
 	});
 }
 
