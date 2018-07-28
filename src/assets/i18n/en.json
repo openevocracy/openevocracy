@@ -9,6 +9,7 @@
 	"FOOTER_MENU_IMPRESS": "Imprint",
 	"FOOTER_MENU_VERSION": "Current version",
 	
+	"FORM_BUTTON_CLOSE": "Close",
 	"FORM_LABEL_MAIL": "Your email address:",
 	"FORM_LABEL_PASSWORD": "Your password:",
 	"FORM_LABEL_PASSWORD_REP": "Repeat your password",
@@ -125,12 +126,17 @@
 	"CHAT_ROOM_ENTER": "entered the chatroom.",
 	"CHAT_ROOM_LEAVE": "left the chatroom.",
 	
-	"EDITOR_BUTTON_CLOSE": "Close",
 	"EDITOR_SAVED_CHANGES": "All changes are saved.",
 	"EDITOR_UNSAVED_CHANGES": "Saving ...",
 	"EDITOR_CLOSE_MODAL_TEXT": "The document is not fully saved yet, close anyway?",
 	"EDITOR_CLOSE_MODAL_STAY": "Cancel",
 	"EDITOR_CLOSE_MODAL_LEAVE": "Close",
+	"EDITOR_PLACEHOLDER_TOPIC_DESCRIPTION": "Describe this topic ...",
+	"EDITOR_PLACEHOLDER_PROPOSAL": "Express what you think about this topic: your proposed solutions, disires and concerns ...",
+	"EDITOR_PLACEHOLDER_GROUP": "Write down your common proposed solutions. Note that the chat, the text comments and the associated forum is intended for discussions. The text shouldn't contain any meta content ...",
+	"EDITOR_SNACKBAR_CLOSE_SECONDS": "The document closes in {{s}} seconds.",
+	"EDITOR_SNACKBAR_CLOSE_MINUTES": "The document closes in {{m}} minutes",
+	"EDITOR_CONNECTION_LOST": "Connection lost, changes will not be saved.",
 	
 	"PADVIEW_EXPIRATION_LABEL": "Expiration date",
 	"PADVIEW_SUBTITLE_DATE": "at",

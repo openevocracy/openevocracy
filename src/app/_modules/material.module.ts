@@ -11,7 +11,8 @@ import {
 	MatCardModule,
 	MatTooltipModule,
 	MatRippleModule,
-	MatTabsModule/*,
+	MatTabsModule,
+	MatSnackBarModule/*,
 	MatIconModule*/
 } from '@angular/material';
 
@@ -27,7 +28,8 @@ import {
 		MatCardModule,
 		MatTooltipModule,
 		MatRippleModule,
-		MatTabsModule/*,
+		MatTabsModule,
+		MatSnackBarModule/*,
 		MatIconModule*/
 	],
 	exports: [
@@ -41,7 +43,8 @@ import {
 		MatCardModule,
 		MatTooltipModule,
 		MatRippleModule,
-		MatTabsModule/*,
+		MatTabsModule,
+		MatSnackBarModule/*,
 		MatIconModule*/
 	]
 })

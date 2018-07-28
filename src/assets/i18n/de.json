@@ -9,6 +9,7 @@
 	"FOOTER_MENU_IMPRESS": "Impressum",
 	"FOOTER_MENU_VERSION": "Aktuelle Version",
 	
+	"FORM_BUTTON_CLOSE": "Schließen",
 	"FORM_LABEL_MAIL": "Deine E-Mail-Adresse:",
 	"FORM_LABEL_PASSWORD": "Dein Passwort",
 	"FORM_LABEL_PASSWORD_REP": "Wiederhole Dein Passwort",
@@ -125,12 +126,17 @@
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",
 	"CHAT_ROOM_LEAVE": "hat den Raum verlassen.",
 	
-	"EDITOR_BUTTON_CLOSE": "Schließen",
 	"EDITOR_SAVED_CHANGES": "Alle Änderungen sind gespeichert.",
 	"EDITOR_UNSAVED_CHANGES": "Speichert ...",
 	"EDITOR_CLOSE_MODAL_TEXT": "Das Dokument ist noch nicht gespeichert, trotzdem schließen?",
 	"EDITOR_CLOSE_MODAL_STAY": "Abbrechen",
 	"EDITOR_CLOSE_MODAL_LEAVE": "Schließen",
+	"EDITOR_PLACEHOLDER_TOPIC_DESCRIPTION": "Beschreibe das Thema ...",
+	"EDITOR_PLACEHOLDER_PROPOSAL": "Schreibe wie du über das Thema denkst: Formuliere deine Lösungsvorschläge, Wünsche und Bedenken ...",
+	"EDITOR_PLACEHOLDER_GROUP": "Schreibt gemeinsam auf, auf welche Lösungsvorschläge ihr euch einigen konnte. Beachtet, dass Diskussionen über den Text im Chat, in den Textkommentaren und dem zugehörigen Forum geführt werden sollen. Das Dokument selbst soll keine Metainformationen enthalen ...",
+	"EDITOR_SNACKBAR_CLOSE_SECONDS": "Das Dokument schließt in {{s}} Sekunden.",
+	"EDITOR_SNACKBAR_CLOSE_MINUTES": "Das Dokument schließt in {{m}} Minuten.",
+	"EDITOR_CONNECTION_LOST": "Verbindungs verloren, Änderungen werden nicht gespeichert.",
 	
 	"PADVIEW_EXPIRATION_LABEL": "Ablaufdatum",
 	"PADVIEW_SUBTITLE_DATE": "um",

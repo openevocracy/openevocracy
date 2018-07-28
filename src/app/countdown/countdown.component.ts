@@ -97,7 +97,7 @@ export class CountdownComponent implements OnDestroy {
 			this.changeDetectorRef.markForCheck();
 			
 			// If timer is over, stop countdown
-			if(this.delta <= 0) {
+			if (this.delta <= 0) {
 				this._stopTimer();
 				// Inform parent that countdown has finished
 				this.passed.emit(null);

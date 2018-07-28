@@ -6,6 +6,9 @@ export class UtilsService {
 	
 	constructor() { }
 	
+	/*
+	 * @desc: Calculate timestamp from given Object Id
+	 */
 	public getTimestampFromObjectId(id) {
 		// Get timestamp from topic id in hex format from Object Id
 		var hexTimestamp = id.toString().substring(0,8);
@@ -15,7 +18,10 @@ export class UtilsService {
 		return intTimestamp*1000;
 	}
 	
-	// from https://stackoverflow.com/questions/35474991/angular-2-form-validating-for-repeat-password
+	/*
+	 * @desc: Angular form validator to check if field contents are equal
+	 * @source: https://stackoverflow.com/a/45837475/2692283
+	 */
 	public areEqual(c: AbstractControl): ValidationErrors | null {
 		const keys: string[] = Object.keys(c.value);
 		for (const i in keys) {
@@ -33,5 +39,4 @@ export class UtilsService {
 		let browserLang = navigator.language || navigator['userLanguage'];
 		return browserLang.split('-')[0];
 	}
-
 }

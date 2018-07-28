@@ -50,6 +50,12 @@ exports.startPadServer = function(wss) {
 			var stream = new WebSocketJSONStream(ws);
 			backend.listen(stream, {'userId': userId});
 		});
+		
+		// Set socket alive initially and every time a pong is arriving
+		ws.isAlive = true;
+		ws.on('pong', function() {
+			ws.isAlive = true;
+		});
 	});
 	
 	// Middleware to hook into connection process
@@ -66,6 +72,9 @@ exports.startPadServer = function(wss) {
 	
 	// Establish connection to shareDB
 	connection = backend.connect();
+	
+	// Initalize ping interval
+	utils.pingInterval(wss);
 };
 
 /*
@@ -201,16 +210,16 @@ exports.createPadAsync = createPadAsync;
  */
 function getPadDetails(collection, padId) {
 	// Get pad meta information
-	var pad_promise = db.collection(collection).findOneAsync({ '_id': padId });
+	var pad_promise = db.collection(collection).findOneAsync({ '_id': padId, 'expiration': true });
 	
 	// Get topic id as source (for "back" button) and topic name
 	var topic_name_promise = pad_promise.then(function(pad) {
-		return db.collection('topics').findOneAsync({'_id': pad.topicId}, {'name': true}).get('name');
+		return db.collection('topics').findOneAsync({'_id': pad.topicId}, { 'name': true });
 	});
 	
 	// Return pad meta information including topic name
-	return Promise.join(pad_promise, topic_name_promise).spread(function(pad, topic_name) {
-		return { 'docId': pad.docId, 'title': topic_name, 'source': pad.topicId };
+	return Promise.join(pad_promise, topic_name_promise).spread(function(pad, topic) {
+		return { 'docId': pad.docId, 'title': topic.name, 'topicId': pad.topicId, 'deadline': pad.expiration };
 	});
 }
 

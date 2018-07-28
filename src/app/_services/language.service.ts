@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { TranslateService, LangChangeEvent } from '@ngx-translate/core';
+import { forkJoin } from 'rxjs/observable/forkJoin';
+import { MatSnackBar } from '@angular/material';
 
-import { AlertService } from './alert.service';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { HttpManagerService } from './http-manager.service';
@@ -12,11 +13,11 @@ import * as _ from 'underscore';
 export class LanguageService {
 
 	constructor(
+		private snackBar: MatSnackBar,
 		private translateService: TranslateService,
 		private httpManagerService: HttpManagerService,
 		private userService: UserService,
-		private utilsService: UtilsService,
-		private alertService: AlertService) {}
+		private utilsService: UtilsService) {}
 		
 	private getUid() {
 		return this.userService.getUserId();
@@ -40,8 +41,16 @@ export class LanguageService {
 		// Set/Update language in local storage for later use
 		localStorage.setItem('language', key);
 		// Update user language to server
-		this.httpManagerService.post('/json/user/lang', {'uid': this.getUid(), 'lang': key})
-			.subscribe(res => this.alertService.alertFromServer(res.alert));
+		this.httpManagerService.post('/json/user/lang', {'uid': this.getUid(), 'lang': key}).subscribe(res => {
+			forkJoin(
+				this.translateService.get(res.alert.content),
+				this.translateService.get('FORM_BUTTON_CLOSE'))
+			.subscribe(([msg, action]) => {
+				let snackBarRef = this.snackBar.open(msg, action, {
+					'duration': 5000
+				});
+			});
+		});
 	}
 	
 	/*

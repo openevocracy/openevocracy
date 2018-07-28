@@ -1,7 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
+import { forkJoin } from 'rxjs/observable/forkJoin';
+import { MatSnackBar } from '@angular/material';
+import { TranslateService } from '@ngx-translate/core';
 
+import { AlertService } from '../_services/alert.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
 import { ModalService } from '../_services/modal.service';
@@ -25,33 +29,42 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 })
 export class EditorComponent implements OnInit, OnDestroy {
 	private docId: string;
-	protected padId: string;
-	protected userId: string;
 	private title: string;
 	private saved: boolean = true;
-	protected source: string;
-	protected quillModules;
-	private padSocket;
-	protected quillEditor;
 	private placeholder: string;
-	private modalSubscription: Subscription;
+	protected connectionAlreadyLost: boolean = false;
+	protected padId: string;
+	protected userId: string;
+	protected topicId: string;
+	protected quillModules;
+	protected quillEditor;
 	protected userToken: string;
+	protected type: string;
+	protected deadlineInterval;
+	protected pingInterval;
+	protected padSocket;
+	protected modalSubscription: Subscription;
 	
 	private doc;
 	
 	private faTimes = faTimes;
 
 	constructor(
+		protected snackBar: MatSnackBar,
+		protected alertService: AlertService,
 		protected router: Router,
 		protected activatedRoute: ActivatedRoute,
 		protected modalService: ModalService,
 		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
-		protected userService: UserService) {
+		protected userService: UserService,
+		protected translateService: TranslateService) {
 			
 		this.userId = this.userService.getUserId();
 		this.userToken = this.userService.getToken();
+		this.type = this.router.url.split('/')[1];
 		
+		// Set quill editor options
 		this.quillModules = {
 			toolbar: [
 				['bold', 'italic', 'underline', 'strike'],
@@ -64,26 +77,46 @@ export class EditorComponent implements OnInit, OnDestroy {
 			]
 		}
 		
-		this.placeholder = "...";
-		
+		// Modal
 		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe(close => {
 			// Close modal
 			this.modalService.close();
 			
 			// Navigate to source
 			if (close)
-				this.router.navigate(['/topic', this.source]);
+				this.router.navigate(['/topic', this.topicId]);
 		});
 	}
 	
-	ngOnInit() {}
+	ngOnInit() {
+		// Set and translate placeholder
+		let key = (this.type == 'topic') ? "EDITOR_PLACEHOLDER_TOPIC_DESCRIPTION" : "";
+		key = (this.type == 'proposal') ? "EDITOR_PLACEHOLDER_PROPOSAL" : key;
+		this.translatePlaceholder(key);
+		
+		// Initialize ping
+		this.initServerPing();
+	}
 	
 	ngOnDestroy() {
-		if(this.padSocket)
+		// Close pad socket
+		if (this.padSocket)
 			this.padSocket.close();
 			
 		// Unsubscribe to avoid memory leak
 		this.modalSubscription.unsubscribe();
+		
+		// Stop countdown
+		if (this.deadlineInterval)
+			clearInterval(this.deadlineInterval);
+		if (this.pingInterval)
+			clearInterval(this.pingInterval);
+	}
+	
+	protected translatePlaceholder(key) {
+		this.translateService.get(key).subscribe(label => {
+			this.placeholder = label;
+		});
 	}
 	
 	protected enableEdit() {
@@ -111,7 +144,16 @@ export class EditorComponent implements OnInit, OnDestroy {
 			this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
 				this.title = res.title;
 				this.docId = res.docId;
-				this.source = res.source;
+				this.topicId = res.topicId;
+				
+				// Check if document is expired
+				if (Date.now() <= res.deadline) {
+					// If not, initialize countdown
+					this.initCountdown(res.deadline);
+				} else {
+					// If it is expired, switch to view
+					this.redirectToView();
+				}
 				
 				// Initialize socket
 				this.initalizePadSocket(this.docId);
@@ -165,8 +207,53 @@ export class EditorComponent implements OnInit, OnDestroy {
 				});
 			}.bind(this));
 			
+			// WebSocket connection was closed from server
+			this.padSocket.onclose = function(e) {
+				// If pad socket was not closed actively (on destroy), inform user that
+				// socket is broken, ask for reload and freeze editor
+				this.connectionLostMessage();
+			}.bind(this);
+			
 			this.enableEdit();
 		}.bind(this);
+	}
+	
+	/*
+	 * @desc: Send ping to server in specific interval
+	 */
+	protected initServerPing() {
+		// Send ping every 15 seconds
+		this.pingInterval = setInterval(function() {
+			this.httpManagerService.get('/json/ping').subscribe(res => {}, err => {
+				// Connection is lost, show message
+				this.connectionLostMessage();
+			});
+		}.bind(this), 15000);
+	}
+	
+	/*
+	 * @desc: Show message that connection is lost and redirect after some time
+	 */
+	protected connectionLostMessage() {
+		if (this.connectionAlreadyLost)
+			return;
+		
+		forkJoin(
+			this.translateService.get('EDITOR_CONNECTION_LOST'),
+			this.translateService.get('FORM_BUTTON_CLOSE'))
+		.subscribe(([msg, action]) => {
+			// Show message for 10 seconds
+			let snackBarRef = this.snackBar.open(msg, action, {
+				'duration': 10000
+			});
+			// After 10 seconds, redirect to topic
+			snackBarRef.afterDismissed().subscribe(() => {
+				this.router.navigate(['/topic', this.topicId]);
+			});
+		});
+		
+		// Mark connection already lost to avoid that this function is called twice
+		this.connectionAlreadyLost = true
 	}
 	
 	private getCollectionFromURL() {
@@ -182,8 +269,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 			return;
 		}
 		
-		// Navigate to source
-		this.router.navigate(['/topic', this.source]);
+		// Navigate to topic
+		this.router.navigate(['/topic', this.topicId]);
 	}
 	
 	protected setSaved() {
@@ -197,9 +284,58 @@ export class EditorComponent implements OnInit, OnDestroy {
 			
 		// Set unsaved text
 		this.saved = false;
+	}
+	
+	private redirectToView() {
+		if(this.type == 'topic')
+			this.router.navigate(['/topic', this.topicId]);
+		else if (this.type == 'proposal' || this.type == 'group')
+			this.router.navigate(['/'+this.type+'/view', this.padId]);
+	}
+	
+	/*
+	 * @desc: Initialize timer and redirect from editor to view if deadline is over
+	 */
+	protected initCountdown(deadline) {
+		var seconds = 0;
 		
-		// Emit current change to server via socket
-		//this.doc.submitOp(e.delta, {source: this.quillEditor});
+		// Run callback every second
+		this.deadlineInterval = setInterval(function() {
+			seconds++;
+			let delta = deadline - Date.now();
+			
+			// If less than 2 minutes (120000ms) left, show time remaining in snackbar every 10 seconds
+			if (delta > 0 && delta <= 120000 && seconds % 10 == 0) {
+				var secondsLeft = String(Math.round(delta/1000));
+				forkJoin(
+					this.translateService.get('EDITOR_SNACKBAR_CLOSE_SECONDS', {s: secondsLeft}),
+					this.translateService.get('FORM_BUTTON_CLOSE'))
+				.subscribe(([msg, action]) => {
+					this.snackBar.open(msg, action, {
+						'duration': 3000
+					});
+				});
+			}
+			
+			// If less than 2 hours (7200000ms) left, show time remaining in snackbar every 10 minutes
+			if (delta > 0 && delta <= 7200000 && delta > 120000 && seconds % 600 == 0) {
+				var minutesLeft = String(Math.round(delta/(1000*60)));
+				forkJoin(
+					this.translateService.get('EDITOR_SNACKBAR_CLOSE_MINUTES', {m: minutesLeft}),
+					this.translateService.get('FORM_BUTTON_CLOSE'))
+				.subscribe(([msg, action]) => {
+					this.snackBar.open(msg, action, {
+						'duration': 10000
+					});
+				});
+			}
+			
+			// If countdown has finished, stop interval and redirect to view
+			if (delta <= 0) {
+				clearInterval(this.deadlineInterval);
+				this.redirectToView();
+			}
+		}.bind(this), 1000);
 	}
 
 }

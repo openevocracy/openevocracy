@@ -2,8 +2,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
+import { AlertService } from '../_services/alert.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
 import { ModalService } from '../_services/modal.service';
@@ -28,7 +30,7 @@ import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay } f
 })
 export class GroupComponent extends EditorComponent implements OnInit, OnDestroy {
 	private C;
-	private proposal_html: string = "";
+	private proposalHtml: string = "";
 	private group: Group;
 	private chatSocket;
 	private chatForm: FormGroup;
@@ -55,19 +57,21 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	private faPlay = faPlay;
 	
 	constructor(
+		protected snackBar: MatSnackBar,
+		protected alertService: AlertService,
 		protected router: Router,
 		protected activatedRoute: ActivatedRoute,
 		protected modalService: ModalService,
 		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
-		private fb: FormBuilder,
-		private translateService: TranslateService) {
-		super(router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService);
+		protected translateService: TranslateService,
+		private fb: FormBuilder) {
+		super(snackBar, alertService, router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService, translateService);
 		
 		// Initialize form
 		this.chatForm = this.fb.group({
-			'msg': ['', null]
+			'msg': ['', Validators.required]
 		});
 		
 		// Initialize authorship module
@@ -81,13 +85,24 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	 */
 	ngOnInit() {
 		this.C = C;
+		
+		// Set and translate placeholder
+		this.translatePlaceholder("EDITOR_PLACEHOLDER_GROUP");
+		
+		// Initialize ping
+		this.initServerPing();
 	}
 	
 	/*
 	 * @desc: Lifecylce hook, used to close socket connection properly if view is destroyed
 	 */
 	ngOnDestroy() {
-		if(this.chatSocket) {
+		// Close pad socket
+		if (this.padSocket)
+			this.padSocket.close();
+		
+		// Close chat socket
+		if (this.chatSocket) {
 			// Send offline status message
 			this.chatSocket.send(JSON.stringify({
 				'type': C.CHATMSG_OFFLINE,
@@ -97,6 +112,15 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 			// Close connection
 			this.chatSocket.close();
 		}
+		
+		// Unsubscribe to avoid memory leak
+		this.modalSubscription.unsubscribe();
+		
+		// Stop countdown
+		if (this.deadlineInterval)
+			clearInterval(this.deadlineInterval);
+		if (this.pingInterval)
+			clearInterval(this.pingInterval);
 	}
 	
 	/*
@@ -124,7 +148,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 				
 				this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
 					this.group = new Group(res);
-					this.source = res.topicId;
+					this.topicId = res.topicId;
 					
 					// Add color of current member
 					this.me = _.findWhere(res.members, { 'userId': this.userId });
@@ -142,6 +166,9 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 						color: this.me.color,
 						range: 1
 					});*/
+					
+					// Initialize countdown
+					this.initCountdown(res.deadline);
 					
 					// Initialize socket
 					this.initalizePadSocket(this.group.docId);
@@ -218,6 +245,12 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 				}
 			}.bind(this);
 			
+			// WebSocket connection was closed from server
+			this.chatSocket.onclose = function(e) {
+				// If chat socket was not closed actively (on destroy), inform user that
+				// socket is broken, ask for reload and freeze chat
+				this.connectionLostMessage();
+			}.bind(this);
 			// Show chat
 			this.chatReady = true;
 			
@@ -242,7 +275,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		
 		// Position and size of wrapper box
 		let top = $('.editor-toolbars').position().top + $('.editor-toolbars').height();
-		let left = $('quill-editor').position().left + $('quill-editor').outerWidth();
+		let left = $('.editor-center').position().left + $('.editor-center').outerWidth();
 		let width = $('body').innerWidth()-left;
 		let height = $('footer').position().top-top;
 		$('#chat-wrapper').css({
@@ -321,7 +354,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 		this.classColEditor = 'col-xs-6';
 		this.classColProposal = 'col-xs-6';
 		this.styleColProposal = {'background-color': color};
-		this.proposal_html = html;
+		this.proposalHtml = html;
 	}
 	
 	/*
@@ -332,13 +365,13 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	private closeMemberProposal() {
 		this.classColEditor = 'col-xs-12';
 		this.classColProposal = 'hidden';
-		this.proposal_html = "";
+		this.proposalHtml = "";
 	}
 
 	/*
 	 * @desc: Function is called when user filled out the form and
 	 *        clicked the send button or pressed enter.
-	 *        Message will be send via socket and form will be cleard after sending.
+	 *        Message will be send via socket and form will be cleared after sending.
 	 */
 	private sendChatMessage() {
 		if(!this.chatForm.valid)

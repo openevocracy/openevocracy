@@ -325,8 +325,7 @@ exports.query = function(req, res) {
 	var userId = ObjectId(req.user._id);
 	
 	// Get docId, groupId and topicId from group pad
-	var pad_promise = db.collection('pads_group')
-		.findOneAsync({'_id': padId}, { 'docId': true, 'groupId': true, 'topicId': true });
+	var pad_promise = db.collection('pads_group').findOneAsync({'_id': padId});
 	
 	// Everything else depends on pad
 	pad_promise.then(function(pad) {
@@ -338,16 +337,15 @@ exports.query = function(req, res) {
 		 * Simple stuff
 		 */
 		
-		// Get level, name and nextDeadline
-		var topic_promise = db.collection('topics')
-			.findOneAsync({'_id': topicId}, { 'level': true, 'name': true, 'nextDeadline': true });
+		// Get topic name
+		var topic_promise = db.collection('topics').findOneAsync({'_id': topicId}, {'name': true});
 		
 		// Get chatRoomId from group
-		var group_promise = db.collection('groups').findOneAsync({'_id': pad.groupId}, { 'chatRoomId': true });
+		var group_promise = db.collection('groups').findOneAsync({'_id': pad.groupId});
 		
 		// Count number of groups in current level to obtain if we are in last group (last level)
-		var isLastGroup_promise = topic_promise.then(function(topic) {
-			return db.collection('groups').countAsync({ 'topicId': topic._id, 'level': topic.level })
+		var isLastGroup_promise = group_promise.then(function(currentGroup) {
+			return db.collection('groups').countAsync({ 'topicId': currentGroup.topicId, 'level': currentGroup.level })
 				.then(function(numGroupsInCurrentLevel) {
 					return (numGroupsInCurrentLevel == 1) ? true : false;
 			});
@@ -370,9 +368,9 @@ exports.query = function(req, res) {
 		var offset = chance.integer({min: 0, max: 360});
 		
 		// Get previous pads
-		var prevPads_promise = Promise.join(topic_promise, groupRelations_promise).spread(function(topic, groupRelations) {
+		var prevPads_promise = Promise.join(group_promise, groupRelations_promise).spread(function(group, groupRelations) {
 			var prevPadIds = _.pluck(groupRelations, 'prevPadId');
-			if (topic.level == 0) {
+			if (group.level == 0) {
 				return db.collection('pads_proposal')
 					.find({ '_id': {$in: prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
 			} else {
@@ -391,8 +389,8 @@ exports.query = function(req, res) {
 			});
          
          // Get proposal html
-         var prevPadHtml_promise = Promise.join(topic_promise, prevPads_promise).spread(function(topic, prevPads) {
-         	if (topic.level == 0) {
+         var prevPadHtml_promise = Promise.join(group_promise, prevPads_promise).spread(function(group, prevPads) {
+         	if (group.level == 0) {
 	         	var prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': relation.userId});
 	         	return pads.getPadHTMLAsync('proposal', prevUserPad.docId);
          	} else {
@@ -426,9 +424,9 @@ exports.query = function(req, res) {
 					'groupId': groupId,
 					'topicId': topicId,
 					'docId': pad.docId,
-					'level': topic.level,
+					'level': group.level,
 					'title': topic.name,
-					'nextDeadline': topic.nextDeadline,
+					'deadline': pad.expiration,
 					'chatRoomId': group.chatRoomId,
 					'isLastGroup': isLastGroup,
 					'members': group_members

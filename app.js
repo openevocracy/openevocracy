@@ -129,6 +129,13 @@ app.get('/json/group/editor/:id', auth(), groups.query);
 // @desc: Get group information
 app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 
+// ###################
+// ###   C H A T   ###
+// ###################
+
+// @desc: Get chat room
+app.get('/json/chat/room/:id', auth(), chats.getChatRoomMessages);
+
 // #####################
 // ### R A T I N G S ###
 // #####################
@@ -198,11 +205,11 @@ app.get('/json/user/lang/:id', auth(), users.getLanguage);
 app.post('/json/user/lang', auth(), users.setLanguage);
 
 // ###################
-// ###   C H A T   ###
+// ###   M I S C   ###
 // ###################
 
-// @desc: Get chat room
-app.get('/json/chat/room/:id', auth(), chats.getChatRoomMessages);
+// @desc: Ping server for connection test
+app.get('/json/ping', auth(), utils.ping);
 
 // ###################
 // ###   T E S T   ###

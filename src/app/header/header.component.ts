@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-//import { MatToolbarModule, MatListModule, MatMenuModule } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { UserService } from '../_services/user.service';

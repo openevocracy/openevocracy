@@ -47,7 +47,7 @@ $color-default-rating: $grey700 !default;
 }
 
 /* Group vis */
-.vis-navigation .vis-button { width: 30px; font-size: 30px; line-height: 30px; cursor: pointer; }
+/*.vis-navigation .vis-button { width: 30px; font-size: 30px; line-height: 30px; cursor: pointer; }
 .vis-navigation .vis-button:before { font-family: 'FontAwesome'; position: absolute; bottom: 0; }
 .vis-navigation .vis-up:before { content: '\f139'; right: 30px; bottom: 60px; }
 .vis-navigation .vis-down:before { content: '\f13a'; right: 30px; }
@@ -55,4 +55,13 @@ $color-default-rating: $grey700 !default;
 .vis-navigation .vis-right:before { content: '\f138'; right: 0; bottom: 30px; }
 .vis-navigation .vis-zoomIn:before { content: '\f055'; right: 130px; }
 .vis-navigation .vis-zoomOut:before { content: '\f056'; right: 100px; }
-.vis-navigation .vis-zoomExtends:before { content: '\f0b2'; width: 25px; right: 30px; bottom: 30px; }
+.vis-navigation .vis-zoomExtends:before { content: '\f0b2'; width: 25px; right: 30px; bottom: 30px; }*/
+
+.vis-navigation .vis-button { position: absolute; cursor: pointer; opacity: 0.85; bottom: 0; background-position: center center; background-color: transparent; background-repeat: no-repeat; width: 30px; height: 30px; }
+.vis-navigation .vis-up { background-image: url('../assets/images/chevron-circle-down-solid.svg'); right: 30px; }
+.vis-navigation .vis-down { background-image: url('../assets/images/chevron-circle-up-solid.svg'); right: 30px; bottom: 60px; }
+.vis-navigation .vis-left { background-image: url('../assets/images/chevron-circle-right-solid.svg'); right: 0; bottom: 30px; }
+.vis-navigation .vis-right { background-image: url('../assets/images/chevron-circle-left-solid.svg'); right: 60px; bottom: 30px; }
+.vis-navigation .vis-zoomIn { background-image: url('../assets/images/plus-circle-solid.svg'); right: 130px; }
+.vis-navigation .vis-zoomOut { background-image: url('../assets/images/minus-circle-solid.svg'); right: 100px; }
+.vis-navigation .vis-zoomExtends { background-image: url('../assets/images/expand-arrows-alt-solid.svg'); right: 30px; bottom: 30px; }

@@ -93,3 +93,28 @@ exports.countHtmlWords = function(html) {
 	// Remove tags, split and get length
 	return html.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length;
 };
+
+/*
+ * @desc: ping all socket clients
+ * @params:
+ *    - wss: websocket
+ */
+exports.pingInterval = function(wss) {
+	setInterval(function() {
+		// Send ping to every client
+		wss.clients.forEach(function(ws) {
+			if (ws.isAlive === false) return ws.terminate();
+			
+			ws.isAlive = false;
+			ws.ping(function() {});
+		});
+	}, 30000);
+};
+
+/*
+ * @dsc: ping request from client, response with timestamp
+ */
+exports.ping = function(req, res) {
+	var now = Date.now();
+	res.json({'timestamp': now});
+};

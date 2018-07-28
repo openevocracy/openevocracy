@@ -153,5 +153,14 @@ exports.startChatServer = function(wss) {
 			// Initialize chat
 			joinChatRoom(ws, chatRoomId, userId);
 		});
+		
+		// Set socket alive initially and every time a pong is arriving
+		ws.isAlive = true;
+		ws.on('pong', function() {
+			ws.isAlive = true;
+		});
 	});
+	
+	// Initalize ping interval
+	utils.pingInterval(wss);
 };
