@@ -12,9 +12,12 @@ import {
 	MatTooltipModule,
 	MatRippleModule,
 	MatTabsModule,
-	MatSnackBarModule/*,
+	MatSnackBarModule,
+	MatDialogModule/*,
 	MatIconModule*/
 } from '@angular/material';
+
+import { ShareDialogComponent } from '../dialogs/share/share.component';
 
 @NgModule({
 	imports: [
@@ -29,7 +32,8 @@ import {
 		MatTooltipModule,
 		MatRippleModule,
 		MatTabsModule,
-		MatSnackBarModule/*,
+		MatSnackBarModule,
+		MatDialogModule/*,
 		MatIconModule*/
 	],
 	exports: [
@@ -44,8 +48,12 @@ import {
 		MatTooltipModule,
 		MatRippleModule,
 		MatTabsModule,
-		MatSnackBarModule/*,
+		MatSnackBarModule,
+		MatDialogModule/*,
 		MatIconModule*/
+	],
+	entryComponents: [
+		ShareDialogComponent
 	]
 })
 export class MaterialModule {}

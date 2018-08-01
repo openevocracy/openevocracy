@@ -21,6 +21,7 @@
 	"MODAL_SEND_VERIFICATION_MAIL_AGAIN": "Verifizierungs-E-Mail erneut senden",
 	"MODAL_SEND_REQUEST": "Absenden",
 	"MODAL_CANCEL": "Abbrechen",
+	"DIALOG_SHARE_TITLE": "Teile diese Seite",
 	
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",

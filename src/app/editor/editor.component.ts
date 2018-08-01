@@ -11,8 +11,6 @@ import { UserService } from '../_services/user.service';
 import { ModalService } from '../_services/modal.service';
 import { CloseeditorModalService } from '../_services/modal.closeeditor.service';
 
-import { cfg } from '../../../shared/config';
-
 import * as sharedb from 'sharedb/lib/client';
 import * as richText from 'rich-text';
 
@@ -33,6 +31,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 	private saved: boolean = true;
 	private placeholder: string;
 	protected connectionAlreadyLost: boolean = false;
+	protected manualClose: boolean = false;
 	protected padId: string;
 	protected userId: string;
 	protected topicId: string;
@@ -99,6 +98,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 	}
 	
 	ngOnDestroy() {
+		this.manualClose = true;
+		
 		// Close pad socket
 		if (this.padSocket)
 			this.padSocket.close();
@@ -211,7 +212,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 			this.padSocket.onclose = function(e) {
 				// If pad socket was not closed actively (on destroy), inform user that
 				// socket is broken, ask for reload and freeze editor
-				this.connectionLostMessage();
+				if(!this.manualClose)
+					this.connectionLostMessage();
 			}.bind(this);
 			
 			this.enableEdit();

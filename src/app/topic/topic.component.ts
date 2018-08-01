@@ -1,8 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
+import { MatDialog } from "@angular/material";
 
 import { CountdownComponent } from '../countdown/countdown.component';
 import { GroupvisComponent } from '../groupvis/groupvis.component';
+import { ShareDialogComponent } from '../dialogs/share/share.component';
 
 import { HttpManagerService } from '../_services/http-manager.service';
 import { AlertService } from '../_services/alert.service';
@@ -46,6 +48,7 @@ export class TopicComponent implements OnInit {
 	
 	constructor(
 		private router: Router,
+		private matDialog: MatDialog,
 		private alertService: AlertService,
 		private topicService: TopicService,
 		private userService: UserService,
@@ -60,6 +63,10 @@ export class TopicComponent implements OnInit {
 			(params: Params) => this.topicId = params['id']);
 		
 		this.loadTopic(this.topicId);
+	}
+	
+	openDialog() {
+		this.matDialog.open(ShareDialogComponent);
 	}
 	
 	private loadTopic(topicId) {

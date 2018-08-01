@@ -97,6 +97,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	 * @desc: Lifecylce hook, used to close socket connection properly if view is destroyed
 	 */
 	ngOnDestroy() {
+		this.manualClose = true;
 		// Close pad socket
 		if (this.padSocket)
 			this.padSocket.close();
@@ -249,7 +250,8 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 			this.chatSocket.onclose = function(e) {
 				// If chat socket was not closed actively (on destroy), inform user that
 				// socket is broken, ask for reload and freeze chat
-				this.connectionLostMessage();
+				if(!this.manualClose)
+					this.connectionLostMessage();
 			}.bind(this);
 			// Show chat
 			this.chatReady = true;

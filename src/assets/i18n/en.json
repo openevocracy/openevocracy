@@ -21,6 +21,7 @@
 	"MODAL_SEND_VERIFICATION_MAIL_AGAIN": "Send verification mail again",
 	"MODAL_SEND_REQUEST": "Submit",
 	"MODAL_CANCEL": "Cancel",
+	"DIALOG_SHARE_TITLE": "Share this page",
 	
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",

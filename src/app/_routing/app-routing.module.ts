@@ -11,6 +11,7 @@ import { EditorComponent } from '../editor/editor.component';
 import { GroupComponent } from '../group/group.component';
 import { PadviewComponent } from '../padview/padview.component';
 import { SettingsComponent } from '../settings/settings.component';
+import { UserprofileComponent } from '../userprofile/userprofile.component';
 
 const appChildRoutes: Routes = [
 	{ path: '', redirectTo: 'topiclist', pathMatch: 'full' },
@@ -21,7 +22,8 @@ const appChildRoutes: Routes = [
 	{ path: 'group/editor/:id', component: GroupComponent },
 	{ path: 'proposal/view/:id', component: PadviewComponent },
 	{ path: 'group/view/:id', component: PadviewComponent },
-	{ path: 'settings/:id', component: SettingsComponent }
+	{ path: 'settings/:id', component: SettingsComponent },
+	{ path: 'user/profile/:id', component: UserprofileComponent }
 ];
 
 const appRoutes: Routes = [

@@ -277,11 +277,10 @@ app.post("/api/auth/remove_account", function(req, res) {
 
 // GET /json/user/profile/:id
 exports.query = function(req, res) {
-    var uid = ObjectId(req.params.id);
-    
-    db.collection('users').findOneAsync(
-        {'_id':uid},{'email':false, 'password':false, 'salt':false}).
-        then(res.send.bind(res));
+	var userId = ObjectId(req.params.id);
+	
+	db.collection('users').findOneAsync({'_id': userId},{ 'email':false, 'password':false, 'salt':false })
+		.then(res.send.bind(res));
 };
 
 // GET /json/user/settings/:id
