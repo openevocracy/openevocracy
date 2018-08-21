@@ -1,0 +1,9 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+     - "$PORT:8080"
+  mongodb:
+    image: mongo
+    restart: always

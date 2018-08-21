@@ -64,33 +64,3 @@ export PORT=80
 mongod --dbpath=data --nojournal --bind_ip=127.0.0.1 &
 node app.js
 ```
-
-## Current Roadmap
-
-### Wostock (0.1)
-
-  * Concept for small communities (~ up to 100 members)
-  * Implementation of collaborative documents (using gulf: https://github.com/gulf/gulf)
-
-### Gemini (0.2)
-
-  * Concept for big communities (~ up to 1000 members)
-  * Citing (to be able to argue with facts/literatur/science)
-  * Basic authentication, using invitations
-  * Simple reputation system
-  * Basic social components (simple timeline, follower, intimates, discussion groups)
-  * Add external forums for groups
-  * Extend topic (gps position, urgency, etc.)
-
-### Outlook
-
-  * Concept for the general public
-  * Decentralize user authentification
-  * Forgery protection for final documents
-  * Complex reputation system
-  * Decentralization in technology, use Blockchain?
-
-## License
-
-[Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
-
