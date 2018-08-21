@@ -31,6 +31,7 @@ mail.initializeMail();
 var users = require('./server/routes/users');
 var topics = require('./server/routes/topics');
 var groups = require('./server/routes/groups');
+var forums = require('./server/routes/forums');
 var proposals = require('./server/routes/proposals');
 var ratings = require('./server/routes/ratings');
 var tests = require('./server/routes/tests');
@@ -108,11 +109,13 @@ app.post('/json/topic-unvote', auth(), topics.unvote);
 app.get('/file/topic/:id', auth(), topics.download);
 
 // ###############
-// ### P A D S ###
+// ### D O C S ###
 // ###############
 
 // @desc: Get detailed information about topic description pad
 app.get('/json/topic/editor/:id', auth(), pads.getPadTopicDetails);
+
+/*** Proposal ***/
 
 // @desc: Create new proposal
 app.post('/json/proposal/create', auth(), proposals.create);
@@ -123,11 +126,16 @@ app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
 // @desc: Get proposal information
 app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
 
+/*** Group ***/
+
 // @desc: Get detailed information about group pad
 app.get('/json/group/editor/:id', auth(), groups.query);
 
 // @desc: Get group information
 app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
+
+// @desc: Get group forum
+app.get('/json/group/forum/:id', auth(), forums.query);
 
 // ###################
 // ###   C H A T   ###

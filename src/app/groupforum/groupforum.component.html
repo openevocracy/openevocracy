@@ -1,0 +1,16 @@
+<mat-toolbar color="primary">
+	<div class="flex container">
+		<div class="topic-title">
+			<h1>{{ 'FORUM_TITLE_PREFIX' | translate }} {{topic?.name}}</h1>
+		</div>
+		
+		<span class="flex-spacer"></span>
+		
+		<button mat-button title="{{ 'FORUM_BUTTON_NEW_THREAD' | translate }}" (click)="createNewThread()">
+			<span><fa-icon [icon]="faHandPaper"></fa-icon> {{ 'FORUM_BUTTON_NEW_THREAD' | translate }}</span>
+		</button>
+	</div>
+</mat-toolbar>
+
+<div class="container"></div>
+

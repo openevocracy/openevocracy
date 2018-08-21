@@ -122,6 +122,7 @@
 	"GROUP_RATING_TOOLTIP_INTEGRATION": "Integration skill of this member, i.e. ability to cooperate and find consensus",
 	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Expertise of this member regarding the topic",
 	"GROUP_MEMBER_PROPOSAL_CLOSE": "Schließen",
+	"GROUP_BUTTON_FORUM": "Forum",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",

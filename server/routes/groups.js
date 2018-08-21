@@ -59,6 +59,7 @@ function assignParticipantsToGroups(participants) {
 
 /*
  * @desc: Store group, group pad and members in database
+ *        Called from initial creation and remix
  * @params:
  *    groupId: id of the new group
  *    topicId: id of the related topic
@@ -70,7 +71,8 @@ function assignParticipantsToGroups(participants) {
 function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, level) {
 	// Create group itself
 	var chatRoomId = ObjectId();
-	var group = { '_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'level': level };
+	var forumId = ObjectId();
+	var group = { '_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'forumId': forumId, 'level': level };
 	var create_group_promise =	db.collection('groups').insertAsync(group);
 	
 	// Create group pad
@@ -428,6 +430,7 @@ exports.query = function(req, res) {
 					'title': topic.name,
 					'deadline': pad.expiration,
 					'chatRoomId': group.chatRoomId,
+					'forumId': group.forumId,
 					'isLastGroup': isLastGroup,
 					'members': group_members
 				};

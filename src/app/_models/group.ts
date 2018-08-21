@@ -5,6 +5,7 @@ export class Group {
 	topicId: string;
 	docId: string;
 	chatRoomId: string;
+	forumId: string;
 	level: number;
 	title: string;
 	isLastGroup: number;
@@ -16,6 +17,7 @@ export class Group {
 		this.topicId = res.topicId;
 		this.docId = res.docId;
 		this.chatRoomId = res.chatRoomId;
+		this.forumId = res.forumId;
 		this.level = res.level;
 		this.title = res.title;
 		this.isLastGroup = res.isLastGroup;

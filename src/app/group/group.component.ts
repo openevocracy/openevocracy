@@ -21,7 +21,7 @@ import * as _ from 'underscore';
 
 import { C } from '../../../shared/constants';
 
-import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay, faComments } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-group',
@@ -55,6 +55,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	private faHandshake = faHandshake;
 	private faLightbulb = faLightbulb;
 	private faPlay = faPlay;
+	private faComments = faComments;
 	
 	constructor(
 		protected snackBar: MatSnackBar,
