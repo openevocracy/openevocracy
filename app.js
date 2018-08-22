@@ -135,7 +135,7 @@ app.get('/json/group/editor/:id', auth(), groups.query);
 app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 
 // @desc: Get group forum
-app.get('/json/group/forum/:id', auth(), forums.query);
+app.get('/json/group/forum/:id', auth(), forums.queryForum);
 
 // ###################
 // ###   C H A T   ###

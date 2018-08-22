@@ -39,4 +39,12 @@ export class UtilsService {
 		let browserLang = navigator.language || navigator['userLanguage'];
 		return browserLang.split('-')[0];
 	}
+	
+	/*
+	 * @desc: Get only the last 4 digits of an id
+	 *        The goal is to get a human readable identifier
+	 */
+	public getShortId(id) {
+		return id.slice(20,24);
+	}
 }

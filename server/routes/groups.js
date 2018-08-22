@@ -69,18 +69,23 @@ function assignParticipantsToGroups(participants) {
  *    level: new level (old level +1)
  */
 function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, level) {
-	// Create group itself
 	var chatRoomId = ObjectId();
 	var forumId = ObjectId();
+	
+	// Create group itself
 	var group = { '_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'forumId': forumId, 'level': level };
-	var create_group_promise =	db.collection('groups').insertAsync(group);
+	var createGroup_promise =	db.collection('groups').insertAsync(group);
 	
 	// Create group pad
 	var pad = { '_id': padId, 'topicId': topicId, 'groupId': groupId, 'expiration': nextDeadline };
-	var create_pad_proposal_promise = pads.createPadAsync(pad, 'group');
+	var createPadProposal_promise = pads.createPadAsync(pad, 'group');
+	
+	// Create forum for group
+	var forum = { '_id': forumId, 'groupId': groupId };
+	var createForum_promise = db.collection('forums').insertAsync(forum);
 	
 	// Insert group members to database
-	var insert_members_promise =
+	var insertMembers_promise =
 	db.collection('group_relations').insertAsync(
 		_.map(groupRelations, function(rel) {
 			var prevGroupId = _.isUndefined(rel.prevGroupId) ? null : rel.prevGroupId;
@@ -88,7 +93,7 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 		})
 	);
 	
-	return Promise.join(create_pad_proposal_promise, create_group_promise, insert_members_promise);
+	return Promise.join(createPadProposal_promise, createGroup_promise, createForum_promise, insertMembers_promise);
 }
 
 /**

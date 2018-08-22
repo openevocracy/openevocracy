@@ -65,7 +65,7 @@ export class TopicComponent implements OnInit {
 		this.loadTopic(this.topicId);
 	}
 	
-	openDialog() {
+	private openDialog() {
 		this.matDialog.open(ShareDialogComponent);
 	}
 	

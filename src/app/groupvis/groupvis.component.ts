@@ -3,6 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { trigger, transition, group, animate, style, state } from '@angular/animations'
 import { forkJoin } from 'rxjs/observable/forkJoin';
 
+import { UtilsService } from '../_services/utils.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 
 import { Network } from 'vis';
@@ -45,6 +46,7 @@ export class GroupvisComponent implements OnInit {
 	private groupColor = { 'background': '#3F51B5', 'border': '#3F51B5', 'hover': '#7986CB', 'highlight': '#283593' };
 	
 	constructor(
+		private utilsService: UtilsService,
 		private httpManagerService: HttpManagerService,
 		private translateService: TranslateService) { }
 	
@@ -62,10 +64,6 @@ export class GroupvisComponent implements OnInit {
 		this.close.emit(null);
 	}
 	
-	private getShortId(id) {
-		return id.slice(20,24);
-	}
-	
 	private drawGraph(res) {
 		// Define container and options
 		let container = document.getElementById('graph');
@@ -80,12 +78,12 @@ export class GroupvisComponent implements OnInit {
 			this.nodes = _.map(res.nodes, function(node) {
 				if(node.level == -1) {
 					return _.extend(node, {
-						'label': labelProposal+' '+this.getShortId(node.id),
+						'label': labelProposal+' '+this.utilsService.getShortId(node.id),
 						'color': node.me ? this.meColor : this.proposalColor
 					});
 				} else {
 					return _.extend(node, {
-						'label': labelGroup+' '+this.getShortId(node.id),
+						'label': labelGroup+' '+this.utilsService.getShortId(node.id),
 						'color': node.me ? this.meColor : this.groupColor
 					});
 				}
@@ -113,7 +111,7 @@ export class GroupvisComponent implements OnInit {
 			
 			setTimeout(function() {
 				var id = params.nodes[0];
-				var shortId = this.getShortId(id);
+				var shortId = this.utilsService.getShortId(id);
 				var node = _.findWhere(this.nodes, {'id': id});
 				
 				if(node.level == -1) {

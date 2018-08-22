@@ -18,6 +18,7 @@ import {
 } from '@angular/material';
 
 import { ShareDialogComponent } from '../dialogs/share/share.component';
+import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.component';
 
 @NgModule({
 	imports: [
@@ -53,7 +54,8 @@ import { ShareDialogComponent } from '../dialogs/share/share.component';
 		MatIconModule*/
 	],
 	entryComponents: [
-		ShareDialogComponent
+		ShareDialogComponent,
+		NewThreadDialogComponent
 	]
 })
 export class MaterialModule {}

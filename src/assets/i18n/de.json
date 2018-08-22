@@ -124,6 +124,10 @@
 	"GROUP_MEMBER_PROPOSAL_CLOSE": "Schließen",
 	"GROUP_BUTTON_FORUM": "Forum",
 	
+	"FORUM_TITLE_PREFIX": "Forum der Gruppe {{id}} zum Thema:",
+	"FORUM_BUTTON_NEW_THREAD": "Neuer Thread",
+	"FORUM_BUTTON_TO_GROUP": "Zur Gruppe",
+	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",
 	"CHAT_ROOM_LEAVE": "hat den Raum verlassen.",

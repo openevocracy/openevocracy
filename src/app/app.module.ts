@@ -67,6 +67,7 @@ import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
 import { ShareDialogComponent } from './dialogs/share/share.component';
 import { GroupForumComponent } from './groupforum/groupforum.component';
+import { NewThreadDialogComponent } from './dialogs/newthread/newthread.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -99,7 +100,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 		PadviewComponent,
 		UserprofileComponent,
 		ShareDialogComponent,
-		GroupForumComponent
+		GroupForumComponent,
+		NewThreadDialogComponent
 	],
 	imports: [
 		BrowserModule,
