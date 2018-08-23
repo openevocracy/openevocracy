@@ -1,0 +1,22 @@
+/* Import variables */
+@import "~styles/variables";
+
+label {
+	display: block;
+	font-weight: 400;
+	color: rgba(0,0,0,0.54);
+	transform: scale(0.75) perspective(100px) translateZ(0.001px);
+	transform-origin: 0 0;
+}
+
+.editor { border-bottom: 1px solid rgba(0, 0, 0, 0.42); padding-bottom: 1px; }
+
+/* Form validation colors */
+
+.focus label { color: $green500; }
+.editor.focus .asterisk { color: $orange500; }
+.editor.focus { border-width: 2px; padding-bottom: 0; border-color: $green500; }
+
+.touched.empty label, .touched.focus.empty label,
+.touched.empty .asterisk, .touched.focus.empty .asterisk { color: $red500; }
+.editor.touched.empty, .editor.touched.focus.empty { border-color: $red500; }

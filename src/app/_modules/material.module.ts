@@ -13,8 +13,8 @@ import {
 	MatRippleModule,
 	MatTabsModule,
 	MatSnackBarModule,
-	MatDialogModule/*,
-	MatIconModule*/
+	MatDialogModule,
+	MatSlideToggleModule
 } from '@angular/material';
 
 import { ShareDialogComponent } from '../dialogs/share/share.component';
@@ -34,8 +34,8 @@ import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.compone
 		MatRippleModule,
 		MatTabsModule,
 		MatSnackBarModule,
-		MatDialogModule/*,
-		MatIconModule*/
+		MatDialogModule,
+		MatSlideToggleModule
 	],
 	exports: [
 		MatButtonModule,
@@ -50,8 +50,8 @@ import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.compone
 		MatRippleModule,
 		MatTabsModule,
 		MatSnackBarModule,
-		MatDialogModule/*,
-		MatIconModule*/
+		MatDialogModule,
+		MatSlideToggleModule
 	],
 	entryComponents: [
 		ShareDialogComponent,

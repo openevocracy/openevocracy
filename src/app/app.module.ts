@@ -68,6 +68,7 @@ import { UserprofileComponent } from './userprofile/userprofile.component';
 import { ShareDialogComponent } from './dialogs/share/share.component';
 import { GroupForumComponent } from './groupforum/groupforum.component';
 import { NewThreadDialogComponent } from './dialogs/newthread/newthread.component';
+import { EditorFieldComponent } from './editorfield/editorfield.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -101,7 +102,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 		UserprofileComponent,
 		ShareDialogComponent,
 		GroupForumComponent,
-		NewThreadDialogComponent
+		NewThreadDialogComponent,
+		EditorFieldComponent
 	],
 	imports: [
 		BrowserModule,

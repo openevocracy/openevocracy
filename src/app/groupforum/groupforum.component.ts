@@ -10,6 +10,8 @@ import { HttpManagerService } from '../_services/http-manager.service';
 
 import { faComment, faUsers } from '@fortawesome/free-solid-svg-icons';
 
+import * as _ from 'underscore';
+
 @Component({
 	selector: 'app-groupforum',
 	templateUrl: './groupforum.component.html',
@@ -50,7 +52,15 @@ export class GroupForumComponent implements OnInit {
 	}
 	
 	private createNewThread() {
-		this.matDialog.open(NewThreadDialogComponent);
+		let dialogRef = this.matDialog.open(NewThreadDialogComponent, {'minWidth': '600px'});
+		dialogRef.componentInstance.onSubmit.subscribe(thread => {
+			this.onSubmit(thread);
+		});
+	}
+	
+	private onSubmit(thread) {
+		var data = _.extend(thread, { 'forumId': this.forumId });
+		this.httpManagerService.post('/json/group/forum/thread/create', data).subscribe();
 	}
 
 }

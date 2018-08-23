@@ -3,7 +3,6 @@ var favicon = require('serve-favicon');
 var session = require('express-session')
 var multer = require('multer');
 var errorHandler = require('errorhandler');
-var utils = require('./server/utils');
 var db = require('./server/database').db;
 
 
@@ -28,6 +27,7 @@ var cfg = require('./shared/config').cfg;
 mail.initializeMail();
 
 // Import routes
+var utils = require('./server/utils');
 var users = require('./server/routes/users');
 var topics = require('./server/routes/topics');
 var groups = require('./server/routes/groups');
@@ -136,6 +136,9 @@ app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 
 // @desc: Get group forum
 app.get('/json/group/forum/:id', auth(), forums.queryForum);
+
+// @desc: Create new thread in forum
+app.post('/json/group/forum/thread/create', auth(), forums.createThread);
 
 // ###################
 // ###   C H A T   ###
