@@ -1,1 +1,19 @@
+/* Import variables */
+@import "~styles/variables";
+
 .topic-title p { margin: 0; font-size: 12px; font-weight: 300; line-height: 16px; }
+.threads { margin-top: 20px; }
+
+/* Threads */
+
+section { background-color: $white; height: 90px; margin: 10px 0; transition: background-color 600ms; cursor: pointer; }
+section:hover { background-color: $grey100; }
+
+.thread-states { float: left; padding: 10px 20px; }
+.state { line-height: 35px; height: 35px; }
+.state fa-icon { font-size: 24px; }
+.open, .public { color: $green500; }
+.closed, .private { color: $red500; }
+
+.thread-content { padding: 10px 20px; }
+.thread-content h2 { margin: 10px 0; font-weight: 500; }

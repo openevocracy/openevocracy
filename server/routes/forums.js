@@ -20,9 +20,17 @@ exports.queryForum = function(req, res) {
 		return db.collection('topics').findOneAsync({'_id': group.topicId}, {'name': true});
 	});
 	
+	// Get threads
+	var threads_promise = db.collection('forum_threads').find({'forumId': forumId}).toArrayAsync();
+	
 	// Send group id and topic name
-	Promise.join(group_promise, pad_promise, topic_promise).spread(function(group, pad, topic) {
-		return { 'groupId': group._id, 'padId': pad._id, 'title': topic.name };
+	Promise.join(group_promise, pad_promise, topic_promise, threads_promise).spread(function(group, pad, topic, threads) {
+		return {
+			'groupId': group._id,
+			'padId': pad._id,
+			'title': topic.name,
+			'threads': threads
+		};
 	}).then(res.json.bind(res));
 	
 };
@@ -32,10 +40,18 @@ exports.queryForum = function(req, res) {
  */
 exports.createThread = function(req, res) {
 	var userId = ObjectId(req.user._id);
-	var thread = req.body;
+	var body = req.body;
 	
-	// Add author to thread
-	_.extend(thread, {'authorId': userId});
+	// Define thread
+	var thread = {
+		'title': body.title,
+		'html': body.html,
+		'private': body.private,
+		'forumId': ObjectId(body.forumId),
+		'closed': false,
+		'citationId': null,
+		'authorId': userId
+	};
 	
 	// Store thread in database
 	db.collection('forum_threads').insertAsync(thread)
