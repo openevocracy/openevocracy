@@ -43,7 +43,7 @@ exports.initializeMail = function() {
 	});
 		
 	// Get smtp credentials from databse and create transporter
-	db.collection('configs').findOneAsync({'type': 'mailauth'},{'user': true, 'password': true})
+	/*db.collection('configs').findOneAsync({'type': 'mailauth'},{'user': true, 'password': true})
 		.then(function(credentials) {
 			var smtpConfig = {
 				'host': 'smtp.openevocracy.org',
@@ -63,7 +63,24 @@ exports.initializeMail = function() {
 		Promise.props(smtpConfig).then(function(smtpConfig) {
 			transporter = nodemailer.createTransport(smtpConfig);
 		}); 
-	});
+	});*/
+	
+	const smtpConfig = {
+		'host': process.env.MAIL_HOST,
+		'port': process.env.MAIL_PORT,
+		'secure': false,
+		//'logger': true,
+		//'debug': true,
+		tls: {
+			'rejectUnauthorized': false // allow self signed certificate
+		},
+		auth: {
+			'user': process.env.MAIL_USER,
+			'pass': process.env.MAIL_PASS
+		}
+	};
+	
+	transporter = nodemailer.createTransport(smtpConfig);
 };
 
 // @desc: Hash mail using an identifier (e.g. translation key of subject) and email of user

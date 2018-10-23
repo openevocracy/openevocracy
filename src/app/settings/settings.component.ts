@@ -18,13 +18,13 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 })
 export class SettingsComponent implements OnInit {
 	
-	private uid: string;
-	private settingsForm: FormGroup;
-	private disableButton: boolean = true;
-	private showSpinner: boolean = false;
+	public uid: string;
+	public settingsForm: FormGroup;
+	public disableButton: boolean = true;
+	public showSpinner: boolean = false;
 	
-	private faSave = faSave;
-	private faSpinner = faSpinner;
+	public faSave = faSave;
+	public faSpinner = faSpinner;
 	
 	constructor(
 		private fb: FormBuilder,
@@ -66,7 +66,7 @@ export class SettingsComponent implements OnInit {
 		});
 	}
 	
-	private onSubmit() {
+	public onSubmit() {
 		// If form is valid and dirty, go for login
 		if(!(this.settingsForm.valid && this.settingsForm.dirty))
 			return;

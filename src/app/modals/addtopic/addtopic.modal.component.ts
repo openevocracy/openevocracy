@@ -18,8 +18,8 @@ import { cfg } from '../../../../shared/config';
 })
 export class ModalAddtopicComponent extends ModalComponent {
 	
-	private addTopicForm: FormGroup;
-	private topicnamePlaceholder: String;
+	public addTopicForm: FormGroup;
+	public topicnamePlaceholder: String;
 	
 	constructor(
 		protected modalService: ModalService,

@@ -11,7 +11,7 @@ import { cfg } from '../../../../shared/config';
 })
 export class ShareDialogComponent implements OnInit {
 
-	private url: string;
+	public url: string;
 
 	constructor(
 		private router: Router,
@@ -23,7 +23,7 @@ export class ShareDialogComponent implements OnInit {
 	
 	ngOnInit() {}
 	
-	private close() {
+	public close() {
 		this.dialogRef.close();
 	}
 

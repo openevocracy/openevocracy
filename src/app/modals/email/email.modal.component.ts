@@ -13,8 +13,8 @@ import { EmailModalService } from '../../_services/modal.email.service';
 })
 export class ModalEmailComponent extends ModalComponent {
 	
-	private emailForm: FormGroup;
-	private title: string;
+	public emailForm: FormGroup;
+	public title: string;
 	
 	constructor(
 		protected modalService: ModalService,
@@ -41,6 +41,10 @@ export class ModalEmailComponent extends ModalComponent {
 		this.emailForm.setValue({ 'email': data.email });
 		this.title = data.title;
 		super.open(data);
+	}
+	
+	close() {
+		super.close();
 	}
 	
 }

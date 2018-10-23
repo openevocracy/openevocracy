@@ -22,9 +22,9 @@ import * as $ from 'jquery';
 	styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit, OnDestroy {
-	private loginForm: FormGroup;
+	public loginForm: FormGroup;
 	private modalSubscription: Subscription;
-	private awaitAuthentication: boolean = false;
+	public awaitAuthentication: boolean = false;
 	private lastAlertKey: string;
 
 	private faSpinner = faSpinner;
@@ -98,7 +98,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 		});
 	}
 	
-	private onSubmit() {
+	public onSubmit() {
 		// If form is not valid, return
 		if(!this.loginForm.valid)
 			return;
@@ -145,7 +145,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 		
 	}
 	
-	private passwordForget(e) {
+	public passwordForget(e) {
 		// Prevent default click behavior
 		e.preventDefault();
 		

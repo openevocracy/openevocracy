@@ -57,7 +57,7 @@ export class UserService {
 	
 	public authenticate(credentials) {
 		var self = this;
-		return this.http.post(cfg.BASE_URL + '/json/auth/login', credentials)
+		return this.http.post('/json/auth/login', credentials)
 			.map(raw => {
 				var res = raw.json();
 				

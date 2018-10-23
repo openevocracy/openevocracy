@@ -6,6 +6,12 @@ var EVOCRACY_HOST = 'http://178.63.84.211:8100';
 var BASE_URL = 'https://develop.openevocracy.org';
 var DATABASE_HOST = 'mongodb://127.0.0.1/evocracy';
 
+var MAIL_HOST = 'smtp.openevocracy.org';
+var MAIL_PORT = 587;
+var MAIL_SECURE = false;  // False: Use TLS if server supports STARTTLS, True: Force TLS
+var MAIL_USER = process.env.MAIL_USER;
+var MAIL_PASS = process.env.MAIL_PASS;
+
 var DEBUG_CONFIG = {
     DEBUG:         true,
     MAIL:          false,

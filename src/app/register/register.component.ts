@@ -15,7 +15,7 @@ import { UtilsService } from '../_services/utils.service';
 })
 export class RegisterComponent implements OnInit {
   
-	private registerForm: FormGroup;
+	public registerForm: FormGroup;
 	private awaitAuthentication: boolean = false;
 	
 	constructor(
@@ -39,7 +39,7 @@ export class RegisterComponent implements OnInit {
 		});
 	}
 	
-	private onSubmit() {
+	public onSubmit() {
 		// If form is not valid, break registration
 		if(!this.registerForm.valid)
 			return;

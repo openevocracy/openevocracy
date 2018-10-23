@@ -26,27 +26,27 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 	styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit, OnDestroy {
-	private docId: string;
-	private title: string;
-	private saved: boolean = true;
-	private placeholder: string;
-	protected connectionAlreadyLost: boolean = false;
-	protected manualClose: boolean = false;
-	protected padId: string;
-	protected userId: string;
-	protected topicId: string;
-	protected quillModules;
-	protected quillEditor;
-	protected userToken: string;
-	protected type: string;
-	protected deadlineInterval;
-	protected pingInterval;
-	protected padSocket;
-	protected modalSubscription: Subscription;
+	public docId: string;
+	public title: string;
+	public saved: boolean = true;
+	public placeholder: string;
+	public connectionAlreadyLost: boolean = false;
+	public manualClose: boolean = false;
+	public padId: string;
+	public userId: string;
+	public topicId: string;
+	public quillModules;
+	public quillEditor;
+	public userToken: string;
+	public type: string;
+	public deadlineInterval;
+	public pingInterval;
+	public padSocket;
+	public modalSubscription: Subscription;
 	
 	private doc;
 	
-	private faTimes = faTimes;
+	public faTimes = faTimes;
 
 	constructor(
 		protected snackBar: MatSnackBar,
@@ -128,7 +128,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		$('.ql-editor').attr('contenteditable', 'false').hide();
 	}
 	
-	protected editorCreated(editor) {
+	public editorCreated(editor) {
 		// Disable editor body
 		this.disableEdit();
 		
@@ -265,7 +265,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		return 'docs_'+key;
 	}
 	
-	protected closeEditor() {
+	public closeEditor() {
 		if (!this.saved) {
 			this.modalService.open({});
 			return;
@@ -279,7 +279,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.saved = true;
 	}
 	
-	protected contentChanged(e) {
+	public contentChanged(e) {
 		// If input source is not user, do not send a change to server
 		if(e.source != 'user')
 			return;

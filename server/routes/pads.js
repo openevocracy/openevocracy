@@ -9,9 +9,8 @@ var pdf = require('phantom-html2pdf');
 var ShareDB = require('sharedb');
 var richText = require('rich-text');
 var WebSocketJSONStream = require('websocket-json-stream');
-var ShareDBMongo = require('sharedb-mongo');
 var ShareDBAccess = require('sharedb-access');
-var sharedb = ShareDBMongo('mongodb://127.0.0.1/evocracy');
+var sharedb = require('../database').sharedb;
 var QuillDeltaToHtmlConverter = require('quill-delta-to-html');
 
 // Own references

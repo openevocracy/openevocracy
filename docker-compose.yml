@@ -4,6 +4,11 @@ services:
     build: .
     ports:
      - "$PORT:8080"
+    depends_on:
+     - mongodb
+    restart: always
+    volumes:
+     - shared/config.js:/home/node/app/shared/config.js
   mongodb:
     image: mongo
     restart: always

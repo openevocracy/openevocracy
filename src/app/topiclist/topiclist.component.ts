@@ -22,12 +22,12 @@ import { faHandPaper, faPlusSquare, faDownload } from '@fortawesome/free-solid-s
 })
 export class TopiclistComponent implements OnInit {
 	public C;
-	private topicsList: TopicListElement[];
+	public topicsList: TopicListElement[];
 	private stageClass: string;
 	
-	private faHandPaper = faHandPaper;
-	private faPlusSquare = faPlusSquare;
-	private faDownload = faDownload;
+	public faHandPaper = faHandPaper;
+	public faPlusSquare = faPlusSquare;
+	public faDownload = faDownload;
 
 	constructor(
 		private topicsListService: TopicsListService,
@@ -84,7 +84,7 @@ export class TopiclistComponent implements OnInit {
 	/*
 	 * @desc: Open modal to add new topic
 	 */
-	private openAddTopicModal(e) {
+	public openAddTopicModal(e) {
 		e.preventDefault();
 		this.modal.open({});
 	}

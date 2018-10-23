@@ -13,7 +13,7 @@ import { cfg } from '../../../shared/config';
 	styleUrls: ['./alert.component.scss']
 })
 export class AlertComponent implements OnInit {
-	private alerts: Alert[] = [];
+	public alerts: Alert[] = [];
 	
 	constructor(private alertService: AlertService) { }
 	

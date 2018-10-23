@@ -10,7 +10,7 @@ import { UserService } from '../_services/user.service';
 })
 export class UserprofileComponent implements OnInit {
 
-	private userId: string;
+	public userId: string;
 
 	constructor(
 		private userService: UserService,

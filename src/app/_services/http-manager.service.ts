@@ -35,7 +35,7 @@ export class HttpManagerService {
 	}
 	
 	public get(url) {
-		return this.http.get(cfg.BASE_URL + url, this.getOptions())
+		return this.http.get(url, this.getOptions())
 			.map(res => { return this.extractData(res); })
 			.catch(error => { return this.handleError(error); });
 	}
@@ -43,7 +43,7 @@ export class HttpManagerService {
 	public getFile(url) {
 		var options = this.getOptions();
 		options.responseType = ResponseContentType.ArrayBuffer;
-		return this.http.get(cfg.BASE_URL + url, options)
+		return this.http.get(url, options)
 			.map(res => {
 				var body = res['_body'];
 				var blob = new Blob([body], {type: 'application/pdf'});
@@ -57,32 +57,31 @@ export class HttpManagerService {
 	}
 	
 	public post(url, body) {
-		return this.http.post(cfg.BASE_URL + url, body, this.getOptions())
+		return this.http.post(url, body, this.getOptions())
 			.map(res => { return this.extractData(res); })
 			.catch(error => { return this.handleError(error); });
 	}
 	
 	public put(url, body) {
-		return this.http.put(cfg.BASE_URL + url, body, this.getOptions())
+		return this.http.put(url, body, this.getOptions())
 			.map(res => { return this.extractData(res); })
 			.catch(error => { return this.handleError(error); });
 	}
 	
 	public delete(url) {
-		return this.http.delete(cfg.BASE_URL + url, this.getOptions())
+		return this.http.delete(url, this.getOptions())
 			.map(res => { return this.extractData(res); })
 			.catch(error => { return this.handleError(error); });
 	}
 	
 	public patch(url, body) {
-		return this.http.patch(cfg.BASE_URL + url, body, this.getOptions())
+		return this.http.patch(url, body, this.getOptions())
 			.map(res => { return this.extractData(res); })
 			.catch(error => { return this.handleError(error); });
 	}
 	
 	public extractData(res: Response) {
 		let body = res.json();
-		//let body = res.json();
 		if(cfg.DEBUG)
 			console.log('http response', body);
 		return body || { };

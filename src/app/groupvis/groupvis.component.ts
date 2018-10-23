@@ -33,16 +33,16 @@ export class GroupvisComponent implements OnInit {
 	@Input() topicId: string;
 	@Output() close = new EventEmitter();
 	
-	private nodes;
-	private network;
-	private detail;
-	private detailStatus: string = 'out';
+	public nodes;
+	public network;
+	public detail;
+	public detailStatus: string = 'out';
 	
-	private faTimes = faTimes;
+	public faTimes = faTimes;
 	
-	private meColor = { 'background': '#E91E63', 'border': '#E91E63', 'hover': '#F06292', 'highlight': '#AD1457'};
-	private proposalColor = { 'background': '#9C27B0', 'border': '#9C27B0', 'hover': '#BA68C8', 'highlight': '#6A1B9A'};
-	private groupColor = { 'background': '#3F51B5', 'border': '#3F51B5', 'hover': '#7986CB', 'highlight': '#283593' };
+	public meColor = { 'background': '#E91E63', 'border': '#E91E63', 'hover': '#F06292', 'highlight': '#AD1457'};
+	public proposalColor = { 'background': '#9C27B0', 'border': '#9C27B0', 'hover': '#BA68C8', 'highlight': '#6A1B9A'};
+	public groupColor = { 'background': '#3F51B5', 'border': '#3F51B5', 'hover': '#7986CB', 'highlight': '#283593' };
 	
 	constructor(
 		private httpManagerService: HttpManagerService,
@@ -58,7 +58,7 @@ export class GroupvisComponent implements OnInit {
 		}.bind(this), 500));
 	}
 	
-	private closeGraph() {
+	public closeGraph() {
 		this.close.emit(null);
 	}
 	
