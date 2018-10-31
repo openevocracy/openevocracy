@@ -42,6 +42,7 @@ exports.initializeMail = function() {
 		if(err) console.log(err);
 	});
 		
+	// TODO Delete after 31.12.2018
 	// Get smtp credentials from databse and create transporter
 	/*db.collection('configs').findOneAsync({'type': 'mailauth'},{'user': true, 'password': true})
 		.then(function(credentials) {
@@ -65,18 +66,19 @@ exports.initializeMail = function() {
 		}); 
 	});*/
 	
+	// Get smtp credentials from config and create transporter
 	const smtpConfig = {
-		'host': process.env.MAIL_HOST,
-		'port': process.env.MAIL_PORT,
-		'secure': false,
+		'host': cfg.PRIVATE.MAIL_HOST,
+		'port': cfg.PRIVATE.MAIL_PORT,
+		'secure': cfg.PRIVATE.MAIL_SECURE,
 		//'logger': true,
 		//'debug': true,
 		tls: {
 			'rejectUnauthorized': false // allow self signed certificate
 		},
 		auth: {
-			'user': process.env.MAIL_USER,
-			'pass': process.env.MAIL_PASS
+			'user': cfg.PRIVATE.MAIL_USER,
+			'pass': cfg.PRIVATE.MAIL_PASS
 		}
 	};
 	
@@ -126,7 +128,7 @@ function sendMail(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyPa
 		};
 		
 		// Send mail via nodemailer if MAIL flag is true in config
-		if(cfg.MAIL) {
+		if(cfg.MAIL_ENABLED) {
 			transporter.sendMail(mailOptions, function(error, info) {
 				if (error)
 					return console.log(error);

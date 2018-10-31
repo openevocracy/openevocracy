@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { Topic } from '../_models/topic/topic';
-import { cfg } from '../../../shared/config';
 
 import { HttpManagerService } from './http-manager.service';
 

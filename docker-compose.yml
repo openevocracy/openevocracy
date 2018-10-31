@@ -8,7 +8,10 @@ services:
      - mongodb
     restart: always
     volumes:
-     - shared/config.js:/home/node/app/shared/config.js
+     - ./shared/config.base.js:/home/node/app/shared/config.base.js
+     - ./shared/config.env.prod.js:/home/node/app/shared/config.js
   mongodb:
     image: mongo
     restart: always
+    volumes:
+    - ./data:/data/db

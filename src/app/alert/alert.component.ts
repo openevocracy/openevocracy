@@ -4,8 +4,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { Alert, AlertType } from '../_models/alert';
 import { AlertService } from '../_services/alert.service';
-
-import { cfg } from '../../../shared/config';
+import { ConfigService } from '../_services/config.service';
 
 @Component({
 	selector: 'alert',
@@ -13,9 +12,14 @@ import { cfg } from '../../../shared/config';
 	styleUrls: ['./alert.component.scss']
 })
 export class AlertComponent implements OnInit {
+	private cfg: any;
 	public alerts: Alert[] = [];
 	
-	constructor(private alertService: AlertService) { }
+	constructor(
+		private alertService: AlertService,
+		private configService: ConfigService) {
+			this.cfg = configService.get();
+		}
 	
 	ngOnInit() {
 		this.alertService.getAlert().subscribe((alert: Alert) => {
@@ -31,7 +35,7 @@ export class AlertComponent implements OnInit {
 			// Remove alert automatically after some time
 			setTimeout(function(){
 				this.alerts.shift();
-			}.bind(this), cfg.ALERT_REMOVAL_TIME);
+			}.bind(this), this.cfg.ALERT_REMOVAL_TIME);
 		});
 	}
 	

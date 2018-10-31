@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { UtilsService } from './utils.service';
 import { HttpManagerService } from './http-manager.service';
 
-import { cfg } from '../../../shared/config';
 import * as _ from 'underscore';
 
 class Credentials {

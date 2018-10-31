@@ -12,7 +12,6 @@ import { TopicService } from '../_services/topic.service';
 import { UserService } from '../_services/user.service';
 
 import { C } from '../../../shared/constants';
-import { cfg } from '../../../shared/config';
 import * as _ from 'underscore';
 
 import { Topic } from '../_models/topic/topic';

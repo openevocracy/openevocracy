@@ -1,6 +1,10 @@
+const minute = 1000*60;
+const hour = 60*minute;
+
 exports.C = {
-	HOUR: 3600000,
-   DAY: 86400000,
+   MINUTE: minute,
+	HOUR: 60*minute,
+   DAY: 24*hour,
    
    // Stages 
    STAGE_REJECTED  : -1,

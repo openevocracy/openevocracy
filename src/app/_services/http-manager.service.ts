@@ -4,22 +4,25 @@ import { Observable } from 'rxjs/Observable';
 import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
 import { Router } from '@angular/router';
 
-import { cfg } from '../../../shared/config';
-
-import { AlertService } from '../_services/alert.service';
 import { TranslateService } from '@ngx-translate/core';
+import { AlertService } from '../_services/alert.service';
+import { ConfigService } from '../_services/config.service';
 
 import 'rxjs/add/observable/throw';
 import * as _ from 'underscore';
 
 @Injectable()
 export class HttpManagerService {
+	private cfg: any;
 
 	constructor(
 		private http: Http,
 		private router: Router,
 		private alert: AlertService,
-		private translate: TranslateService) { }
+		private translate: TranslateService,
+		private configService: ConfigService) {
+			this.cfg = configService.get();
+		}
 		
 	private getOptions() {
 		var currentUser = window.localStorage.getItem('currentUser');
@@ -82,13 +85,14 @@ export class HttpManagerService {
 	
 	public extractData(res: Response) {
 		let body = res.json();
-		if(cfg.DEBUG)
+		if(this.cfg.DEBUG)
 			console.log('http response', body);
 		return body || { };
 	}
 	
 	public handleError(raw: Response | any) {
-		console.error(raw);
+		if(this.cfg.DEBUG)
+			console.error(raw);
 		// If server sends 401 'Unauthorized'
 		if(_.has(raw, 'status') && raw.status == 401 && raw._body == 'Unauthorized') {
 			// Delete token in local storage and redirect

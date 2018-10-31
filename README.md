@@ -53,7 +53,7 @@ Then customize the copied config in `public/js/setup/config.js`. There are diffe
 
 #### Necessary changes
 
-Change `EVOCRACY_HOST` to the URL where the instance will be reachable.
+Change `BASE_URL` to the URL where the instance will be reachable.
 
 ## Run OpenEvocracy
 

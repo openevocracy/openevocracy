@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
@@ -55,9 +55,9 @@ import { EmailModalService } from './_services/modal.email.service';
 import { CloseeditorModalService } from './_services/modal.closeeditor.service';
 import { UtilsService } from './_services/utils.service';
 import { LanguageService } from './_services/language.service';
+import { ConfigService } from './_services/config.service';
 
 // Shared
-import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
@@ -70,6 +70,11 @@ import { ShareDialogComponent } from './dialogs/share/share.component';
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
 	return new TranslateHttpLoader(http);
+}
+
+export async function loadConfig(configService: ConfigService) {
+	return configService.load;
+	//return () => configService.load();
 }
 
 @NgModule({
@@ -121,6 +126,9 @@ export function HttpLoaderFactory(http: HttpClient) {
 	],
 	providers: [
 		HttpManagerService,
+		ConfigService,
+		//{ provide: ConfigService, useValue: ConfigService, deps: [HttpManagerService] },
+		{ provide: APP_INITIALIZER, useFactory: loadConfig, deps: [ConfigService], multi: true },
 		TopicsListService,
 		TopicService,
 		Guard,
@@ -131,7 +139,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 		CloseeditorModalService,
 		UtilsService,
 		LanguageService,
-		{ provide: 'cfg', useValue: cfg },
+		//{ provide: 'cfg', useValue: cfg },
 		{ provide: 'C', useValue: C }
 	],
 	bootstrap: [AppComponent]

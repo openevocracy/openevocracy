@@ -3,6 +3,7 @@ var rp = require('request-promise');
 //var requirejs = require('requirejs');
 var db = require('./database').db;
 var ObjectId = require('mongodb').ObjectID;
+var cfg = require('../shared/config').cfg;
 
 function prepareAlert(type, content, vars) {
     vars = vars || null;
@@ -112,7 +113,15 @@ exports.pingInterval = function(wss) {
 };
 
 /*
- * @dsc: ping request from client, response with timestamp
+ * @desc: Send config file, but omit private configuration information
+ *        (e.g. mail credentials)
+ */
+exports.config = function(req, res) {
+	res.send(_.omit(cfg, 'PRIVATE'));
+};
+
+/*
+ * @desc: ping request from client, response with timestamp
  */
 exports.ping = function(req, res) {
 	var now = Date.now();

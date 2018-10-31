@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from '../_services/alert.service';
 import { UtilsService } from '../_services/utils.service';
 import { UserService } from '../_services/user.service';
-import { SettingsService } from '../_services/settings.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 
 import { faSave } from '@fortawesome/free-solid-svg-icons';

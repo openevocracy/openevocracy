@@ -6,10 +6,9 @@ import { ModalComponent } from '../modal.component';
 
 import { ModalService } from '../../_services/modal.service';
 import { TopicService } from '../../_services/topic.service';
+import { ConfigService } from '../../_services/config.service';
 
 import { TranslateService } from '@ngx-translate/core';
-
-import { cfg } from '../../../../shared/config';
 
 @Component({
 	selector: 'modal-addtopic',
@@ -17,7 +16,7 @@ import { cfg } from '../../../../shared/config';
 	styleUrls: ['../modal.component.scss']
 })
 export class ModalAddtopicComponent extends ModalComponent {
-	
+	private cfg: any;
 	public addTopicForm: FormGroup;
 	public topicnamePlaceholder: String;
 	
@@ -27,15 +26,16 @@ export class ModalAddtopicComponent extends ModalComponent {
 		private router: Router,
 		private topicService: TopicService,
 		private translate: TranslateService,
-		private fb: FormBuilder) {
-		
-		super(modalService, el);
-		
-		this.addTopicForm = this.fb.group({
-			topicname: ['', Validators.minLength(cfg.minLengthTopicName)]
-		});
-	
-	}
+		private fb: FormBuilder,
+		private configService: ConfigService) {
+			super(modalService, el);
+			
+			this.cfg = configService.get();
+			
+			this.addTopicForm = this.fb.group({
+				topicname: ['', Validators.minLength(this.cfg.minLengthTopicName)]
+			});
+		}
 	
 	onSubmit() {
 		// Pass topic name to topicService
@@ -49,7 +49,7 @@ export class ModalAddtopicComponent extends ModalComponent {
 	}
 	
 	open(data) {
-		this.translate.get("MODAL_NEW_TOPIC_NAME", {numChars: String(cfg.MIN_LETTERS_TOPIC_NAME)}).subscribe(
+		this.translate.get("MODAL_NEW_TOPIC_NAME", {numChars: String(this.cfg.MIN_LETTERS_TOPIC_NAME)}).subscribe(
 			str => {this.topicnamePlaceholder = str; });
 			
 		//this.translate.get("MODAL_NEW_TOPIC_NAME").subscribe(
