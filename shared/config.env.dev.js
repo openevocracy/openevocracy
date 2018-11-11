@@ -1,5 +1,5 @@
-const baseCfg = require("./config.base");
-const C = require("./constants");
+const baseCfg = require("./config.base").base;
+const C = require("./constants").C;
 
 exports.cfg = {
 	DEBUG:         true,

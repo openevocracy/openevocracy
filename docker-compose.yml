@@ -8,8 +8,12 @@ services:
      - mongodb
     restart: always
     volumes:
-     - ./shared/config.base.js:/home/node/app/shared/config.base.js
-     - ./shared/config.env.prod.js:/home/node/app/shared/config.js
+     #- /workspace/openevocracy/shared/:/home/node/app/shared/
+     - ./shared/:/home/node/app/shared/
+     #- ./shared/config.base.js:/home/node/app/shared/config.base.js
+     #- ./shared/config.env.prod.js:/home/node/app/shared/config.js
+    environment:
+     - ENV=prod
   mongodb:
     image: mongo
     restart: always

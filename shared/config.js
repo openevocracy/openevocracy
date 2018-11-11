@@ -1,0 +1,1 @@
+module.exports = require('./config.env.' + process.env.ENV);
