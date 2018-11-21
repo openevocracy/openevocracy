@@ -1,1 +1,1 @@
-module.exports = require('./config.env.' + process.env.ENV);
+exports.cfg = require('./config.env.' + process.env.ENV).cfg;

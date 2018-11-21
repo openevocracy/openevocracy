@@ -209,7 +209,7 @@ exports.createPadAsync = createPadAsync;
  */
 function getPadDetails(collection, padId) {
 	// Get pad meta information
-	var pad_promise = db.collection(collection).findOneAsync({ '_id': padId, 'expiration': true });
+	var pad_promise = db.collection(collection).findOneAsync({ '_id': padId });
 	
 	// Get topic id as source (for "back" button) and topic name
 	var topic_name_promise = pad_promise.then(function(pad) {

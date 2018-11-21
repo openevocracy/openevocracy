@@ -3,7 +3,7 @@ const C = require("./constants").C;
 
 exports.cfg = {
 	DEBUG:         true,
-	MAIL_ENABLED:  false,
+	MAIL_ENABLED:  true,
 	CRON_INTERVAL: 1,  // Run cron every x minute(s)
 	ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
 	
@@ -30,7 +30,7 @@ exports.cfg = {
 	
 	PRIVATE: {
 		BASE_URL     : baseCfg.BASE_URL,
-		DATABASE_HOST: baseCfg.DATABASE_HOST,
+		DATABASE_HOST: 'mongodb://localhost',
 		
 		MAIL_HOST  : baseCfg.MAIL_HOST,
 		MAIL_PORT  : baseCfg.MAIL_PORT,

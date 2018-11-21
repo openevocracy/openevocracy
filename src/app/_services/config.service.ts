@@ -26,5 +26,7 @@ export class ConfigService {
 			.map(res => { return res.json(); })
 			.catch(error => { return error.json(); })
 			.toPromise();
+			
+		return this.config;
 	}
 }

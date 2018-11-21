@@ -58,6 +58,7 @@ import { LanguageService } from './_services/language.service';
 import { ConfigService } from './_services/config.service';
 
 // Shared
+import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
@@ -72,9 +73,8 @@ export function HttpLoaderFactory(http: HttpClient) {
 	return new TranslateHttpLoader(http);
 }
 
-export async function loadConfig(configService: ConfigService) {
-	return configService.load;
-	//return () => configService.load();
+function loadConfig(configService: ConfigService) {
+	return () => configService.load();
 }
 
 @NgModule({
@@ -140,6 +140,10 @@ export async function loadConfig(configService: ConfigService) {
 		UtilsService,
 		LanguageService,
 		//{ provide: 'cfg', useValue: cfg },
+		/*{ provide: 'cfg',
+		  useFactory: (configService: ConfigService) => () => Promise.resolve(configService.get()),
+		  deps: [ConfigService]
+		},*/
 		{ provide: 'C', useValue: C }
 	],
 	bootstrap: [AppComponent]
