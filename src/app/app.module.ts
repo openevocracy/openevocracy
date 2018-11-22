@@ -73,7 +73,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 	return new TranslateHttpLoader(http);
 }
 
-function loadConfig(configService: ConfigService) {
+export function loadConfig(configService: ConfigService) {
 	return () => configService.load();
 }
 
