@@ -169,7 +169,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		sharedb.types.register(richText.type);
 
 		// Open WebSocket connection to ShareDB server
-		this.padSocket = new WebSocket('wss://' + parseUrl(origin).host + 'socket/pad/'+this.userToken);
+		this.padSocket = new WebSocket('wss://' + parseUrl(origin).host + '/socket/pad/'+this.userToken);
 		
 		// WebSocket connection was established
 		this.padSocket.onopen = function () {

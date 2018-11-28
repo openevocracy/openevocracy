@@ -19,6 +19,9 @@ import 'quill-authorship-evo';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 
+import origin from 'get-location-origin';
+import parseUrl from 'url-parse';
+
 import { C } from '../../../shared/constants';
 
 import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay } from '@fortawesome/free-solid-svg-icons';
@@ -206,7 +209,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 			}.bind(this));
 			
 			// Open WebSocket connection
-			this.chatSocket = new WebSocket('wss://develop.openevocracy.org/socket/chat/'+chatRoomId+'/'+this.userToken);
+			this.chatSocket = new WebSocket('wss://' + parseUrl(origin).host + '/socket/chat/'+chatRoomId+'/'+this.userToken);
 			
 			// WebSocket connection was established
 			this.chatSocket.onopen = function () {
