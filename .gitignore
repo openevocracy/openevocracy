@@ -44,4 +44,5 @@ testem.log
 .DS_Store
 Thumbs.db
 
-shared/config.base.js
+/shared/config.base.js
+/data

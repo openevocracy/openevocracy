@@ -16,51 +16,23 @@ Discussions are outsourced in small groups, therefore every idea has a chance to
 
 You should have a server with ssh access and root permissions and you should know how to use basic shell commands in linux. Your system needs the following requirements:
 
-  * Node.js: https://nodejs.org/en/download/package-manager/
-  * MongoDB: https://docs.mongodb.com/manual/administration/install-on-linux/
+  * docker: https://docs.docker.com/install/
+  * docker-compose: https://docs.docker.com/compose/install/
 
-### 1. Install OpenEvocracy via npm
+### 1. Install OpenEvocracy
 
-```shell
-npm install openevocracy
-cd node_modules/openevocracy
-```
+Clone the OpenEvocracy repository.
 
-**Background**: [How to get npm?](https://docs.npmjs.com/getting-started/installing-node)
+### 2. Customize the config
 
-I don't want to use npm, where can I just download the code?  
-Have a look at the releases page: https://github.com/openevocracy/openevocracy/releases
-
-### 2. Database
-
-Edit the file `install.js` to enter the mailserver configuration.
-
-Then run
-
-```shell
-mongo evocracy install.js
-mkdir data
-```
-
-### 3. Customize config.js
-
-First copy the default config:
-```shell
-cp public/js/setup/configs.default.js public/js/setup/configs.js
-```
-
-Then customize the copied config in `public/js/setup/config.js`. There are different config sets, one for productive use and one for debugging. You can choose the config set in the end of the file.
+Inside the repository copy the file `shared/config.base.js` as `shared/config.base.js`.
+Customize the files `shared/config.base.js` and `shared/config.env.prod.js` according to your needs.
 
 #### Necessary changes
 
 Change `BASE_URL` to the URL where the instance will be reachable.
 
-## Run OpenEvocracy
+## 3. Run OpenEvocracy
 
-```shell
-export IP=localhost
-export PORT=80
-
-mongod --dbpath=data --nojournal --bind_ip=127.0.0.1 &
-node app.js
-```
+Run `docker-compose up` to start OpenEvocracy in foreground mode.
+Run `docker-compose up -d` to start OpenEvocracy in background mode.

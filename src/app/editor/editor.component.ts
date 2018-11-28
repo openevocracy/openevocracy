@@ -18,6 +18,9 @@ import * as io from 'socket.io-client';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 
+import origin from 'get-location-origin';
+import parseUrl from 'url-parse';
+
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -166,7 +169,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		sharedb.types.register(richText.type);
 
 		// Open WebSocket connection to ShareDB server
-		this.padSocket = new WebSocket('wss://develop.openevocracy.org/socket/pad/'+this.userToken);
+		this.padSocket = new WebSocket('wss://' + parseUrl(origin).host + 'socket/pad/'+this.userToken);
 		
 		// WebSocket connection was established
 		this.padSocket.onopen = function () {
