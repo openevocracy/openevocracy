@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    image: openevocracy/openevocracy
+    image: openevocracy/openevocracy:v0.2
     ports:
      - $PORT:8080
     depends_on:
