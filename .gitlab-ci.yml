@@ -11,19 +11,20 @@ stages:
 test_package_check:
   allow_failure: true
   script:
-  - yarn global add yarn-check
-  - yarn-check || true
+  - npm i npm-check
+  - npm-check || true
   - pushd src
-  - yarn-check || true
+  - npm-check || true
   - popd
 
 test_audit:
   allow_failure: true
   script:
-  - yarn global add synode
-  - yarn audit || true
+  - npm i synode
+  - synode .
+  - npm audit || true
   - pushd src
-  - yarn audit || true
+  - npm audit || true
   - popd
 
 test_sast:
