@@ -25,7 +25,7 @@ Clone the OpenEvocracy repository.
 
 ### 2. Customize the config
 
-Inside the repository copy the file `shared/config.base.js` as `shared/config.base.js`.
+Inside the repository copy the file `shared/config.base.default.js` as `shared/config.base.js`.
 Customize the files `shared/config.base.js` and `shared/config.env.prod.js` according to your needs.
 
 #### Necessary changes
