@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>{{ 'FORUM_DIALOG_NEWTHREAD_HEADING' | translate }}</h2>
+
+<mat-dialog-content>
+	<form [formGroup]="newthreadForm" novalidate>
+	<p>
+		<mat-form-field>
+			<input matInput formControlName="title" type="text" placeholder="{{ 'FORUM_DIALOG_NEWTHREAD_TITLE' | translate }}" required>
+		</mat-form-field>
+	</p>
+	
+	<div>
+		<editor-field [labelKey]="'FORUM_DIALOG_NEWTHREAD_TEXT'" [required]="true" (onEditorCreated)="editorCreated($event)"></editor-field>
+	</div>
+	
+	<p>
+		<mat-slide-toggle [checked]="slideChecked" (change)="onSlide($event)">{{ 'FORUM_DIALOG_NEWTHREAD_ONLY_MEMBERS' | translate }}</mat-slide-toggle>
+	</p>
+	
+</form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+	<button mat-raised-button color="primary" (click)="submit()">{{ 'FORUM_BUTTON_NEW_THREAD' | translate }}</button>
+	<button mat-raised-button color="warn" (click)="close()">{{ 'FORM_BUTTON_CLOSE' | translate }}</button>
+</mat-dialog-actions>

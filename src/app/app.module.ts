@@ -67,6 +67,9 @@ import { GroupvisComponent } from './groupvis/groupvis.component';
 import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
 import { ShareDialogComponent } from './dialogs/share/share.component';
+import { GroupForumComponent } from './groupforum/groupforum.component';
+import { NewThreadDialogComponent } from './dialogs/newthread/newthread.component';
+import { EditorFieldComponent } from './editorfield/editorfield.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -102,7 +105,10 @@ export function loadConfig(configService: ConfigService) {
 		GroupvisComponent,
 		PadviewComponent,
 		UserprofileComponent,
-		ShareDialogComponent
+		ShareDialogComponent,
+		GroupForumComponent,
+		NewThreadDialogComponent,
+		EditorFieldComponent
 	],
 	imports: [
 		BrowserModule,

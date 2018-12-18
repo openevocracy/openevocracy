@@ -12,6 +12,7 @@ import { GroupComponent } from '../group/group.component';
 import { PadviewComponent } from '../padview/padview.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { UserprofileComponent } from '../userprofile/userprofile.component';
+import { GroupForumComponent } from '../groupforum/groupforum.component';
 
 const appChildRoutes: Routes = [
 	{ path: '', redirectTo: 'topiclist', pathMatch: 'full' },
@@ -22,6 +23,7 @@ const appChildRoutes: Routes = [
 	{ path: 'group/editor/:id', component: GroupComponent },
 	{ path: 'proposal/view/:id', component: PadviewComponent },
 	{ path: 'group/view/:id', component: PadviewComponent },
+	{ path: 'group/forum/:id', component: GroupForumComponent },
 	{ path: 'settings/:id', component: SettingsComponent },
 	{ path: 'user/profile/:id', component: UserprofileComponent }
 ];

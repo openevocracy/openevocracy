@@ -1,0 +1,40 @@
+<mat-toolbar color="primary">
+	<div class="flex container">
+		<div class="topic-title">
+			<p>{{prefix}}</p>
+			<h1>{{title}}</h1>
+		</div>
+		
+		<span class="flex-spacer"></span>
+		
+		<button mat-button title="{{ 'FORUM_BUTTON_NEW_THREAD' | translate }}" (click)="openNewThreadDialog()">
+			<span><fa-icon [icon]="faComment"></fa-icon> {{ 'FORUM_BUTTON_NEW_THREAD' | translate }}</span>
+		</button>
+		<button mat-button title="{{ 'FORUM_BUTTON_TO_GROUP' | translate }}" [routerLink]="['/group/editor', padId]">
+			<span><fa-icon [icon]="faUsers"></fa-icon> {{ 'FORUM_BUTTON_TO_GROUP' | translate }}</span>
+		</button>
+	</div>
+</mat-toolbar>
+
+<div class="threads container">
+	<section *ngFor="let thread of threads">
+		<div class="thread-states">
+			<div class="state">
+				<fa-icon *ngIf="!closed" class="open" [icon]="faExclamationCircle" title="{{ 'THREAD_OPEN' | translate }}"></fa-icon>
+				<fa-icon *ngIf="closed" class="closed" [icon]="faCheckCircle" title="{{ 'THREAD_CLOSED' | translate }}"></fa-icon>
+			</div>
+			<div class="state">
+				<fa-icon *ngIf="!private" class="public" [icon]="faLockOpen" title="{{ 'THREAD_PUBLIC' | translate }}"></fa-icon>
+				<fa-icon *ngIf="private" class="private" [icon]="faLock" title="{{ 'THREAD_PRIVATE' | translate }}"></fa-icon>
+			</div>
+		</div>
+		
+		<div class="thread-content">
+			<h2>{{ thread.title }}</h2>
+			<div class="author">
+				<small><span>{{ thread.createdTimestamp | date:'y-MM-dd' }}</span>
+				<a [routerLink]="['/user/profile', thread.authorId]">{{ thread.authorId }}</a></small>
+			</div>
+		</div>
+	</section>
+</div>

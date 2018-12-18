@@ -122,6 +122,16 @@
 	"GROUP_RATING_TOOLTIP_INTEGRATION": "Integration skill of this member, i.e. ability to cooperate and find consensus",
 	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Expertise of this member regarding the topic",
 	"GROUP_MEMBER_PROPOSAL_CLOSE": "Schließen",
+	"GROUP_BUTTON_FORUM": "Forum",
+	
+	"FORUM_TITLE_PREFIX": "Forum of group {{id}} of topic:",
+	"FORUM_BUTTON_NEW_THREAD": "New thread",
+	"FORUM_BUTTON_TO_GROUP": "To group",
+	"FORUM_BUTTON_NEW_THREAD": "Create thread",
+	"FORUM_DIALOG_NEWTHREAD_HEADING": "Create new thread",
+	"FORUM_DIALOG_NEWTHREAD_TITLE": "Thread title",
+	"FORUM_DIALOG_NEWTHREAD_TEXT": "Thread description",
+	"FORUM_DIALOG_NEWTHREAD_ONLY_MEMBERS": "Only members of the group are allowed to post and comment.",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",

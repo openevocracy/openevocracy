@@ -122,6 +122,16 @@
 	"GROUP_RATING_TOOLTIP_INTEGRATION": "Integrationsfähigkeit dieses Mitglieds, d.h. Kooperations- und Konsensfähigkeit",
 	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Fachwissen dieses Mitglieds bezüglich des Themas",
 	"GROUP_MEMBER_PROPOSAL_CLOSE": "Schließen",
+	"GROUP_BUTTON_FORUM": "Forum",
+	
+	"FORUM_TITLE_PREFIX": "Forum der Gruppe {{id}} zum Thema:",
+	"FORUM_BUTTON_NEW_THREAD": "Neuer Thread",
+	"FORUM_BUTTON_TO_GROUP": "Zur Gruppe",
+	"FORUM_BUTTON_NEW_THREAD": "Thread erstellen",
+	"FORUM_DIALOG_NEWTHREAD_HEADING": "Neuen Thread erstellen",
+	"FORUM_DIALOG_NEWTHREAD_TITLE": "Thread Titel",
+	"FORUM_DIALOG_NEWTHREAD_TEXT": "Thread Beschreibung",
+	"FORUM_DIALOG_NEWTHREAD_ONLY_MEMBERS": "Nur Mitglieder der Gruppe dürfen posten und kommentieren.",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",

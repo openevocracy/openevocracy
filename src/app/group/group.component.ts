@@ -24,7 +24,7 @@ import parseUrl from 'url-parse';
 
 import { C } from '../../../shared/constants';
 
-import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay, faComments } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-group',
@@ -58,8 +58,9 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	public faHandshake = faHandshake;
 	public faLightbulb = faLightbulb;
 	public faPlay = faPlay;
+	public faComments = faComments;
 
-	constructor(
+  constructor(
 		protected snackBar: MatSnackBar,
 		protected alertService: AlertService,
 		protected router: Router,
