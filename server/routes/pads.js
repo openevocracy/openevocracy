@@ -11,7 +11,7 @@ var richText = require('rich-text');
 var WebSocketJSONStream = require('websocket-json-stream');
 var ShareDBAccess = require('sharedb-access');
 var sharedb = require('../database').sharedb;
-var QuillDeltaToHtmlConverter = require('quill-delta-to-html');
+var QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
 
 // Own references
 var users = require('./users');
