@@ -209,7 +209,9 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 			}.bind(this));
 			
 			// Open WebSocket connection
-			this.chatSocket = new WebSocket('wss://' + parseUrl(origin).host + '/socket/chat/'+chatRoomId+'/'+this.userToken);
+			const parsed = parseUrl(origin);
+			const protocol = ('https' == parsed.protocol) ? 'wss://' : 'ws://';
+			this.chatSocket = new WebSocket(protocol + parsed.host + '/socket/chat/'+chatRoomId+'/'+this.userToken);
 			
 			// WebSocket connection was established
 			this.chatSocket.onopen = function () {
