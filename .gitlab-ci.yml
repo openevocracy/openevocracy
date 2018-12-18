@@ -63,7 +63,8 @@ test_platform:
   - echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
   - apt-get update
   - apt-get install -y nodejs yarn build-essential
-  - docker-compose -f docker-compose.dev.yml up
+  - cp shared/config.base.default.js shared/config.base.js
+  - PORT=8080 docker-compose -f docker-compose.dev.yml up
   - sleep 1m
   - docker-compose -f docker-compose.dev.yml down
 
