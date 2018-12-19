@@ -1,0 +1,75 @@
+image: node:8
+
+services:
+- docker:stable-dind
+
+stages:
+- build
+- test
+- release
+
+test_package_check:
+  allow_failure: true
+  script:
+  - npm i npm-check
+  - npm-check || true
+  - pushd src
+  - npm-check || true
+  - popd
+
+test_audit:
+  allow_failure: true
+  script:
+  - npm i synode
+  - synode .
+  - npm audit || true
+  - pushd src
+  - npm audit || true
+  - popd
+
+test_sast:
+  image: docker:stable
+  stage: test
+  variables:
+    DOCKER_DRIVER: overlay2
+  allow_failure: true
+  script:
+    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+    - docker run
+        --env SAST_CONFIDENCE_LEVEL="${SAST_CONFIDENCE_LEVEL:-3}"
+        --volume "$PWD:/code"
+        --volume /var/run/docker.sock:/var/run/docker.sock
+        "registry.gitlab.com/gitlab-org/security-products/sast:$SP_VERSION" /app/bin/run /code
+  artifacts:
+    paths: [gl-sast-report.json]
+
+test_platform:
+  image: ubuntu:bionic
+  stage: test
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2375/
+  allow_failure: true
+  script:
+  - apt-get update
+  - apt-get install -y curl wget
+  - curl -fsSL https://get.docker.com -o get-docker.sh
+  - sh get-docker.sh
+  - usermod -aG docker $(whoami)
+  - curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  - chmod +x /usr/local/bin/docker-compose
+  - curl -sL https://deb.nodesource.com/setup_8.x | bash -
+  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+  - apt-get update
+  - apt-get install -y nodejs yarn build-essential
+  - cp shared/config.base.default.js shared/config.base.js
+  - PORT=8080 docker-compose -f docker-compose.dev.yml up
+  - sleep 1m
+  - docker-compose -f docker-compose.dev.yml down
+
+release_docker:
+  image: docker:stable
+  stage: release
+  script:
+  - docker build -t openevocracy .

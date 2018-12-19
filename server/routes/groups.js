@@ -150,7 +150,7 @@ exports.createGroupsAsync = function(topic) {
 			.then(function(users) {
 				mail.sendMailMulti(users,
 					'EMAIL_CONSENSUS_START_SUBJECT', [topic.name],
-					'EMAIL_CONSENSUS_START_MESSAGE', [topic.name, groupId.toString(), cfg.BASE_URL]);
+					'EMAIL_CONSENSUS_START_MESSAGE', [topic.name, groupId.toString(), cfg.PRIVATE.BASE_URL]);
 		});
 		
 		// Get group relations (previous pad ids and member ids)
@@ -253,7 +253,7 @@ exports.remixGroupsAsync = function(topic) {
 						.then(function(users) {
 							mail.sendMailMulti(users,
 								'EMAIL_TOPIC_PASSED_SUBJECT', [topic.name],
-								'EMAIL_TOPIC_PASSED_MESSAGE', [topic.name, topic._id, cfg.BASE_URL]);
+								'EMAIL_TOPIC_PASSED_MESSAGE', [topic.name, topic._id, cfg.PRIVATE.BASE_URL]);
 					});
 				}).return({'nextStage': C.STAGE_PASSED});
 		}
@@ -307,7 +307,7 @@ exports.remixGroupsAsync = function(topic) {
 				.find({'_id': {$in: groupMemberIds}}, {'email': true}).toArrayAsync().then(function(users) {
 					mail.sendMailMulti(users,
 						'EMAIL_LEVEL_CHANGE_SUBJECT', [topic.name],
-						'EMAIL_LEVEL_CHANGE_MESSAGE', [topic.name, groupId.toString(), cfg.BASE_URL]);
+						'EMAIL_LEVEL_CHANGE_MESSAGE', [topic.name, groupId.toString(), cfg.PRIVATE.BASE_URL]);
          });
             
 			return Promise.join(sendMail_promise, storeGroup_promise);

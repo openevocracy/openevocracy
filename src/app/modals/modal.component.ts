@@ -48,7 +48,7 @@ export class ModalComponent implements OnInit, OnDestroy {
 		$('body').addClass('modal-open');
 	}
 	
-	protected close() {
+	public close() {
 		this.element.fadeOut();
 		$('body').removeClass('modal-open');
 	}

@@ -1,10 +1,13 @@
 var mongoskin = require('mongoskin');
 var promisify = require('./promisify');
+var cfg = require('../shared/config').cfg;
 
 // promisify mongoskin
-var mongoskin = promisify(mongoskin);
+var ms = promisify(mongoskin);
 
-var dbpath = 'mongodb://127.0.0.1/evocracy';
+// Get DB path from 
+var dbpath = cfg.PRIVATE.DATABASE_HOST;
+console.log(cfg, dbpath);
 
-exports.db = mongoskin.db(dbpath);
+exports.db = ms.db(dbpath);
 exports.sharedb = require('sharedb-mongo')(dbpath);

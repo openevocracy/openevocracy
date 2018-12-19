@@ -22,7 +22,7 @@ export class ModalCloseeditorComponent extends ModalComponent {
 		super(modalService, el);
 	}
 	
-	private setResponse(leave: boolean) {
+	public setResponse(leave: boolean) {
 		this.closeeditorModalService.setResponse(leave);
 	}
 

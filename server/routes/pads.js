@@ -9,10 +9,9 @@ var pdf = require('phantom-html2pdf');
 var ShareDB = require('sharedb');
 var richText = require('rich-text');
 var WebSocketJSONStream = require('websocket-json-stream');
-var ShareDBMongo = require('sharedb-mongo');
 var ShareDBAccess = require('sharedb-access');
-var sharedb = ShareDBMongo('mongodb://127.0.0.1/evocracy');
-var QuillDeltaToHtmlConverter = require('quill-delta-to-html');
+var sharedb = require('../database').sharedb;
+var QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
 
 // Own references
 var users = require('./users');
@@ -210,7 +209,7 @@ exports.createPadAsync = createPadAsync;
  */
 function getPadDetails(collection, padId) {
 	// Get pad meta information
-	var pad_promise = db.collection(collection).findOneAsync({ '_id': padId, 'expiration': true });
+	var pad_promise = db.collection(collection).findOneAsync({ '_id': padId });
 	
 	// Get topic id as source (for "back" button) and topic name
 	var topic_name_promise = pad_promise.then(function(pad) {

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { cfg } from '../../../shared/config';
+import { ConfigService } from '../_services/config.service';
 
 // Read version from package.json file
 declare function require(moduleName: string): any;
@@ -17,7 +17,9 @@ export class FooterComponent implements OnInit {
 	public version;
 	public debug;
 	
-	constructor() {
+	constructor(private configService: ConfigService) {
+		const cfg = configService.get();
+		
 		this.version = version;
 		this.debug = cfg.DEBUG;
 	}

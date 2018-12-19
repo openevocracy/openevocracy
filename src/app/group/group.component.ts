@@ -19,6 +19,9 @@ import 'quill-authorship-evo';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 
+import origin from 'get-location-origin';
+import parseUrl from 'url-parse';
+
 import { C } from '../../../shared/constants';
 
 import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay, faComments } from '@fortawesome/free-solid-svg-icons';
@@ -29,35 +32,35 @@ import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay, fa
 	styleUrls: ['../editor/editor.component.scss', './group.component.scss']
 })
 export class GroupComponent extends EditorComponent implements OnInit, OnDestroy {
-	private C;
-	private proposalHtml: string = "";
-	private group: Group;
-	private chatSocket;
-	private chatForm: FormGroup;
+	public C;
+	public proposalHtml: string = "";
+	public group: Group;
+	public chatSocket;
+	public chatForm: FormGroup;
 	
-	private chatReady: boolean = false;
-	private chatHide: boolean = false;
-	private me;
-	private messages;
-	private memberColors = {};
-	private memberNames = {};
-	private online = {};
+	public chatReady: boolean = false;
+	public chatHide: boolean = false;
+	public me;
+	public messages;
+	public memberColors = {};
+	public memberNames = {};
+	public online = {};
 	
 	// Classes and styles for member proposal column
-	private classColEditor: string = 'col-xs-12';
-	private classColProposal: string = 'hidden';
-	private styleColProposal = {'background-color': '#fff'};
+	public classColEditor: string = 'col-xs-12';
+	public classColProposal: string = 'hidden';
+	public styleColProposal = {'background-color': '#fff'};
 	
 	// FontAwesome icons
-	private faUser = faUser;
-	private faExpandArrowsAlt = faExpandArrowsAlt;
-	private faFile = faFile;
-	private faHandshake = faHandshake;
-	private faLightbulb = faLightbulb;
-	private faPlay = faPlay;
-	private faComments = faComments;
-	
-	constructor(
+	public faUser = faUser;
+	public faExpandArrowsAlt = faExpandArrowsAlt;
+	public faFile = faFile;
+	public faHandshake = faHandshake;
+	public faLightbulb = faLightbulb;
+	public faPlay = faPlay;
+	public faComments = faComments;
+
+  constructor(
 		protected snackBar: MatSnackBar,
 		protected alertService: AlertService,
 		protected router: Router,
@@ -134,7 +137,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	 * @params:
 	 *    editor: quill editor object
 	 */
-	protected editorCreated(editor) {
+	public editorCreated(editor) {
 		// Disable editor body
 		this.disableEdit();
 		
@@ -207,7 +210,9 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 			}.bind(this));
 			
 			// Open WebSocket connection
-			this.chatSocket = new WebSocket('wss://develop.openevocracy.org/socket/chat/'+chatRoomId+'/'+this.userToken);
+			const parsed = parseUrl(origin);
+			const protocol = ('https' == parsed.protocol) ? 'wss://' : 'ws://';
+			this.chatSocket = new WebSocket(protocol + parsed.host + '/socket/chat/'+chatRoomId+'/'+this.userToken);
 			
 			// WebSocket connection was established
 			this.chatSocket.onopen = function () {
@@ -336,7 +341,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	/*
 	 * @desc: Opens 'productive mode'
 	 */
-	private enterFullscreen() {
+	public enterFullscreen() {
 		var element = document.documentElement;
 		
 		if(element.requestFullscreen) {
@@ -365,7 +370,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 	 *        chooses antoher member proposal, this function is called
 	 *        in order to close the particular member proposal. 
 	 */
-	private closeMemberProposal() {
+	public closeMemberProposal() {
 		this.classColEditor = 'col-xs-12';
 		this.classColProposal = 'hidden';
 		this.proposalHtml = "";

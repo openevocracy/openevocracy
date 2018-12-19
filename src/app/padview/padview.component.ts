@@ -13,14 +13,14 @@ import { faEllipsisV, faUser, faShareSquare, faComments } from '@fortawesome/fre
 
 export class PadviewComponent implements OnInit {
 
-	private pad;
-	private now;
+	public pad;
+	public now;
 
 	// FontAwesome icons
-	private faEllipsisV = faEllipsisV;
-	private faUser = faUser;
-	private faShareSquare = faShareSquare;
-	private faComments = faComments;
+	public faEllipsisV = faEllipsisV;
+	public faUser = faUser;
+	public faShareSquare = faShareSquare;
+	public faComments = faComments;
 
 	constructor(
 		private router: Router,

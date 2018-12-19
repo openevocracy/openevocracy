@@ -12,7 +12,6 @@ import { TopicService } from '../_services/topic.service';
 import { UserService } from '../_services/user.service';
 
 import { C } from '../../../shared/constants';
-import { cfg } from '../../../shared/config';
 import * as _ from 'underscore';
 
 import { Topic } from '../_models/topic/topic';
@@ -28,23 +27,23 @@ export class TopicComponent implements OnInit {
 	//@ViewChild(GroupvisComponent)
 	//private groupvis: GroupvisComponent;
 	
-	private showGraph: boolean = false;
+	public showGraph: boolean = false;
 	
-	private C;
-	private userId: string;
-	private topicId: string;
-	private topic: Topic;
+	public C;
+	public userId: string;
+	public topicId: string;
+	public topic: Topic;
 	
-	private faHandPaper = faHandPaper;
-	private faEllipsisV = faEllipsisV;
-	private faUser = faUser;
-	private faShareSquare = faShareSquare;
-	private faDownload = faDownload;
-	private faFileMedical = faFile;
-	private faSitemap = faSitemap;
-	private faSave = faSave;
-	private faEdit = faEdit;
-	private faUsers = faUsers;
+	public faHandPaper = faHandPaper;
+	public faEllipsisV = faEllipsisV;
+	public faUser = faUser;
+	public faShareSquare = faShareSquare;
+	public faDownload = faDownload;
+	public faFileMedical = faFile;
+	public faSitemap = faSitemap;
+	public faSave = faSave;
+	public faEdit = faEdit;
+	public faUsers = faUsers;
 	
 	constructor(
 		private router: Router,
@@ -65,7 +64,7 @@ export class TopicComponent implements OnInit {
 		this.loadTopic(this.topicId);
 	}
 	
-	private openDialog() {
+	public openDialog() {
 		this.matDialog.open(ShareDialogComponent);
 	}
 	
@@ -108,7 +107,7 @@ export class TopicComponent implements OnInit {
 	/*
 	 * @desc: Open graph to visualize topic hierarchy
 	 */
-	private openGraph() {
+	public openGraph() {
 		this.showGraph = true;
 		//this.groupvis.initGraph(this.topicId);
 	}

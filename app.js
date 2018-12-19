@@ -219,8 +219,11 @@ app.post('/json/user/lang', auth(), users.setLanguage);
 // ###   M I S C   ###
 // ###################
 
+// @desc: Config file
+app.get('/json/config', utils.config);
+
 // @desc: Ping server for connection test
-app.get('/json/ping', auth(), utils.ping);
+app.get('/json/ping', utils.ping);
 
 // ###################
 // ###   T E S T   ###
@@ -243,11 +246,6 @@ app.all('/*', function(req, res, next) {
     
     // TODO Error handling is necessary if given path is not a route in Angular
 });
-
-/*app.use(function(req, res, next){
-  // TODO redirect to specific 404 page
-  res.redirect(cfg.EVOCRACY_HOST);
-});*/
 
 // ###################
 // ### S E R V E R ###

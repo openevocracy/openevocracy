@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { UtilsService } from './utils.service';
 import { HttpManagerService } from './http-manager.service';
 
-import { cfg } from '../../../shared/config';
 import * as _ from 'underscore';
 
 class Credentials {
@@ -57,7 +56,7 @@ export class UserService {
 	
 	public authenticate(credentials) {
 		var self = this;
-		return this.http.post(cfg.BASE_URL + '/json/auth/login', credentials)
+		return this.http.post('/json/auth/login', credentials)
 			.map(raw => {
 				var res = raw.json();
 				

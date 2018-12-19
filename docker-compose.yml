@@ -1,0 +1,18 @@
+version: '3'
+services:
+  web:
+    image: openevocracy/openevocracy:v0.2
+    ports:
+     - $PORT:8080
+    depends_on:
+     - mongodb
+    restart: always
+    volumes:
+     - ./shared/:/home/node/app/shared/
+    environment:
+     - ENV=prod
+  mongodb:
+    image: mongo
+    restart: always
+    volumes:
+    - ./data:/data/db

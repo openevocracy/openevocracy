@@ -117,7 +117,7 @@ exports.sendVerificationMailAgain = function(req, res) {
 function sendVerificationMail(user) {
 	mail.sendMail(user,
 		'EMAIL_REGISTRATION_SUBJECT', [],
-		'EMAIL_REGISTRATION_MESSAGE', [cfg.BASE_URL, user._id.toString(), user.email]);
+		'EMAIL_REGISTRATION_MESSAGE', [cfg.PRIVATE.BASE_URL, user._id.toString(), user.email]);
 }
 
 // @desc: Send a mail containing a new password for the user with the specific email
