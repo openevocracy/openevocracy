@@ -34,5 +34,4 @@ Change `BASE_URL` value in `shared/config.base.js` to the URL where the instance
 
 ## 3. Run OpenEvocracy
 
-Run `docker-compose up` to start OpenEvocracy in foreground mode.
-Run `docker-compose up -d` to start OpenEvocracy in background mode.
+Change dir to project folder. Run `docker-compose up` to start OpenEvocracy in foreground mode or run `docker-compose up -d` to start OpenEvocracy in background mode.
