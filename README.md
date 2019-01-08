@@ -30,7 +30,7 @@ Customize the files `shared/config.base.js` and `shared/config.env.prod.js` acco
 
 #### Necessary changes
 
-Change `BASE_URL` to the URL where the instance will be reachable.
+Change `BASE_URL` value in `shared/config.base.js` to the URL where the instance will be reachable.
 
 ## 3. Run OpenEvocracy
 
