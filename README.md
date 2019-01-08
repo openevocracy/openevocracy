@@ -35,3 +35,7 @@ Change `BASE_URL` value in `shared/config.base.js` to the URL where the instance
 ## 3. Run OpenEvocracy
 
 Change dir to project folder. Run `docker-compose up` to start OpenEvocracy in foreground mode or run `docker-compose up -d` to start OpenEvocracy in background mode.
+
+#### Choose port
+
+The default port is `8080`. Start OpenEvocracy e.g. with `PORT=80 docker-compose up -d` (where `80` is your port of choice).
