@@ -21,19 +21,19 @@ import * as _ from 'underscore';
 })
 export class GroupForumComponent implements OnInit {
 	
-	private forumId: string;
-	private padId: string;
-	private prefix: string;
-	private title: string;
-	private threads: Thread[];
+	public forumId: string;
+	public padId: string;
+	public prefix: string;
+	public title: string;
+	public threads: Thread[];
 	
 	// FontAwesome icons
-	private faComment = faComment;
-	private faUsers = faUsers;
-	private faLock = faLock;
-	private faLockOpen = faLockOpen;
-	private faExclamationCircle = faExclamationCircle;
-	private faCheckCircle = faCheckCircle;
+	public faComment = faComment;
+	public faUsers = faUsers;
+	public faLock = faLock;
+	public faLockOpen = faLockOpen;
+	public faExclamationCircle = faExclamationCircle;
+	public faCheckCircle = faCheckCircle;
 
 	constructor(
 		private utilsService: UtilsService,
