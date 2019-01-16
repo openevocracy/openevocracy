@@ -75,7 +75,7 @@ export class GroupForumComponent implements OnInit {
 	 * @desc: opens dialog to add new thread and subscribe to dialog
 	 *        function is called from "New thread"-Button
 	 */
-	private openNewThreadDialog() {
+	public openNewThreadDialog() {
 		// Open dialog
 		let dialogRef = this.matDialog.open(NewThreadDialogComponent, {'minWidth': '600px'});
 		// Wait for onSubmit event from dialog
