@@ -1,8 +1,8 @@
 # OpenEvocracy
 
-Is an implementation of the Evocracy concept: http://openevocracy.org/
+Is an implementation of the Evocracy concept: https://openevocracy.org/
 
-See a running demo instance at: http://demo.openevocracy.org/
+See a running demo instance at: https://demo.openevocracy.org/
 
 ## Project
 
