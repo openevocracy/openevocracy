@@ -26,19 +26,19 @@ export class NewThreadDialogComponent {
 		});
 	}
 	
-	private close() {
+	public close() {
 		this.dialogRef.close();
 	}
 	
-	private editorCreated(editor: any) {
+	public editorCreated(editor: any) {
 		this.editor = editor;
 	}
 	
-	private onSlide(e: any) {
+	public onSlide(e: any) {
 		this.slideChecked = e.checked;
 	}
 	
-	private submit() {
+	public submit() {
 		// Check if form is valid
 		if(!this.newthreadForm.valid || this.editor.getText().trim() == "")
 			return;
