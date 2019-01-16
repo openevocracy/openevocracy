@@ -37,14 +37,14 @@ export class EditorFieldComponent {
 	/*
 	 * @desc: Called from quill editor component, when editor is ready
 	 */
-	private editorCreated(editor: any) {
+	public editorCreated(editor: any) {
 		this.onEditorCreated.emit(editor);
 	}
 	
 	/*
 	 * @desc: Called from quill editor component, when something was typed
 	 */
-	private contentChanged(e: any) {
+	public contentChanged(e: any) {
 		// Set dirty variable
 		if(!this.isDirty) this.isDirty = true;
 		
@@ -56,7 +56,7 @@ export class EditorFieldComponent {
 	/*
 	 * @desc: Called from quill editor component, when something was selected/deselcted
 	 */
-	private selectionChanged(e: any) {
+	public selectionChanged(e: any) {
 		// Editor is focused if range is not null and not focuses otherwise
 		this.hasFocus = !_.isNull(e.range);
 		
