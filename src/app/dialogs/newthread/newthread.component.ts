@@ -13,9 +13,9 @@ export class NewThreadDialogComponent {
 	
 	public onSubmit = new EventEmitter();
 
-	private editor;
-	private newthreadForm: FormGroup;
-	private slideChecked: boolean = false;
+	public editor;
+	public newthreadForm: FormGroup;
+	public slideChecked: boolean = false;
 
 	constructor(
 		private fb: FormBuilder,
