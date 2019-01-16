@@ -14,13 +14,13 @@ export class EditorFieldComponent {
 	
 	@Output() onEditorCreated = new EventEmitter();
 	
-	private quillModules;
+	public quillModules;
 	
 	// Form validation status
-	private wasTouched: boolean = false;
-	private isDirty: boolean = false;
-	private isEmpty: boolean = true;
-	private hasFocus: boolean = false;
+	public wasTouched: boolean = false;
+	public isDirty: boolean = false;
+	public isEmpty: boolean = true;
+	public hasFocus: boolean = false;
 
 	constructor() {
 		this.quillModules = {
