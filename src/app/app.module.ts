@@ -5,7 +5,7 @@ import { HttpModule } from '@angular/http';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import 'hammerjs';
 
 // Modules
@@ -67,6 +67,7 @@ import { GroupvisComponent } from './groupvis/groupvis.component';
 import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
 import { ShareDialogComponent } from './dialogs/share/share.component';
+import { FeedbackDialogComponent } from './dialogs/feedback/feedback.component';
 import { GroupForumComponent } from './groupforum/groupforum.component';
 import { NewThreadDialogComponent } from './dialogs/newthread/newthread.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
@@ -106,6 +107,7 @@ export function loadConfig(configService: ConfigService) {
 		PadviewComponent,
 		UserprofileComponent,
 		ShareDialogComponent,
+		FeedbackDialogComponent
 		GroupForumComponent,
 		NewThreadDialogComponent,
 		EditorFieldComponent
@@ -119,6 +121,7 @@ export function loadConfig(configService: ConfigService) {
 		PublicRoutingModule,
 		HttpModule,
 		HttpClientModule,
+		FormsModule,
 		ReactiveFormsModule,
 		QuillModule,
 		StarRatingModule.forRoot(),
@@ -151,6 +154,9 @@ export function loadConfig(configService: ConfigService) {
 		  deps: [ConfigService]
 		},*/
 		{ provide: 'C', useValue: C }
+	],
+	entryComponents: [
+		FeedbackDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

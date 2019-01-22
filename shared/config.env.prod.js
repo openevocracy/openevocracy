@@ -29,7 +29,7 @@ exports.cfg = {
 	
 	PRIVATE: {
 		BASE_URL     : baseCfg.BASE_URL,
-		DATABASE_HOST: baseCfg.DATABASE_HOST,
+		DATABASE_HOST: 'mongodb://mongodb',
 		
 		MAIL_HOST  : baseCfg.MAIL_HOST,
 		MAIL_PORT  : baseCfg.MAIL_PORT,

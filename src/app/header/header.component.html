@@ -10,6 +10,10 @@
 			
 			<span class="flex-spacer"></span>
 			
+			<button mat-icon-button title="{{ 'HEADER_MAINMENU_FEEDBACK' | translate}}" (click)="openFeedbackDialog()">
+				<fa-icon [icon]="faCommentAlt"></fa-icon>
+			</button>
+			
 			<button mat-icon-button title="{{ 'HEADER_MAINMENU_LANGUAGE' | translate}}" [matMenuTriggerFor]="lang">
 				<fa-icon [icon]="faGlobe"></fa-icon>
 			</button>

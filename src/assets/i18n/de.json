@@ -4,11 +4,13 @@
 	"HEADER_MAINMENU_SETTINGS": "Einstellungen",
 	"HEADER_MAINMENU_LOGOUT": "Logout",
 	"HEADER_MAINMENU_LANGUAGE": "Sprache wählen",
+	"HEADER_MAINMENU_FEEDBACK": "Feedback",
 	
 	"FOOTER_MENU_ABOUT": "Über uns",
 	"FOOTER_MENU_IMPRESS": "Impressum",
 	"FOOTER_MENU_VERSION": "Aktuelle Version",
 	
+	"FORM_BUTTON_SEND": "Senden",
 	"FORM_BUTTON_CLOSE": "Schließen",
 	"FORM_LABEL_MAIL": "Deine E-Mail-Adresse:",
 	"FORM_LABEL_PASSWORD": "Dein Passwort",
@@ -22,7 +24,10 @@
 	"MODAL_SEND_REQUEST": "Absenden",
 	"MODAL_CANCEL": "Abbrechen",
 	"DIALOG_SHARE_TITLE": "Teile diese Seite",
-	
+	"DIALOG_FEEDBACK_TITLE": "Hast du Feedback für uns?",
+	"DIALOG_FEEDBACK_PLACEHOLDER": "Beschreibe kurz deine Ideen, Probleme, etc",
+	"DIALOG_FEEDBACK_SUCESSFULLY_SENT": "Das Feedback wurde erfolgreich weitergegeben.",
+
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",
 	"LOGIN_FORM_WELCOME": "Willkommen bei OpenEvocracy!",
