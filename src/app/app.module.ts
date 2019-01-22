@@ -107,7 +107,7 @@ export function loadConfig(configService: ConfigService) {
 		PadviewComponent,
 		UserprofileComponent,
 		ShareDialogComponent,
-		FeedbackDialogComponent
+		FeedbackDialogComponent,
 		GroupForumComponent,
 		NewThreadDialogComponent,
 		EditorFieldComponent
