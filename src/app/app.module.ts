@@ -5,7 +5,7 @@ import { HttpModule } from '@angular/http';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import 'hammerjs';
 
 // Modules
@@ -67,6 +67,7 @@ import { GroupvisComponent } from './groupvis/groupvis.component';
 import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
 import { ShareDialogComponent } from './dialogs/share/share.component';
+import { FeedbackDialogComponent } from './dialogs/feedback/feedback.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -102,7 +103,8 @@ export function loadConfig(configService: ConfigService) {
 		GroupvisComponent,
 		PadviewComponent,
 		UserprofileComponent,
-		ShareDialogComponent
+		ShareDialogComponent,
+		FeedbackDialogComponent
 	],
 	imports: [
 		BrowserModule,
@@ -113,6 +115,7 @@ export function loadConfig(configService: ConfigService) {
 		PublicRoutingModule,
 		HttpModule,
 		HttpClientModule,
+		FormsModule,
 		ReactiveFormsModule,
 		QuillModule,
 		StarRatingModule.forRoot(),
@@ -145,6 +148,9 @@ export function loadConfig(configService: ConfigService) {
 		  deps: [ConfigService]
 		},*/
 		{ provide: 'C', useValue: C }
+	],
+	entryComponents: [
+		FeedbackDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

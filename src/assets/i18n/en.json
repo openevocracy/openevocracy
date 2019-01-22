@@ -4,11 +4,13 @@
 	"HEADER_MAINMENU_SETTINGS": "Settings",
 	"HEADER_MAINMENU_LOGOUT": "Logout",
 	"HEADER_MAINMENU_LANGUAGE": "Select language",
+	"HEADER_MAINMENU_FEEDBACK": "Feedback",
 	
 	"FOOTER_MENU_ABOUT": "About",
 	"FOOTER_MENU_IMPRESS": "Imprint",
 	"FOOTER_MENU_VERSION": "Current version",
 	
+	"FORM_BUTTON_SEND": "Send",
 	"FORM_BUTTON_CLOSE": "Close",
 	"FORM_LABEL_MAIL": "Your email address:",
 	"FORM_LABEL_PASSWORD": "Your password:",
@@ -22,6 +24,9 @@
 	"MODAL_SEND_REQUEST": "Submit",
 	"MODAL_CANCEL": "Cancel",
 	"DIALOG_SHARE_TITLE": "Share this page",
+	"DIALOG_FEEDBACK_TITLE": "Do you have some feedback for us?",
+	"DIALOG_FEEDBACK_PLACEHOLDER": "Shortly describe your ideas, problems, etc.",
+	"DIALOG_FEEDBACK_SUCESSFULLY_SENT": "Feedback was sent successfully.",
 	
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",

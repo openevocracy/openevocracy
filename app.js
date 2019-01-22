@@ -214,6 +214,9 @@ app.get('/json/config', utils.config);
 // @desc: Ping server for connection test
 app.get('/json/ping', utils.ping);
 
+// @desc: User feedback
+app.post('/json/feedback', users.sendFeedback);
+
 // ###################
 // ###   T E S T   ###
 // ###################

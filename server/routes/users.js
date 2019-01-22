@@ -115,7 +115,7 @@ exports.sendVerificationMailAgain = function(req, res) {
 };
 
 function sendVerificationMail(user) {
-	mail.sendMail(user,
+	mail.sendMailToUser(user,
 		'EMAIL_REGISTRATION_SUBJECT', [],
 		'EMAIL_REGISTRATION_MESSAGE', [cfg.PRIVATE.BASE_URL, user._id.toString(), user.email]);
 }
@@ -136,7 +136,7 @@ exports.sendPassword = function(req, res) {
 		var password = Math.random().toString(36).slice(2);
 		
 		// Send password via email to user
-		mail.sendMail(user,
+		mail.sendMailToUser(user,
 			'EMAIL_PASSWORD_RESET_SUBJECT', [],
 			'EMAIL_PASSWORD_RESET_MESSAGE', [password]);
 		
@@ -443,3 +443,17 @@ exports.socketAuthentication = function(ws, userToken, cb) {
 			cb(userId);
 	}));
 };
+
+/*
+ * @desc: When user sends feedback, redirect it to feedback@openevocracy.org
+ */
+exports.sendFeedback = function(req, res) {
+	let feedback = req.body.feedback;
+	
+	// Send mail
+	mail.sendMail('feedback@openevocracy.org', 'Evocracy | Feedback Nachricht', feedback);
+	
+	// Respond with alert
+	utils.sendAlert(res, 200, 'success', 'DIALOG_FEEDBACK_SUCESSFULLY_SENT');
+};
+

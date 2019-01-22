@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>{{ 'DIALOG_FEEDBACK_TITLE' | translate }}</h2>
+
+<mat-dialog-content>
+	<mat-form-field class="feedback-textarea">
+		<textarea matInput placeholder="{{ 'DIALOG_FEEDBACK_PLACEHOLDER' | translate }}" [(ngModel)]="feedback"></textarea>
+	</mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+	<button mat-raised-button color="primary" [mat-dialog-close]="feedback">{{ 'FORM_BUTTON_SEND' | translate }}</button>
+	<button mat-raised-button color="warn" (click)="close()">{{ 'FORM_BUTTON_CLOSE' | translate }}</button>
+</mat-dialog-actions>

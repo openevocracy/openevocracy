@@ -99,31 +99,16 @@ function formatAndTranslate(key, params) {
 		return i18next.t(key);
 }
 
-
-/**
- * @desc: takes user information, raw subject and raw text, including parameters, and sends mail
- * @params:
- *   mailUser:          user object, needs to containt 'email' and 'lang' of user
- *   mailSubject:       translation key for subject
- *   mailSubjectParams: array, contains all variables which need to be filled into subject
- *   mailBody:          translation key for body
- *   mailBodyParams:    array, contains all variables which need to be filled into body
+/*
+ * @desc: 
  */
-function sendMail(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
-	// First change language of i18n
-	i18next.changeLanguage(mailUser.lang, function(err, t) {
-		// If any error occurs while language change, log it
-		if(err) console.log(err);
-		
-		// Avoid that string is seperated in characters
-		var emailAdress = (_.isString(mailUser.email) ? [mailUser.email] : mailUser.email);
-		
-		// Define mail options with sender, receriver, subject and body
+function sendMail(toEmailAddress, subject, text) {
+	// Define mail options with sender, receriver, subject and body
 		var mailOptions = {
 			'from': '"Evocracy Project" <noreply@openevocracy.org>',
-			'to': emailAdress,
-			'subject': formatAndTranslate(mailSubject, mailSubjectParams),
-			'text': formatAndTranslate(mailBody, mailBodyParams)//, // plaintext body
+			'to': toEmailAddress,
+			'subject': subject,
+			'text': text //, // plaintext body
 			//html: '<b>Welcome/b>' // html body
 		};
 		
@@ -137,9 +122,32 @@ function sendMail(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyPa
 		} else {
 			console.log('Message was NOT sent: Configurations flag MAIL was set to false');
 		}
-	});
 }
 exports.sendMail = sendMail;
+
+/**
+ * @desc: Takes user information, raw subject and raw text, including parameters, and sends mail
+ * @params:
+ *   mailUser:          user object, needs to containt 'email' and 'lang' of user
+ *   mailSubject:       translation key for subject
+ *   mailSubjectParams: array, contains all variables which need to be filled into subject
+ *   mailBody:          translation key for body
+ *   mailBodyParams:    array, contains all variables which need to be filled into body
+ */
+function sendMailToUser(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
+	// First change language of i18n
+	i18next.changeLanguage(mailUser.lang, function(err, t) {
+		// If any error occurs while language change, log it
+		if(err) console.log(err);
+		
+		// Avoid that string is seperated in characters
+		var emailAdress = (_.isString(mailUser.email) ? [mailUser.email] : mailUser.email);
+		
+		// Send mail
+		sendMail(emailAdress, formatAndTranslate(mailSubject, mailSubjectParams), formatAndTranslate(mailBody, mailBodyParams));
+	});
+}
+exports.sendMailToUser = sendMailToUser;
 
 /**
  * @desc: send email to multiple users (find details in description of 'sendMail' function)
@@ -148,7 +156,7 @@ exports.sendMail = sendMail;
  */
 function sendMailMulti(mailUsers, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	_.each(mailUsers, function(mailUser) {
-		sendMail(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams);
+		sendMailToUser(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams);
 	});
 }
 exports.sendMailMulti = sendMailMulti;
@@ -164,7 +172,7 @@ function sendMailOnce(mailUser, mailSubject, mailSubjectParams, mailBody, mailBo
 			return Promise.resolve();
 		}
 		// If mail was not yet send OR sending of mail is longer ago than interval
-		sendMail(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams);
+		sendMailToUser(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams);
 		return db.collection('mail').insertOneAsync({ 'hash': hash });
 	});
 }
