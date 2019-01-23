@@ -21,23 +21,31 @@ You should have a server with ssh access and root permissions and you should kno
   * docker: https://docs.docker.com/install/
   * docker-compose: https://docs.docker.com/compose/install/
 
-### 1. Install OpenEvocracy
+### 1. Get Code
 
-Clone the OpenEvocracy repository.
+Get the code with one of the following two options:
+
+  * Download the [latest release](https://github.com/openevocracy/openevocracy/releases/tag/v0.2.0) or
+  * Clone the repository with `https://github.com/openevocracy/openevocracy.git` and switch to the latest stable branch with `git checkout v0.2`
 
 ### 2. Customize the config
 
 Inside the repository copy the file `shared/config.base.default.js` as `shared/config.base.js`.
+
 Customize the files `shared/config.base.js` and `shared/config.env.prod.js` according to your needs.
 
 #### Necessary changes
 
 Change `BASE_URL` value in `shared/config.base.js` to the URL where the instance will be reachable.
 
-## 3. Run OpenEvocracy
+### 3. Run OpenEvocracy
 
 Change dir to project folder. Run `docker-compose up` to start OpenEvocracy in foreground mode or run `docker-compose up -d` to start OpenEvocracy in background mode.
 
-#### Choose port
+#### Optional: Choose port
 
 The default port is `8080`. Start OpenEvocracy e.g. with `PORT=80 docker-compose up -d` (where `80` is your port of choice).
+
+#### Stop OpenEvocracy
+
+If you want to stop the OpenEvocracy instance, change dir to project folder and execute `docker-compose down`.
