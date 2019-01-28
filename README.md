@@ -26,7 +26,7 @@ You should have a server with ssh access and root permissions and you should kno
 Get the code with one of the following two options:
 
   * Download the [latest release](https://github.com/openevocracy/openevocracy/releases/tag/v0.2.0) or
-  * Clone the repository with `https://github.com/openevocracy/openevocracy.git` and switch to the latest stable branch with `git checkout v0.2`
+  * Clone the repository with `git clone https://github.com/openevocracy/openevocracy.git` and switch to the latest stable branch with `git checkout v0.2`
 
 ### 2. Customize the config
 
