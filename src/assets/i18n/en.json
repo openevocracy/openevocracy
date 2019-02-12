@@ -66,9 +66,13 @@
 	"USER_ACCOUNT_PASSWORD_RESET": "A new password was sent to &raquo;{{email}}&laquo;. You should immediately change your password after log in.",
 	"USER_ACCOUNT_LANG_UPDATED": "The language was successfully changed.",
 	
+	"STAGE_COUNTDOWN_DAY_LEFT": "1 day remaining",
 	"STAGE_COUNTDOWN_DAYS_LEFT": "{{dd}} days remaining",
+	"STAGE_COUNTDOWN_HOUR_LEFT": "1 hour remaining",
 	"STAGE_COUNTDOWN_HOURS_LEFT": "{{hh}} hrs. remaining",
+	"STAGE_COUNTDOWN_MINUTE_LEFT": "1 min. remaining",
 	"STAGE_COUNTDOWN_MINUTES_LEFT": "{{mm}} min. remaining",
+	"STAGE_COUNTDOWN_SECOND_LEFT": "1 sec. remaining",
 	"STAGE_COUNTDOWN_SECONDS_LEFT": "{{ss}} sec. remaining",
 	"TOPIC_SUBTITLE_1": "ends on",
 	"TOPIC_SUBTITLE_2": "at",

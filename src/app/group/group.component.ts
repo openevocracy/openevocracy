@@ -19,8 +19,8 @@ import 'quill-authorship-evo';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 
-import origin from 'get-location-origin';
-import parseUrl from 'url-parse';
+import * as parseUrl from 'url-parse';
+import * as origin from 'get-location-origin';
 
 import { C } from '../../../shared/constants';
 
@@ -211,7 +211,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 			
 			// Open WebSocket connection
 			const parsed = parseUrl(origin);
-			const protocol = ('https' == parsed.protocol) ? 'wss://' : 'ws://';
+			const protocol = parsed.protocol.includes('https') ? 'wss://' : 'ws://';
 			this.chatSocket = new WebSocket(protocol + parsed.host + '/socket/chat/'+chatRoomId+'/'+this.userToken);
 			
 			// WebSocket connection was established

@@ -9,9 +9,9 @@
 			<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
 		</span>
 		<span class="flex-spacer"></span>
-		<button mat-button title="{{ 'GROUP_BUTTON_FORUM' | translate }}" [routerLink]="['/group/forum', group?.forumId]">
+		<!--<button mat-button title="{{ 'GROUP_BUTTON_FORUM' | translate }}" [routerLink]="['/group/forum', group?.forumId]">
 			<span><fa-icon [icon]="faComments"></fa-icon> {{ 'GROUP_BUTTON_FORUM' | translate }}</span>
-		</button>
+		</button>-->
 		<button mat-button (click)="enterFullscreen()" title="{{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}">
 			<span><fa-icon [icon]="faExpandArrowsAlt"></fa-icon> {{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}</span>
 		</button>

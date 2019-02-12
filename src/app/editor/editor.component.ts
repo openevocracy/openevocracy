@@ -18,8 +18,8 @@ import * as io from 'socket.io-client';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 
-import origin from 'get-location-origin';
-import parseUrl from 'url-parse';
+import * as parseUrl from 'url-parse';
+import * as origin from 'get-location-origin';
 
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
@@ -170,7 +170,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 
 		// Open WebSocket connection to ShareDB server
 		const parsed = parseUrl(origin);
-		const protocol = ('https' == parsed.protocol) ? 'wss://' : 'ws://';
+		const protocol = parsed.protocol.includes('https') ? 'wss://' : 'ws://';
 		this.padSocket = new WebSocket(protocol + parsed.host + '/socket/pad/'+this.userToken);
 		
 		// WebSocket connection was established

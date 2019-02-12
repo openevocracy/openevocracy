@@ -66,9 +66,13 @@
 	"USER_ACCOUNT_PASSWORD_RESET": "An die E-Mail-Adresse &raquo;{{email}}&laquo; wurde ein neues Passwort versendet. Du solltest das Passwort direkt beim nächsten Login wieder ändern.",
 	"USER_ACCOUNT_LANG_UPDATED": "Die Sprache wurde erfolgreich geändert.",
 
+   "STAGE_COUNTDOWN_DAY_LEFT": "1 Tag verbleibend",
 	"STAGE_COUNTDOWN_DAYS_LEFT": "{{dd}} Tage verbleibend",
+	"STAGE_COUNTDOWN_HOUR_LEFT": "1 Std. verbleibend",
 	"STAGE_COUNTDOWN_HOURS_LEFT": "{{hh}} Std. verbleibend",
+	"STAGE_COUNTDOWN_MINUTE_LEFT": "1 Min. verbleibend",
 	"STAGE_COUNTDOWN_MINUTES_LEFT": "{{mm}} Min. verbleibend",
+	"STAGE_COUNTDOWN_SECOND_LEFT": "1 Sek. verbleibend",
 	"STAGE_COUNTDOWN_SECONDS_LEFT": "{{ss}} Sek. verbleibend",
 	"TOPIC_SUBTITLE_1": "endet am",
 	"TOPIC_SUBTITLE_2": "um",
@@ -109,7 +113,7 @@
 	"TOPIC_TAB_LABEL_RESULT": "Ergebnis",
 	"TOPIC_BUTTON_CREATE_PROPOSAL": "Vorschlag erstellen",
 	"TOPIC_BUTTON_EDIT_PROPOSAL": "Vorschlag bearbeiten",
-	"TOPIC_PROPOSAL_ALERT_CREATED": "Dein Vorschlag wurde erstellt. Ein neuer Tab wurde erstellt, dort kannst du einen Vorschlag einsehen und bearbeiten.",
+	"TOPIC_PROPOSAL_ALERT_CREATED": "Dein Vorschlag wurde erstellt. Ein neuer Tab wurde hinzugefügt, dort kannst du den Vorschlag einsehen und bearbeiten.",
 	"TOPIC_BUTTON_EDIT_CURRENT_GROUP": "Gruppenvorschlag bearbeiten",
 	"TOPIC_BUTTON_GOTO_CURRENT_GROUP": "Gruppe",
 	

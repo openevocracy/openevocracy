@@ -59,9 +59,19 @@ export class CountdownComponent implements OnDestroy {
 		delta -= minutes * 60;
 		seconds = delta % 60;
 		
-		if (this.delta < 60) // in this case, display seconds left
+		if (this.delta < 2) // in this case, display one second left
+		{
+			this.translate.get("STAGE_COUNTDOWN_SECOND_LEFT").
+				subscribe(str => {time = str; });
+		}
+		else if (this.delta < 60) // in this case, display seconds left
 		{
 			this.translate.get("STAGE_COUNTDOWN_SECONDS_LEFT", {ss: String(seconds)}).
+				subscribe(str => {time = str; });
+		}
+		else if (this.delta < 2*60) // in this case, display one minute left
+		{
+			this.translate.get("STAGE_COUNTDOWN_MINUTE_LEFT").
 				subscribe(str => {time = str; });
 		}
 		else if (this.delta < 3600) // in this case, display minutes left
@@ -69,9 +79,19 @@ export class CountdownComponent implements OnDestroy {
 			this.translate.get("STAGE_COUNTDOWN_MINUTES_LEFT", {mm: String(minutes)}).
 				subscribe(str => {time = str; });
 		}
+		else if (this.delta < 2*3600) // in this case, display one hour left
+		{
+			this.translate.get("STAGE_COUNTDOWN_HOUR_LEFT").
+				subscribe(str => {time = str; });
+		}
 		else if (this.delta < 86400) // in this case, display hours left
 		{
 			this.translate.get("STAGE_COUNTDOWN_HOURS_LEFT", {hh: String(hours)}).
+				subscribe(str => {time = str; });
+		}
+		else if (this.delta < 2*86400) // in this case, display one day left
+		{
+			this.translate.get("STAGE_COUNTDOWN_DAY_LEFT").
 				subscribe(str => {time = str; });
 		}
 		else // in this case, display days left
