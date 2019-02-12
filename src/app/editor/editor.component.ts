@@ -158,7 +158,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 					// If it is expired, switch to view
 					this.redirectToView();
 				}
-				
+
 				// Initialize socket
 				this.initalizePadSocket(this.docId);
 			});
@@ -172,7 +172,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		const parsed = parseUrl(origin);
 		const protocol = parsed.protocol.includes('https') ? 'wss://' : 'ws://';
 		this.padSocket = new WebSocket(protocol + parsed.host + '/socket/pad/'+this.userToken);
-		
+
 		// WebSocket connection was established
 		this.padSocket.onopen = function () {
 			// Get ShareDB connection
@@ -188,10 +188,10 @@ export class EditorComponent implements OnInit, OnDestroy {
 				
 				// Get quill
 				var quill = this.quillEditor;
-				
+	
 				// Set quill contents from doc
 				quill.setContents(doc.data);
-				
+	
 				// On text change, send changes to ShareDB
 				quill.on('text-change', function(delta, oldDelta, source) {
 					if (source !== 'user') return;
@@ -200,7 +200,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 				
 				// Define a debounced version of setSaved function
 				var lazySetSaved = _.debounce(this.setSaved.bind(this), 1000);
-				
+	
 				// Is called when a operation was applied
 				doc.on('op', function(op, source) {
 					// If source is me, set saved and return
@@ -212,7 +212,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 					quill.updateContents(op);
 				});
 			}.bind(this));
-			
+
 			// WebSocket connection was closed from server
 			this.padSocket.onclose = function(e) {
 				// If pad socket was not closed actively (on destroy), inform user that
@@ -220,7 +220,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 				if(!this.manualClose)
 					this.connectionLostMessage();
 			}.bind(this);
-			
+	
 			this.enableEdit();
 		}.bind(this);
 	}
