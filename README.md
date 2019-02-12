@@ -49,3 +49,15 @@ The default port is `8080`. Start OpenEvocracy e.g. with `PORT=80 docker-compose
 #### Stop OpenEvocracy
 
 If you want to stop the OpenEvocracy instance, change dir to project folder and execute `docker-compose down`.
+
+## Update
+
+Stop the OpenEvocracy instance, pull the updated image, start the instance again. The database will not be touched.
+
+```
+docker-compose down
+docker pull openevocracy/openevocracy:v0.2
+docker-compose up -d
+```
+
+When pulling the latest docker image, take great caution to specify a compatible version for the update.
