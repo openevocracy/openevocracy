@@ -64,7 +64,7 @@ test_platform:
   - apt-get update
   - apt-get install -y nodejs yarn build-essential
   - cp shared/config.base.default.js shared/config.base.js
-  - PORT=8080 docker-compose -f docker-compose.dev.yml up
+  - PORT=8080 docker-compose -f docker-compose.dev.yml up &
   - sleep 1m
   - docker-compose -f docker-compose.dev.yml down
 
