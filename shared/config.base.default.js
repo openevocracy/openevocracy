@@ -6,5 +6,6 @@ exports.base = {
 	MAIL_PORT  : 587,
 	MAIL_SECURE: false,  // False: Uses TLS if server supports STARTTLS, True: Forces TLS
 	MAIL_USER  : '',
-	MAIL_PASS  : ''
+	MAIL_PASS  : '',
+	MAIL_ADDRESS : ''
 };
