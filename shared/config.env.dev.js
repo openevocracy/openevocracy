@@ -36,6 +36,7 @@ exports.cfg = {
 		MAIL_PORT  : baseCfg.MAIL_PORT,
 		MAIL_SECURE: baseCfg.MAIL_SECURE,
 		MAIL_USER  : baseCfg.MAIL_USER,
-		MAIL_PASS  : baseCfg.MAIL_PASS
+		MAIL_PASS  : baseCfg.MAIL_PASS,
+		MAIL_ADDRESS  : baseCfg.MAIL_ADDRESS
 	}
 };
