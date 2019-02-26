@@ -105,7 +105,7 @@ function formatAndTranslate(key, params) {
 function sendMail(toEmailAddress, subject, text) {
 	// Define mail options with sender, receriver, subject and body
 		var mailOptions = {
-			'from': '"Evocracy Project" <'+cfg.MAIL_ADDRESS+'>',
+			'from': '"Evocracy Project" <'+cfg.PRIVATE.MAIL_ADDRESS+'>',
 			'to': toEmailAddress,
 			'subject': subject,
 			'text': text //, // plaintext body
