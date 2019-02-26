@@ -8,6 +8,7 @@ exports.cfg = {
 	ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
 	
 	MIN_VOTES_PER_TOPIC : 1,
+	MIN_GROUPS_PER_TOPIC: 1,
 	
 	MIN_WORDS_PROPOSAL: 100,
 	MIN_WORDS_GROUP   : 100,
