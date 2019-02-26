@@ -1,6 +1,7 @@
 const baseCfg = require("./config.base").base;
 const C = require("./constants").C;
 
+// the keys have to be the same as in config.env.prod.js (this is checked in app.js)
 exports.cfg = {
 	DEBUG:         true,
 	MAIL_ENABLED:  true,

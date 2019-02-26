@@ -73,6 +73,9 @@ function auth() {
 	return passport.authenticate('jwt', { session: false });
 }
 
+// Check if config.env.* contain the same variables
+utils.checkConfig();
+
 // ###################
 // ### T O P I C S ###
 // ###################

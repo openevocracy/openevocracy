@@ -99,8 +99,8 @@ function formatAndTranslate(key, params) {
 		return i18next.t(key);
 }
 
-/*
- * @desc: 
+/**
+ * @desc: Sends mail to an address, with a subject and a text
  */
 function sendMail(toEmailAddress, subject, text) {
 	// Define mail options with sender, receriver, subject and body

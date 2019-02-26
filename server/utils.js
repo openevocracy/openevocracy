@@ -1,9 +1,9 @@
-var _ = require('underscore');
-var rp = require('request-promise');
-//var requirejs = require('requirejs');
-var db = require('./database').db;
-var ObjectId = require('mongodb').ObjectID;
-var cfg = require('../shared/config').cfg;
+const _ = require('underscore');
+const rp = require('request-promise');
+const db = require('./database').db;
+const ObjectId = require('mongodb').ObjectID;
+const cfg = require('../shared/config').cfg;
+const fs = require('fs');
 
 function prepareAlert(type, content, vars) {
     vars = vars || null;
@@ -126,4 +126,40 @@ exports.config = function(req, res) {
 exports.ping = function(req, res) {
 	var now = Date.now();
 	res.json({'timestamp': now});
+};
+
+
+/**
+ * @desc: Compares keys of two objects and returns true,
+ *        if both contain identical keys
+ * @link: https://stackoverflow.com/a/14368628/2692283, accessed 2019-02-26
+ */
+function compareKeys(a, b) {
+  var aKeys = Object.keys(a).sort();
+  var bKeys = Object.keys(b).sort();
+  return (JSON.stringify(aKeys) === JSON.stringify(bKeys));
+}
+exports.compareKeys = compareKeys;
+
+/**
+ * @desc: Checks if all config.env.* files contain the same variables
+ */
+exports.checkConfig = function() {
+	const sharedFolder = './shared/';
+	// Read all config files in shared folder
+	fs.readdir('./shared/', (err, files) => {
+		// Loop through all config files
+		files.forEach(file => {
+			// Only apply to files that start with config.env.*
+			if (file.startsWith('config.env.')) {
+				// Remove '.js' from file name
+				file = file.replace('.js', '');
+				// Get config from current file
+				const cfgFromFile = require('../shared/'+file).cfg;
+				// Check if cfg's from files contain the same variable than the used cfg
+				if (!compareKeys(cfg, cfgFromFile))
+					console.error('WARNING: Check config files, some variables differ between config files.');
+			}
+		});
+	});
 };
