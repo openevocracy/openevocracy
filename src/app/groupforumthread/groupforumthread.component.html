@@ -1,0 +1,22 @@
+<mat-toolbar color="primary">
+	<div class="flex container">
+		<h1>{{ thread.title }}</h1>
+		
+		<span class="flex-spacer"></span>
+		
+		<button mat-button title="{{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}" [routerLink]="['/group/forum', thread.forumId]">
+			<span><fa-icon [icon]="faArrowAltCircleLeft"></fa-icon> {{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}</span>
+		</button>
+	</div>
+</mat-toolbar>
+
+<div class="container">
+	<div id="mainpost" class="post" [ngClass]="{'closed': thread.closed, 'open': !thread.closed}">
+		<div class="post-content" [innerHtml]="thread.html"></div>
+		<hr/>
+		<div class="post-meta">
+			{{ 'FORUM_LABEL_DATE_CREATED' | translate }} <span>{{ thread.createdTimestamp | date:'y-MM-dd' }}</span><br/>
+			{{ 'FORUM_LABEL_AUTHOR' | translate }}: {{ thread.authorId }}
+		</div>
+	</div>
+</div>

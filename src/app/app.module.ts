@@ -71,6 +71,7 @@ import { FeedbackDialogComponent } from './dialogs/feedback/feedback.component';
 import { GroupForumComponent } from './groupforum/groupforum.component';
 import { NewThreadDialogComponent } from './dialogs/newthread/newthread.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
+import { GroupForumThreadComponent } from './groupforumthread/groupforumthread.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -110,7 +111,8 @@ export function loadConfig(configService: ConfigService) {
 		FeedbackDialogComponent,
 		GroupForumComponent,
 		NewThreadDialogComponent,
-		EditorFieldComponent
+		EditorFieldComponent,
+		GroupForumThreadComponent
 	],
 	imports: [
 		BrowserModule,

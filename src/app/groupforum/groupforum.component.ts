@@ -10,7 +10,7 @@ import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.compone
 import { UtilsService } from '../_services/utils.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 
-import { faComment, faUsers, faLock, faLockOpen, faExclamationCircle, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faComment, faUsers, faLock } from '@fortawesome/free-solid-svg-icons';
 
 import * as _ from 'underscore';
 
@@ -31,9 +31,6 @@ export class GroupForumComponent implements OnInit {
 	public faComment = faComment;
 	public faUsers = faUsers;
 	public faLock = faLock;
-	public faLockOpen = faLockOpen;
-	public faExclamationCircle = faExclamationCircle;
-	public faCheckCircle = faCheckCircle;
 
 	constructor(
 		private utilsService: UtilsService,
@@ -48,7 +45,7 @@ export class GroupForumComponent implements OnInit {
 		this.activatedRoute.params.subscribe((params: Params) => {
 			this.forumId = params.id;
 			
-			// Call current forum information
+			// Get current forum information
 			this.httpManagerService.get('/json/group/forum/' + this.forumId).subscribe(res => {
 				this.padId = res.padId;
 				this.title = res.title;

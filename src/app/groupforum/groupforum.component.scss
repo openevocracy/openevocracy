@@ -6,14 +6,17 @@
 
 /* Threads */
 
-section { background-color: $white; height: 90px; margin: 10px 0; transition: background-color 600ms; cursor: pointer; }
-section:hover { background-color: $grey100; }
-
-.thread-states { float: left; padding: 10px 20px; }
-.state { line-height: 35px; height: 35px; }
-.state fa-icon { font-size: 24px; }
-.open, .public { color: $green500; }
-.closed, .private { color: $red500; }
-
-.thread-content { padding: 10px 20px; }
-.thread-content h2 { margin: 10px 0; font-weight: 500; }
+section {
+	background-color: $white;
+	height: 80px;
+	margin: 10px 0;
+	padding: 10px 20px;
+	border-left: 5px solid $white;
+	box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+}
+.open { border-color: $green500; }
+.closed { border-color: $red500; }
+h2 { display: inline-block; margin: 5px 0; font-weight: 500; cursor: pointer; }
+h2 .thread-title:hover, section h2 .thread-title:focus, section h2 .thread-title:active { color: $teal500; }
+.meta a { color: inherit; }
+.meta a:hover, .meta a:focus, .meta a:active { color: $teal500; text-decoration: none; }

@@ -141,6 +141,9 @@
 	"FORUM_DIALOG_NEWTHREAD_TITLE": "Thread title",
 	"FORUM_DIALOG_NEWTHREAD_TEXT": "Thread description",
 	"FORUM_DIALOG_NEWTHREAD_ONLY_MEMBERS": "Only members of the group are allowed to post and comment.",
+	"FORUM_BUTTON_BACK_TO_THREADLIST": "Back to forum",
+	"FORUM_THREADLIST_AUTHOR_PREFIX": "Created by",
+	"FORUM_THREADLIST_CREATION_DATE_PREFIX": "at",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",

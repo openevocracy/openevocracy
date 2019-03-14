@@ -5,7 +5,7 @@ var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 
 /*
- * @desc: Query orum of specific group
+ * @desc: Query forum of specific group
  */
 exports.queryForum = function(req, res) {
 	var forumId = ObjectId(req.params.id);
@@ -56,4 +56,17 @@ exports.createThread = function(req, res) {
 	// Store thread in database
 	db.collection('forum_threads').insertAsync(thread)
 		.then(res.json.bind(res));
+};
+
+/**
+ * @desc: Query thread of specific forum of specific group
+ */
+exports.queryThread = function(req, res) {
+	const threadId = ObjectId(req.params.id);
+	
+	// Get threads
+	var thread_promise = db.collection('forum_threads').findOneAsync({'_id': threadId});
+	
+	// Send result
+	thread_promise.then(res.json.bind(res));
 };
