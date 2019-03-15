@@ -3,7 +3,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from "@angular/material";
 
-import { Thread } from "../_models/thread";
+import { Thread } from "../_models/forum/thread";
 
 import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.component';
 
@@ -51,7 +51,7 @@ export class GroupForumComponent implements OnInit {
 				this.title = res.title;
 				
 				// Sort threads by closed state and by date
-				let sortedThreads = res.threads; //_.sortBy(_.sortBy(withProgress, 'name'), 'progress');
+				const sortedThreads = res.threads; //_.sortBy(_.sortBy(withProgress, 'name'), 'progress');
 				
 				// Initialize thread and construct all elements
 				this.threads = [];
@@ -60,7 +60,7 @@ export class GroupForumComponent implements OnInit {
 				}.bind(this));
 				
 				// Set pre title
-				let shortGroupId = this.utilsService.getShortId(res.groupId);
+				const shortGroupId = this.utilsService.getShortId(res.groupId);
 				this.translateService.get('FORUM_TITLE_PREFIX', {'id': shortGroupId}).subscribe(label => {
 					this.prefix = label;
 				});

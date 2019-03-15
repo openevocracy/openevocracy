@@ -146,6 +146,9 @@ app.post('/json/group/forum/thread/create', auth(), forums.createThread);
 // @desc: Get group forum thread
 app.get('/json/group/forum/thread/:id', auth(), forums.queryThread);
 
+// @desc: Create new post in forum thread
+app.post('/json/group/forum/post/create', auth(), forums.createPost);
+
 // ###################
 // ###   C H A T   ###
 // ###################

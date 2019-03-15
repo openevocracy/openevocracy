@@ -64,9 +64,37 @@ exports.createThread = function(req, res) {
 exports.queryThread = function(req, res) {
 	const threadId = ObjectId(req.params.id);
 	
-	// Get threads
+	// Get thread
 	var thread_promise = db.collection('forum_threads').findOneAsync({'_id': threadId});
 	
+	// Get posts
+	var posts_promise = db.collection('forum_posts').find({'threadId': threadId}).toArrayAsync();
+	
 	// Send result
-	thread_promise.then(res.json.bind(res));
+	Promise.join(thread_promise, posts_promise).spread(function(thread, posts) {
+		return {
+			'thread': thread,
+			'posts': posts
+		};
+	}).then(res.json.bind(res));
+};
+
+/*
+ * @desc: Creates new post in forum thread
+ */
+exports.createPost = function(req, res) {
+	var userId = ObjectId(req.user._id);
+	var body = req.body;
+	
+	// Define post
+	var post = {
+		'html': body.html,
+		'threadId': ObjectId(body.threadId),
+		'forumId': ObjectId(body.forumId),
+		'authorId': userId
+	};
+	
+	// Store post in database
+	db.collection('forum_posts').insertAsync(post)
+		.then(res.json.bind(res));
 };

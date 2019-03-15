@@ -3,10 +3,26 @@
 
 hr { margin: 0; }
 
-#mainpost { margin-top: 20px; border-left: 5px solid $white; }
+.post {
+    margin-bottom: 20px;
+    background-color: $white;
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+}
+.post-content { padding: 10px 20px; }
+.post-meta { padding: 10px 20px; }
+.post-text { margin-left: 70px; }
+
+.post-vote { float: left; margin: 10px 0; width: 40px; text-align: center; }
+.post-vote fa-icon { font-size: 35px; cursor: pointer; transition: color 300ms; }
+.post-vote fa-icon:hover, .post-vote fa-icon:focus, .post-vote fa-icon:active { color: $teal500; }
+.vote-fa { margin: -10px 0; }
+
+.post-comments { padding: 10px 20px; }
+
+#mainpost { margin-top: 20px; border-top: 8px solid $white; }
 #mainpost.open { border-color: $green500; }
 #mainpost.closed { border-color: $red500; }
 
-.post { background-color: $white; box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12); }
-.post-content { padding: 10px 20px; }
-.post-meta { padding: 10px 20px; }
+#newpost {  padding: 10px 20px; }
+#newpost button { margin: 20px 0; }
+

@@ -46,7 +46,7 @@ export class NewThreadDialogComponent {
 		// Bundle all form data
 		var thread = {
 			'title': this.newthreadForm.value.title,
-			'html': this.editor.container.firstChild.innerHTML,
+			'html': this.editor.root.innerHTML,
 			'private': this.slideChecked
 		}
 		

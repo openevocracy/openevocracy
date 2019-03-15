@@ -1,5 +1,5 @@
 import { ReflectiveInjector } from '@angular/core';
-import { UtilsService } from "../_services/utils.service";
+import { UtilsService } from "../../_services/utils.service";
 
 export class Thread {
 	/* Raw values from database */

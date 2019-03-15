@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Http, Response } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
 import { Router } from '@angular/router';
 
 import { UtilsService } from './utils.service';

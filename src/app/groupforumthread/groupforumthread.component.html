@@ -1,22 +1,59 @@
 <mat-toolbar color="primary">
 	<div class="flex container">
-		<h1>{{ thread.title }}</h1>
+		<h1>{{ thread?.title }}</h1>
 		
 		<span class="flex-spacer"></span>
 		
-		<button mat-button title="{{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}" [routerLink]="['/group/forum', thread.forumId]">
+		<button mat-button title="{{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}" [routerLink]="['/group/forum', thread?.forumId]">
 			<span><fa-icon [icon]="faArrowAltCircleLeft"></fa-icon> {{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}</span>
 		</button>
 	</div>
 </mat-toolbar>
 
 <div class="container">
-	<div id="mainpost" class="post" [ngClass]="{'closed': thread.closed, 'open': !thread.closed}">
-		<div class="post-content" [innerHtml]="thread.html"></div>
-		<hr/>
+	<div id="mainpost" class="post" [ngClass]="{'closed': thread?.closed, 'open': !thread?.closed}">
 		<div class="post-meta">
-			{{ 'FORUM_LABEL_DATE_CREATED' | translate }} <span>{{ thread.createdTimestamp | date:'y-MM-dd' }}</span><br/>
-			{{ 'FORUM_LABEL_AUTHOR' | translate }}: {{ thread.authorId }}
+			<!--{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', thread?.authorId]">{{ thread?.authorId }}</a>-->
+			{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ thread?.createdTimestamp | date:'y-MM-dd HH:mm' }}</span>
 		</div>
+		<hr/>
+		<div class="post-content clearfix">
+			<div class="post-vote">
+				<div class="vote-fa vote-up"><fa-icon [icon]="faCaretUp"></fa-icon></div>
+				<div>0</div>
+				<div class="vote-fa vote-down"><fa-icon [icon]="faCaretDown"></fa-icon></div>
+			</div>
+			<div class="post-text" [innerHtml]="thread?.html"></div>
+		</div>
+	</div>
+	
+	<div *ngFor="let post of posts" class="post">
+		<div class="post-meta">
+			{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', post.authorId]">{{ post.authorId }}</a>
+			{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ post.createdTimestamp | date:'y-MM-dd HH:mm' }}</span>
+		</div>
+		<hr/>
+		<div class="post-content clearfix">
+			<div class="post-vote">
+				<div class="vote-fa vote-up"><fa-icon [icon]="faCaretUp"></fa-icon></div>
+				<div>0</div>
+				<div class="vote-fa vote-down"><fa-icon [icon]="faCaretDown"></fa-icon></div>
+			</div>
+			<div class="post-text" [innerHtml]="post.html"></div>
+		</div>
+		<hr/>
+		<div class="post-comments">
+			Add a comment
+		</div>
+	</div>
+	
+	<div id="newpost" class="post">
+		<h2>{{ 'FORUM_HEADING_NEW_POST' | translate }}</h2>
+		
+		<editor-field (onEditorCreated)="editorCreated($event)"></editor-field>
+		
+		<button [disabled]="saving" mat-raised-button color="primary" title="{{ 'FORUM_BUTTON_NEW_POST' | translate }}" (click)="submitPost()">
+			<span>{{ 'FORUM_BUTTON_NEW_POST' | translate }}</span>
+		</button>
 	</div>
 </div>
