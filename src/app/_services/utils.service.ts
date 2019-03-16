@@ -47,4 +47,11 @@ export class UtilsService {
 	public getShortId(id) {
 		return id.slice(20,24);
 	}
+	
+	/**
+	 * @desc: Strip html from given string
+	 */
+	public stripHtml(htmlString) {
+		return htmlString.replace(/<(?:.|\n)*?>/gm, '');
+	}
 }

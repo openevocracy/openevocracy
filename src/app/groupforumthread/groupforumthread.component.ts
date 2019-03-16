@@ -6,11 +6,13 @@ import { MatSnackBar } from '@angular/material';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 
 import { HttpManagerService } from '../_services/http-manager.service';
+import { UtilsService } from '../_services/utils.service';
 
 import { faArrowAltCircleLeft, faCaretUp, faCaretDown } from '@fortawesome/free-solid-svg-icons';
 
 import { Thread } from "../_models/forum/thread";
 import { Post } from "../_models/forum/post";
+import { Comment } from "../_models/forum/comment";
 
 import * as _ from 'underscore';
 
@@ -22,6 +24,7 @@ import * as _ from 'underscore';
 export class GroupForumThreadComponent implements OnInit {
 	
 	public saving: boolean = false;
+	public commentField: number = -1;
 	public editor;
 	public thread: Thread;
 	public posts: Post[];
@@ -33,6 +36,7 @@ export class GroupForumThreadComponent implements OnInit {
 
 	constructor(
 		private snackBar: MatSnackBar,
+		private utilsService: UtilsService,
 		private translateService: TranslateService,
 		private activatedRoute: ActivatedRoute,
 		private httpManagerService: HttpManagerService) {
@@ -53,14 +57,28 @@ export class GroupForumThreadComponent implements OnInit {
 				// Create thread object from thread data
 				this.thread = new Thread(res.thread);
 				
-				// Sort posts by ...
+				// TODO Sort posts by ...
 				const sortedPosts = res.posts; //_.sortBy(_.sortBy(withProgress, 'name'), 'progress');
 				
 				// Initialize posts and construct all elements
 				this.posts = [];
 				_.each(sortedPosts, function(post) {
-					this.posts.push(new Post(post));
+					// Create post instance
+					let postInstance = new Post(post);
+					
+					// TODO Sort comments by ...
+					const sortedComments = postInstance.comments; //_.sortBy(_.sortBy(withProgress, 'name'), 'progress');
+					
+					// Replace post comments with instances of comments
+					postInstance.comments = _.map(sortedComments, function(comment) {
+						return new Comment(comment);
+					});
+					
+					// Push post (including comments) to posts array
+					this.posts.push(postInstance);
 				}.bind(this));
+				
+				console.log(this.posts);
 				
 				// Return to subscribers
 				observer.next(true);
@@ -70,6 +88,52 @@ export class GroupForumThreadComponent implements OnInit {
 	
 	public editorCreated(editor: any) {
 		this.editor = editor;
+	}
+	
+	public showCommentField(idx) {
+		this.commentField = idx;
+	}
+	
+	public hideCommentField() {
+		this.commentField = -1;
+	}
+	
+	public submitComment(post) {
+		const comment = post.newComment;
+		
+		// Check if textarea is undefined or empty
+		if(_.isUndefined(comment) || comment.trim() == "")
+			return;
+			
+		// Close textarea
+		this.hideCommentField();
+		
+		// Define data
+		var data = {
+			'text': this.utilsService.stripHtml(comment),
+			'postId': post.postId,
+			'threadId': post.threadId,
+			'forumId': post.forumId
+		};
+		
+		// Post comment to server and create comment in database
+		this.httpManagerService.post('/json/group/forum/comment/create', data).subscribe(res => {
+			console.log(res);
+			
+			// Reload model
+			this.loadThread(this.thread.threadId).subscribe(() => {
+				// After everything is finished, show editor again
+				forkJoin(
+					this.translateService.get('FORUM_SNACKBAR_NEW_COMMENT'),
+					this.translateService.get('FORM_BUTTON_CLOSE'))
+				.subscribe(([msg, action]) => {
+					// Open snackbar for 3 seconds and save reference
+					const snackBarRef = this.snackBar.open(msg, action, {
+						'duration': 5000
+					});
+				});
+			});
+		});
 	}
 	
 	public disableNewPostEditor() {
@@ -83,14 +147,14 @@ export class GroupForumThreadComponent implements OnInit {
 	}
 	
 	public submitPost() {
-		// Check if form is valid
+		// Check if editor is empty
 		if(this.editor.getText().trim() == "")
 			return;
 			
 		// Hide editor while saving
 		this.disableNewPostEditor();
 		
-		// Prepare data
+		// Define data
 		var data = {
 			'html': this.editor.root.innerHTML,
 			'threadId': this.thread.threadId,
@@ -102,7 +166,7 @@ export class GroupForumThreadComponent implements OnInit {
 			// Clear editor
 			this.editor.setText('');
 			
-			// Reload page
+			// Reload model
 			this.loadThread(this.thread.threadId).subscribe(() => {
 				// After everything is finished, show editor again
 				forkJoin(

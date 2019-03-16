@@ -147,6 +147,9 @@
 	"FORUM_HEADING_NEW_POST": "Post something",
 	"FORUM_BUTTON_NEW_POST": "Submit",
 	"FORUM_SNACKBAR_NEW_POST": "Your post was successfully submitted.",
+	"FORUM_LINK_ADD_COMMENT": "Add a comment",
+	"FORUM_PLACEHOLDER_NEW_COMMENT": "Add an aspect to the post or ask for further information.",
+	"FORUM_BUTTON_NEW_COMMENT": "Submit",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",

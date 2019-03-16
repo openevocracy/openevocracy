@@ -1,27 +1,25 @@
 import { ReflectiveInjector } from '@angular/core';
 import { UtilsService } from "../../_services/utils.service";
 
-import { Comment } from './comment';
-
-export class Post {
+export class Comment {
 	/* Raw values from database */
 	html: string;
+	commentId: string;
 	postId: string;
 	threadId: string;
 	forumId: string;
 	authorId: string;
-	comments: Comment[];
 	
 	/* Calculated values */
 	createdTimestamp: number;
 	
 	constructor(res: any) {
 		this.html = res.html;
-		this.postId = res._id;
+		this.commentId = res._id;
+		this.postId = res.postId;
 		this.threadId = res.threadId;
 		this.forumId = res.forumId;
 		this.authorId = res.authorId;
-		this.comments = res.comments;
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
 	}
 	

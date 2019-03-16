@@ -147,6 +147,9 @@
 	"FORUM_HEADING_NEW_POST": "Schreibe einen Beitrag",
 	"FORUM_BUTTON_NEW_POST": "Absenden",
 	"FORUM_SNACKBAR_NEW_POST": "Dein Beitrag wurde erfolgreich gespeichert.",
+	"FORUM_LINK_ADD_COMMENT": "Kommentieren",
+	"FORUM_PLACEHOLDER_NEW_COMMENT": "Ergänze einen Aspekt zum Beitrag oder frage nach weiteren Informationen.",
+	"FORUM_BUTTON_NEW_COMMENT": "Absenden",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",

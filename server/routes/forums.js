@@ -4,6 +4,9 @@ var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 
+// Import routes
+var utils = require('../utils');
+
 /*
  * @desc: Query forum of specific group
  */
@@ -65,10 +68,19 @@ exports.queryThread = function(req, res) {
 	const threadId = ObjectId(req.params.id);
 	
 	// Get thread
-	var thread_promise = db.collection('forum_threads').findOneAsync({'_id': threadId});
+	const thread_promise = db.collection('forum_threads').findOneAsync({'_id': threadId});
 	
 	// Get posts
-	var posts_promise = db.collection('forum_posts').find({'threadId': threadId}).toArrayAsync();
+	const posts_promise = db.collection('forum_posts').find({'threadId': threadId}).toArrayAsync().map(function(post) {
+		
+		// FIXME: Is a Promise.resolve() necessary before return? Or does map() aldready handle it correctly?
+		
+		// For every post, get comments
+		return db.collection('forum_comments').find({'postId': post._id}).toArrayAsync().then(function(comments) {
+				// Add comments to post as array
+				return _.extend(post, {'comments': comments});
+		});
+	});
 	
 	// Send result
 	Promise.join(thread_promise, posts_promise).spread(function(thread, posts) {
@@ -79,15 +91,15 @@ exports.queryThread = function(req, res) {
 	}).then(res.json.bind(res));
 };
 
-/*
+/**
  * @desc: Creates new post in forum thread
  */
 exports.createPost = function(req, res) {
-	var userId = ObjectId(req.user._id);
-	var body = req.body;
+	const userId = ObjectId(req.user._id);
+	const body = req.body;
 	
 	// Define post
-	var post = {
+	const post = {
 		'html': body.html,
 		'threadId': ObjectId(body.threadId),
 		'forumId': ObjectId(body.forumId),
@@ -96,5 +108,29 @@ exports.createPost = function(req, res) {
 	
 	// Store post in database
 	db.collection('forum_posts').insertAsync(post)
+		.then(res.json.bind(res));
+};
+
+/**
+ * @desc: Creates new comment for post in forum thread
+ */
+exports.createComment = function(req, res) {
+	const userId = ObjectId(req.user._id);
+	const body = req.body;
+	
+	// First strip html, then add <p> and replace \n by <br/>
+	const text = '<p>'+utils.stripHtml(body.text).replace(/\n/g, '<br/>')+'</p>';
+	
+	// Define post
+	const comment = {
+		'html': text,
+		'postId': ObjectId(body.postId),
+		'threadId': ObjectId(body.threadId),
+		'forumId': ObjectId(body.forumId),
+		'authorId': userId
+	};
+	
+	// Store comment in database
+	db.collection('forum_comments').insertAsync(comment)
 		.then(res.json.bind(res));
 };

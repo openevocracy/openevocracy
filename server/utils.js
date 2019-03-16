@@ -163,3 +163,10 @@ exports.checkConfig = function() {
 		});
 	});
 };
+
+/**
+ * @desc: Strips html tags from given string
+ */
+exports.stripHtml = function (htmlString) {
+	return htmlString.replace(/<(?:.|\n)*?>/gm, '');
+};

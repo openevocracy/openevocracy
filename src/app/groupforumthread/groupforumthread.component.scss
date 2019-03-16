@@ -3,6 +3,12 @@
 
 hr { margin: 0; }
 
+/* Mainpost from thread */
+#mainpost { margin-top: 20px; border-top: 8px solid $white; }
+#mainpost.open { border-color: $green500; }
+#mainpost.closed { border-color: $red500; }
+
+/* Post */
 .post {
     margin-bottom: 20px;
     background-color: $white;
@@ -12,17 +18,18 @@ hr { margin: 0; }
 .post-meta { padding: 10px 20px; }
 .post-text { margin-left: 70px; }
 
+/* Vote */
 .post-vote { float: left; margin: 10px 0; width: 40px; text-align: center; }
 .post-vote fa-icon { font-size: 35px; cursor: pointer; transition: color 300ms; }
 .post-vote fa-icon:hover, .post-vote fa-icon:focus, .post-vote fa-icon:active { color: $teal500; }
 .vote-fa { margin: -10px 0; }
 
-.post-comments { padding: 10px 20px; }
+/* Comment */
+.post-comments { padding: 0 20px 10px 20px; margin-left: 70px; }
+.comment-add { padding: 20px 0; }
+.comment-add-link { cursor: pointer;  }
+.comment-field textarea { width: 100%; margin-bottom: 10px; padding: 5px; }
 
-#mainpost { margin-top: 20px; border-top: 8px solid $white; }
-#mainpost.open { border-color: $green500; }
-#mainpost.closed { border-color: $red500; }
-
+/* New post editor */
 #newpost {  padding: 10px 20px; }
 #newpost button { margin: 20px 0; }
-

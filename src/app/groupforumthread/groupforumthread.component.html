@@ -13,7 +13,7 @@
 <div class="container">
 	<div id="mainpost" class="post" [ngClass]="{'closed': thread?.closed, 'open': !thread?.closed}">
 		<div class="post-meta">
-			<!--{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', thread?.authorId]">{{ thread?.authorId }}</a>-->
+			{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', thread?.forumId]">{{ thread?.authorId }}</a>
 			{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ thread?.createdTimestamp | date:'y-MM-dd HH:mm' }}</span>
 		</div>
 		<hr/>
@@ -27,7 +27,7 @@
 		</div>
 	</div>
 	
-	<div *ngFor="let post of posts" class="post">
+	<div *ngFor="let post of posts; let i = index;" class="post">
 		<div class="post-meta">
 			{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', post.authorId]">{{ post.authorId }}</a>
 			{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ post.createdTimestamp | date:'y-MM-dd HH:mm' }}</span>
@@ -41,9 +41,23 @@
 			</div>
 			<div class="post-text" [innerHtml]="post.html"></div>
 		</div>
-		<hr/>
 		<div class="post-comments">
-			Add a comment
+			<div *ngFor="let comment of post.comments" class="comment">
+				<hr/>
+				<div [innerHtml]="comment.html"></div>
+			</div>
+			<hr/>
+			<div class="comment-add">
+				<a class="comment-add-link" *ngIf="commentField!=i" (click)="showCommentField(i)" title="{{ 'FORUM_LINK_ADD_COMMENT' | translate }}">
+					<span>{{ 'FORUM_LINK_ADD_COMMENT' | translate }}</span>
+				</a>
+				<div *ngIf="commentField==i" class="comment-field">
+					<div><textarea [(ngModel)]="post.newComment" placeholder="{{ 'FORUM_PLACEHOLDER_NEW_COMMENT' | translate }}" rows="3"></textarea></div>
+					<button mat-raised-button color="primary" title="{{ 'FORUM_BUTTON_NEW_COMMENT' | translate }}" (click)="submitComment(post)">
+						<span>{{ 'FORUM_BUTTON_NEW_COMMENT' | translate }}</span>
+					</button>
+				</div>
+			</div>
 		</div>
 	</div>
 	
