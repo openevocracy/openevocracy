@@ -6,7 +6,7 @@ hr { margin: 0; }
 /* Mainpost from thread */
 #mainpost { margin-top: 20px; border-top: 8px solid $white; }
 #mainpost.open { border-color: $green500; }
-#mainpost.closed { border-color: $red500; }
+#mainpost.closed { border-color: $blue500; }
 
 /* Post */
 .post {
@@ -16,7 +16,7 @@ hr { margin: 0; }
 }
 .post-content { padding: 10px 20px; }
 .post-meta { padding: 10px 20px; }
-.post-text { margin-left: 70px; }
+.post-text { margin: 0 0 50px 70px; }
 
 /* Vote */
 .post-vote { float: left; margin: 10px 0; width: 40px; text-align: center; }
