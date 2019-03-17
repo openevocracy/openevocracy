@@ -150,6 +150,9 @@
 	"FORUM_LINK_ADD_COMMENT": "Kommentieren",
 	"FORUM_PLACEHOLDER_NEW_COMMENT": "Ergänze einen Aspekt zum Beitrag oder frage nach weiteren Informationen.",
 	"FORUM_BUTTON_NEW_COMMENT": "Absenden",
+	"FORUM_BUTTON_SHARE": "Teilen",
+	"FORUM_BUTTON_EDIT": "Bearbeiten",
+	"FORUM_BUTTON_DELETE": "Löschen",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",

@@ -1,8 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { MatDialogRef } from '@angular/material';
-
-import { ConfigService } from '../../_services/config.service';
 
 @Component({
 	selector: 'app-share',
@@ -13,13 +10,10 @@ export class ShareDialogComponent implements OnInit {
 	public url: string;
 
 	constructor(
-		private router: Router,
-		private dialogRef: MatDialogRef<ShareDialogComponent>,
-		private configService: ConfigService) {
-		const cfg = configService.get();
+		private dialogRef: MatDialogRef<ShareDialogComponent>) {
 			
 		// Get current URL
-		this.url = cfg.BASE_URL + this.router.url;
+		this.url = window.location.href ;
 	}
 	
 	ngOnInit() {}

@@ -3,32 +3,54 @@
 
 hr { margin: 0; }
 
+.vote-fa  fa-icon { cursor: pointer; transition: color 300ms; }
+.vote-fa fa-icon:hover, .post-vote fa-icon:focus, .post-vote fa-icon:active { color: $teal500; }
+
+#thread-toolbar { border-bottom: 5px solid $white; }
+#thread-toolbar.open { border-color: $green500; }
+#thread-toolbar.closed { border-color: $blue500; }
+
 /* Mainpost from thread */
-#mainpost { margin-top: 20px; border-top: 8px solid $white; }
-#mainpost.open { border-color: $green500; }
-#mainpost.closed { border-color: $blue500; }
+#mainpost { margin-top: 20px; }
 
 /* Post */
 .post {
     margin-bottom: 20px;
     background-color: $white;
+    transition: background-color 500ms;
     box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
 }
-.post-content { padding: 10px 20px; }
-.post-meta { padding: 10px 20px; }
-.post-text { margin: 0 0 50px 70px; }
+.post.highlighted { background-color: $amber50; }
+.post-wrapper { padding: 10px 20px; }
 
-/* Vote */
+.post-head { padding: 10px 20px; }
+.post-links { float: right; }
+.post-links .mat-button { line-height: 22px; padding: 0 5px; font-size: 12px; }
+.post-meta { line-height: 22px; }
+
+.post-text { margin: 10px 0 50px 70px; }
+.post-text p { margin: 0; }
+
 .post-vote { float: left; margin: 10px 0; width: 40px; text-align: center; }
-.post-vote fa-icon { font-size: 35px; cursor: pointer; transition: color 300ms; }
-.post-vote fa-icon:hover, .post-vote fa-icon:focus, .post-vote fa-icon:active { color: $teal500; }
-.vote-fa { margin: -10px 0; }
+.post-vote fa-icon { font-size: 35px; }
+.post-vote .vote-fa { margin: -10px 0; }
 
 /* Comment */
 .post-comments { padding: 0 20px 10px 20px; margin-left: 70px; }
 .comment-add { padding: 20px 0; }
 .comment-add-link { cursor: pointer;  }
 .comment-field textarea { width: 100%; margin-bottom: 10px; padding: 5px; }
+
+.comment-wrapper { margin-left: 40px; }
+.comment-text p { margin: 10px 0; }
+
+.comment-vote { float: left; margin: 10px 0; width: 30px; text-align: center; }
+.comment-vote fa-icon { color: $grey500; font-size: 28px; }
+.comment-vote .vote-fa { margin: -10px 0;  }
+.comment-vote .vote-count span { color: $grey500; }
+
+.comment-footer { color: $grey700; margin-bottom: 5px; }
+.comment-links { float: right; }
 
 /* New post editor */
 #newpost {  padding: 10px 20px; }

@@ -150,6 +150,9 @@
 	"FORUM_LINK_ADD_COMMENT": "Add a comment",
 	"FORUM_PLACEHOLDER_NEW_COMMENT": "Add an aspect to the post or ask for further information.",
 	"FORUM_BUTTON_NEW_COMMENT": "Submit",
+	"FORUM_BUTTON_SHARE": "Share",
+	"FORUM_BUTTON_EDIT": "Edit",
+	"FORUM_BUTTON_DELETE": "Delete",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",
