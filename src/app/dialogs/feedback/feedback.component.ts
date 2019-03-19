@@ -8,14 +8,14 @@ import { MatDialogRef } from '@angular/material';
 })
 export class FeedbackDialogComponent implements OnInit {
 
-	feedback: string;
+	public feedback: string;
 	
 	constructor(
 		private dialogRef: MatDialogRef<FeedbackDialogComponent>) {}
 	
 	ngOnInit() {}
 	
-	close() {
+	public close() {
 		this.dialogRef.close();
 	}
 

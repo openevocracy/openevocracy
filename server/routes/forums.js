@@ -134,3 +134,31 @@ exports.createComment = function(req, res) {
 	db.collection('forum_comments').insertAsync(comment)
 		.then(res.json.bind(res));
 };
+
+/**
+ * @desc: Deletes a post in a thread
+ */
+exports.deletePost = function(req, res) {
+	const postId = req.body.postId;
+	
+	// Delete post
+	const delete_post_promise = db.collection('forum_posts').removeByIdAsync(postId);
+	
+	// Delete all related comments
+	const delete_comments_promise = db.collection('forum_comments').removeAsync({ 'postId': postId });
+	
+	// Send result to client
+	Promise.join(delete_post_promise, delete_comments_promise)
+		.then(res.json.bind(res));
+};
+
+/**
+ * @desc: Deletes a comment in a thread
+ */
+exports.deleteComment = function(req, res) {
+	const commentId = req.body.commentId;
+	
+	// Delete comment in database
+	db.collection('forum_comments').removeByIdAsync(commentId)
+		.then(res.json.bind(res));
+};

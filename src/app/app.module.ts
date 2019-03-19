@@ -72,6 +72,7 @@ import { GroupForumComponent } from './groupforum/groupforum.component';
 import { NewThreadDialogComponent } from './dialogs/newthread/newthread.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { GroupForumThreadComponent } from './groupforumthread/groupforumthread.component';
+import { AskDeleteDialogComponent } from './dialogs/askdelete/askdelete.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -112,7 +113,8 @@ export function loadConfig(configService: ConfigService) {
 		GroupForumComponent,
 		NewThreadDialogComponent,
 		EditorFieldComponent,
-		GroupForumThreadComponent
+		GroupForumThreadComponent,
+		AskDeleteDialogComponent
 	],
 	imports: [
 		BrowserModule,
@@ -158,7 +160,8 @@ export function loadConfig(configService: ConfigService) {
 		{ provide: 'C', useValue: C }
 	],
 	entryComponents: [
-		FeedbackDialogComponent
+		FeedbackDialogComponent,
+		AskDeleteDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

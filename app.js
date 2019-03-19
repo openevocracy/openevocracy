@@ -137,6 +137,10 @@ app.get('/json/group/editor/:id', auth(), groups.query);
 // @desc: Get group information
 app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 
+// ############################
+// ### G R O U P  F O R U M ###
+// ############################
+
 // @desc: Get group forum
 app.get('/json/group/forum/:id', auth(), forums.queryForum);
 
@@ -149,8 +153,14 @@ app.get('/json/group/forum/thread/:id', auth(), forums.queryThread);
 // @desc: Create new post in forum thread
 app.post('/json/group/forum/post/create', auth(), forums.createPost);
 
-// @desc: Create new post in forum thread
+// @desc: Create new comment for post in forum thread
 app.post('/json/group/forum/comment/create', auth(), forums.createComment);
+
+// @desc: Delete post in forum thread
+app.post('/json/group/forum/post/delete', auth(), forums.deletePost);
+
+// @desc: Delete comment in forum thread
+app.post('/json/group/forum/comment/delete', auth(), forums.deleteComment);
 
 // ###################
 // ###   C H A T   ###

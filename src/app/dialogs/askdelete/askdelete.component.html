@@ -1,0 +1,10 @@
+<h2 mat-dialog-title>{{ 'DIALOG_ASKDELETE_TITLE' | translate }}</h2>
+
+<mat-dialog-content>
+	<p>{{ deleteDescription }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+	<button mat-raised-button color="primary" (click)="submit()">{{ 'FORUM_BUTTON_DELETE' | translate }}</button>
+	<button mat-raised-button color="warn" (click)="close()">{{ 'FORM_BUTTON_CANCEL' | translate }}</button>
+</mat-dialog-actions>

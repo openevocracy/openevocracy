@@ -51,6 +51,7 @@ hr { margin: 0; }
 
 .comment-footer { color: $grey700; margin-bottom: 5px; }
 .comment-links { float: right; }
+.comment-links a { cursor: pointer; }
 
 /* New post editor */
 #newpost {  padding: 10px 20px; }

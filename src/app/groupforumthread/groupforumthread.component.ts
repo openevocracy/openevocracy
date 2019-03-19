@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 
 import { ShareDialogComponent } from '../dialogs/share/share.component';
+import { AskDeleteDialogComponent } from '../dialogs/askdelete/askdelete.component';
 
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UtilsService } from '../_services/utils.service';
@@ -66,7 +67,7 @@ export class GroupForumThreadComponent implements OnInit {
 		this.activatedRoute.fragment.subscribe(fragment => {
 			this.fragment = fragment;
 			
-			// Remoe highlight after 10 seconds
+			// Remove highlight after 10 seconds
 			setTimeout(function() {
 				this.fragment = "";
 			}.bind(this), 10000);
@@ -260,7 +261,25 @@ export class GroupForumThreadComponent implements OnInit {
 	}
 	
 	public deletePost(postId) {
+		this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'Delete post ...' } });
 		
+		return;
+		
+		this.httpManagerService.post('/json/group/forum/post/delete', { 'postId': postId }).subscribe(res => {
+			// Reload model
+			this.loadThread(this.thread.threadId).subscribe(() => {
+				// After everything is finished, show editor again
+				forkJoin(
+					this.translateService.get('FORUM_SNACKBAR_POST_DELETED'),
+					this.translateService.get('FORM_BUTTON_CLOSE'))
+				.subscribe(([msg, action]) => {
+					// Open snackbar for 3 seconds and save reference
+					const snackBarRef = this.snackBar.open(msg, action, {
+						'duration': 5000
+					});
+				});
+			});
+		});
 	}
 	
 	public editComment(commentId) {
@@ -268,7 +287,25 @@ export class GroupForumThreadComponent implements OnInit {
 	}
 	
 	public deleteComment(commentId) {
+		this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'Delete comment ...' } });
 		
+		return;
+		
+		this.httpManagerService.post('/json/group/forum/comment/delete', { 'commentId': commentId }).subscribe(res => {
+			// Reload model
+			this.loadThread(this.thread.threadId).subscribe(() => {
+				// After everything is finished, show editor again
+				forkJoin(
+					this.translateService.get('FORUM_SNACKBAR_COMMENT_DELETED'),
+					this.translateService.get('FORM_BUTTON_CLOSE'))
+				.subscribe(([msg, action]) => {
+					// Open snackbar for 3 seconds and save reference
+					const snackBarRef = this.snackBar.open(msg, action, {
+						'duration': 5000
+					});
+				});
+			});
+		});
 	}
 
 }

@@ -12,6 +12,7 @@
 	
 	"FORM_BUTTON_SEND": "Send",
 	"FORM_BUTTON_CLOSE": "Close",
+	"FORM_BUTTON_CANCEL": "Cancel",
 	"FORM_LABEL_MAIL": "Your email address:",
 	"FORM_LABEL_PASSWORD": "Your password:",
 	"FORM_LABEL_PASSWORD_REP": "Repeat your password",
@@ -27,6 +28,7 @@
 	"DIALOG_FEEDBACK_TITLE": "Do you have some feedback for us?",
 	"DIALOG_FEEDBACK_PLACEHOLDER": "Shortly describe your ideas, problems, etc.",
 	"DIALOG_FEEDBACK_SUCESSFULLY_SENT": "Feedback was sent successfully.",
+	"DIALOG_ASKDELETE_TITLE": "Delete",
 	
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",

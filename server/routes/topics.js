@@ -476,8 +476,8 @@ exports.delete = function(req,res) {
     var topicId = ObjectId(req.params.id);
     var uid = ObjectId(req.user._id);
     
-    db.collection('topics').findOneAsync({ '_id': topicId }, { 'owner': true, 'stage': true }).
-    then(function(topic) {
+    db.collection('topics').findOneAsync({ '_id': topicId }, { 'owner': true, 'stage': true })
+    .then(function(topic) {
         // only the owner can delete the topic
         // and if the selection stage has passed, nobody can
         if(!_.isEqual(topic.owner,uid) || topic.stage > C.STAGE_SELECTION)
