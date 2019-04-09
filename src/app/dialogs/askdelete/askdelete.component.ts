@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, Inject, EventEmitter } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 export interface DialogData {
@@ -10,7 +10,9 @@ export interface DialogData {
 	templateUrl: './askdelete.component.html',
 	styleUrls: ['./askdelete.component.scss']
 })
-export class AskDeleteDialogComponent implements OnInit {
+export class AskDeleteDialogComponent {
+	
+	public onSubmit = new EventEmitter();
 	
 	public deleteDescription: string;
 
@@ -21,11 +23,12 @@ export class AskDeleteDialogComponent implements OnInit {
 		this.deleteDescription = data.deleteDescription;
 	}
 	
-	ngOnInit() {
-	}
-	
 	public submit() {
-		console.log('send http request to delete');
+		// Emit to parent
+		this.onSubmit.emit(true);
+		
+		// Finally close dialog
+		this.close();
 	}
 
 	public close() {

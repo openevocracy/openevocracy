@@ -14,51 +14,22 @@
 </mat-toolbar>
 
 <div class="container">
-	<div id="mainpost" class="post">
-		<div class="clearfix post-head">
-			<div class="post-links">
-				<button mat-button title="{{ 'FORUM_BUTTON_SHARE' | translate }}" (click)="shareThread()">
-					<span><fa-icon [icon]="faShareSquare"></fa-icon> {{ 'FORUM_BUTTON_SHARE' | translate }}</span>
-				</button>
-				<button mat-button title="{{ 'FORUM_BUTTON_EDIT' | translate }}" (click)="editThread()">
-					<span><fa-icon [icon]="faPenSquare"></fa-icon> {{ 'FORUM_BUTTON_EDIT' | translate }}</span>
-				</button>
-				<button mat-button title="{{ 'FORUM_BUTTON_DELETE' | translate }}" (click)="deleteThread()">
-					<span><fa-icon [icon]="faTrash"></fa-icon> {{ 'FORUM_BUTTON_DELETE' | translate }}</span>
-				</button>
-			</div>
-			<div class="post-meta">
-				{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', thread?.forumId]">{{ thread?.authorId }}</a>
-				{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ thread?.createdTimestamp | date:'y-MM-dd HH:mm' }}</span>
-			</div>
-		</div>
-		<hr/>
-		<div class="post-wrapper clearfix">
-			<div class="post-vote">
-				<div class="vote-fa vote-up"><fa-icon [icon]="faCaretUp"></fa-icon></div>
-				<div>0</div>
-				<div class="vote-fa vote-down"><fa-icon [icon]="faCaretDown"></fa-icon></div>
-			</div>
-			<div class="post-text" [innerHtml]="thread?.html"></div>
-		</div>
-	</div>
-	
-	<div *ngFor="let post of posts; let i = index;" class="post" [id]="'post-'+post.postId" [ngClass]="{ 'highlighted': post.postId==fragment }">
+	<div *ngFor="let post of posts; let i = index;" class="post" [id]="'post-'+post.postId" [ngClass]="{ 'highlighted': post.postId==fragment, 'mainpost': post.postId==thread.mainPostId}">
 		<div class="post-head">
 			<div class="post-links">
-				<button mat-button title="{{ 'FORUM_BUTTON_SHARE' | translate }}" (click)="sharePost(post.postId)">
+				<button mat-button title="{{ 'FORUM_BUTTON_SHARE' | translate }}" (click)="post.postId==thread.mainPostId ? shareThread() : sharePost(post.postId)">
 					<span><fa-icon [icon]="faShareSquare"></fa-icon> {{ 'FORUM_BUTTON_SHARE' | translate }}</span>
 				</button>
-				<button mat-button title="{{ 'FORUM_BUTTON_EDIT' | translate }}" (click)="editThread(post.postId)">
+				<button mat-button title="{{ 'FORUM_BUTTON_EDIT' | translate }}" (click)="post.postId==thread.mainPostId ? editThread() : editPost(post.postId, post.html)">
 					<span><fa-icon [icon]="faPenSquare"></fa-icon> {{ 'FORUM_BUTTON_EDIT' | translate }}</span>
 				</button>
-				<button mat-button title="{{ 'FORUM_BUTTON_DELETE' | translate }}" (click)="deletePost(post.postId)">
+				<button mat-button title="{{ 'FORUM_BUTTON_DELETE' | translate }}" (click)="post.postId==thread.mainPostId ? deleteThread() : deletePost(post.postId)">
 					<span><fa-icon [icon]="faTrash"></fa-icon> {{ 'FORUM_BUTTON_DELETE' | translate }}</span>
 				</button>
 			</div>
 			<div class="post-meta">
 				{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', post.authorId]">{{ post.authorId }}</a>
-				{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ post.createdTimestamp | date:'y-MM-dd HH:mm' }}</span>
+				{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ post.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}</span>
 			</div>
 		</div>
 		<hr/>
@@ -82,10 +53,10 @@
 						<div class="comment-text" [innerHtml]="comment.html"></div>
 						<div class="comment-footer clearfix">
 							<div class="comment-links">
-								<small><a (click)="editComment(comment.commentId)">{{ 'FORUM_BUTTON_EDIT' | translate }}</a>&nbsp;&nbsp;<a (click)="deleteComment(comment.commentId)">{{ 'FORUM_BUTTON_DELETE' | translate }}</a></small>
+								<small><a (click)="editComment(comment)">{{ 'FORUM_BUTTON_EDIT' | translate }}</a>&nbsp;&nbsp;<a (click)="deleteComment(comment.commentId)">{{ 'FORUM_BUTTON_DELETE' | translate }}</a></small>
 							</div>
 							<div class="comment-meta">
-								<small><a [routerLink]="['/user/profile', comment.authorId]">{{ comment.authorId }}</a>, {{ comment.createdTimestamp | date:'y-MM-dd HH:mm' }}</small>
+								<small><a [routerLink]="['/user/profile', comment.authorId]">{{ comment.authorId }}</a>, {{ comment.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}</small>
 							</div>
 						</div>
 					</div>

@@ -4,6 +4,7 @@ import { UtilsService } from "../../_services/utils.service";
 export class Thread {
 	/* Raw values from database */
 	threadId: string;
+	mainPostId: string;
 	title: string;
 	html: string;
 	forumId: string;
@@ -16,7 +17,8 @@ export class Thread {
 	createdTimestamp: number;
 	
 	constructor(res: any) {
-		this.threadId = res._id
+		this.threadId = res._id;
+		this.mainPostId = res.mainPostId;
 		this.title = res.title;
 		this.html = res.html;
 		this.forumId = res.forumId;

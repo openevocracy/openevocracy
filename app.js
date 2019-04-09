@@ -37,6 +37,7 @@ var ratings = require('./server/routes/ratings');
 var tests = require('./server/routes/tests');
 var pads = require('./server/routes/pads');
 var groupvis = require('./server/routes/groupvis');
+var activities = require('./server/routes/activities');
 
 // Set passport strategy
 var strategy = users.getStrategy();
@@ -111,6 +112,32 @@ app.post('/json/topic-unvote', auth(), topics.unvote);
 // @desc: Download final document as pdf
 app.get('/file/topic/:id', auth(), topics.download);
 
+
+// ###########################
+// ### A C T I V I T I E S ###
+// ###########################
+
+/*
+ * Routes:
+ *
+ * /activitylist - Collection of activities
+ *
+ * /activity - Collection of topics with extended information (currently not used)
+ * /activity:id - Single topic with extended information
+ */
+
+/*
+ * @desc: Get whole activity list
+ */
+app.get('/json/activitylist', auth(), activities.getActivityList);
+
+/*
+ * @desc: Get, create and delete activities
+ */
+app.get('/json/activity/:id', auth(), activities.query);
+app.post('/json/activity/create', auth(), activities.create);
+app.delete('/json/activity/:id', auth(), activities.delete);
+
 // ###############
 // ### D O C S ###
 // ###############
@@ -144,23 +171,29 @@ app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 // @desc: Get group forum
 app.get('/json/group/forum/:id', auth(), forums.queryForum);
 
+// @desc: Get thread
+app.get('/json/group/forum/thread/:id', auth(), forums.queryThread);
+
 // @desc: Create new thread in forum
 app.post('/json/group/forum/thread/create', auth(), forums.createThread);
-
-// @desc: Get group forum thread
-app.get('/json/group/forum/thread/:id', auth(), forums.queryThread);
 
 // @desc: Create new post in forum thread
 app.post('/json/group/forum/post/create', auth(), forums.createPost);
 
+// @desc: Edit post in forum thread
+app.patch('/json/group/forum/post/:id', auth(), forums.editPost);
+
+// @desc: Delete post in forum thread
+app.delete('/json/group/forum/post/:id', auth(), forums.deletePost);
+
 // @desc: Create new comment for post in forum thread
 app.post('/json/group/forum/comment/create', auth(), forums.createComment);
 
-// @desc: Delete post in forum thread
-app.post('/json/group/forum/post/delete', auth(), forums.deletePost);
+// @desc: Edit comment in forum thread
+app.patch('/json/group/forum/comment/:id', auth(), forums.editComment);
 
 // @desc: Delete comment in forum thread
-app.post('/json/group/forum/comment/delete', auth(), forums.deleteComment);
+app.delete('/json/group/forum/comment/:id', auth(), forums.deleteComment);
 
 // ###################
 // ###   C H A T   ###

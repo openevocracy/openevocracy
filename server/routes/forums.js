@@ -7,6 +7,11 @@ var Promise = require('bluebird');
 // Import routes
 var utils = require('../utils');
 
+function commentTextareaToHtml(str) {
+	// First strip html, then add <p> and replace \n by <br/>
+	return '<p>'+utils.stripHtml(str).replace(/\n/g, '<br/>')+'</p>';
+}
+
 /*
  * @desc: Query forum of specific group
  */
@@ -42,23 +47,44 @@ exports.queryForum = function(req, res) {
  * @desc: Creates new thread in forum of specific group
  */
 exports.createThread = function(req, res) {
-	var userId = ObjectId(req.user._id);
-	var body = req.body;
+	const userId = ObjectId(req.user._id);
+	const body = req.body;
+	
+	// Generate threadId and mainPostId
+	const threadId = ObjectId();
+	const mainPostId = ObjectId();
 	
 	// Define thread
-	var thread = {
-		'title': body.title,
-		'html': body.html,
-		'private': body.private,
+	const thread = {
+		'_id': threadId,
+		'mainPostId': mainPostId,
 		'forumId': ObjectId(body.forumId),
+		'authorId': userId,
+		'title': body.title,
+		'private': body.private,
 		'closed': false,
-		'citationId': null,
-		'authorId': userId
+		'citationId': null
 	};
 	
 	// Store thread in database
-	db.collection('forum_threads').insertAsync(thread)
-		.then(res.json.bind(res));
+	const thread_promise = db.collection('forum_threads').insertAsync(thread);
+	
+	// Define main post
+	const post = {
+		'_id': mainPostId,
+		'threadId': threadId,
+		'forumId': ObjectId(body.forumId),
+		'authorId': userId,
+		'html': body.html
+	};
+	
+	// Store main post in database
+	const post_promise = db.collection('forum_posts').insertAsync(post);
+	
+	// Wait for both promises and send response
+	Promise.join(thread_promise, post_promise).spread(function(thread, post) {
+		return { 'thread': thread, 'post': post };
+	}).then(res.json.bind(res));
 };
 
 /**
@@ -118,12 +144,9 @@ exports.createComment = function(req, res) {
 	const userId = ObjectId(req.user._id);
 	const body = req.body;
 	
-	// First strip html, then add <p> and replace \n by <br/>
-	const text = '<p>'+utils.stripHtml(body.text).replace(/\n/g, '<br/>')+'</p>';
-	
 	// Define post
 	const comment = {
-		'html': text,
+		'html': commentTextareaToHtml(body.text),
 		'postId': ObjectId(body.postId),
 		'threadId': ObjectId(body.threadId),
 		'forumId': ObjectId(body.forumId),
@@ -139,7 +162,7 @@ exports.createComment = function(req, res) {
  * @desc: Deletes a post in a thread
  */
 exports.deletePost = function(req, res) {
-	const postId = req.body.postId;
+	const postId = ObjectId(req.params.id);
 	
 	// Delete post
 	const delete_post_promise = db.collection('forum_posts').removeByIdAsync(postId);
@@ -156,9 +179,35 @@ exports.deletePost = function(req, res) {
  * @desc: Deletes a comment in a thread
  */
 exports.deleteComment = function(req, res) {
-	const commentId = req.body.commentId;
+	const commentId = ObjectId(req.params.id);
 	
 	// Delete comment in database
 	db.collection('forum_comments').removeByIdAsync(commentId)
+		.then(res.json.bind(res));
+};
+
+/**
+ * @desc: Edits an existing comment for post in forum thread
+ */
+exports.editComment = function(req, res) {
+	const commentId = ObjectId(req.params.id);
+	const updatedComment = req.body.updatedComment;
+	
+	// Update comment in database
+	db.collection('forum_comments')
+		.updateAsync({ '_id': commentId }, { $set: { 'html': commentTextareaToHtml(updatedComment) } })
+		.then(res.json.bind(res));
+};
+
+/**
+ * @desc: Edits an existing comment for post in forum thread
+ */
+exports.editPost = function(req, res) {
+	const postId = ObjectId(req.params.id);
+	const updatedPost = req.body.updatedPost;
+	
+	// Update comment in database
+	db.collection('forum_posts')
+		.updateAsync({ '_id': postId }, { $set: { 'html': updatedPost } })
 		.then(res.json.bind(res));
 };

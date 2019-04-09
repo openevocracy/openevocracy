@@ -69,12 +69,12 @@ export class GroupForumComponent implements OnInit {
 	}
 	
 	/*
-	 * @desc: opens dialog to add new thread and subscribe to dialog
+	 * @desc: Opens dialog to add new thread and subscribe to dialog
 	 *        function is called from "New thread"-Button
 	 */
 	public openNewThreadDialog() {
 		// Open dialog
-		let dialogRef = this.matDialog.open(NewThreadDialogComponent, {'minWidth': '600px'});
+		const dialogRef = this.matDialog.open(NewThreadDialogComponent, {'minWidth': '600px'});
 		// Wait for onSubmit event from dialog
 		dialogRef.componentInstance.onSubmit.subscribe(thread => {
 			this.onSubmit(thread);
@@ -86,7 +86,7 @@ export class GroupForumComponent implements OnInit {
 	 */
 	private onSubmit(thread) {
 		// Extend thread information, coming from dialog
-		var data = _.extend(thread, { 'forumId': this.forumId });
+		const data = _.extend(thread, { 'forumId': this.forumId });
 		// Post thread to server and create thread in database
 		this.httpManagerService.post('/json/group/forum/thread/create', data).subscribe();
 	}

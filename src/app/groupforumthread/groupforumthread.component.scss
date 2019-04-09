@@ -10,9 +10,6 @@ hr { margin: 0; }
 #thread-toolbar.open { border-color: $green500; }
 #thread-toolbar.closed { border-color: $blue500; }
 
-/* Mainpost from thread */
-#mainpost { margin-top: 20px; }
-
 /* Post */
 .post {
     margin-bottom: 20px;
@@ -21,6 +18,7 @@ hr { margin: 0; }
     box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
 }
 .post.highlighted { background-color: $amber50; }
+.post.mainpost { margin-top: 20px; }
 .post-wrapper { padding: 10px 20px; }
 
 .post-head { padding: 10px 20px; }

@@ -11,6 +11,7 @@
 	"FOOTER_MENU_VERSION": "Aktuelle Version",
 	
 	"FORM_BUTTON_SEND": "Senden",
+	"FORM_BUTTON_SAVE": "Speichern",
 	"FORM_BUTTON_CLOSE": "Schließen",
 	"FORM_BUTTON_CANCEL": "Abbrechen",
 	"FORM_LABEL_MAIL": "Deine E-Mail-Adresse:",
@@ -29,6 +30,9 @@
 	"DIALOG_FEEDBACK_PLACEHOLDER": "Beschreibe kurz deine Ideen, Probleme, etc",
 	"DIALOG_FEEDBACK_SUCESSFULLY_SENT": "Das Feedback wurde erfolgreich weitergegeben.",
 	"DIALOG_ASKDELETE_TITLE": "Löschen",
+	"DIALOG_ASKDELETE_COMMENT": "Möchtest du diesen Kommentar wirklich löschen?",
+	"DIALOG_ASKDELETE_POST": "Möchtest du diesen Beitrag wirklich löschen?",
+	"DIALOG_EDITFORUMCOMMENT_TITLE": "Kommentar bearbeiten",
 
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",
@@ -155,6 +159,11 @@
 	"FORUM_BUTTON_SHARE": "Teilen",
 	"FORUM_BUTTON_EDIT": "Bearbeiten",
 	"FORUM_BUTTON_DELETE": "Löschen",
+	"FORUM_SNACKBAR_NEW_POST": "Der Beitrag wurde erfolgreich erstellt.",
+	"FORUM_SNACKBAR_NEW_COMMENT": "Der Kommentar wurde erfolgreich erstellt.",
+	"FORUM_SNACKBAR_POST_DELETED": "Der Beitrag wurde erfolgreich gelöscht.",
+	"FORUM_SNACKBAR_COMMENT_DELETED": "Der Kommentar wurde erfolgreich gelöscht.",
+	"FORUM_SNACKBAR_COMMENT_EDITED": "Der Kommentar wurde erfolgreich bearbeitet.",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",
@@ -179,5 +188,13 @@
 	"REJECTED_NOT_ENOUGH_VOTES": "Nicht genügend Teilnehmer in der Selektionsphase",
 	"REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS": "Nicht genügend gültige Entwürfe in der Vorschlagsphase",
 	"REJECTED_UNSUFFICIENT_RATINGS": "Keine gültigen Bewertungen in den Gruppen",
-	"REJECTED_NO_VALID_GROUP_PROPOSAL": "Keine gültigen Entwürfe in den Gruppen"
+	"REJECTED_NO_VALID_GROUP_PROPOSAL": "Keine gültigen Entwürfe in den Gruppen",
+	
+	"ACT_TOPIC_VOTE_STR": "voted for topic",
+   "ACT_TOPIC_CREATE_STR": "created topic",
+   "ACT_PROPOSAL_CREATED_STR": "created proposal",
+   "ACT_ELECTED_DELEGATE_STR": "was elected as delegate",
+   "ACT_DROP_OUT_STR": "dropped out of group phase",
+   "ACT_TOPIC_COMPLETE_STR": "topic was completed in which the user participated",
+   "ACT_MENTIONED_STR": "the user was mentioned in a group"
 }

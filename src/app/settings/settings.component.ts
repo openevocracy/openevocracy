@@ -95,5 +95,6 @@ export class SettingsComponent implements OnInit {
 				this.alertService.alertFromServer(res.alert);
 			});
 	}
-
+		
+			
 }
