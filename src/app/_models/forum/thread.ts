@@ -6,7 +6,6 @@ export class Thread {
 	threadId: string;
 	mainPostId: string;
 	title: string;
-	html: string;
 	forumId: string;
 	authorId: string;
 	citationId: string;
@@ -20,7 +19,6 @@ export class Thread {
 		this.threadId = res._id;
 		this.mainPostId = res.mainPostId;
 		this.title = res.title;
-		this.html = res.html;
 		this.forumId = res.forumId;
 		this.authorId = res.authorId;
 		this.citationId = res.citationId;

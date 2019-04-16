@@ -72,10 +72,16 @@ export class UserprofileComponent implements OnInit {
 	private remove(e, actId) {
 		e.stopPropagation();
 		
-		var act = _.findWhere(this.activityList, {'_id': actId}); // get activity from activity list
-		
-		// TODO
-
+		console.log("To delete: " + actId)
+		this.activityListService.removeActivity(actId).subscribe(res => {
+				if (res) // if deleting in database was successful
+				{
+					console.log("Deleting succesful");
+					this.activityList = _.without(this.activityList, _.findWhere(this.activityList, {'_id': actId}));
+				}
+				else	
+					console.log("Deleting not succesful");
+			});
 	}
 	
 	
@@ -84,7 +90,9 @@ export class UserprofileComponent implements OnInit {
 	 */
 	private addActivity(e) {
 		e.stopPropagation();
-		this.activityListService.addActivity(C.ACT_MENTIONED, this.userId).subscribe();
+		this.activityListService.addActivity(C.ACT_MENTIONED, this.userId).subscribe(res => {
+				this.activityList.push(new Activity(res));
+		});
 
 	}
 

@@ -5,7 +5,7 @@ import { MatDialog } from "@angular/material";
 
 import { Thread } from "../_models/forum/thread";
 
-import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.component';
+import { EditThreadDialogComponent } from '../dialogs/editthread/editthread.component';
 
 import { UtilsService } from '../_services/utils.service';
 import { HttpManagerService } from '../_services/http-manager.service';
@@ -74,7 +74,7 @@ export class GroupForumComponent implements OnInit {
 	 */
 	public openNewThreadDialog() {
 		// Open dialog
-		const dialogRef = this.matDialog.open(NewThreadDialogComponent, {'minWidth': '600px'});
+		const dialogRef = this.matDialog.open(EditThreadDialogComponent, { 'minWidth': '600px' });
 		// Wait for onSubmit event from dialog
 		dialogRef.componentInstance.onSubmit.subscribe(thread => {
 			this.onSubmit(thread);

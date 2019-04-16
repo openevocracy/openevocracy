@@ -20,7 +20,7 @@
 				<button mat-button title="{{ 'FORUM_BUTTON_SHARE' | translate }}" (click)="post.postId==thread.mainPostId ? shareThread() : sharePost(post.postId)">
 					<span><fa-icon [icon]="faShareSquare"></fa-icon> {{ 'FORUM_BUTTON_SHARE' | translate }}</span>
 				</button>
-				<button mat-button title="{{ 'FORUM_BUTTON_EDIT' | translate }}" (click)="post.postId==thread.mainPostId ? editThread() : editPost(post.postId, post.html)">
+				<button mat-button title="{{ 'FORUM_BUTTON_EDIT' | translate }}" (click)="post.postId==thread.mainPostId ? editThread(post.postId, post.html) : editPost(post.postId, post.html)">
 					<span><fa-icon [icon]="faPenSquare"></fa-icon> {{ 'FORUM_BUTTON_EDIT' | translate }}</span>
 				</button>
 				<button mat-button title="{{ 'FORUM_BUTTON_DELETE' | translate }}" (click)="post.postId==thread.mainPostId ? deleteThread() : deletePost(post.postId)">

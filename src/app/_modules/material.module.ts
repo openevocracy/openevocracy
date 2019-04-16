@@ -17,9 +17,6 @@ import {
 	MatSlideToggleModule
 } from '@angular/material';
 
-import { ShareDialogComponent } from '../dialogs/share/share.component';
-import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.component';
-
 @NgModule({
 	imports: [
 		MatButtonModule,
@@ -54,8 +51,7 @@ import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.compone
 		MatSlideToggleModule
 	],
 	entryComponents: [
-		ShareDialogComponent,
-		NewThreadDialogComponent
+		
 	]
 })
 export class MaterialModule {}

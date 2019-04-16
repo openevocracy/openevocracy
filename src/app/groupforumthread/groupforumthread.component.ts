@@ -12,6 +12,7 @@ import { ShareDialogComponent } from '../dialogs/share/share.component';
 import { AskDeleteDialogComponent } from '../dialogs/askdelete/askdelete.component';
 import { EditForumPostDialogComponent } from '../dialogs/editforumpost/editforumpost.component';
 import { EditForumCommentDialogComponent } from '../dialogs/editforumcomment/editforumcomment.component';
+import { EditThreadDialogComponent } from '../dialogs/editthread/editthread.component';
 
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UtilsService } from '../_services/utils.service';
@@ -89,7 +90,6 @@ export class GroupForumThreadComponent implements OnInit {
 			this.httpManagerService.get('/json/group/forum/thread/' + threadId).subscribe(res => {
 				// Create thread object from thread data
 				this.thread = new Thread(res.thread);
-				console.log('thread', this.thread);
 				
 				// TODO Sort posts by ...
 				const sortedPosts = res.posts; //_.sortBy(_.sortBy(withProgress, 'name'), 'progress');
@@ -172,16 +172,8 @@ export class GroupForumThreadComponent implements OnInit {
 			
 			// Reload model
 			this.loadThread(this.thread.threadId).subscribe(() => {
-				// After everything is finished, show editor again
-				forkJoin(
-					this.translateService.get('FORUM_SNACKBAR_NEW_COMMENT'),
-					this.translateService.get('FORM_BUTTON_CLOSE'))
-				.subscribe(([msg, action]) => {
-					// Open snackbar for 3 seconds and save reference
-					const snackBarRef = this.snackBar.open(msg, action, {
-						'duration': 5000
-					});
-				});
+				// Show snack bar notification
+				this.showSnackBar('FORUM_SNACKBAR_NEW_COMMENT');
 			});
 		});
 	}
@@ -200,6 +192,27 @@ export class GroupForumThreadComponent implements OnInit {
 	public enableNewPostEditor() {
 		this.saving = false;
 		this.editor.enable(true);
+	}
+	
+	/**
+	 * @desc: Show snackbar notification
+	 */
+	public showSnackBar(title, afterDismissed?) {
+		forkJoin(
+			this.translateService.get(title),
+			this.translateService.get('FORM_BUTTON_CLOSE'))
+		.subscribe(([msg, action]) => {
+			// Open snackbar for 5 seconds
+			const snackBarRef = this.snackBar.open(msg, action, {
+				'duration': 5000
+			});
+			// If afterDismissed callback was given as argument, call function after dismiss
+			if (afterDismissed) {
+				snackBarRef.afterDismissed().subscribe(() => {
+					afterDismissed();
+				});
+			}
+		});
 	}
 	
 	/**
@@ -231,21 +244,8 @@ export class GroupForumThreadComponent implements OnInit {
 			
 			// Reload model
 			this.loadThread(this.thread.threadId).subscribe(() => {
-				// After everything is finished, show editor again
-				forkJoin(
-					this.translateService.get('FORUM_SNACKBAR_NEW_POST'),
-					this.translateService.get('FORM_BUTTON_CLOSE'))
-				.subscribe(([msg, action]) => {
-					// Open snackbar for 3 seconds and save reference
-					const snackBarRef = this.snackBar.open(msg, action, {
-						'duration': 5000
-					});
-					
-					// After snackbar is closed, redirect show editor again
-					snackBarRef.afterDismissed().subscribe(() => {
-						this.enableNewPostEditor();
-					});
-				});
+				// After everything is finished, show snackbar notification and enable editor again
+				this.showSnackBar('FORUM_SNACKBAR_NEW_POST', this.enableNewPostEditor.bind(this));
 			});
 		});
 	}
@@ -287,8 +287,15 @@ export class GroupForumThreadComponent implements OnInit {
 	/**
 	 * @desc: Sends a patch request when user edits a thread
 	 */
-	public editThread() {
+	public editThread(postId, postHtml) {
+		// Open thread editor
+		const options = { 'data': { 'mainPostHtml': postHtml, 'thread': this.thread }, 'minWidth': '400px' };
+		const editRef = this.matDialog.open(EditThreadDialogComponent, options);
 		
+		// If dialog was approved, get new post and send it to server
+		editRef.componentInstance.onSubmit.subscribe(updatedThread => {
+			
+		});
 	}
 	
 	/**

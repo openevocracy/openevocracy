@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NewThreadDialogComponent } from './newthread.component';
+import { EditThreadDialogComponent } from './editthread.component';
 
-describe('NewThreadDialogComponent', () => {
-  let component: NewThreadDialogComponent;
-  let fixture: ComponentFixture<NewThreadDialogComponent>;
+describe('EditThreadDialogComponent', () => {
+  let component: EditThreadDialogComponent;
+  let fixture: ComponentFixture<EditThreadDialogComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NewThreadDialogComponent ]
+      declarations: [ EditThreadDialogComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NewThreadDialogComponent);
+    fixture = TestBed.createComponent(EditThreadDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

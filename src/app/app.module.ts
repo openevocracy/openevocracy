@@ -46,7 +46,7 @@ import { TopicComponent } from './topic/topic.component';
 // Dialogs
 import { ShareDialogComponent } from './dialogs/share/share.component';
 import { FeedbackDialogComponent } from './dialogs/feedback/feedback.component';
-import { NewThreadDialogComponent } from './dialogs/newthread/newthread.component';
+import { EditThreadDialogComponent } from './dialogs/editthread/editthread.component';
 import { AskDeleteDialogComponent } from './dialogs/askdelete/askdelete.component';
 import { EditForumPostDialogComponent } from './dialogs/editforumpost/editforumpost.component';
 import { EditForumCommentDialogComponent } from './dialogs/editforumcomment/editforumcomment.component';
@@ -117,7 +117,7 @@ export function loadConfig(configService: ConfigService) {
 		ShareDialogComponent,
 		FeedbackDialogComponent,
 		GroupForumComponent,
-		NewThreadDialogComponent,
+		EditThreadDialogComponent,
 		EditorFieldComponent,
 		GroupForumThreadComponent,
 		AskDeleteDialogComponent,
@@ -171,7 +171,9 @@ export function loadConfig(configService: ConfigService) {
 		FeedbackDialogComponent,
 		AskDeleteDialogComponent,
 		EditForumPostDialogComponent,
-		EditForumCommentDialogComponent
+		EditForumCommentDialogComponent,
+		EditThreadDialogComponent,
+		ShareDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

@@ -17,7 +17,11 @@ export class ActivityListService {
 		return this.httpManagerService.get('/json/activitylist');
 	}
 	
-	public addActivity(type: number, targetId: string) {
+	public addActivity(type: number, targetId: string): Observable<Activity> {
 		return this.httpManagerService.post('/json/activity/create', {'type': type, 'targetId': targetId});
+	}
+	
+	public removeActivity(actId: string): Observable<boolean> {
+		return this.httpManagerService.delete('/json/activity/' + actId);
 	}
 }

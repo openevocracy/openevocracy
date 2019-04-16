@@ -2,7 +2,7 @@ import { Component, Inject, EventEmitter } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 export interface DialogData {
-  'postHtml': string;
+	'postHtml': string
 }
 
 @Component({
