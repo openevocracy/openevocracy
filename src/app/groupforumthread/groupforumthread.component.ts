@@ -293,8 +293,18 @@ export class GroupForumThreadComponent implements OnInit {
 		const editRef = this.matDialog.open(EditThreadDialogComponent, options);
 		
 		// If dialog was approved, get new post and send it to server
-		editRef.componentInstance.onSubmit.subscribe(updatedThread => {
+		editRef.componentInstance.onSubmit.subscribe(updatedThreadAndPost => {
+			const up = updatedThreadAndPost;
+			const data = {
+				'updatedThread': { 'threadId': this.thread.threadId, 'title': up.title, 'private': up.private },
+				'updatedPost': { 'postId': postId, 'html': up.html }
+			};
 			
+			// Send data to server
+			this.httpManagerService.patch('/json/group/forum/thread/'+this.thread.threadId, data).subscribe(res => {
+				// TODO Update thread
+				console.log(res);
+			});
 		});
 	}
 	
@@ -302,7 +312,18 @@ export class GroupForumThreadComponent implements OnInit {
 	 * @desc: Sends a delete request when user deletes a whole thread
 	 */
 	public deleteThread() {
+		// Open dialog and ask if thread should really be deleted
+		const deleteRef = this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'DIALOG_ASKDELETE_THREAD' } });
 		
+		// If dialog was approved, delete thread
+		deleteRef.componentInstance.onSubmit.subscribe(() => {
+			this.httpManagerService.delete('/json/group/forum/thread/'+this.thread.threadId).subscribe(res => {
+				// After everything is finished, show snackbar notification and redirect to forum list
+				this.showSnackBar('FORUM_SNACKBAR_THREAD_DELETED', function() {
+					this.router.navigate(['/group/forum/', this.thread.forumId])
+				});
+			});
+		});
 	}
 	
 	/**

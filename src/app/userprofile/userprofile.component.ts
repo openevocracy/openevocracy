@@ -81,6 +81,7 @@ export class UserprofileComponent implements OnInit {
 				}
 				else	
 					console.log("Deleting not succesful");
+				console.log(res);
 			});
 	}
 	
@@ -91,7 +92,12 @@ export class UserprofileComponent implements OnInit {
 	private addActivity(e) {
 		e.stopPropagation();
 		this.activityListService.addActivity(C.ACT_MENTIONED, this.userId).subscribe(res => {
-				this.activityList.push(new Activity(res));
+				console.log(res);
+				if (res)
+					this.activityList.push(new Activity({_id: res.insertedIds[0], 
+					                                     user: this.userId, 
+					                                     type: C.ACT_MENTIONED,
+						                                  targetId: this.userId}));
 		});
 
 	}

@@ -118,6 +118,50 @@ exports.queryThread = function(req, res) {
 };
 
 /**
+ * @desc: Edit thread of specific forum of specific group
+ */
+exports.editThread = function(req, res) {
+	const threadId = ObjectId(req.params.id);
+	const updatedThread = req.body.updatedThread;
+	const updatedPost = req.body.updatedPost;
+	
+	// Update post in database
+	const updatePost_promise = db.collection('forum_posts').updateAsync({ '_id': ObjectId(updatedPost.postId) }, { $set: {
+		'html': updatedPost.html
+	} });
+	
+	// Update thread in database
+	const updateThread_promise = db.collection('forum_threads').updateAsync({ '_id': threadId }, { $set: {
+		'title': updatedThread.title,
+		'private': updatedThread.private
+	} });
+	
+	// Send result to client
+	Promise.join(updatePost_promise, updateThread_promise)
+		.then(res.json.bind(res));
+};
+
+/**
+ * @desc: Delete thread of specific forum of specific group
+ */
+exports.deleteThread = function(req, res) {
+	const threadId = ObjectId(req.params.id);
+	
+	// Delete thread
+	const deleteThread_promise = db.collection('forum_threads').removeByIdAsync(threadId);
+	
+	// Delete all related posts
+	const deletePosts_promise = db.collection('forum_posts').removeAsync({ 'threadId': threadId });
+	
+	// Delete all related comments
+	const deleteComments_promise = db.collection('forum_comments').removeAsync({ 'threadId': threadId });
+	
+	// Send result to client
+	Promise.join(deleteThread_promise, deletePosts_promise, deleteComments_promise)
+		.then(res.json.bind(res));
+};
+
+/**
  * @desc: Creates new post in forum thread
  */
 exports.createPost = function(req, res) {
@@ -134,6 +178,36 @@ exports.createPost = function(req, res) {
 	
 	// Store post in database
 	db.collection('forum_posts').insertAsync(post)
+		.then(res.json.bind(res));
+};
+
+/**
+ * @desc: Edits an existing comment for post in forum thread
+ */
+exports.editPost = function(req, res) {
+	const postId = ObjectId(req.params.id);
+	const updatedPost = req.body.updatedPost;
+	
+	// Update post in database
+	db.collection('forum_posts')
+		.updateAsync({ '_id': postId }, { $set: { 'html': updatedPost } })
+		.then(res.json.bind(res));
+};
+
+/**
+ * @desc: Deletes a post in a thread
+ */
+exports.deletePost = function(req, res) {
+	const postId = ObjectId(req.params.id);
+	
+	// Delete post
+	const deletePost_promise = db.collection('forum_posts').removeByIdAsync(postId);
+	
+	// Delete all related comments
+	const deleteComments_promise = db.collection('forum_comments').removeAsync({ 'postId': postId });
+	
+	// Send result to client
+	Promise.join(deletePost_promise, deleteComments_promise)
 		.then(res.json.bind(res));
 };
 
@@ -159,34 +233,6 @@ exports.createComment = function(req, res) {
 };
 
 /**
- * @desc: Deletes a post in a thread
- */
-exports.deletePost = function(req, res) {
-	const postId = ObjectId(req.params.id);
-	
-	// Delete post
-	const delete_post_promise = db.collection('forum_posts').removeByIdAsync(postId);
-	
-	// Delete all related comments
-	const delete_comments_promise = db.collection('forum_comments').removeAsync({ 'postId': postId });
-	
-	// Send result to client
-	Promise.join(delete_post_promise, delete_comments_promise)
-		.then(res.json.bind(res));
-};
-
-/**
- * @desc: Deletes a comment in a thread
- */
-exports.deleteComment = function(req, res) {
-	const commentId = ObjectId(req.params.id);
-	
-	// Delete comment in database
-	db.collection('forum_comments').removeByIdAsync(commentId)
-		.then(res.json.bind(res));
-};
-
-/**
  * @desc: Edits an existing comment for post in forum thread
  */
 exports.editComment = function(req, res) {
@@ -200,14 +246,12 @@ exports.editComment = function(req, res) {
 };
 
 /**
- * @desc: Edits an existing comment for post in forum thread
+ * @desc: Deletes a comment in a thread
  */
-exports.editPost = function(req, res) {
-	const postId = ObjectId(req.params.id);
-	const updatedPost = req.body.updatedPost;
+exports.deleteComment = function(req, res) {
+	const commentId = ObjectId(req.params.id);
 	
-	// Update comment in database
-	db.collection('forum_posts')
-		.updateAsync({ '_id': postId }, { $set: { 'html': updatedPost } })
+	// Delete comment in database
+	db.collection('forum_comments').removeByIdAsync(commentId)
 		.then(res.json.bind(res));
 };

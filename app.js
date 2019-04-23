@@ -177,6 +177,12 @@ app.get('/json/group/forum/thread/:id', auth(), forums.queryThread);
 // @desc: Create new thread in forum
 app.post('/json/group/forum/thread/create', auth(), forums.createThread);
 
+// @desc: Edit thread in forum
+app.patch('/json/group/forum/thread/:id', auth(), forums.editThread);
+
+// @desc: Delete thread in forum
+app.delete('/json/group/forum/thread/:id', auth(), forums.deleteThread);
+
 // @desc: Create new post in forum thread
 app.post('/json/group/forum/post/create', auth(), forums.createPost);
 

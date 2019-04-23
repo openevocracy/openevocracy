@@ -74,10 +74,11 @@ exports.create = function(req, res) {
 exports.delete = function(req,res) {
     var actId = ObjectId(req.params.id);
     var uid = ObjectId(req.user._id);
-    
+
     db.collection('activities').findOneAsync({ '_id': actId })
-      .then(function(actId) {
-         db.collection('activities').removeByIdAsync(actId)
-            .then(res.json.bind(res));
+      .then(function(activity) {
+         return db.collection('activities').removeByIdAsync(activity._id )
+                .then(res.json.bind(res))
+                .catch(utils.isOwnError,utils.handleOwnError(res));
        });
 };
