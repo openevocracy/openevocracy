@@ -53,7 +53,7 @@
 						<div class="comment-text" [innerHtml]="comment.html"></div>
 						<div class="comment-footer clearfix">
 							<div class="comment-links">
-								<small><a (click)="editComment(comment)">{{ 'FORUM_BUTTON_EDIT' | translate }}</a>&nbsp;&nbsp;<a (click)="deleteComment(comment.commentId)">{{ 'FORUM_BUTTON_DELETE' | translate }}</a></small>
+								<small><a (click)="editComment(post.postId, comment)">{{ 'FORUM_BUTTON_EDIT' | translate }}</a>&nbsp;&nbsp;<a (click)="deleteComment(post.postId, comment.commentId)">{{ 'FORUM_BUTTON_DELETE' | translate }}</a></small>
 							</div>
 							<div class="comment-meta">
 								<small><a [routerLink]="['/user/profile', comment.authorId]">{{ comment.authorId }}</a>, {{ comment.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}</small>

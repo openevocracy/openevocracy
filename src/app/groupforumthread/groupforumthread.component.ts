@@ -345,22 +345,20 @@ export class GroupForumThreadComponent implements OnInit {
 		const editRef = this.matDialog.open(EditForumPostDialogComponent, options);
 		
 		// If dialog was approved, get new post and send it to server
-		editRef.componentInstance.onSubmit.subscribe(updatedPost => {
+		editRef.componentInstance.onSubmit.subscribe(updatedPostHtml => {
 			// Prepare data to send (updated post content)
-			const data = { 'updatedPost': updatedPost };
+			const data = { 'updatedPostHtml': updatedPostHtml };
 			// Send data to server
 			this.httpManagerService.patch('/json/group/forum/post/'+postId, data).subscribe(res => {
-				// Reload model
-				this.loadThread(this.thread.threadId).subscribe(() => {
-					// After everything has finished, show editor again
-					forkJoin(
-						this.translateService.get('FORUM_SNACKBAR_POST_EDITED'),
-						this.translateService.get('FORM_BUTTON_CLOSE'))
-					.subscribe(([msg, action]) => {
-						// Open snackbar for 5 seconds
-						this.snackBar.open(msg, action, { 'duration': 5000 });
-					});
+				// Change edited post from posts array
+				this.posts = _.map(this.posts, (post) => {
+					if (post.postId == postId)
+						post.html = updatedPostHtml;
+					return post;
 				});
+				
+				// Show snack bar notification
+				this.showSnackBar('FORUM_SNACKBAR_POST_EDITED');
 			});
 		});
 	}
@@ -375,25 +373,39 @@ export class GroupForumThreadComponent implements OnInit {
 		// If dialog was approved, delete post
 		deleteRef.componentInstance.onSubmit.subscribe(() => {
 			this.httpManagerService.delete('/json/group/forum/post/'+postId).subscribe(res => {
-				// Reload model
-				this.loadThread(this.thread.threadId).subscribe(() => {
-					// After everything has finished, show editor again
-					forkJoin(
-						this.translateService.get('FORUM_SNACKBAR_POST_DELETED'),
-						this.translateService.get('FORM_BUTTON_CLOSE'))
-					.subscribe(([msg, action]) => {
-						// Open snackbar for 5 seconds
-						this.snackBar.open(msg, action, { 'duration': 5000 });
-					});
+				// Remove deleted post from posts array
+				this.posts = _.reject(this.posts, (post) => {
+					return post.postId == postId;
 				});
+				
+				// Show snack bar notification
+				this.showSnackBar('FORUM_SNACKBAR_POST_DELETED');
 			});
 		});
 	}
 	
 	/**
+	 * @desc: Helper function to strip html
+	 */
+	public stripHtml(htmlString) {
+		return htmlString.replace(/<(?:.|\n)*?>/gm, '');
+	};
+	
+	/**
+	 * @desc: Helper function to convert textarea content to html
+	 */
+	public textareaToHtml(str) {
+		// First strip html, then add <p> and replace \n by <br/>
+		return '<p>'+this.stripHtml(str).replace(/\n/g, '<br/>')+'</p>';
+	}
+	
+	/**
 	 * @desc: Sends a patch request when user edits a comment
 	 */
-	public editComment(comment) {
+	public editComment(postId, comment) {
+		// Define comment id
+		const commentId = comment.commentId;
+		
 		// Replace comment text by textarea text
 		const textareaContent = comment.html.replace(/<br\/>/g, '\n').replace('<p>', '').replace('</p>', '');
 		
@@ -402,22 +414,25 @@ export class GroupForumThreadComponent implements OnInit {
 		const editRef = this.matDialog.open(EditForumCommentDialogComponent, options);
 		
 		// If dialog was approved, get new comment and send it to server
-		editRef.componentInstance.onSubmit.subscribe(updatedComment => {
+		editRef.componentInstance.onSubmit.subscribe(updatedCommentHtml => {
 			// Prepare data to send (updated comment content)
-			const data = { 'updatedComment': updatedComment };
+			const data = { 'updatedCommentHtml': updatedCommentHtml };
 			// Send data to server
-			this.httpManagerService.patch('/json/group/forum/comment/'+comment.commentId, data).subscribe(res => {
-				// Reload model
-				this.loadThread(this.thread.threadId).subscribe(() => {
-					// After everything has finished, show editor again
-					forkJoin(
-						this.translateService.get('FORUM_SNACKBAR_COMMENT_EDITED'),
-						this.translateService.get('FORM_BUTTON_CLOSE'))
-					.subscribe(([msg, action]) => {
-						// Open snackbar for 5 seconds
-						this.snackBar.open(msg, action, { 'duration': 5000 });
-					});
+			this.httpManagerService.patch('/json/group/forum/comment/'+commentId, data).subscribe(res => {
+				// Change edited post from posts array
+				this.posts = _.map(this.posts, (post) => {
+					if (post.postId == postId) {
+						post.comments = _.map(post.comments, (comment) => {
+							if(comment.commentId == commentId)
+								comment.html = this.textareaToHtml(updatedCommentHtml);
+							return comment;
+						});
+					}
+					return post;
 				});
+				
+				// Show snack bar notification
+				this.showSnackBar('FORUM_SNACKBAR_COMMENT_EDITED');
 			});
 		});
 	}
@@ -425,24 +440,24 @@ export class GroupForumThreadComponent implements OnInit {
 	/**
 	 * @desc: Sends a delete request when user deletes a comment
 	 */
-	public deleteComment(commentId) {
+	public deleteComment(postId, commentId) {
 		// Open dialog and ask if comment should really be deleted
 		const deleteRef = this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'DIALOG_ASKDELETE_COMMENT' } });
 		
 		// If dialog was approved, delete comment
 		deleteRef.componentInstance.onSubmit.subscribe(() => {
 			this.httpManagerService.delete('/json/group/forum/comment/'+commentId).subscribe(res => {
-				// Reload model
-				this.loadThread(this.thread.threadId).subscribe(() => {
-					// After everything has finished, show editor again
-					forkJoin(
-						this.translateService.get('FORUM_SNACKBAR_COMMENT_DELETED'),
-						this.translateService.get('FORM_BUTTON_CLOSE'))
-					.subscribe(([msg, action]) => {
-						// Open snackbar for 5 seconds
-						this.snackBar.open(msg, action, { 'duration': 5000 });
-					});
+				// Remove deleted comment from posts array
+				_.each(this.posts, (post) => {
+					if (post.postId == postId) {
+						post.comments = _.reject(post.comments, (comment) => {
+							return comment.commentId == commentId;
+						});
+					}
 				});
+				
+				// Show snack bar notification
+				this.showSnackBar('FORUM_SNACKBAR_COMMENT_DELETED');
 			});
 		});
 	}

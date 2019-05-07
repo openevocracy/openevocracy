@@ -94,10 +94,12 @@ export class UserprofileComponent implements OnInit {
 		this.activityListService.addActivity(C.ACT_MENTIONED, this.userId).subscribe(res => {
 				console.log(res);
 				if (res)
-					this.activityList.push(new Activity({_id: res.insertedIds[0], 
-					                                     user: this.userId, 
-					                                     type: C.ACT_MENTIONED,
-						                                  targetId: this.userId}));
+					this.activityList.push(new Activity({
+						//_id: res.insertedIds[0],
+					   user: this.userId,
+					   type: C.ACT_MENTIONED,
+						targetId: this.userId
+					}));
 		});
 
 	}

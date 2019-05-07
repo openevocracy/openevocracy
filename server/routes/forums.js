@@ -186,11 +186,11 @@ exports.createPost = function(req, res) {
  */
 exports.editPost = function(req, res) {
 	const postId = ObjectId(req.params.id);
-	const updatedPost = req.body.updatedPost;
+	const updatedPostHtml = req.body.updatedPostHtml;
 	
 	// Update post in database
 	db.collection('forum_posts')
-		.updateAsync({ '_id': postId }, { $set: { 'html': updatedPost } })
+		.updateAsync({ '_id': postId }, { $set: { 'html': updatedPostHtml } })
 		.then(res.json.bind(res));
 };
 
@@ -237,11 +237,11 @@ exports.createComment = function(req, res) {
  */
 exports.editComment = function(req, res) {
 	const commentId = ObjectId(req.params.id);
-	const updatedComment = req.body.updatedComment;
+	const updatedCommentHtml = req.body.updatedCommentHtml;
 	
 	// Update comment in database
 	db.collection('forum_comments')
-		.updateAsync({ '_id': commentId }, { $set: { 'html': commentTextareaToHtml(updatedComment) } })
+		.updateAsync({ '_id': commentId }, { $set: { 'html': commentTextareaToHtml(updatedCommentHtml) } })
 		.then(res.json.bind(res));
 };
 
