@@ -311,3 +311,4 @@ httpServer.on('upgrade', function upgrade(request, socket, head) {
 
 //var wss = new WebSocket.Server({'server': httpServer});
 
+module.exports = app;

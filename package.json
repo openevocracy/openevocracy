@@ -9,7 +9,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "extract": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json"
+    "extract": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json",
+    "test_integration": "ENV=test mocha --require test/it-helper test/users.js --exit"
   },
   "private": true,
   "dependencies": {
@@ -73,7 +74,11 @@
     "mailcomposer": "^4.0.2",
     "method-override": "*",
     "methods": "*",
+    "mocha": "^6.1.4",
+    "mocha-prepare": "^0.1.0",
+    "mongo-unit": "^1.4.4",
     "mongodb": "^2.0",
+    "mongoist": "^2.0.0",
     "mongoskin": "*",
     "morgan": "^1.9.1",
     "multer": "^1.4.1",
@@ -123,6 +128,8 @@
     "@types/jasminewd2": "^2.0.6",
     "@types/node": "^8.10.39",
     "codelyzer": "^4.5.0",
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
     "css-star-rating": "^1.2.4",
     "jasmine-core": "~2.8.0",
     "jasmine-spec-reporter": "~4.2.1",
