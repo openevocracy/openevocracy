@@ -69,7 +69,7 @@ export class UserprofileComponent implements OnInit {
 	/*
 	 * @desc: Removes an activity
 	 */
-	private remove(e, actId) {
+	remove(e, actId) {
 		e.stopPropagation();
 		
 		console.log("To delete: " + actId)
@@ -89,7 +89,7 @@ export class UserprofileComponent implements OnInit {
 	/*
 	 * @desc: Adds an activity; for testing only; TODO: REMOVE
 	 */
-	private addActivity(e) {
+	addActivity(e) {
 		e.stopPropagation();
 		this.activityListService.addActivity(C.ACT_MENTIONED, this.userId).subscribe(res => {
 				console.log(res);
