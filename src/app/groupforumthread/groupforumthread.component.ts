@@ -17,6 +17,7 @@ import { EditThreadDialogComponent } from '../dialogs/editthread/editthread.comp
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UtilsService } from '../_services/utils.service';
 import { ConfigService } from '../_services/config.service';
+import { UserService } from '../_services/user.service';
 
 import { Thread } from "../_models/forum/thread";
 import { Post } from "../_models/forum/post";
@@ -39,6 +40,7 @@ export class GroupForumThreadComponent implements OnInit {
 	public commentField: number = -1;
 	public fragment: string = "";
 	public editor;
+	public userId: string;
 	public thread: Thread;
 	public posts: Post[];
 	
@@ -59,8 +61,13 @@ export class GroupForumThreadComponent implements OnInit {
 		private translateService: TranslateService,
 		private activatedRoute: ActivatedRoute,
 		private httpManagerService: HttpManagerService,
-		private configService: ConfigService) {
+		private configService: ConfigService,
+		private userService: UserService) {
+			// Store config
 			this.cfg = configService.get();
+			
+			// Store user id of current user
+			this.userId = this.userService.getUserId();
 	}
 	
 	ngOnInit() {
@@ -302,8 +309,19 @@ export class GroupForumThreadComponent implements OnInit {
 			
 			// Send data to server
 			this.httpManagerService.patch('/json/group/forum/thread/'+this.thread.threadId, data).subscribe(res => {
-				// TODO Update thread
-				console.log(res);
+				// Update edited post from posts array
+				this.posts = _.map(this.posts, (post) => {
+					if (post.postId == postId)
+						post.html = up.html;
+					return post;
+				});
+				
+				// Update topic
+				this.thread.title = up.title;
+				this.thread.private = up.private;
+				
+				// Show snack bar notification
+				this.showSnackBar('FORUM_SNACKBAR_THREAD_EDITED');
 			});
 		});
 	}
@@ -313,7 +331,7 @@ export class GroupForumThreadComponent implements OnInit {
 	 */
 	public deleteThread() {
 		// Open dialog and ask if thread should really be deleted
-		const deleteRef = this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'DIALOG_ASKDELETE_THREAD' } });
+		const deleteRef = this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'FORUM_DIALOG_DELETE_THREAD_TEXT' } });
 		
 		// If dialog was approved, delete thread
 		deleteRef.componentInstance.onSubmit.subscribe(() => {
@@ -368,7 +386,7 @@ export class GroupForumThreadComponent implements OnInit {
 	 */
 	public deletePost(postId) {
 		// Open dialog and ask if post should really be deleted
-		const deleteRef = this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'DIALOG_ASKDELETE_POST' } });
+		const deleteRef = this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'FORUM_DIALOG_DELETE_POST_TEXT' } });
 	
 		// If dialog was approved, delete post
 		deleteRef.componentInstance.onSubmit.subscribe(() => {
@@ -442,7 +460,7 @@ export class GroupForumThreadComponent implements OnInit {
 	 */
 	public deleteComment(postId, commentId) {
 		// Open dialog and ask if comment should really be deleted
-		const deleteRef = this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'DIALOG_ASKDELETE_COMMENT' } });
+		const deleteRef = this.matDialog.open(AskDeleteDialogComponent, { 'data': { 'deleteDescription': 'FORUM_DIALOG_DELETE_COMMENT_TEXT' } });
 		
 		// If dialog was approved, delete comment
 		deleteRef.componentInstance.onSubmit.subscribe(() => {

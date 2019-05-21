@@ -20,10 +20,10 @@
 				<button mat-button title="{{ 'FORUM_BUTTON_SHARE' | translate }}" (click)="post.postId==thread.mainPostId ? shareThread() : sharePost(post.postId)">
 					<span><fa-icon [icon]="faShareSquare"></fa-icon> {{ 'FORUM_BUTTON_SHARE' | translate }}</span>
 				</button>
-				<button mat-button title="{{ 'FORUM_BUTTON_EDIT' | translate }}" (click)="post.postId==thread.mainPostId ? editThread(post.postId, post.html) : editPost(post.postId, post.html)">
+				<button *ngIf="post.authorId == userId" mat-button title="{{ 'FORUM_BUTTON_EDIT' | translate }}" (click)="post.postId==thread.mainPostId ? editThread(post.postId, post.html) : editPost(post.postId, post.html)">
 					<span><fa-icon [icon]="faPenSquare"></fa-icon> {{ 'FORUM_BUTTON_EDIT' | translate }}</span>
 				</button>
-				<button mat-button title="{{ 'FORUM_BUTTON_DELETE' | translate }}" (click)="post.postId==thread.mainPostId ? deleteThread() : deletePost(post.postId)">
+				<button *ngIf="post.authorId == userId" mat-button title="{{ 'FORUM_BUTTON_DELETE' | translate }}" (click)="post.postId==thread.mainPostId ? deleteThread() : deletePost(post.postId)">
 					<span><fa-icon [icon]="faTrash"></fa-icon> {{ 'FORUM_BUTTON_DELETE' | translate }}</span>
 				</button>
 			</div>
@@ -53,7 +53,7 @@
 						<div class="comment-text" [innerHtml]="comment.html"></div>
 						<div class="comment-footer clearfix">
 							<div class="comment-links">
-								<small><a (click)="editComment(post.postId, comment)">{{ 'FORUM_BUTTON_EDIT' | translate }}</a>&nbsp;&nbsp;<a (click)="deleteComment(post.postId, comment.commentId)">{{ 'FORUM_BUTTON_DELETE' | translate }}</a></small>
+								<small *ngIf="comment.authorId == userId"><a (click)="editComment(post.postId, comment)">{{ 'FORUM_BUTTON_EDIT' | translate }}</a>&nbsp;&nbsp;<a (click)="deleteComment(post.postId, comment.commentId)">{{ 'FORUM_BUTTON_DELETE' | translate }}</a></small>
 							</div>
 							<div class="comment-meta">
 								<small><a [routerLink]="['/user/profile', comment.authorId]">{{ comment.authorId }}</a>, {{ comment.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}</small>
