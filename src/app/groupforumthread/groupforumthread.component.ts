@@ -1,12 +1,9 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivatedRoute, Params } from '@angular/router';
-import { MatSnackBar, MatDialog } from '@angular/material';
-
-import { TranslateService } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material';
 
 import { Observable } from 'rxjs';
-import { forkJoin } from 'rxjs/observable/forkJoin';
 
 import { ShareDialogComponent } from '../dialogs/share/share.component';
 import { AskDeleteDialogComponent } from '../dialogs/askdelete/askdelete.component';
@@ -18,6 +15,7 @@ import { HttpManagerService } from '../_services/http-manager.service';
 import { UtilsService } from '../_services/utils.service';
 import { ConfigService } from '../_services/config.service';
 import { UserService } from '../_services/user.service';
+import { SnackbarService } from '../_services/snackbar.service';
 
 import { Thread } from "../_models/forum/thread";
 import { Post } from "../_models/forum/post";
@@ -55,14 +53,13 @@ export class GroupForumThreadComponent implements OnInit {
 
 	constructor(
 		private router: Router,
-		private snackBar: MatSnackBar,
 		private matDialog: MatDialog,
 		private utilsService: UtilsService,
-		private translateService: TranslateService,
 		private activatedRoute: ActivatedRoute,
 		private httpManagerService: HttpManagerService,
 		private configService: ConfigService,
-		private userService: UserService) {
+		private userService: UserService,
+		private snackbarService: SnackbarService) {
 			// Store config
 			this.cfg = configService.get();
 			
@@ -118,8 +115,6 @@ export class GroupForumThreadComponent implements OnInit {
 					// Push post (including comments) to posts array
 					this.posts.push(postInstance);
 				}.bind(this));
-				
-				console.log(this.posts);
 				
 				// Return to subscribers
 				observer.next(true);
@@ -180,7 +175,7 @@ export class GroupForumThreadComponent implements OnInit {
 			// Reload model
 			this.loadThread(this.thread.threadId).subscribe(() => {
 				// Show snack bar notification
-				this.showSnackBar('FORUM_SNACKBAR_NEW_COMMENT');
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_COMMENT');
 			});
 		});
 	}
@@ -199,27 +194,6 @@ export class GroupForumThreadComponent implements OnInit {
 	public enableNewPostEditor() {
 		this.saving = false;
 		this.editor.enable(true);
-	}
-	
-	/**
-	 * @desc: Show snackbar notification
-	 */
-	public showSnackBar(title, afterDismissed?) {
-		forkJoin(
-			this.translateService.get(title),
-			this.translateService.get('FORM_BUTTON_CLOSE'))
-		.subscribe(([msg, action]) => {
-			// Open snackbar for 5 seconds
-			const snackBarRef = this.snackBar.open(msg, action, {
-				'duration': 5000
-			});
-			// If afterDismissed callback was given as argument, call function after dismiss
-			if (afterDismissed) {
-				snackBarRef.afterDismissed().subscribe(() => {
-					afterDismissed();
-				});
-			}
-		});
 	}
 	
 	/**
@@ -252,7 +226,7 @@ export class GroupForumThreadComponent implements OnInit {
 			// Reload model
 			this.loadThread(this.thread.threadId).subscribe(() => {
 				// After everything is finished, show snackbar notification and enable editor again
-				this.showSnackBar('FORUM_SNACKBAR_NEW_POST', this.enableNewPostEditor.bind(this));
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_POST', this.enableNewPostEditor.bind(this));
 			});
 		});
 	}
@@ -321,7 +295,7 @@ export class GroupForumThreadComponent implements OnInit {
 				this.thread.private = up.private;
 				
 				// Show snack bar notification
-				this.showSnackBar('FORUM_SNACKBAR_THREAD_EDITED');
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_EDITED');
 			});
 		});
 	}
@@ -337,9 +311,9 @@ export class GroupForumThreadComponent implements OnInit {
 		deleteRef.componentInstance.onSubmit.subscribe(() => {
 			this.httpManagerService.delete('/json/group/forum/thread/'+this.thread.threadId).subscribe(res => {
 				// After everything is finished, show snackbar notification and redirect to forum list
-				this.showSnackBar('FORUM_SNACKBAR_THREAD_DELETED', function() {
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_DELETED', function() {
 					this.router.navigate(['/group/forum/', this.thread.forumId])
-				});
+				}.bind(this));
 			});
 		});
 	}
@@ -376,7 +350,7 @@ export class GroupForumThreadComponent implements OnInit {
 				});
 				
 				// Show snack bar notification
-				this.showSnackBar('FORUM_SNACKBAR_POST_EDITED');
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_POST_EDITED');
 			});
 		});
 	}
@@ -397,7 +371,7 @@ export class GroupForumThreadComponent implements OnInit {
 				});
 				
 				// Show snack bar notification
-				this.showSnackBar('FORUM_SNACKBAR_POST_DELETED');
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_POST_DELETED');
 			});
 		});
 	}
@@ -450,7 +424,7 @@ export class GroupForumThreadComponent implements OnInit {
 				});
 				
 				// Show snack bar notification
-				this.showSnackBar('FORUM_SNACKBAR_COMMENT_EDITED');
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_COMMENT_EDITED');
 			});
 		});
 	}
@@ -475,7 +449,7 @@ export class GroupForumThreadComponent implements OnInit {
 				});
 				
 				// Show snack bar notification
-				this.showSnackBar('FORUM_SNACKBAR_COMMENT_DELETED');
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_COMMENT_DELETED');
 			});
 		});
 	}

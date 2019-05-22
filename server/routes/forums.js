@@ -16,7 +16,7 @@ function commentTextareaToHtml(str) {
  * @desc: Check if user is authorized to edit or delete a specific entity
  *        An entity can be: thread, post or comment
  */
-function isUserAuthorisedAsync(userId, collection, entityId) {
+function isUserAuthorizedAsync(userId, collection, entityId) {
 	return db.collection(collection).findOneAsync({ '_id': entityId }, { 'authorId': true	})
 		.then(function(thread) {
 			// If user is not author, reject promise
@@ -43,7 +43,14 @@ exports.queryForum = function(req, res) {
 	});
 	
 	// Get threads
-	var threads_promise = db.collection('forum_threads').find({'forumId': forumId}).toArrayAsync();
+	var threads_promise = db.collection('forum_threads')
+		.find({'forumId': forumId}).toArrayAsync().map(function(thread) {
+			// Add number of posts to every thread
+			return db.collection('forum_posts').countAsync({ 'threadId': thread._id }).then(function(postCount) {
+				// Reduce postCount by 1 since the main post shall not be counted
+				return _.extend(thread, {'postCount': (postCount-1)});
+			});
+		});
 	
 	// Send group id and topic name
 	Promise.join(group_promise, pad_promise, topic_promise, threads_promise).spread(function(group, pad, topic, threads) {
@@ -77,7 +84,8 @@ exports.createThread = function(req, res) {
 		'title': body.title,
 		'private': body.private,
 		'closed': false,
-		'citationId': null
+		'citationId': null,
+		'views': 0
 	};
 	
 	// Store thread in database
@@ -122,8 +130,13 @@ exports.queryThread = function(req, res) {
 		});
 	});
 	
+	// Increase number of views by one
+	const viewsUpdate_promise = db.collection('forum_threads')
+		.updateAsync({ '_id': threadId }, {$inc: {'views': 1} });
+	
 	// Send result
-	Promise.join(thread_promise, posts_promise).spread(function(thread, posts) {
+	Promise.join(thread_promise, posts_promise, viewsUpdate_promise)
+		.spread(function(thread, posts, viewsUpdate) {
 		return {
 			'thread': thread,
 			'posts': posts
@@ -141,7 +154,7 @@ exports.editThread = function(req, res) {
 	const updatedPost = req.body.updatedPost;
 	
 	// If user is author, store changes, otherwise reject
-	isUserAuthorisedAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
+	isUserAuthorizedAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
 		// Update post in database
 		const updatePost_promise = db.collection('forum_posts')
 		.updateAsync({ '_id': ObjectId(updatedPost.postId) }, { $set: {
@@ -169,7 +182,7 @@ exports.deleteThread = function(req, res) {
 	const threadId = ObjectId(req.params.id);
 	
 	// If user is author, delete thread, otherwise reject
-	isUserAuthorisedAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
+	isUserAuthorizedAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
 		// Delete thread
 		const deleteThread_promise = db.collection('forum_threads').removeByIdAsync(threadId);
 		
@@ -214,7 +227,7 @@ exports.editPost = function(req, res) {
 	const updatedPostHtml = req.body.updatedPostHtml;
 	
 	// If user is author, update post, otherwise reject
-	isUserAuthorisedAsync(userId, 'forum_posts', postId).then(function(isAuthorized) {
+	isUserAuthorizedAsync(userId, 'forum_posts', postId).then(function(isAuthorized) {
 		// Update post in database
 		db.collection('forum_posts')
 			.updateAsync({ '_id': postId }, { $set: { 'html': updatedPostHtml } })
@@ -230,7 +243,7 @@ exports.deletePost = function(req, res) {
 	const postId = ObjectId(req.params.id);
 	
 	// If user is author, delete post, otherwise reject
-	isUserAuthorisedAsync(userId, 'forum_posts', postId).then(function(isAuthorized) {
+	isUserAuthorizedAsync(userId, 'forum_posts', postId).then(function(isAuthorized) {
 		
 		// Delete post
 		const deletePost_promise = db.collection('forum_posts').removeByIdAsync(postId);
@@ -275,7 +288,7 @@ exports.editComment = function(req, res) {
 	const updatedCommentHtml = req.body.updatedCommentHtml;
 	
 	// If user is author, update comment, otherwise reject
-	isUserAuthorisedAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
+	isUserAuthorizedAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
 		// Update comment in database
 		db.collection('forum_comments')
 			.updateAsync({ '_id': commentId }, { $set: { 'html': commentTextareaToHtml(updatedCommentHtml) } })
@@ -291,7 +304,7 @@ exports.deleteComment = function(req, res) {
 	const commentId = ObjectId(req.params.id);
 	
 	// If user is author, update comment, otherwise reject
-	isUserAuthorisedAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
+	isUserAuthorizedAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
 		// Delete comment in database
 		db.collection('forum_comments').removeByIdAsync(commentId)
 			.then(res.json.bind(res));

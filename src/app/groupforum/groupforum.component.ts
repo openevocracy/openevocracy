@@ -9,6 +9,7 @@ import { EditThreadDialogComponent } from '../dialogs/editthread/editthread.comp
 
 import { UtilsService } from '../_services/utils.service';
 import { HttpManagerService } from '../_services/http-manager.service';
+import { SnackbarService } from '../_services/snackbar.service';
 
 import { faComment, faUsers, faLock } from '@fortawesome/free-solid-svg-icons';
 
@@ -37,7 +38,8 @@ export class GroupForumComponent implements OnInit {
 		private activatedRoute: ActivatedRoute,
 		private httpManagerService: HttpManagerService,
 		private translateService: TranslateService,
-		private matDialog: MatDialog) {
+		private matDialog: MatDialog,
+		private snackbarService: SnackbarService) {
 	}
 	
 	ngOnInit() {
@@ -88,7 +90,13 @@ export class GroupForumComponent implements OnInit {
 		// Extend thread information, coming from dialog
 		const data = _.extend(thread, { 'forumId': this.forumId });
 		// Post thread to server and create thread in database
-		this.httpManagerService.post('/json/group/forum/thread/create', data).subscribe();
+		this.httpManagerService.post('/json/group/forum/thread/create', data).subscribe(res => {
+			// Add new thread to threads array
+			this.threads.push(new Thread(res.thread.ops[0]));
+			
+			// Show snackbar notification
+			this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_THREAD');
+		});
 	}
 
 }

@@ -11,6 +11,8 @@ export class Thread {
 	citationId: string;
 	closed: boolean;
 	private: boolean;
+	views: number;
+	postCount: number;
 	
 	/* Calculated values */
 	createdTimestamp: number;
@@ -24,6 +26,8 @@ export class Thread {
 		this.citationId = res.citationId;
 		this.closed = res.closed;
 		this.private = res.private;
+		this.views = res.views;
+		this.postCount = res.postCount || 0;
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
 	}
 	

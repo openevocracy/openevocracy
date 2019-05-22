@@ -1,0 +1,36 @@
+import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material';
+
+import { forkJoin } from 'rxjs/observable/forkJoin';
+
+import { TranslateService } from '@ngx-translate/core';
+
+@Injectable()
+export class SnackbarService {
+
+  constructor(
+  		private snackBar: MatSnackBar,
+		private translateService: TranslateService) { }
+		
+	
+	/**
+	 * @desc: Show snackbar notification
+	 */
+	public showSnackbar(title, afterDismissed?) {
+		forkJoin(
+			this.translateService.get(title),
+			this.translateService.get('FORM_BUTTON_CLOSE'))
+		.subscribe(([msg, action]) => {
+			// Open snackbar for 5 seconds
+			const snackBarRef = this.snackBar.open(msg, action, {
+				'duration': 5000
+			});
+			// If afterDismissed callback was given as argument, call function after dismiss
+			if (afterDismissed) {
+				snackBarRef.afterDismissed().subscribe(() => {
+					afterDismissed();
+				});
+			}
+		});
+	}
+}
