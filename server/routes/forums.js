@@ -214,8 +214,13 @@ exports.createPost = function(req, res) {
 	};
 	
 	// Store post in database
-	db.collection('forum_posts').insertAsync(post)
-		.then(res.json.bind(res));
+	const createPost_promise = db.collection('forum_posts').insertAsync(post);
+	
+	// Reopen thread if it was closed (just open it in any case)
+	const openThread_promise = db.collection('forum_threads')
+		.updateAsync({ '_id': post.threadId }, { $set: { 'closed': false } });
+	
+	Promise.all([createPost_promise, openThread_promise]).then(res.json.bind(res));
 };
 
 /**
@@ -307,6 +312,19 @@ exports.deleteComment = function(req, res) {
 	isUserAuthorizedAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
 		// Delete comment in database
 		db.collection('forum_comments').removeByIdAsync(commentId)
+			.then(res.json.bind(res));
+	}).catch(utils.isOwnError, utils.handleOwnError(res));
+};
+
+exports.updateSolved = function(req, res) {
+	const userId = ObjectId(req.user._id);
+	const threadId = ObjectId(req.body.threadId);
+	const solved = req.body.solved;
+	
+	// If user is author, update solved state, otherwise reject
+	isUserAuthorizedAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
+		// Update solved state
+		db.collection('forum_threads').updateAsync({'_id': threadId}, { $set: {'closed': solved} })
 			.then(res.json.bind(res));
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };

@@ -21,7 +21,7 @@ import { Thread } from "../_models/forum/thread";
 import { Post } from "../_models/forum/post";
 import { Comment } from "../_models/forum/comment";
 
-import { faArrowAltCircleLeft, faLock, faCaretUp, faCaretDown, faPenSquare, faTrash, faShareSquare } from '@fortawesome/free-solid-svg-icons';
+import { faArrowAltCircleLeft, faLock, faCaretUp, faCaretDown, faPenSquare, faTrash, faShareSquare, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 
 import * as _ from 'underscore';
 
@@ -41,6 +41,7 @@ export class GroupForumThreadComponent implements OnInit {
 	public userId: string;
 	public thread: Thread;
 	public posts: Post[];
+	public solvedButton: string;
 	
 	// FontAwesome icons
 	public faArrowAltCircleLeft = faArrowAltCircleLeft;
@@ -50,6 +51,7 @@ export class GroupForumThreadComponent implements OnInit {
 	public faPenSquare = faPenSquare;
 	public faTrash = faTrash;
 	public faShareSquare = faShareSquare;
+	public faCheckSquare = faCheckSquare;
 
 	constructor(
 		private router: Router,
@@ -71,7 +73,10 @@ export class GroupForumThreadComponent implements OnInit {
 		// Get forum id from url
 		this.activatedRoute.params.subscribe((params: Params) => {
 			const threadId = params.id;
-			this.loadThread(threadId).subscribe();
+			this.loadThread(threadId).subscribe(res => {
+				// Set solved button label
+				this.solvedButton = this.thread.closed ? 'FORUM_BUTTON_MARK_UNSOLVED' : 'FORUM_BUTTON_MARK_SOLVED';
+			});
 		});
 		
 		// Get fragment from url
@@ -119,6 +124,25 @@ export class GroupForumThreadComponent implements OnInit {
 				// Return to subscribers
 				observer.next(true);
 			});
+		});
+	}
+	
+	public toggleSolved() {
+		const data = {
+			'threadId': this.thread.threadId,
+			'solved': !this.thread.closed
+		};
+		
+		this.httpManagerService.post('/json/group/forum/thread/solved', data).subscribe(res => {
+			console.log(res);
+			
+			if (this.thread.closed) {
+				this.thread.closed = false;
+				this.solvedButton = 'FORUM_BUTTON_MARK_SOLVED';
+			} else {
+				this.thread.closed = true;
+				this.solvedButton = 'FORUM_BUTTON_MARK_UNSOLVED';
+			}
 		});
 	}
 	
@@ -220,7 +244,7 @@ export class GroupForumThreadComponent implements OnInit {
 			this.editor.setText('');
 			
 			// Scroll to and highlight newly created post
-			const submittedPostId = res.insertedIds[0];
+			const submittedPostId = res[0].insertedIds[0];
 			this.navigateToUrlWithFragment(submittedPostId);
 			
 			// Reload model

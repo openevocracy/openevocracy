@@ -10,6 +10,9 @@
 		<button mat-button title="{{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}" [routerLink]="['/group/forum', thread?.forumId]">
 			<span><fa-icon [icon]="faArrowAltCircleLeft"></fa-icon> {{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}</span>
 		</button>
+		<button *ngIf="thread?.authorId == userId" mat-button title="{{ solvedButton | translate }}" (click)="toggleSolved()">
+			<span><fa-icon [icon]="faCheckSquare"></fa-icon> {{ solvedButton | translate }}</span>
+		</button>
 	</div>
 </mat-toolbar>
 

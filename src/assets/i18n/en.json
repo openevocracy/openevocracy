@@ -152,6 +152,8 @@
 	"FORUM_DIALOG_DELETE_POST_TEXT": "Do you really want to delete this post?",
 	"FORUM_DIALOG_DELETE_COMMENT_TEXT": "Do you really want to delete this comment?",
 	"FORUM_BUTTON_BACK_TO_THREADLIST": "Back to forum",
+	"FORUM_BUTTON_MARK_SOLVED": "Close thread",
+	"FORUM_BUTTON_MARK_UNSOLVED": "Open thread",
 	"FORUM_THREADLIST_AUTHOR_PREFIX": "Created by",
 	"FORUM_THREADLIST_CREATION_DATE_PREFIX": "at",
 	"FORUM_THREAD_POST_COUNT_LABEL": "Posts",

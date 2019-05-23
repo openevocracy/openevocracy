@@ -152,6 +152,8 @@
 	"FORUM_DIALOG_DELETE_POST_TEXT": "Möchtest du diesen Beitrag wirklich löschen?",
 	"FORUM_DIALOG_DELETE_COMMENT_TEXT": "Möchtest du diesen Kommentar wirklich löschen?",
 	"FORUM_BUTTON_BACK_TO_THREADLIST": "Zurück zum Forum",
+	"FORUM_BUTTON_MARK_SOLVED": "Thread schließen",
+	"FORUM_BUTTON_MARK_UNSOLVED": "Thread öffnen",
 	"FORUM_THREADLIST_AUTHOR_PREFIX": "Erstellt von",
 	"FORUM_THREADLIST_CREATION_DATE_PREFIX": "am",
 	"FORUM_THREAD_POST_COUNT_LABEL": "Beiträge",

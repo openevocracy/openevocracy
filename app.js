@@ -201,6 +201,9 @@ app.patch('/json/group/forum/comment/:id', auth(), forums.editComment);
 // @desc: Delete comment in forum thread
 app.delete('/json/group/forum/comment/:id', auth(), forums.deleteComment);
 
+// @desc: Update solved state of thread
+app.post('/json/group/forum/thread/solved', auth(), forums.updateSolved);
+
 // ###################
 // ###   C H A T   ###
 // ###################
