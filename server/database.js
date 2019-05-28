@@ -10,3 +10,6 @@ var dbpath = cfg.PRIVATE.DATABASE_HOST;
 
 exports.db = ms.db(dbpath);
 exports.sharedb = require('sharedb-mongo')(dbpath);
+
+const mongoist = require('mongoist');
+exports.db2 = mongoist(dbpath);
