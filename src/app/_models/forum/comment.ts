@@ -9,6 +9,8 @@ export class Comment {
 	threadId: string;
 	forumId: string;
 	authorId: string;
+	sumVotes: number;
+	userVote: number;
 	
 	/* Calculated values */
 	createdTimestamp: number;
@@ -20,6 +22,8 @@ export class Comment {
 		this.threadId = res.threadId;
 		this.forumId = res.forumId;
 		this.authorId = res.authorId;
+		this.sumVotes = res.sumVotes || 0;
+		this.userVote = res.userVote || null;
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
 	}
 	

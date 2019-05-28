@@ -23,9 +23,7 @@ var mail = require('../mail');
  * @return {object} topics - all adjusted topics
  */
 function manageAndListActivitiesAsync() {
-	return lock.acquire('manageActivity', function() {
-		return db.collection('activities').find().toArrayAsync();
-	});
+	return db.collection('activities').find().toArrayAsync();
 }
 exports.manageAndListActivitiesAsync = manageAndListActivitiesAsync;
 
@@ -66,9 +64,8 @@ exports.create = function(req, res) {
 	   targetId: req.body.targetId
    };
    	
-   db.collection('activities').insertAsync(activity).then(function(activity) {
-      res.json(activity);
-   }).catch(utils.isOwnError,utils.handleOwnError(res));
+   //db.collection('activities').insertAsync(activity).then(res.json.bind(res));
+   db.collection('activities').insertAsync(activity).then(activity._id).then(res.json.bind(res));
 };
 
 exports.delete = function(req,res) {

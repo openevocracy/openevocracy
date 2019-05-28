@@ -11,32 +11,37 @@
 	<mat-card *ngFor="let act of activityList" [ngClass]="'act'+act.type">
 		<mat-card-content>
 			<mat-card-title>{{act.timestamp | date: cfg.DATEFORMAT_DATETIME}}</mat-card-title>
-			<div *ngIf="act.type == C.ACT_TOPIC_VOTE">
-				<p>{{'ACT_TOPIC_VOTE_STR' | translate}}</p>
-			</div>
 			
 			<div *ngIf="act.type == C.ACT_TOPIC_CREATE">
-				<p>{{'ACT_TOPIC_CREATE_STR' | translate}}</p>
+				<p>{{'ACT_TOPIC_CREATE_STR' | translate}} {{act.targetId}}</p>
 			</div>
 			
 			<div *ngIf="act.type == C.ACT_PROPOSAL_CREATED">
-				<p>{{'ACT_PROPOSAL_CREATED_STR' | translate}}</p>
+				<p>{{'ACT_PROPOSAL_CREATED_STR' | translate}} {{act.targetId}}</p>
 			</div>
 			
 			<div *ngIf="act.type == C.ACT_ELECTED_DELEGATE">
-				<p>{{'ACT_ELECTED_DELEGATE_STR' | translate}}</p>
+				<p>{{'ACT_ELECTED_DELEGATE_STR' | translate}} {{act.targetId}}</p>
 			</div>
 			
 			<div *ngIf="act.type == C.ACT_DROP_OUT">
-				<p>{{'ACT_DROP_OUT_STR' | translate}}</p>
+				<p>{{'ACT_DROP_OUT_STR' | translate}} {{act.targetId}}</p>
 			</div>
 			
 			<div *ngIf="act.type == C.ACT_TOPIC_COMPLETE">
-				<p>{{'ACT_TOPIC_COMPLETE_STR' | translate}}</p>
+				<p>{{'ACT_TOPIC_COMPLETE_STR' | translate}} {{act.targetId}} {{'ACT_TOPIC_COMPLETE_STR2' | translate}}</p>
 			</div>
 			
 			<div *ngIf="act.type == C.ACT_MENTIONED">
-				<p>{{'ACT_MENTIONED_STR' | translate}}</p>
+				<p>{{'ACT_MENTIONED_STR' | translate}} {{act.targetId}} {{'ACT_MENTIONED_STR2' | translate}}</p>
+			</div>
+			
+			<div *ngIf="act.type == C.ACT_TOPIC_VOTE">
+				<p>{{'ACT_TOPIC_VOTE_STR' | translate}} {{act.targetId}}</p>
+			</div>
+			
+			<div *ngIf="act.type == C.ACT_TOPIC_UNVOTE">
+				<p>{{'ACT_TOPIC_UNVOTE_STR' | translate}} {{act.targetId}}</p>
 			</div>
 		</mat-card-content>
 		

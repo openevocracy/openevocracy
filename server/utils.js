@@ -10,8 +10,18 @@ function prepareAlert(type, content, vars) {
     return { 'type': type, 'content': content, 'vars': vars };
 }
 
+/**
+ * @desc: Send alert message to client
+ */
 exports.sendAlert = function(res, status, type, content, vars) {
-    res.status(status).send({'alert': prepareAlert(type, content, vars)});
+    res.status(status).send({ 'alert': prepareAlert(type, content, vars) });
+};
+
+/**
+ * @desc: Send simple message to client
+ */
+exports.sendMessage = function(res, status, msg) {
+    res.status(status).send({ 'status': status, 'msg': msg });
 };
 
 /**

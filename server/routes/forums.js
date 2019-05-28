@@ -110,29 +110,77 @@ exports.createThread = function(req, res) {
 };
 
 /**
+ * @desc: Check if a user has voted for a specific entity (post or comment)
+ */
+function hasUserVotedAsync(entityId, userId) {
+	return db.collection('forum_votes').findOneAsync({ 'entityId': entityId, 'userId': userId }).then(function(userVote) {
+		// If userVote is null, user has not voted, retun null again, otherwise return vote value (-1, 1)
+		return _.isNull(userVote) ? null : userVote.voteValue;
+	});
+}
+
+/**
+ * @desc: Count sum of votes for a specific entity (post or comment)
+ */
+function sumVotesAsync(entityId) {
+	return db.collection('forum_votes')
+		.aggregateAsync([
+			{ $match: { 'entityId': entityId } },
+			{ $group: { _id: null, 'sumVotes': { $sum: "$voteValue" } } }
+		])
+		.then(function(group) {
+			// If somehting was found, return the sum of votes, otherwise 0
+			return group.length > 0 ? group[0].sumVotes : 0;
+		});
+}
+
+/**
  * @desc: Query thread of specific forum of specific group
  */
 exports.queryThread = function(req, res) {
+	const userId = ObjectId(req.user._id);
 	const threadId = ObjectId(req.params.id);
 	
 	// Get thread
 	const thread_promise = db.collection('forum_threads').findOneAsync({'_id': threadId});
 	
 	// Get posts
-	const posts_promise = db.collection('forum_posts').find({'threadId': threadId}).toArrayAsync().map(function(post) {
+	const posts_promise = db.collection('forum_posts').find({ 'threadId': threadId }).toArrayAsync().map(function(post) {
 		
-		// FIXME: Is a Promise.resolve() necessary before return? Or does map() aldready handle it correctly?
+		// Check if user has voted for this post
+		const postUserVote_promise = hasUserVotedAsync(post._id, userId);
+		
+		// Count sum of votes for this post
+		const postSumVotes_promise = sumVotesAsync(post._id);
 		
 		// For every post, get comments
-		return db.collection('forum_comments').find({'postId': post._id}).toArrayAsync().then(function(comments) {
-				// Add comments to post as array
-				return _.extend(post, {'comments': comments});
+		const comments_promise = db.collection('forum_comments').find({ 'postId': post._id }).toArrayAsync().map(function(comment) {
+			// Check if user has voted for this comment
+			const commentUserVote_promise = hasUserVotedAsync(comment._id, userId);
+			
+			// Count sum of votes for this post
+			const commentSumVotes_promise = sumVotesAsync(comment._id);
+			
+			// Extend comment by user vote and sum of votes
+			return Promise.join(commentUserVote_promise, commentSumVotes_promise)
+				.spread(function(commentUserVote, commentSumVotes) {
+				
+				return _.extend(comment, { 'userVote': commentUserVote, 'sumVotes': commentSumVotes });
+			});
+				
+		});
+		
+		// Extend post by user vote, sum of votes and comments
+		return Promise.join(postUserVote_promise, postSumVotes_promise, comments_promise)
+			.spread(function(postUserVote, postSumVotes, comments) {
+			
+			return _.extend(post, { 'comments': comments, 'userVote': postUserVote, 'sumVotes': postSumVotes });
 		});
 	});
 	
 	// Increase number of views by one
 	const viewsUpdate_promise = db.collection('forum_threads')
-		.updateAsync({ '_id': threadId }, {$inc: {'views': 1} });
+		.updateAsync({ '_id': threadId }, { $inc: {'views': 1} });
 	
 	// Send result
 	Promise.join(thread_promise, posts_promise, viewsUpdate_promise)
@@ -316,6 +364,9 @@ exports.deleteComment = function(req, res) {
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
+/**
+ * @desc: Update solved state of thread (open/closed)
+ */
 exports.updateSolved = function(req, res) {
 	const userId = ObjectId(req.user._id);
 	const threadId = ObjectId(req.body.threadId);
@@ -327,4 +378,36 @@ exports.updateSolved = function(req, res) {
 		db.collection('forum_threads').updateAsync({'_id': threadId}, { $set: {'closed': solved} })
 			.then(res.json.bind(res));
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
+};
+
+/**
+ * @desc: Vote for entity (post or comment)
+ */
+exports.vote = function(req, res) {
+	const userId = ObjectId(req.user._id);
+	const entityId = ObjectId(req.body.entityId);
+	const voteValue = req.body.voteValue;
+	
+	// Check if vote value is -1, 0 or 1
+	if (voteValue != -1 && voteValue != 0 && voteValue != 1) {
+		utils.sendMessage(400, 'VOTE_VALUE_ERROR');
+		return;
+	}
+	
+	// Define search pattern for database request (user voted for entity)
+	const userEntityRelation = {
+		'userId': userId,
+		'entityId': entityId
+	};
+	
+	// If vote value is 0, remove entity row from databse, otherwise update value
+	if (voteValue == 0) {
+		// Remove vote value
+		db.collection('forum_votes').removeAsync(userEntityRelation).then(res.json.bind(res));
+	} else {
+		// Update vote value
+		db.collection('forum_votes')
+			.updateAsync(userEntityRelation, { $set: {'voteValue': voteValue} }, { 'upsert': true })
+			.then(res.json.bind(res));
+	}
 };

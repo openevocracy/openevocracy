@@ -38,9 +38,9 @@
 		<hr/>
 		<div class="post-wrapper clearfix">
 			<div class="post-vote">
-				<div class="vote-fa vote-up"><fa-icon [icon]="faCaretUp"></fa-icon></div>
-				<div>0</div>
-				<div class="vote-fa vote-down"><fa-icon [icon]="faCaretDown"></fa-icon></div>
+				<div class="vote-fa vote-up" [ngClass]="{ 'voted': post.userVote==1}" (click)="votePost(post.postId, 1)"><fa-icon [icon]="faCaretUp"></fa-icon></div>
+				<div>{{ post.sumVotes }}</div>
+				<div class="vote-fa vote-down" [ngClass]="{ 'voted': post.userVote==-1}" (click)="votePost(post.postId, -1)"><fa-icon [icon]="faCaretDown"></fa-icon></div>
 			</div>
 			<div class="post-text" [innerHtml]="post.html"></div>
 		</div>
@@ -49,8 +49,8 @@
 				<hr/>
 				<div class="clearfix">
 					<div class="comment-vote">
-						<div class="vote-fa vote-up"><fa-icon [icon]="faCaretUp"></fa-icon></div>
-						<div class="vote-count"><span>0</span></div>
+						<div class="vote-fa vote-up" [ngClass]="{ 'voted': comment.userVote==1}" (click)="voteComment(comment.commentId, post.postId, 1)"><fa-icon [icon]="faCaretUp"></fa-icon></div>
+						<div class="vote-count"><span>{{ comment.sumVotes }}</span></div>
 					</div>
 					<div class="comment-wrapper">
 						<div class="comment-text" [innerHtml]="comment.html"></div>

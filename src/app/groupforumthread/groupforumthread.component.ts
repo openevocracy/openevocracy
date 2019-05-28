@@ -93,7 +93,7 @@ export class GroupForumThreadComponent implements OnInit {
 	/**
 	 * @desc: Sends a get request for the whole thread
 	 */
-	public loadThread(threadId) {
+	public loadThread(threadId: string) {
 		// Get current forum information
 		return new Observable(observer => {
 			this.httpManagerService.get('/json/group/forum/thread/' + threadId).subscribe(res => {
@@ -147,6 +147,44 @@ export class GroupForumThreadComponent implements OnInit {
 	}
 	
 	/**
+	 * @desc: Wrapper function for vote function
+	 */
+	public votePost(postId: string, voteValue: number) {
+		const post = _.findWhere(this.posts, { 'postId': postId });
+		this.vote(postId, post, voteValue);
+	}
+	
+	public voteComment(commentId: string, postId: string, voteValue: number) {
+		const post = _.findWhere(this.posts, { 'postId': postId });
+		const comment = _.findWhere(post, { 'commentId': commentId })
+		this.vote(commentId, comment, voteValue);
+	}
+	
+	/**
+	 * @desc: Vote for entity (post or comment)
+	 */
+	public vote(entityId: string, entity: any, voteValue: number) {
+		// Define data to post to server
+		const preUserVote = entity.userVote;
+		const postUserVote = preUserVote != voteValue ? voteValue : 0
+		const data = {
+			'userId': this.userId,
+			'entityId': entityId,
+			'voteValue': postUserVote
+		};
+		
+		// Post vote to server and create vote entity in database
+		this.httpManagerService.post('/json/group/forum/vote', data).subscribe(res => {
+			// Update entity user vote
+			entity.userVote = data.voteValue;
+			
+			// Update sum of user votes for this entity
+			const deltaUserVote = postUserVote - preUserVote;
+			entity.sumVotes = entity.sumVotes + deltaUserVote;
+		});
+	}
+	
+	/**
 	 * @desc: Called when Quill editor is ready
 	 */
 	public editorCreated(editor: any) {
@@ -190,8 +228,6 @@ export class GroupForumThreadComponent implements OnInit {
 		
 		// Post comment to server and create comment in database
 		this.httpManagerService.post('/json/group/forum/comment/create', data).subscribe(res => {
-			console.log(res);
-			
 			// Scroll to and highlight post, related to created comment
 			const relatedPostId = res.ops[0].postId;
 			this.navigateToUrlWithFragment(relatedPostId);

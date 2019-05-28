@@ -32,6 +32,7 @@ hr { margin: 0; }
 .post-vote { float: left; margin: 10px 0; width: 40px; text-align: center; }
 .post-vote fa-icon { font-size: 35px; }
 .post-vote .vote-fa { margin: -10px 0; }
+.post-vote .voted { color: $teal500; }
 
 /* Comment */
 .post-comments { padding: 0 20px 10px 20px; margin-left: 70px; }
@@ -46,6 +47,7 @@ hr { margin: 0; }
 .comment-vote fa-icon { color: $grey500; font-size: 28px; }
 .comment-vote .vote-fa { margin: -10px 0;  }
 .comment-vote .vote-count span { color: $grey500; }
+.comment-vote .voted { color: $teal500; }
 
 .comment-footer { color: $grey700; margin-bottom: 5px; }
 .comment-links { float: right; }

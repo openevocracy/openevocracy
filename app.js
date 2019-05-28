@@ -168,6 +168,9 @@ app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 // ### G R O U P  F O R U M ###
 // ############################
 
+// @desc: Vote for entity (post or comment)
+app.post('/json/group/forum/vote', auth(), forums.vote);
+
 // @desc: Get group forum
 app.get('/json/group/forum/:id', auth(), forums.queryForum);
 

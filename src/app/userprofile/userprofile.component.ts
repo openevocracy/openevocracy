@@ -72,7 +72,6 @@ export class UserprofileComponent implements OnInit {
 	remove(e, actId) {
 		e.stopPropagation();
 		
-		console.log("To delete: " + actId)
 		this.activityListService.removeActivity(actId).subscribe(res => {
 				if (res) // if deleting in database was successful
 				{
@@ -87,19 +86,20 @@ export class UserprofileComponent implements OnInit {
 	
 	
 	/*
-	 * @desc: Adds an activity; for testing only; TODO: REMOVE
+	 * @desc: Adds an activity (for testing only)
 	 */
 	addActivity(e) {
 		e.stopPropagation();
 		this.activityListService.addActivity(C.ACT_MENTIONED, this.userId).subscribe(res => {
-				console.log(res);
+
 				if (res)
-					this.activityList.push(new Activity({
-						//_id: res.insertedIds[0],
-					   user: this.userId,
+				{
+					this.activityList.push(new Activity( 
+      				{_id: res,
+				      userId: this.userId,
 					   type: C.ACT_MENTIONED,
-						targetId: this.userId
-					}));
+					   targetId: this.userId} ));
+				}
 		});
 
 	}
