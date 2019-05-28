@@ -69,6 +69,7 @@ describe('users', () => {
      expect(res.status).to.equal(200);
      expect(res.body.alert.type, 'success');
      expect(res.body.alert.content).to.equal('USER_ACCOUNT_PASSWORD_RESET');
+     expect(res.body.alert.vars).to.deep.equal({email: 'test@example.com'});
      done();
    });
  })
