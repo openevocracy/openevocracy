@@ -158,6 +158,7 @@
 	"FORUM_THREADLIST_CREATION_DATE_PREFIX": "am",
 	"FORUM_THREAD_POST_COUNT_LABEL": "Beiträge",
 	"FORUM_THREAD_VIEWS_LABEL": "Ansichten",
+	"FORUM_THREAD_MAINPOST_VOTES_LABEL": "Votes",
 	"FORUM_HEADING_NEW_POST": "Schreibe einen Beitrag",
 	"FORUM_BUTTON_NEW_POST": "Absenden",
 	"FORUM_LINK_ADD_COMMENT": "Kommentieren",
@@ -174,6 +175,8 @@
 	"FORUM_SNACKBAR_POST_DELETED": "Der Beitrag wurde erfolgreich gelöscht.",
 	"FORUM_SNACKBAR_COMMENT_DELETED": "Der Kommentar wurde erfolgreich gelöscht.",
 	"FORUM_SNACKBAR_COMMENT_EDITED": "Der Kommentar wurde erfolgreich bearbeitet.",
+	"FORUM_SNACKBAR_MARK_SOLVED": "Der Thread wurde als gelöst markiert.",
+	"FORUM_SNACKBAR_MARK_UNSOLVED": "Der Thread wurde wieder als ungelöst markiert.",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",

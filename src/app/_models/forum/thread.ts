@@ -13,6 +13,7 @@ export class Thread {
 	private: boolean;
 	views: number;
 	postCount: number;
+	sumMainpostVotes: number;
 	
 	/* Calculated values */
 	createdTimestamp: number;
@@ -28,6 +29,7 @@ export class Thread {
 		this.private = res.private;
 		this.views = res.views;
 		this.postCount = res.postCount || 0;
+		this.sumMainpostVotes = res.sumMainpostVotes || 0;
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
 	}
 	

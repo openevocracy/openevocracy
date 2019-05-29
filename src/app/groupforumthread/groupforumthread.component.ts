@@ -134,29 +134,36 @@ export class GroupForumThreadComponent implements OnInit {
 		};
 		
 		this.httpManagerService.post('/json/group/forum/thread/solved', data).subscribe(res => {
-			console.log(res);
-			
 			if (this.thread.closed) {
 				this.thread.closed = false;
 				this.solvedButton = 'FORUM_BUTTON_MARK_SOLVED';
+				
+				// Show snack bar notification
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_MARK_SOLVED');
 			} else {
 				this.thread.closed = true;
 				this.solvedButton = 'FORUM_BUTTON_MARK_UNSOLVED';
+				
+				// Show snack bar notification
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_MARK_UNSOLVED');
 			}
 		});
 	}
 	
 	/**
-	 * @desc: Wrapper function for vote function
+	 * @desc: Wrapper function for vote function, votes for a post
 	 */
 	public votePost(postId: string, voteValue: number) {
 		const post = _.findWhere(this.posts, { 'postId': postId });
 		this.vote(postId, post, voteValue);
 	}
 	
+	/**
+	 * @desc: Wrapper function for vote function, votes for a comment
+	 */
 	public voteComment(commentId: string, postId: string, voteValue: number) {
 		const post = _.findWhere(this.posts, { 'postId': postId });
-		const comment = _.findWhere(post, { 'commentId': commentId })
+		const comment = _.findWhere(post.comments, { 'commentId': commentId });
 		this.vote(commentId, comment, voteValue);
 	}
 	

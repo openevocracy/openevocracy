@@ -158,6 +158,7 @@
 	"FORUM_THREADLIST_CREATION_DATE_PREFIX": "at",
 	"FORUM_THREAD_POST_COUNT_LABEL": "Posts",
 	"FORUM_THREAD_VIEWS_LABEL": "Views",
+	"FORUM_THREAD_MAINPOST_VOTES_LABEL": "Votes",
 	"FORUM_HEADING_NEW_POST": "Post something",
 	"FORUM_BUTTON_NEW_POST": "Submit",
 	"FORUM_LINK_ADD_COMMENT": "Add a comment",
@@ -174,6 +175,8 @@
 	"FORUM_SNACKBAR_POST_DELETED": "The post was successfully deleted.",
 	"FORUM_SNACKBAR_COMMENT_DELETED": "The comment was successfully deleted.",
 	"FORUM_SNACKBAR_COMMENT_EDITED": "The comment was successfully updated.",
+	"FORUM_SNACKBAR_MARK_SOLVED": "The thread was marked as solved.",
+	"FORUM_SNACKBAR_MARK_UNSOLVED": "The thread was marked as unsolved again.",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",

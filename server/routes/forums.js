@@ -45,12 +45,19 @@ exports.queryForum = function(req, res) {
 	// Get threads
 	var threads_promise = db.collection('forum_threads')
 		.find({'forumId': forumId}).toArrayAsync().map(function(thread) {
-			// Add number of posts to every thread
-			return db.collection('forum_posts').countAsync({ 'threadId': thread._id }).then(function(postCount) {
-				// Reduce postCount by 1 since the main post shall not be counted
-				return _.extend(thread, {'postCount': (postCount-1)});
-			});
+		
+		// Get sum of votes of mainpost
+		const sumMainpostVotes_promise = sumVotesAsync(thread.mainPostId);
+		
+		// Get number of posts
+		const numPosts_promise = db.collection('forum_posts').countAsync({ 'threadId': thread._id });
+		
+		// Add sum of votes of mainpost and number of posts to every thread
+		return Promise.join(sumMainpostVotes_promise, numPosts_promise).spread(function(sumMainpostVotes, numPosts) {
+			// Reduce numPosts by 1 since the main post shall not be counted
+			return _.extend(thread, {'sumMainpostVotes': sumMainpostVotes, 'postCount': (numPosts-1)});
 		});
+	});
 	
 	// Send group id and topic name
 	Promise.join(group_promise, pad_promise, topic_promise, threads_promise).spread(function(group, pad, topic, threads) {
