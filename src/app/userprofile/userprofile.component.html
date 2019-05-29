@@ -29,11 +29,11 @@
 			</div>
 			
 			<div *ngIf="act.type == C.ACT_TOPIC_COMPLETE">
-				<p>{{'ACT_TOPIC_COMPLETE_STR' | translate}} {{act.targetId}} {{'ACT_TOPIC_COMPLETE_STR2' | translate}}</p>
+				<p>{{'ACT_TOPIC_COMPLETE_STR' | translate}} {{act.targetId}}{{'ACT_TOPIC_COMPLETE_STR2' | translate}}</p>
 			</div>
 			
 			<div *ngIf="act.type == C.ACT_MENTIONED">
-				<p>{{'ACT_MENTIONED_STR' | translate}} {{act.targetId}} {{'ACT_MENTIONED_STR2' | translate}}</p>
+				<p>{{'ACT_MENTIONED_STR' | translate}} {{act.targetId}}{{'ACT_MENTIONED_STR2' | translate}}</p>
 			</div>
 			
 			<div *ngIf="act.type == C.ACT_TOPIC_VOTE">
@@ -41,7 +41,7 @@
 			</div>
 			
 			<div *ngIf="act.type == C.ACT_TOPIC_UNVOTE">
-				<p>{{'ACT_TOPIC_UNVOTE_STR' | translate}} {{act.targetId}}</p>
+				<p>{{'ACT_TOPIC_UNVOTE_STR' | translate}} {{act.targetId}}{{'ACT_TOPIC_UNVOTE_STR2' | translate}}</p>
 			</div>
 		</mat-card-content>
 		

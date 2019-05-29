@@ -64,8 +64,7 @@ exports.create = function(req, res) {
 	   targetId: req.body.targetId
    };
    	
-   //db.collection('activities').insertAsync(activity).then(res.json.bind(res));
-   db.collection('activities').insertAsync(activity).then(activity._id).then(res.json.bind(res));
+   db.collection('activities').insertAsync(activity).then(res.json.bind(res));
 };
 
 exports.delete = function(req,res) {

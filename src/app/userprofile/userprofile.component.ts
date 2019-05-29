@@ -94,11 +94,7 @@ export class UserprofileComponent implements OnInit {
 
 				if (res)
 				{
-					this.activityList.push(new Activity( 
-      				{_id: res,
-				      userId: this.userId,
-					   type: C.ACT_MENTIONED,
-					   targetId: this.userId} ));
+					this.activityList.push(new Activity(res.ops[0]));
 				}
 		});
 

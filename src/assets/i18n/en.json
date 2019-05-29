@@ -200,13 +200,15 @@
 	"REJECTED_UNSUFFICIENT_RATINGS": "Unsufficient ratings in groups",
 	"REJECTED_NO_VALID_GROUP_PROPOSAL": "No valid proposals in groups",
 	
-   "ACT_TOPIC_CREATE_STR": "created topic",
-   "ACT_PROPOSAL_CREATED_STR": "created proposal",
-   "ACT_ELECTED_DELEGATE_STR": "was elected as delegate in",
-   "ACT_DROP_OUT_STR": "dropped out of group phase in",
-   "ACT_TOPIC_COMPLETE_STR": "topic",
-   "ACT_TOPIC_COMPLETE_STR2": "was completed",
-   "ACT_MENTIONED_STR": "the user was mentioned in group",
-   "ACT_TOPIC_VOTE_STR": "voted for topic",
-	"ACT_TOPIC_UNVOTE_STR": "withdrew vote for topic"
+   "ACT_TOPIC_CREATE_STR": "Created topic",
+   "ACT_PROPOSAL_CREATED_STR": "Created proposal",
+   "ACT_ELECTED_DELEGATE_STR": "Was elected as delegate in",
+   "ACT_DROP_OUT_STR": "Dropped out of group phase in",
+   "ACT_TOPIC_COMPLETE_STR": "Topic",
+   "ACT_TOPIC_COMPLETE_STR2": " was completed",
+   "ACT_MENTIONED_STR": "Was mentioned in group",
+   "ACT_MENTIONED_STR2": "",
+   "ACT_TOPIC_VOTE_STR": "Voted for topic",
+	"ACT_TOPIC_UNVOTE_STR": "Withdrew vote for topic",
+	"ACT_TOPIC_UNVOTE_STR2": ""
 }

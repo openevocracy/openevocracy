@@ -200,13 +200,15 @@
 	"REJECTED_UNSUFFICIENT_RATINGS": "Keine gültigen Bewertungen in den Gruppen",
 	"REJECTED_NO_VALID_GROUP_PROPOSAL": "Keine gültigen Entwürfe in den Gruppen",
 	
-   "ACT_TOPIC_CREATE_STR": "created topic",
-   "ACT_PROPOSAL_CREATED_STR": "created proposal",
-   "ACT_ELECTED_DELEGATE_STR": "was elected as delegate in",
-   "ACT_DROP_OUT_STR": "dropped out of group phase in",
-   "ACT_TOPIC_COMPLETE_STR": "topic",
-   "ACT_TOPIC_COMPLETE_STR2": "was completed",
-   "ACT_MENTIONED_STR": "the user was mentioned in group",
-   "ACT_TOPIC_VOTE_STR": "voted for topic",
-	"ACT_TOPIC_UNVOTE_STR": "withdrew vote for topic"
+   "ACT_TOPIC_CREATE_STR": "Erstellte Thema",
+   "ACT_PROPOSAL_CREATED_STR": "Erstellte Vorschlag",
+   "ACT_ELECTED_DELEGATE_STR": "Wurde als Delegierter gewählt in",
+   "ACT_DROP_OUT_STR": "Ist aus der Gruppenphase ausgeschieden in",
+   "ACT_TOPIC_COMPLETE_STR": "Thema",
+   "ACT_TOPIC_COMPLETE_STR2": " wurde abgeschlossen",
+   "ACT_MENTIONED_STR": "Wurde in Gruppe",
+   "ACT_MENTIONED_STR2": " erwähnt",
+   "ACT_TOPIC_VOTE_STR": "Stimmte für Thema",
+	"ACT_TOPIC_UNVOTE_STR": "Hat die Stimme für Thema",
+	"ACT_TOPIC_UNVOTE_STR2": " zurückgezogen"
 }
