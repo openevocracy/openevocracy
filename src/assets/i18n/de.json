@@ -204,7 +204,7 @@
 	"REJECTED_NO_VALID_GROUP_PROPOSAL": "Keine gültigen Entwürfe in den Gruppen",
 	
    "ACT_TOPIC_CREATE_STR": "Erstellte Thema",
-   "ACT_PROPOSAL_CREATED_STR": "Erstellte Vorschlag",
+   "ACT_PROPOSAL_CREATED_STR": "Erstellte Vorschlag in Thema",
    "ACT_ELECTED_DELEGATE_STR": "Wurde als Delegierter gewählt in",
    "ACT_DROP_OUT_STR": "Ist aus der Gruppenphase ausgeschieden in",
    "ACT_TOPIC_COMPLETE_STR": "Thema",

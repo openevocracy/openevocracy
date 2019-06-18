@@ -48,6 +48,23 @@ exports.query = function(req, res) {
       .catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
+
+// Actually creates an activity in the database
+function actcreate(_userId, _type, _targetId) {
+   // Create activity
+   const activity = {
+      _id: ObjectId(),
+      userId: _userId,
+	   type: _type,
+	   targetId: _targetId
+   };
+   
+   db.collection('activities').insertAsync(activity).then(res.json.bind(res));
+};
+exports.actcreate = actcreate;
+
+
+// Creates an activity (to be called from POST)
 exports.create = function(req, res) {
 
    // reject if user ID is missing
@@ -56,16 +73,10 @@ exports.create = function(req, res) {
       return;
    }
 
-   // Create activity
-   const activity = {
-      _id: ObjectId(),
-      userId: req.user._id,
-	   type: req.body.type,
-	   targetId: req.body.targetId
-   };
-   	
-   db.collection('activities').insertAsync(activity).then(res.json.bind(res));
+   
+   actcreate(req.user._id, req.body.type, req.body.targetId);
 };
+
 
 exports.delete = function(req,res) {
     var actId = ObjectId(req.params.id);

@@ -76,14 +76,14 @@ export class TopiclistComponent implements OnInit {
 				topic.voted = res.voted;
 				topic.numVotes--;
 				
-				this.activityListService.addActivity(C.ACT_TOPIC_UNVOTE, tid).subscribe();
+				this.activityListService.addActivity(C.ACT_TOPIC_UNVOTE, tid).subscribe(); // add activity
 			});
 		} else {
 			this.topicService.vote(tid, uid).subscribe(res => {
 				topic.voted = res.voted;
 				topic.numVotes++;
 				
-				this.activityListService.addActivity(C.ACT_TOPIC_VOTE, tid).subscribe();
+				this.activityListService.addActivity(C.ACT_TOPIC_VOTE, tid).subscribe(); // add activity
 			});
 		}
 	}

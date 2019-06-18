@@ -75,11 +75,11 @@ export class UserprofileComponent implements OnInit {
 		this.activityListService.removeActivity(actId).subscribe(res => {
 				if (res) // if deleting in database was successful
 				{
-					console.log("Deleting succesful");
+					console.log("Deleting successful");
 					this.activityList = _.without(this.activityList, _.findWhere(this.activityList, {'_id': actId}));
 				}
 				else	
-					console.log("Deleting not succesful");
+					console.log("Deleting not successful");
 				console.log(res);
 			});
 	}

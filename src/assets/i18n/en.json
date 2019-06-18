@@ -204,7 +204,7 @@
 	"REJECTED_NO_VALID_GROUP_PROPOSAL": "No valid proposals in groups",
 	
    "ACT_TOPIC_CREATE_STR": "Created topic",
-   "ACT_PROPOSAL_CREATED_STR": "Created proposal",
+   "ACT_PROPOSAL_CREATED_STR": "Created proposal in topic",
    "ACT_ELECTED_DELEGATE_STR": "Was elected as delegate in",
    "ACT_DROP_OUT_STR": "Dropped out of group phase in",
    "ACT_TOPIC_COMPLETE_STR": "Topic",

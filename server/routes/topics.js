@@ -17,6 +17,8 @@ var pads = require('./pads');
 var utils = require('../utils');
 var mail = require('../mail');
 
+var activities = require('./server/routes/activities');
+
 function calculateDeadline(nextStage, prevDeadline, levelDuration) {
     // define standard parameter
     if(_.isUndefined(levelDuration))
@@ -85,6 +87,11 @@ function manageConsensusStageAsync(topic, levelDuration) {
                 'stagePassedStarted': Date.now(),
                 'finalDocument': finalDocumentHtmlPromise
             };
+                        
+            //add activity
+            //for (users) {
+            //activities.actcreate(_userId, C.ACT_TOPIC_COMPLETE, topicId);
+            // }
             break;
         case C.STAGE_REJECTED:
             // updates below are only required if topic was rejected
