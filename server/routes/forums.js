@@ -27,19 +27,6 @@ function isUserAuthorizedAsync(userId, collection, entityId) {
 	});
 }
 
-/**
- * @desc: Check if author/group combination exists and generate name for the author
- */
-function getAuthorNameAsync(groupId, authorId) {
-	// Check database for groupId, authorId combination
-	return db.collection('group_relations')
-		.findOneAsync({ 'groupId': groupId, 'userId': authorId })
-		.then(function(gr) {
-			// If combination exists return generated user name, otherwise return null
-			return _.isNull(gr) ? null : groups.generateUserName(gr.groupId, gr.userId);
-	});
-}
-
 /*
  * @desc: Query forum of specific group
  */
@@ -70,7 +57,7 @@ exports.queryForum = function(req, res) {
 			const numPosts_promise = db.collection('forum_posts').countAsync({ 'threadId': thread._id });
 			
 			// Add author name (can be null if not available)
-			const authorName_promise = getAuthorNameAsync(group._id, thread.authorId);
+			const authorName_promise = groups.generateUserName(group._id, thread.authorId);
 			
 			// Add sum of votes of mainpost and number of posts to every thread
 			return Promise.join(sumMainpostVotes_promise, numPosts_promise, authorName_promise)
@@ -189,7 +176,7 @@ exports.queryThread = function(req, res) {
 			const postSumVotes_promise = sumVotesAsync(post._id);
 			
 			// Add post author name (can be null if not available)
-			const postAuthorName_promise = getAuthorNameAsync(group._id, post.authorId);
+			const postAuthorName_promise = groups.generateUserName(group._id, post.authorId);
 			
 			// For every post, get comments
 			const comments_promise = db.collection('forum_comments').find({ 'postId': post._id }).toArrayAsync().map(function(comment) {
@@ -200,7 +187,7 @@ exports.queryThread = function(req, res) {
 				const commentSumVotes_promise = sumVotesAsync(comment._id);
 				
 				// Add comment author name (can be null if not available)
-				const commentAuthorName_promise = getAuthorNameAsync(group._id, comment.authorId);
+				const commentAuthorName_promise = groups.generateUserName(group._id, comment.authorId);
 				
 				// Extend comment by user vote and sum of votes
 				return Promise.join(commentUserVote_promise, commentSumVotes_promise, commentAuthorName_promise)

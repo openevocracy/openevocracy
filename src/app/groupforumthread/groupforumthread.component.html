@@ -31,11 +31,7 @@
 				</button>
 			</div>
 			<div class="post-meta">
-				{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} 
-				<a [routerLink]="['/user/profile', post.authorId]">
-					<span *ngIf="post.authorName">{{ post.authorName }}</span>
-					<span *ngIf="!post.authorName">{{ post.authorId }}</span>
-				</a>
+				{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', post.authorId]">{{ post.authorName }}</a>
 				{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ post.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}</span>
 			</div>
 		</div>
@@ -64,10 +60,7 @@
 								<small *ngIf="comment.authorId == userId"><a (click)="editComment(post.postId, comment)">{{ 'FORUM_BUTTON_EDIT' | translate }}</a>&nbsp;&nbsp;<a (click)="deleteComment(post.postId, comment.commentId)">{{ 'FORUM_BUTTON_DELETE' | translate }}</a></small>
 							</div>
 							<div class="comment-meta">
-								<small>
-									<a [routerLink]="['/user/profile', comment.authorId]"><span *ngIf="comment.authorName">{{ comment.authorName }}</span><span *ngIf="!comment.authorName">{{ comment.authorId }}</span></a>,
-									{{ comment.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}
-								</small>
+								<small><a [routerLink]="['/user/profile', comment.authorId]">{{ comment.authorName }}</a>, {{ comment.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}</small>
 							</div>
 						</div>
 					</div>
