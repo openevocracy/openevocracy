@@ -30,6 +30,9 @@
 				<fa-icon [icon]="faCogs"></fa-icon>
 			</button>
 			<mat-menu #settings="matMenu" [overlapTrigger]="false">
+				<button mat-menu-item [routerLink]="['/user/profile', uid]">
+					<span>{{ 'HEADER_MAINMENU_PROFILE' | translate }}</span>
+				</button>
 				<button mat-menu-item [routerLink]="['/settings', uid]">
 					<span>{{ 'HEADER_MAINMENU_SETTINGS' | translate }}</span>
 				</button>

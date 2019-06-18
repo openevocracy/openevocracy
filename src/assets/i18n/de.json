@@ -2,6 +2,7 @@
 	"HEADER_MAINMENU_TOPICLIST": "Themen",
 	"HEADER_MAINMENU_TIMELINE": "Timeline",
 	"HEADER_MAINMENU_SETTINGS": "Einstellungen",
+	"HEADER_MAINMENU_PROFILE": "Profil",
 	"HEADER_MAINMENU_LOGOUT": "Logout",
 	"HEADER_MAINMENU_LANGUAGE": "Sprache wählen",
 	"HEADER_MAINMENU_FEEDBACK": "Feedback",
@@ -52,6 +53,9 @@
 	"SETTINGS_ACCOUNT_TITLE_ID": "Deine Identifikationsnummer",
 	"SETTINGS_ACCOUNT_TITLE_CREDENTIALS": "Deine Zugangsdaten",
 	"SETTINGS_BUTTON_SAVE": "Speichern",
+	
+	"PROFILE_TAB_TITLE_OVERVIEW": "Übersicht",
+	"PROFILE_TAB_TITLE_ACTIVITIES": "Meine Aktivitäten",
 	
 	"USER_PASSWORT_NOT_CORRECT": "Das Passwort ist nicht korrekt. Hast du dein <a href=\"{{email}}\">Passwort vergessen</a>?",
 	"USER_FORM_VALIDATION_ERROR": "Deine Eingabe war nicht ganz korrekt, prüfe deine Änderung nochmal auf Richtigkeit.",

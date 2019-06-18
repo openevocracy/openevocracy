@@ -17,7 +17,7 @@ var pads = require('./pads');
 var utils = require('../utils');
 var mail = require('../mail');
 
-var activities = require('./server/routes/activities');
+var activities = require('./activities');
 
 function calculateDeadline(nextStage, prevDeadline, levelDuration) {
     // define standard parameter

@@ -65,6 +65,7 @@ import { UtilsService } from './_services/utils.service';
 import { LanguageService } from './_services/language.service';
 import { ConfigService } from './_services/config.service';
 import { SnackbarService } from './_services/snackbar.service';
+import { ActivityListService } from './_services/activitylist.service';
 
 // Shared
 import { cfg } from '../../shared/config';
@@ -162,6 +163,7 @@ export function loadConfig(configService: ConfigService) {
 		UtilsService,
 		LanguageService,
 		SnackbarService,
+		ActivityListService,
 		//{ provide: 'cfg', useValue: cfg },
 		/*{ provide: 'cfg',
 		  useFactory: (configService: ConfigService) => () => Promise.resolve(configService.get()),

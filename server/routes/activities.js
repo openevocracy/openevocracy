@@ -18,14 +18,22 @@ var utils = require('../utils');
 var mail = require('../mail');
 
 /**
- * gets all topics from database, call management of topic states and retun all topics
+ * gets all activities from database that satisfy the filter
+ * - filter: a JSON object specifying what is queried
  * 
  * @return {object} topics - all adjusted topics
  */
-function manageAndListActivitiesAsync() {
-	return db.collection('activities').find().toArrayAsync();
+function manageAndListActivitiesAsync(filter) {
+	return db.collection('activities').find(filter).toArrayAsync();
 }
 exports.manageAndListActivitiesAsync = manageAndListActivitiesAsync;
+
+/*
+ * @desc: Get whole activity list of a particular user
+ */
+exports.getUserActivityList = function(req, res) {
+	manageAndListActivitiesAsync({ 'userId': req.user._id }).then(res.json.bind(res));
+};
 
 /*
  * @desc: Get whole activity list
@@ -50,7 +58,7 @@ exports.query = function(req, res) {
 
 
 // Actually creates an activity in the database
-function actcreate(_userId, _type, _targetId) {
+function actcreate(_userId, _type, _targetId, res) {
    // Create activity
    const activity = {
       _id: ObjectId(),
@@ -74,7 +82,7 @@ exports.create = function(req, res) {
    }
 
    
-   actcreate(req.user._id, req.body.type, req.body.targetId);
+   actcreate(req.user._id, req.body.type, req.body.targetId, res);
 };
 
 

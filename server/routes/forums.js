@@ -6,6 +6,7 @@ var Promise = require('bluebird');
 
 // Import routes
 var utils = require('../utils');
+var groups = require('./groups');
 
 function commentTextareaToHtml(str) {
 	// First strip html, then add <p> and replace \n by <br/>
@@ -26,6 +27,19 @@ function isUserAuthorizedAsync(userId, collection, entityId) {
 	});
 }
 
+/**
+ * @desc: Check if author/group combination exists and generate name for the author
+ */
+function getAuthorNameAsync(groupId, authorId) {
+	// Check database for groupId, authorId combination
+	return db.collection('group_relations')
+		.findOneAsync({ 'groupId': groupId, 'userId': authorId })
+		.then(function(gr) {
+			// If combination exists return generated user name, otherwise return null
+			return _.isNull(gr) ? null : groups.generateUserName(gr.groupId, gr.userId);
+	});
+}
+
 /*
  * @desc: Query forum of specific group
  */
@@ -33,29 +47,37 @@ exports.queryForum = function(req, res) {
 	var forumId = ObjectId(req.params.id);
 	//var userId = ObjectId(req.user._id);
 	
-	// Get group, group pad and topic
+	// Get group
 	var group_promise = db.collection('groups').findOneAsync({'forumId': forumId}, {'topicId': true});
+	
+	// Get group pad
 	var pad_promise = group_promise.then(function(group) {
 		return db.collection('pads_group').findOneAsync({'groupId': group._id}, {'_id': true});
 	});
+	
+	// Get topic
 	var topic_promise = group_promise.then(function(group) {
 		return db.collection('topics').findOneAsync({'_id': group.topicId}, {'name': true});
 	});
 	
 	// Get threads
-	var threads_promise = db.collection('forum_threads')
-		.find({'forumId': forumId}).toArrayAsync().map(function(thread) {
-		
-		// Get sum of votes of mainpost
-		const sumMainpostVotes_promise = sumVotesAsync(thread.mainPostId);
-		
-		// Get number of posts
-		const numPosts_promise = db.collection('forum_posts').countAsync({ 'threadId': thread._id });
-		
-		// Add sum of votes of mainpost and number of posts to every thread
-		return Promise.join(sumMainpostVotes_promise, numPosts_promise).spread(function(sumMainpostVotes, numPosts) {
-			// Reduce numPosts by 1 since the main post shall not be counted
-			return _.extend(thread, {'sumMainpostVotes': sumMainpostVotes, 'postCount': (numPosts-1)});
+	var threads_promise = group_promise.then(function(group) {
+		return db.collection('forum_threads').find({'forumId': forumId}).toArrayAsync().map(function(thread) {
+			// Get sum of votes of mainpost
+			const sumMainpostVotes_promise = sumVotesAsync(thread.mainPostId);
+			
+			// Get number of posts
+			const numPosts_promise = db.collection('forum_posts').countAsync({ 'threadId': thread._id });
+			
+			// Add author name (can be null if not available)
+			const authorName_promise = getAuthorNameAsync(group._id, thread.authorId);
+			
+			// Add sum of votes of mainpost and number of posts to every thread
+			return Promise.join(sumMainpostVotes_promise, numPosts_promise, authorName_promise)
+				.spread(function(sumMainpostVotes, numPosts, authorName) {
+					// Reduce numPosts by 1 since the main post shall not be counted
+					return _.extend(thread, {'sumMainpostVotes': sumMainpostVotes, 'postCount': (numPosts-1), 'authorName': authorName});
+			});
 		});
 	});
 	
@@ -151,37 +173,50 @@ exports.queryThread = function(req, res) {
 	// Get thread
 	const thread_promise = db.collection('forum_threads').findOneAsync({'_id': threadId});
 	
+	// Get group
+	var group_promise = thread_promise.then(function(thread) {
+		return db.collection('groups').findOneAsync({'forumId': thread.forumId}, {});
+	});
+	
 	// Get posts
-	const posts_promise = db.collection('forum_posts').find({ 'threadId': threadId }).toArrayAsync().map(function(post) {
-		
-		// Check if user has voted for this post
-		const postUserVote_promise = hasUserVotedAsync(post._id, userId);
-		
-		// Count sum of votes for this post
-		const postSumVotes_promise = sumVotesAsync(post._id);
-		
-		// For every post, get comments
-		const comments_promise = db.collection('forum_comments').find({ 'postId': post._id }).toArrayAsync().map(function(comment) {
-			// Check if user has voted for this comment
-			const commentUserVote_promise = hasUserVotedAsync(comment._id, userId);
+	const posts_promise = group_promise.then(function(group) {
+		return db.collection('forum_posts').find({ 'threadId': threadId }).toArrayAsync().map(function(post) {
+			
+			// Check if user has voted for this post
+			const postUserVote_promise = hasUserVotedAsync(post._id, userId);
 			
 			// Count sum of votes for this post
-			const commentSumVotes_promise = sumVotesAsync(comment._id);
+			const postSumVotes_promise = sumVotesAsync(post._id);
 			
-			// Extend comment by user vote and sum of votes
-			return Promise.join(commentUserVote_promise, commentSumVotes_promise)
-				.spread(function(commentUserVote, commentSumVotes) {
+			// Add post author name (can be null if not available)
+			const postAuthorName_promise = getAuthorNameAsync(group._id, post.authorId);
+			
+			// For every post, get comments
+			const comments_promise = db.collection('forum_comments').find({ 'postId': post._id }).toArrayAsync().map(function(comment) {
+				// Check if user has voted for this comment
+				const commentUserVote_promise = hasUserVotedAsync(comment._id, userId);
 				
-				return _.extend(comment, { 'userVote': commentUserVote, 'sumVotes': commentSumVotes });
+				// Count sum of votes for this post
+				const commentSumVotes_promise = sumVotesAsync(comment._id);
+				
+				// Add comment author name (can be null if not available)
+				const commentAuthorName_promise = getAuthorNameAsync(group._id, comment.authorId);
+				
+				// Extend comment by user vote and sum of votes
+				return Promise.join(commentUserVote_promise, commentSumVotes_promise, commentAuthorName_promise)
+					.spread(function(commentUserVote, commentSumVotes, commentAuthorName) {
+					
+					return _.extend(comment, { 'userVote': commentUserVote, 'sumVotes': commentSumVotes, 'authorName': commentAuthorName });
+				});
+					
 			});
-				
-		});
-		
-		// Extend post by user vote, sum of votes and comments
-		return Promise.join(postUserVote_promise, postSumVotes_promise, comments_promise)
-			.spread(function(postUserVote, postSumVotes, comments) {
 			
-			return _.extend(post, { 'comments': comments, 'userVote': postUserVote, 'sumVotes': postSumVotes });
+			// Extend post by user vote, sum of votes and comments
+			return Promise.join(postUserVote_promise, postSumVotes_promise, postAuthorName_promise, comments_promise)
+				.spread(function(postUserVote, postSumVotes, postAuthorName, comments) {
+				
+				return _.extend(post, { 'comments': comments, 'userVote': postUserVote, 'sumVotes': postSumVotes, 'authorName': postAuthorName });
+			});
 		});
 	});
 	

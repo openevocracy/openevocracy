@@ -10,6 +10,7 @@ export class Post {
 	threadId: string;
 	forumId: string;
 	authorId: string;
+	authorName: string;
 	comments: Comment[];
 	sumVotes: number;
 	userVote: number;
@@ -23,6 +24,7 @@ export class Post {
 		this.threadId = res.threadId;
 		this.forumId = res.forumId;
 		this.authorId = res.authorId;
+		this.authorName = res.authorName || null;
 		this.comments = res.comments;
 		this.sumVotes = res.sumVotes || 0;
 		this.userVote = res.userVote || null;

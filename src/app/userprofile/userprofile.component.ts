@@ -87,7 +87,7 @@ export class UserprofileComponent implements OnInit {
 	
 	/*
 	 * @desc: Adds an activity (for testing only)
-	 */
+	 *
 	addActivity(e) {
 		e.stopPropagation();
 		this.activityListService.addActivity(C.ACT_MENTIONED, this.userId).subscribe(res => {
@@ -98,7 +98,7 @@ export class UserprofileComponent implements OnInit {
 				}
 		});
 
-	}
+	}*/
 
 
 }

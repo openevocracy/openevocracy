@@ -132,6 +132,11 @@ app.get('/file/topic/:id', auth(), topics.download);
 app.get('/json/activitylist', auth(), activities.getActivityList);
 
 /*
+ * @desc: Get a user's activity list
+ */
+app.get('/json/useractivitylist', auth(), activities.getUserActivityList);
+
+/*
  * @desc: Get, create and delete activities
  */
 app.get('/json/activity/:id', auth(), activities.query);

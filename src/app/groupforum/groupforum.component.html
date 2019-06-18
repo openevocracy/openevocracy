@@ -24,7 +24,11 @@
 				<span class="thread-title">{{ thread.title }}</span>
 			</h2>
 			<div class="meta"><small>
-				{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', thread.authorId]">{{ thread.authorId }}</a>
+				{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} 
+				<a [routerLink]="['/user/profile', thread.authorId]">
+					<span *ngIf="thread.authorName">{{ thread.authorName }}</span>
+					<span *ngIf="!thread.authorName">{{ thread.authorId }}</span>
+				</a>
 				{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ thread.createdTimestamp | date:'y-MM-dd HH:mm' }}</span>
 			</small></div>
 		</div>

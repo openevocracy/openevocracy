@@ -14,7 +14,7 @@ export class ActivityListService {
 		private httpManagerService: HttpManagerService) { }
 		
 	public getActivityList(): Observable<Activity[]> {
-		return this.httpManagerService.get('/json/activitylist');
+		return this.httpManagerService.get('/json/useractivitylist');
 	}
 	
 	public addActivity(type: number, targetId: string): Observable<any> {

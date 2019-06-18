@@ -8,6 +8,7 @@ export class Thread {
 	title: string;
 	forumId: string;
 	authorId: string;
+	authorName: string;
 	citationId: string;
 	closed: boolean;
 	private: boolean;
@@ -24,6 +25,7 @@ export class Thread {
 		this.title = res.title;
 		this.forumId = res.forumId;
 		this.authorId = res.authorId;
+		this.authorName = res.authorName || null;
 		this.citationId = res.citationId;
 		this.closed = res.closed;
 		this.private = res.private;
