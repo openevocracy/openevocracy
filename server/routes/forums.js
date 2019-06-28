@@ -57,13 +57,21 @@ exports.queryForum = function(req, res) {
 			const numPosts_promise = db.collection('forum_posts').countAsync({ 'threadId': thread._id });
 			
 			// Add author name (can be null if not available)
-			const authorName_promise = groups.generateUserName(group._id, thread.authorId);
+			const authorName = groups.generateUserName(group._id, thread.authorId);
+			
+			// Add user name to last activity, if last activity exists
+			if(thread.lastActivity)
+				thread.lastActivity.userName = groups.generateUserName(group._id, thread.lastActivity.userId);
 			
 			// Add sum of votes of mainpost and number of posts to every thread
-			return Promise.join(sumMainpostVotes_promise, numPosts_promise, authorName_promise)
-				.spread(function(sumMainpostVotes, numPosts, authorName) {
+			return Promise.join(sumMainpostVotes_promise, numPosts_promise)
+				.spread(function(sumMainpostVotes, numPosts) {
 					// Reduce numPosts by 1 since the main post shall not be counted
-					return _.extend(thread, {'sumMainpostVotes': sumMainpostVotes, 'postCount': (numPosts-1), 'authorName': authorName});
+					return _.extend(thread, {
+						'sumMainpostVotes': sumMainpostVotes,
+						'postCount': (numPosts-1),
+						'authorName': authorName
+					});
 			});
 		});
 	});
@@ -172,11 +180,14 @@ exports.queryThread = function(req, res) {
 			// Check if user has voted for this post
 			const postUserVote_promise = hasUserVotedAsync(post._id, userId);
 			
-			// Count sum of votes for this post
+			// Count sum of total votes for this post
 			const postSumVotes_promise = sumVotesAsync(post._id);
 			
 			// Add post author name (can be null if not available)
 			const postAuthorName_promise = groups.generateUserName(group._id, post.authorId);
+			
+			// Get edits of this post
+			const postEdits_promise = db.collection('forum_edits').find({ 'entityId': post._id }).toArrayAsync();
 			
 			// For every post, get comments
 			const comments_promise = db.collection('forum_comments').find({ 'postId': post._id }).toArrayAsync().map(function(comment) {
@@ -189,20 +200,34 @@ exports.queryThread = function(req, res) {
 				// Add comment author name (can be null if not available)
 				const commentAuthorName_promise = groups.generateUserName(group._id, comment.authorId);
 				
+				// Get edits of this comment
+				const commentEdits_promise = db.collection('forum_edits').find({ 'entityId': comment._id }).toArrayAsync();
+				
 				// Extend comment by user vote and sum of votes
-				return Promise.join(commentUserVote_promise, commentSumVotes_promise, commentAuthorName_promise)
-					.spread(function(commentUserVote, commentSumVotes, commentAuthorName) {
+				return Promise.join(commentUserVote_promise, commentSumVotes_promise, commentAuthorName_promise, commentEdits_promise)
+					.spread(function(commentUserVote, commentSumVotes, commentAuthorName, commentEdits) {
 					
-					return _.extend(comment, { 'userVote': commentUserVote, 'sumVotes': commentSumVotes, 'authorName': commentAuthorName });
+					return _.extend(comment, {
+						'userVote': commentUserVote,
+						'sumVotes': commentSumVotes,
+						'authorName': commentAuthorName,
+						'editHistory': commentEdits
+					});
 				});
 					
 			});
 			
 			// Extend post by user vote, sum of votes and comments
-			return Promise.join(postUserVote_promise, postSumVotes_promise, postAuthorName_promise, comments_promise)
-				.spread(function(postUserVote, postSumVotes, postAuthorName, comments) {
+			return Promise.join(postUserVote_promise, postSumVotes_promise, postAuthorName_promise, postEdits_promise, comments_promise)
+				.spread(function(postUserVote, postSumVotes, postAuthorName, postEdits, comments) {
 				
-				return _.extend(post, { 'comments': comments, 'userVote': postUserVote, 'sumVotes': postSumVotes, 'authorName': postAuthorName });
+				return _.extend(post, {
+					'comments': comments,
+					'userVote': postUserVote,
+					'sumVotes': postSumVotes,
+					'authorName': postAuthorName,
+					'editHistory': postEdits
+				});
 			});
 		});
 	});
@@ -245,8 +270,12 @@ exports.editThread = function(req, res) {
 			'private': updatedThread.private
 		} });
 		
+		// Add edit note
+		const editNote_promise = db.collection('forum_edits')
+			.insertAsync({ 'entityId': ObjectId(updatedPost.postId), 'authorId': userId });
+		
 		// Send result to client
-		Promise.join(updatePost_promise, updateThread_promise)
+		Promise.all([updatePost_promise, updateThread_promise, editNote_promise])
 			.then(res.json.bind(res));
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
@@ -293,11 +322,12 @@ exports.createPost = function(req, res) {
 	// Store post in database
 	const createPost_promise = db.collection('forum_posts').insertAsync(post);
 	
-	// Reopen thread if it was closed (just open it in any case)
-	const openThread_promise = db.collection('forum_threads')
-		.updateAsync({ '_id': post.threadId }, { $set: { 'closed': false } });
+	// Reopen thread if it was closed (just open it in any case) and set last activity
+	const lastActivity = { 'timestamp': Date.now(), 'userId': userId };
+	const thread_promise = db.collection('forum_threads')
+		.updateAsync({ '_id': post.threadId }, { $set: { 'closed': false, 'lastActivity': lastActivity } });
 	
-	Promise.all([createPost_promise, openThread_promise]).then(res.json.bind(res));
+	Promise.all([createPost_promise, thread_promise]).then(res.json.bind(res));
 };
 
 /**
@@ -311,8 +341,14 @@ exports.editPost = function(req, res) {
 	// If user is author, update post, otherwise reject
 	isUserAuthorizedAsync(userId, 'forum_posts', postId).then(function(isAuthorized) {
 		// Update post in database
-		db.collection('forum_posts')
-			.updateAsync({ '_id': postId }, { $set: { 'html': updatedPostHtml } })
+		const updatePost_promise = db.collection('forum_posts')
+			.updateAsync({ '_id': postId }, { $set: { 'html': updatedPostHtml } });
+		
+		// Add edit note
+		const editNote_promise = db.collection('forum_edits')
+			.insertAsync({ 'entityId': postId, 'authorId': userId });
+		
+		Promise.all([ updatePost_promise, editNote_promise ])
 			.then(res.json.bind(res));
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
@@ -347,7 +383,7 @@ exports.createComment = function(req, res) {
 	const userId = ObjectId(req.user._id);
 	const body = req.body;
 	
-	// Define post
+	// Define comment
 	const comment = {
 		'html': commentTextareaToHtml(body.text),
 		'postId': ObjectId(body.postId),
@@ -357,8 +393,14 @@ exports.createComment = function(req, res) {
 	};
 	
 	// Store comment in database
-	db.collection('forum_comments').insertAsync(comment)
-		.then(res.json.bind(res));
+	const createComment_promise = db.collection('forum_comments').insertAsync(comment);
+	
+	// Set last activity
+	const lastActivity = { 'timestamp': Date.now(), 'userId': userId };
+	const thread_promise = db.collection('forum_threads')
+		.updateAsync({ '_id': comment.threadId }, { $set: { 'lastActivity': lastActivity } });
+	
+	Promise.all([createComment_promise, thread_promise]).then(res.json.bind(res));
 };
 
 /**
@@ -372,8 +414,14 @@ exports.editComment = function(req, res) {
 	// If user is author, update comment, otherwise reject
 	isUserAuthorizedAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
 		// Update comment in database
-		db.collection('forum_comments')
-			.updateAsync({ '_id': commentId }, { $set: { 'html': commentTextareaToHtml(updatedCommentHtml) } })
+		const commentUpdate_promise = db.collection('forum_comments')
+			.updateAsync({ '_id': commentId }, { $set: { 'html': commentTextareaToHtml(updatedCommentHtml) } });
+			
+		// Add edit note
+		const editNote_promise = db.collection('forum_edits')
+			.insertAsync({ 'entityId': commentId, 'authorId': userId });
+		
+		Promise.all([ commentUpdate_promise, editNote_promise ])
 			.then(res.json.bind(res));
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };

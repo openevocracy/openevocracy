@@ -1,6 +1,8 @@
 import { ReflectiveInjector } from '@angular/core';
 import { UtilsService } from "../../_services/utils.service";
 
+import { Edit } from './edit';
+
 export class Comment {
 	/* Raw values from database */
 	html: string;
@@ -12,6 +14,7 @@ export class Comment {
 	authorId: string;
 	sumVotes: number;
 	userVote: number;
+	editHistory: Edit[];
 	
 	/* Calculated values */
 	createdTimestamp: number;
@@ -27,6 +30,7 @@ export class Comment {
 		this.sumVotes = res.sumVotes || 0;
 		this.userVote = res.userVote || null;
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
+		this.editHistory = res.editHistory.map(edit => new Edit(edit));
 	}
 	
 	private getCreationTimestamp(id) {

@@ -19,7 +19,7 @@ import { SnackbarService } from '../_services/snackbar.service';
 
 import { Thread } from "../_models/forum/thread";
 import { Post } from "../_models/forum/post";
-import { Comment } from "../_models/forum/comment";
+import { Edit } from "../_models/forum/edit";
 
 import { faArrowAltCircleLeft, faLock, faCaretUp, faCaretDown, faPenSquare, faTrash, faShareSquare, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 
@@ -100,26 +100,16 @@ export class GroupForumThreadComponent implements OnInit {
 				// Create thread object from thread data
 				this.thread = new Thread(res.thread);
 				
-				// TODO Sort posts by ...
-				const sortedPosts = res.posts; //_.sortBy(_.sortBy(withProgress, 'name'), 'progress');
+				// TODO Sort posts and comments
 				
 				// Initialize posts and construct all elements
 				this.posts = [];
-				_.each(sortedPosts, function(post) {
-					// Create post instance
-					let postInstance = new Post(post);
-					
-					// TODO Sort comments by ...
-					const sortedComments = postInstance.comments; //_.sortBy(_.sortBy(withProgress, 'name'), 'progress');
-					
-					// Replace post comments with instances of comments
-					postInstance.comments = _.map(sortedComments, function(comment) {
-						return new Comment(comment);
-					});
-					
-					// Push post (including comments) to posts array
-					this.posts.push(postInstance);
+				_.each(res.posts, function(post) {
+					// Push post instance to posts array
+					this.posts.push(new Post(post));
 				}.bind(this));
+				
+				console.log(this.posts);
 				
 				// Return to subscribers
 				observer.next(true);
@@ -236,7 +226,7 @@ export class GroupForumThreadComponent implements OnInit {
 		// Post comment to server and create comment in database
 		this.httpManagerService.post('/json/group/forum/comment/create', data).subscribe(res => {
 			// Scroll to and highlight post, related to created comment
-			const relatedPostId = res.ops[0].postId;
+			const relatedPostId = res[0].ops[0].postId;
 			this.navigateToUrlWithFragment(relatedPostId);
 			
 			// Reload model
@@ -286,6 +276,8 @@ export class GroupForumThreadComponent implements OnInit {
 			// Clear editor
 			this.editor.setText('');
 			
+			// FIXME: Scrolling is currently not working, since post is added to DOM afterwards
+			//        Either reload page after creation or find another solution for scrolling?
 			// Scroll to and highlight newly created post
 			const submittedPostId = res[0].insertedIds[0];
 			this.navigateToUrlWithFragment(submittedPostId);
@@ -352,8 +344,11 @@ export class GroupForumThreadComponent implements OnInit {
 			this.httpManagerService.patch('/json/group/forum/thread/'+this.thread.threadId, data).subscribe(res => {
 				// Update edited post from posts array
 				this.posts = _.map(this.posts, (post) => {
-					if (post.postId == postId)
+					if (post.postId == postId) {
 						post.html = up.html;
+						post.editHistory.push({ 'createdTimestamp': new Date().getTime(), 'authorId': this.userId });
+						console.log(post);
+					}
 					return post;
 				});
 				
@@ -411,8 +406,10 @@ export class GroupForumThreadComponent implements OnInit {
 			this.httpManagerService.patch('/json/group/forum/post/'+postId, data).subscribe(res => {
 				// Change edited post from posts array
 				this.posts = _.map(this.posts, (post) => {
-					if (post.postId == postId)
+					if (post.postId == postId) {
 						post.html = updatedPostHtml;
+						post.editHistory.push({ 'createdTimestamp': new Date().getTime(), 'authorId': this.userId });
+					}
 					return post;
 				});
 				
@@ -482,8 +479,10 @@ export class GroupForumThreadComponent implements OnInit {
 				this.posts = _.map(this.posts, (post) => {
 					if (post.postId == postId) {
 						post.comments = _.map(post.comments, (comment) => {
-							if(comment.commentId == commentId)
+							if(comment.commentId == commentId) {
 								comment.html = this.textareaToHtml(updatedCommentHtml);
+								comment.editHistory.push({ 'createdTimestamp': new Date().getTime(), 'authorId': this.userId });
+							}
 							return comment;
 						});
 					}

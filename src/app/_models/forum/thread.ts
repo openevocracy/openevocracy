@@ -1,6 +1,8 @@
 import { ReflectiveInjector } from '@angular/core';
 import { UtilsService } from "../../_services/utils.service";
 
+import { Activity } from './activity';
+
 export class Thread {
 	/* Raw values from database */
 	threadId: string;
@@ -15,6 +17,7 @@ export class Thread {
 	views: number;
 	postCount: number;
 	sumMainpostVotes: number;
+	lastActivity: Activity;
 	
 	/* Calculated values */
 	createdTimestamp: number;
@@ -33,6 +36,7 @@ export class Thread {
 		this.postCount = res.postCount || 0;
 		this.sumMainpostVotes = res.sumMainpostVotes || 0;
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
+		this.lastActivity = res.lastActivity ? new Activity(res.lastActivity) : null;
 	}
 	
 	private getCreationTimestamp(id) {

@@ -1,6 +1,7 @@
 import { ReflectiveInjector } from '@angular/core';
 import { UtilsService } from "../../_services/utils.service";
 
+import { Edit } from './edit';
 import { Comment } from './comment';
 
 export class Post {
@@ -14,6 +15,7 @@ export class Post {
 	comments: Comment[];
 	sumVotes: number;
 	userVote: number;
+	editHistory: Edit[];
 	
 	/* Calculated values */
 	createdTimestamp: number;
@@ -25,10 +27,11 @@ export class Post {
 		this.forumId = res.forumId;
 		this.authorId = res.authorId;
 		this.authorName = res.authorName || null;
-		this.comments = res.comments;
+		this.comments = res.comments.map(comment => new Comment(comment));
 		this.sumVotes = res.sumVotes || 0;
 		this.userVote = res.userVote || null;
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
+		this.editHistory = res.editHistory.map(edit => new Edit(edit));
 	}
 	
 	private getCreationTimestamp(id) {

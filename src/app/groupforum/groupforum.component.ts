@@ -61,6 +61,8 @@ export class GroupForumComponent implements OnInit {
 					this.threads.push(new Thread(thread));
 				}.bind(this));
 				
+				console.log(this.threads);
+				
 				// Set pre title
 				const shortGroupId = this.utilsService.getShortId(res.groupId);
 				this.translateService.get('FORUM_TITLE_PREFIX', {'id': shortGroupId}).subscribe(label => {
