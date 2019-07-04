@@ -52,16 +52,14 @@ export class GroupForumComponent implements OnInit {
 				this.padId = res.padId;
 				this.title = res.title;
 				
-				// Sort threads by closed state and by date
-				const sortedThreads = res.threads; //_.sortBy(_.sortBy(withProgress, 'name'), 'progress');
-				
 				// Initialize thread and construct all elements
 				this.threads = [];
-				_.each(sortedThreads, function(thread) {
+				_.each(res.threads, function(thread) {
 					this.threads.push(new Thread(thread));
 				}.bind(this));
 				
-				console.log(this.threads);
+				// Sort threads by last activity (either last response or creation time)
+				this.threads = _.sortBy(this.threads, 'lastActivityTimestamp').reverse();
 				
 				// Set pre title
 				const shortGroupId = this.utilsService.getShortId(res.groupId);
@@ -93,8 +91,8 @@ export class GroupForumComponent implements OnInit {
 		const data = _.extend(thread, { 'forumId': this.forumId });
 		// Post thread to server and create thread in database
 		this.httpManagerService.post('/json/group/forum/thread/create', data).subscribe(res => {
-			// Add new thread to threads array
-			this.threads.push(new Thread(res.thread.ops[0]));
+			// Add new thread to beginning of threads array
+			this.threads.unshift(new Thread(res.thread.ops[0]));
 			
 			// Show snackbar notification
 			this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_THREAD');

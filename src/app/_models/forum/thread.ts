@@ -1,7 +1,7 @@
 import { ReflectiveInjector } from '@angular/core';
 import { UtilsService } from "../../_services/utils.service";
 
-import { Activity } from './activity';
+import { Response } from './response';
 
 export class Thread {
 	/* Raw values from database */
@@ -17,10 +17,11 @@ export class Thread {
 	views: number;
 	postCount: number;
 	sumMainpostVotes: number;
-	lastActivity: Activity;
+	lastResponse: Response;
 	
 	/* Calculated values */
 	createdTimestamp: number;
+	lastActivityTimestamp: number;
 	
 	constructor(res: any) {
 		this.threadId = res._id;
@@ -36,7 +37,12 @@ export class Thread {
 		this.postCount = res.postCount || 0;
 		this.sumMainpostVotes = res.sumMainpostVotes || 0;
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
-		this.lastActivity = res.lastActivity ? new Activity(res.lastActivity) : null;
+		
+		// If last response is not set, use creation time as last activity (important for sorting)
+		this.lastActivityTimestamp = res.lastResponse ? res.lastResponse.timestamp : this.createdTimestamp;
+		
+		// Create last resonse model, including user id, user name and timestamp of last response
+		this.lastResponse = res.lastResponse ? new Response(res.lastResponse) : null;
 	}
 	
 	private getCreationTimestamp(id) {

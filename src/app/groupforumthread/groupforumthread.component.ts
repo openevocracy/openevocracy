@@ -42,6 +42,11 @@ export class GroupForumThreadComponent implements OnInit {
 	public thread: Thread;
 	public posts: Post[];
 	public solvedButton: string;
+	public sortedBy: string = "";
+	public sortLabels = {
+		'sumVotes': 'FORUM_SORT_LABEL_VOTES',
+		'createdTimestamp': 'FORUM_SORT_LABEL_DATE'
+	};
 	
 	// FontAwesome icons
 	public faArrowAltCircleLeft = faArrowAltCircleLeft;
@@ -100,8 +105,6 @@ export class GroupForumThreadComponent implements OnInit {
 				// Create thread object from thread data
 				this.thread = new Thread(res.thread);
 				
-				// TODO Sort posts and comments
-				
 				// Initialize posts and construct all elements
 				this.posts = [];
 				_.each(res.posts, function(post) {
@@ -109,12 +112,37 @@ export class GroupForumThreadComponent implements OnInit {
 					this.posts.push(new Post(post));
 				}.bind(this));
 				
+				this.sortPosts('createdTimestamp', true, false);
+				//this.sortPosts('sumVotes');
+				
 				console.log(this.posts);
 				
 				// Return to subscribers
 				observer.next(true);
 			});
 		});
+	}
+	
+	public sortPosts(by: string, reverse: boolean = false, showSnackbar: boolean = true) {
+		// Remove and retun first element
+		const mainpost = this.posts.shift();
+		
+		// Sort posts
+		this.posts = _.sortBy(this.posts, by).reverse();
+		
+		// If reverse is true, reorder array
+		if (reverse)
+			this.posts = this.posts.reverse();
+		
+		// Add mainpost again as first element
+		this.posts.unshift(mainpost);
+		
+		// Set sort type label
+		this.sortedBy = by;
+		
+		// Show snackbar if flag is set to true
+		if (showSnackbar)
+			this.snackbarService.showSnackbar('FORUM_SNACKBAR_SORT_CHANGED');
 	}
 	
 	public toggleSolved() {

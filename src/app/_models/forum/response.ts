@@ -1,4 +1,4 @@
-export class Activity {
+export class Response {
 	userId: string;
 	userName: string;
 	timestamp: number;

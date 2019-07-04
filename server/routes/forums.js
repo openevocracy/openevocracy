@@ -60,8 +60,8 @@ exports.queryForum = function(req, res) {
 			const authorName = groups.generateUserName(group._id, thread.authorId);
 			
 			// Add user name to last activity, if last activity exists
-			if(thread.lastActivity)
-				thread.lastActivity.userName = groups.generateUserName(group._id, thread.lastActivity.userId);
+			if(thread.lastResponse)
+				thread.lastResponse.userName = groups.generateUserName(group._id, thread.lastResponse.userId);
 			
 			// Add sum of votes of mainpost and number of posts to every thread
 			return Promise.join(sumMainpostVotes_promise, numPosts_promise)
@@ -323,9 +323,9 @@ exports.createPost = function(req, res) {
 	const createPost_promise = db.collection('forum_posts').insertAsync(post);
 	
 	// Reopen thread if it was closed (just open it in any case) and set last activity
-	const lastActivity = { 'timestamp': Date.now(), 'userId': userId };
+	const lastResponse = { 'timestamp': Date.now(), 'userId': userId };
 	const thread_promise = db.collection('forum_threads')
-		.updateAsync({ '_id': post.threadId }, { $set: { 'closed': false, 'lastActivity': lastActivity } });
+		.updateAsync({ '_id': post.threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
 	
 	Promise.all([createPost_promise, thread_promise]).then(res.json.bind(res));
 };
@@ -396,9 +396,9 @@ exports.createComment = function(req, res) {
 	const createComment_promise = db.collection('forum_comments').insertAsync(comment);
 	
 	// Set last activity
-	const lastActivity = { 'timestamp': Date.now(), 'userId': userId };
+	const lastResponse = { 'timestamp': Date.now(), 'userId': userId };
 	const thread_promise = db.collection('forum_threads')
-		.updateAsync({ '_id': comment.threadId }, { $set: { 'lastActivity': lastActivity } });
+		.updateAsync({ '_id': comment.threadId }, { $set: { 'lastResponse': lastResponse } });
 	
 	Promise.all([createComment_promise, thread_promise]).then(res.json.bind(res));
 };

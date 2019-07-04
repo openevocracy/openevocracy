@@ -21,6 +21,10 @@ hr { margin: 0; }
 .post.mainpost { margin-top: 20px; }
 .post-wrapper { padding: 10px 20px; }
 
+.mainpost-spacer { margin-bottom: 20px; margin-top: 30px; text-align: center; }
+.mainpost-spacer hr { margin-bottom: -12px; }
+.mainpost-spacer .sorting-label { display: inline-block; background-color: $grey200; padding: 0 10px; }
+
 .post-head { padding: 10px 20px; }
 .post-links { float: right; }
 .post-links .mat-button { line-height: 22px; padding: 0 5px; font-size: 12px; }
