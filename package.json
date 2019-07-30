@@ -10,7 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "extract": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json",
-    "test_integration": "ENV=test mocha --require test/it-helper test/users.js --exit"
+    "test_integration": "ENV=test mocha --require test/it-helper test/users.js test/topics.js test/proposals.js --exit"
   },
   "private": true,
   "dependencies": {
@@ -74,9 +74,6 @@
     "mailcomposer": "^4.0.2",
     "method-override": "*",
     "methods": "*",
-    "mocha": "^6.1.4",
-    "mocha-prepare": "^0.1.0",
-    "mongo-unit": "^1.4.4",
     "mongodb": "^2.0",
     "mongoist": "^2.0.0",
     "mongoskin": "*",
@@ -139,6 +136,9 @@
     "karma-coverage-istanbul-reporter": "^1.2.1",
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "mocha": "^6.1.4",
+    "mocha-prepare": "^0.1.0",
+    "mongo-unit": "^1.4.4",
     "protractor": "^5.4.2",
     "ts-node": "^7.0.1",
     "tslint": "^5.12.1",
