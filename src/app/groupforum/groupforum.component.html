@@ -17,14 +17,33 @@
 </mat-toolbar>
 
 <div class="threads container">
-	<section *ngFor="let thread of threads" [ngClass]="{'closed': thread.closed, 'open': !thread.closed}">
-		<h2 [routerLink]="['/group/forum/thread', thread.threadId]">
-			<fa-icon *ngIf="thread.private" class="private" [icon]="faLock" title="{{ 'FORUM_THREAD_PRIVATE' | translate }}"></fa-icon>
-			<span class="thread-title">{{ thread.title }}</span>
-		</h2>
-		<div class="meta"><small>
-			{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', thread.authorId]">{{ thread.authorId }}</a>
-			{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ thread.createdTimestamp | date:'y-MM-dd HH:mm' }}</span>
-		</small></div>
+	<section class="flex" *ngFor="let thread of threads" [ngClass]="{'closed': thread.closed, 'open': !thread.closed}">
+		<div>
+			<h2 [routerLink]="['/group/forum/thread', thread.threadId]">
+				<fa-icon *ngIf="thread.private" class="private" [icon]="faLock" title="{{ 'FORUM_THREAD_PRIVATE' | translate }}"></fa-icon>
+				<span class="thread-title">{{ thread.title }}</span>
+			</h2>
+			<div class="meta"><small>
+				{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', thread.authorId]">{{ thread.authorName }}</a>
+				{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ thread.createdTimestamp | date:'y-MM-dd HH:mm' }}</span><span *ngIf="thread.lastResponse">, {{ 'FORUM_LAST_ACTIVITY_PRE_TIME' | translate }} {{ thread.lastResponse.timestamp | date:'y-MM-dd HH:mm' }} {{ 'FORUM_LAST_ACTIVITY_PRE_NAME' | translate }} <a [routerLink]="['/user/profile', thread.lastResponse.userId]">{{ thread.lastResponse.userName }}</a></span>
+			</small></div>
+		</div>
+		
+		<span class="flex-spacer"></span>
+		
+		<div class="stat">
+			<span class="counter">{{ thread.sumMainpostVotes }}</span><br/>
+			<span class="label">{{ 'FORUM_THREAD_MAINPOST_VOTES_LABEL' | translate }}</span>
+		</div>
+		
+		<div class="stat">
+			<span class="counter">{{ thread.postCount }}</span><br/>
+			<span class="label">{{ 'FORUM_THREAD_POST_COUNT_LABEL' | translate }}</span>
+		</div>
+		
+		<div class="stat">
+			<span class="counter">{{ thread.views }}</span><br/>
+			<span class="label">{{ 'FORUM_THREAD_VIEWS_LABEL' | translate }}</span>
+		</div>
 	</section>
 </div>

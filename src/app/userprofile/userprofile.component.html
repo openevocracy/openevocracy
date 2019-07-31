@@ -1,4 +1,73 @@
+<mat-toolbar color="primary">
+	<div class="flex container">
+		<h1>{{ 'HEADER_MAINMENU_PROFILE' | translate }}</h1>
+		<span class="flex-spacer"></span>
+	</div>
+</mat-toolbar>
+
+<div class="container alert-box">
+	<alert></alert>
+</div>
+
 <div class="container">
-	<h2>User Id: {{ userId }}</h2>
-	<p>user profile in progress ...</p>
+	<mat-tab-group>
+		<mat-tab label="{{ 'PROFILE_TAB_TITLE_OVERVIEW' | translate }}">
+			<h3>{{ 'SETTINGS_ACCOUNT_TITLE_ID' | translate }}:</h3>
+			<strong>{{ userId }}</strong>
+		</mat-tab>
+		<mat-tab label="{{ 'PROFILE_TAB_TITLE_ACTIVITIES' | translate }}">
+			<!--div class="container">
+				<button mat-icon-button color="primary" (click)="addActivity($event)">
+					<fa-icon [icon]="faPlus"></fa-icon>
+				</button>
+			</div-->
+			<div class="container">
+				<mat-card *ngFor="let act of activityList" [ngClass]="'act'+act.type">
+					<mat-card-content>
+						<mat-card-title>{{act.timestamp | date: cfg.DATEFORMAT_DATETIME}}</mat-card-title>
+						
+						<div *ngIf="act.type == C.ACT_TOPIC_CREATE">
+							<p>{{'ACT_TOPIC_CREATE_STR' | translate}} {{act.targetId}}</p>
+						</div>
+						
+						<div *ngIf="act.type == C.ACT_PROPOSAL_CREATED">
+							<p>{{'ACT_PROPOSAL_CREATED_STR' | translate}} {{act.targetId}}</p>
+						</div>
+						
+						<div *ngIf="act.type == C.ACT_ELECTED_DELEGATE">
+							<p>{{'ACT_ELECTED_DELEGATE_STR' | translate}} {{act.targetId}}</p>
+						</div>
+						
+						<div *ngIf="act.type == C.ACT_DROP_OUT">
+							<p>{{'ACT_DROP_OUT_STR' | translate}} {{act.targetId}}</p>
+						</div>
+						
+						<div *ngIf="act.type == C.ACT_TOPIC_COMPLETE">
+							<p>{{'ACT_TOPIC_COMPLETE_STR' | translate}} {{act.targetId}}{{'ACT_TOPIC_COMPLETE_STR2' | translate}}</p>
+						</div>
+						
+						<div *ngIf="act.type == C.ACT_MENTIONED">
+							<p>{{'ACT_MENTIONED_STR' | translate}} {{act.targetId}}{{'ACT_MENTIONED_STR2' | translate}}</p>
+						</div>
+						
+						<div *ngIf="act.type == C.ACT_TOPIC_VOTE">
+							<p>{{'ACT_TOPIC_VOTE_STR' | translate}} {{act.targetId}}</p>
+						</div>
+						
+						<div *ngIf="act.type == C.ACT_TOPIC_UNVOTE">
+							<p>{{'ACT_TOPIC_UNVOTE_STR' | translate}} {{act.targetId}}{{'ACT_TOPIC_UNVOTE_STR2' | translate}}</p>
+						</div>
+					</mat-card-content>
+					
+					<mat-card-footer>
+						<div>
+							<button mat-icon-button color="primary" (click)="remove($event, act._id)">
+								<fa-icon [icon]="faTrashAlt"></fa-icon>
+							</button>
+						</div>
+					</mat-card-footer>
+				</mat-card>
+			</div>
+		</mat-tab>
+	</mat-tab-group>
 </div>

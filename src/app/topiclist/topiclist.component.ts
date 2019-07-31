@@ -12,13 +12,15 @@ import { TopicService } from '../_services/topic.service';
 import { UserService } from '../_services/user.service';
 import { TopicsListService } from '../_services/topiclist.service';
 import { ModalService } from '../_services/modal.service';
+import { ActivityListService} from '../_services/activitylist.service';
 
 import { faHandPaper, faPlusSquare, faDownload } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-topics',
 	templateUrl: './topiclist.component.html',
-	styleUrls: ['./topiclist.component.scss']
+	styleUrls: ['./topiclist.component.scss'],
+   providers: [ActivityListService]
 })
 export class TopiclistComponent implements OnInit {
 	public C;
@@ -33,6 +35,7 @@ export class TopiclistComponent implements OnInit {
 		private topicsListService: TopicsListService,
 		private topicService: TopicService,
 		private userService: UserService,
+		private activityListService: ActivityListService,
 		private modal: ModalService,
 		private router: Router) {}
 	
@@ -73,10 +76,22 @@ export class TopiclistComponent implements OnInit {
 				topic.voted = res.voted;
 				topic.numVotes--;
 			});
+			this.activityListService.addActivity(C.ACT_TOPIC_UNVOTE, tid).subscribe(res => { // add activity
+					if (!res)
+					{
+						console.log("Error: ACT_TOPIC_UNVOTE could not be added.");
+					}
+			});
 		} else {
 			this.topicService.vote(tid, uid).subscribe(res => {
 				topic.voted = res.voted;
 				topic.numVotes++;
+			});
+			this.activityListService.addActivity(C.ACT_TOPIC_VOTE, tid).subscribe(res => { // add activity
+					if (!res)
+					{
+						console.log("Error: ACT_TOPIC_VOTE could not be added.");
+					}
 			});
 		}
 	}

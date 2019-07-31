@@ -20,3 +20,7 @@ h2 { display: inline-block; margin: 5px 0; font-weight: 500; cursor: pointer; }
 h2 .thread-title:hover, section h2 .thread-title:focus, section h2 .thread-title:active { color: $teal500; }
 .meta a { color: inherit; }
 .meta a:hover, .meta a:focus, .meta a:active { color: $teal500; text-decoration: none; }
+
+.stat { text-align: center; padding: 0 10px; }
+.stat .counter { font-size: 24px; }
+.stat .label {}

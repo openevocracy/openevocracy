@@ -5,10 +5,11 @@ import { MatDialog } from "@angular/material";
 
 import { Thread } from "../_models/forum/thread";
 
-import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.component';
+import { EditThreadDialogComponent } from '../dialogs/editthread/editthread.component';
 
 import { UtilsService } from '../_services/utils.service';
 import { HttpManagerService } from '../_services/http-manager.service';
+import { SnackbarService } from '../_services/snackbar.service';
 
 import { faComment, faUsers, faLock } from '@fortawesome/free-solid-svg-icons';
 
@@ -37,7 +38,8 @@ export class GroupForumComponent implements OnInit {
 		private activatedRoute: ActivatedRoute,
 		private httpManagerService: HttpManagerService,
 		private translateService: TranslateService,
-		private matDialog: MatDialog) {
+		private matDialog: MatDialog,
+		private snackbarService: SnackbarService) {
 	}
 	
 	ngOnInit() {
@@ -50,14 +52,14 @@ export class GroupForumComponent implements OnInit {
 				this.padId = res.padId;
 				this.title = res.title;
 				
-				// Sort threads by closed state and by date
-				const sortedThreads = res.threads; //_.sortBy(_.sortBy(withProgress, 'name'), 'progress');
-				
 				// Initialize thread and construct all elements
 				this.threads = [];
-				_.each(sortedThreads, function(thread) {
+				_.each(res.threads, function(thread) {
 					this.threads.push(new Thread(thread));
 				}.bind(this));
+				
+				// Sort threads by last activity (either last response or creation time)
+				this.threads = _.sortBy(this.threads, 'lastActivityTimestamp').reverse();
 				
 				// Set pre title
 				const shortGroupId = this.utilsService.getShortId(res.groupId);
@@ -69,12 +71,12 @@ export class GroupForumComponent implements OnInit {
 	}
 	
 	/*
-	 * @desc: opens dialog to add new thread and subscribe to dialog
+	 * @desc: Opens dialog to add new thread and subscribe to dialog
 	 *        function is called from "New thread"-Button
 	 */
 	public openNewThreadDialog() {
 		// Open dialog
-		let dialogRef = this.matDialog.open(NewThreadDialogComponent, {'minWidth': '600px'});
+		const dialogRef = this.matDialog.open(EditThreadDialogComponent, { 'minWidth': '600px' });
 		// Wait for onSubmit event from dialog
 		dialogRef.componentInstance.onSubmit.subscribe(thread => {
 			this.onSubmit(thread);
@@ -86,9 +88,15 @@ export class GroupForumComponent implements OnInit {
 	 */
 	private onSubmit(thread) {
 		// Extend thread information, coming from dialog
-		var data = _.extend(thread, { 'forumId': this.forumId });
+		const data = _.extend(thread, { 'forumId': this.forumId });
 		// Post thread to server and create thread in database
-		this.httpManagerService.post('/json/group/forum/thread/create', data).subscribe();
+		this.httpManagerService.post('/json/group/forum/thread/create', data).subscribe(res => {
+			// Add new thread to beginning of threads array
+			this.threads.unshift(new Thread(res.thread.ops[0]));
+			
+			// Show snackbar notification
+			this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_THREAD');
+		});
 	}
 
 }

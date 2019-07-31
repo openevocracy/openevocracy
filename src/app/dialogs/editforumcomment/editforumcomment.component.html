@@ -1,0 +1,10 @@
+<h2 mat-dialog-title>{{ 'FORUM_DIALOG_EDIT_COMMENT_TITLE' | translate }}</h2>
+
+<mat-dialog-content>
+	<textarea rows="4" [(ngModel)]="comment"></textarea>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+	<button mat-raised-button color="primary" (click)="submit()">{{ 'FORM_BUTTON_SAVE' | translate }}</button>
+	<button mat-raised-button color="warn" (click)="close()">{{ 'FORM_BUTTON_CANCEL' | translate }}</button>
+</mat-dialog-actions>

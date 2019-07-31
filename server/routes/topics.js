@@ -17,6 +17,8 @@ var pads = require('./pads');
 var utils = require('../utils');
 var mail = require('../mail');
 
+var activities = require('./activities');
+
 function calculateDeadline(nextStage, prevDeadline, levelDuration) {
     // define standard parameter
     if(_.isUndefined(levelDuration))
@@ -85,6 +87,11 @@ function manageConsensusStageAsync(topic, levelDuration) {
                 'stagePassedStarted': Date.now(),
                 'finalDocument': finalDocumentHtmlPromise
             };
+                        
+            //add activity
+            //for (users) {
+            //activities.actcreate(_userId, C.ACT_TOPIC_COMPLETE, topicId);
+            // }
             break;
         case C.STAGE_REJECTED:
             // updates below are only required if topic was rejected
@@ -391,7 +398,7 @@ exports.update = function(req, res) {
         if(!topic)
             return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
         else if(!_.isEqual(topic.owner,uid))
-            return utils.rejectPromiseWithAlert(403, 'danger', 'TOPIC_NOT_AUTHORISIZED_FOR_UPDATE');
+            return utils.rejectPromiseWithAlert(403, 'danger', 'TOPIC_NOT_AUTHORIZED_FOR_UPDATE');
         else if(topic.stage != C.STAGE_SELECTION)
             return utils.rejectPromiseWithAlert(403, 'danger', 'TOPIC_UPDATE_ONLY_IN_SELECTION_STAGE');
         

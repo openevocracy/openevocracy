@@ -43,6 +43,14 @@ import { FooterComponent } from './footer/footer.component';
 import { TopiclistComponent } from './topiclist/topiclist.component';
 import { TopicComponent } from './topic/topic.component';
 
+// Dialogs
+import { ShareDialogComponent } from './dialogs/share/share.component';
+import { FeedbackDialogComponent } from './dialogs/feedback/feedback.component';
+import { EditThreadDialogComponent } from './dialogs/editthread/editthread.component';
+import { AskDeleteDialogComponent } from './dialogs/askdelete/askdelete.component';
+import { EditForumPostDialogComponent } from './dialogs/editforumpost/editforumpost.component';
+import { EditForumCommentDialogComponent } from './dialogs/editforumcomment/editforumcomment.component';
+
 // Services
 import { TopicsListService } from './_services/topiclist.service';
 import { TopicService } from './_services/topic.service';
@@ -56,23 +64,23 @@ import { CloseeditorModalService } from './_services/modal.closeeditor.service';
 import { UtilsService } from './_services/utils.service';
 import { LanguageService } from './_services/language.service';
 import { ConfigService } from './_services/config.service';
+import { SnackbarService } from './_services/snackbar.service';
+import { ActivityListService } from './_services/activitylist.service';
 
 // Shared
 import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
+
+// New components (not sorted)
 import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
 import { GroupComponent } from './group/group.component';
 import { GroupvisComponent } from './groupvis/groupvis.component';
 import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
-import { ShareDialogComponent } from './dialogs/share/share.component';
-import { FeedbackDialogComponent } from './dialogs/feedback/feedback.component';
 import { GroupForumComponent } from './groupforum/groupforum.component';
-import { NewThreadDialogComponent } from './dialogs/newthread/newthread.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { GroupForumThreadComponent } from './groupforumthread/groupforumthread.component';
-import { AskDeleteDialogComponent } from './dialogs/askdelete/askdelete.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -111,10 +119,12 @@ export function loadConfig(configService: ConfigService) {
 		ShareDialogComponent,
 		FeedbackDialogComponent,
 		GroupForumComponent,
-		NewThreadDialogComponent,
+		EditThreadDialogComponent,
 		EditorFieldComponent,
 		GroupForumThreadComponent,
-		AskDeleteDialogComponent
+		AskDeleteDialogComponent,
+		EditForumPostDialogComponent,
+		EditForumCommentDialogComponent
 	],
 	imports: [
 		BrowserModule,
@@ -152,6 +162,8 @@ export function loadConfig(configService: ConfigService) {
 		CloseeditorModalService,
 		UtilsService,
 		LanguageService,
+		SnackbarService,
+		ActivityListService,
 		//{ provide: 'cfg', useValue: cfg },
 		/*{ provide: 'cfg',
 		  useFactory: (configService: ConfigService) => () => Promise.resolve(configService.get()),
@@ -161,7 +173,11 @@ export function loadConfig(configService: ConfigService) {
 	],
 	entryComponents: [
 		FeedbackDialogComponent,
-		AskDeleteDialogComponent
+		AskDeleteDialogComponent,
+		EditForumPostDialogComponent,
+		EditForumCommentDialogComponent,
+		EditThreadDialogComponent,
+		ShareDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

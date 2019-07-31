@@ -14,11 +14,9 @@ import {
 	MatTabsModule,
 	MatSnackBarModule,
 	MatDialogModule,
-	MatSlideToggleModule
+	MatSlideToggleModule,
+	MatSelectModule
 } from '@angular/material';
-
-import { ShareDialogComponent } from '../dialogs/share/share.component';
-import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.component';
 
 @NgModule({
 	imports: [
@@ -35,7 +33,8 @@ import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.compone
 		MatTabsModule,
 		MatSnackBarModule,
 		MatDialogModule,
-		MatSlideToggleModule
+		MatSlideToggleModule,
+		MatSelectModule
 	],
 	exports: [
 		MatButtonModule,
@@ -51,11 +50,11 @@ import { NewThreadDialogComponent } from '../dialogs/newthread/newthread.compone
 		MatTabsModule,
 		MatSnackBarModule,
 		MatDialogModule,
-		MatSlideToggleModule
+		MatSlideToggleModule,
+		MatSelectModule
 	],
 	entryComponents: [
-		ShareDialogComponent,
-		NewThreadDialogComponent
+		
 	]
 })
 export class MaterialModule {}

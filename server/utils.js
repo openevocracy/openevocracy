@@ -10,17 +10,49 @@ function prepareAlert(type, content, vars) {
     return { 'type': type, 'content': content, 'vars': vars };
 }
 
+/**
+ * @desc: Send alert message to client
+ */
 exports.sendAlert = function(res, status, type, content, vars) {
-    res.status(status).send({'alert': prepareAlert(type, content, vars)});
+    res.status(status).send({ 'alert': prepareAlert(type, content, vars) });
 };
 
+/**
+ * @desc: Send simple message to client
+ */
+exports.sendMessage = function(res, status, msg) {
+    res.status(status).send({ 'status': status, 'msg': msg });
+};
+
+/**
+ * @desc: Wrapper for Promise.reject() which allows to send a
+ *        simple error message to the client
+ */
+exports.rejectPromiseWithMessage = function(status, msg) {
+	return Promise.reject({ 'status': status, 'msg': msg });
+};
+
+/**
+ * @desc: Wrapper for Promise.reject() which allows to send a
+ *        more complex alert message to the client
+ */
 exports.rejectPromiseWithAlert = function(status, type, content, vars) {
-    return Promise.reject({'status': status, 'alert': prepareAlert(type, content, vars)});
+    return Promise.reject({ 'status': status, 'alert': prepareAlert(type, content, vars) });
 };
 
+/**
+ * @desc: Checks if an object is an own error which implies that the object
+ *        has a key 'status', which represents the http status code
+ */
 exports.isOwnError = function(error) {
-    return _.has(error,'status') && _.has(error,'alert') || _.has(error,'reason');
+	return _.has(error,'status');
+    //return _.has(error,'status') && _.has(error,'alert') || _.has(error,'reason');
 };
+
+/**
+ * @desc: Handles an own error, which basically means that the result is sent
+ *        to the server and a specific html status code is used
+ */
 exports.handleOwnError = function(res) {
     return function(error) {
         res.status(error.status).send(error);

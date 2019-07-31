@@ -58,6 +58,20 @@ function assignParticipantsToGroups(participants) {
 }
 
 /*
+ * @desc: Generate username from chance library, using groupId and userId as seed
+ */
+ 
+function generateUserName(groupId, userId) {
+	// Create new chance object, which seed exists out of groupId and userId
+   const seed = groupId.toString()+userId.toString();
+   const chanceName = new Chance(seed);
+   
+   // Generate name and return
+   return chanceName.first();
+}
+exports.generateUserName = generateUserName;
+
+/*
  * @desc: Store group, group pad and members in database
  *        Called from initial creation and remix
  * @params:
@@ -371,8 +385,8 @@ exports.query = function(req, res) {
 		});
 		
 		// Generate group specific color_offset
-		var chance = new Chance(groupId.toString());
-		var offset = chance.integer({min: 0, max: 360});
+		const chanceOffset = new Chance(groupId.toString());
+		const offset = chanceOffset.integer({min: 0, max: 360});
 		
 		// Get previous pads
 		var prevPads_promise = Promise.join(group_promise, groupRelations_promise).spread(function(group, groupRelations) {
@@ -412,7 +426,7 @@ exports.query = function(req, res) {
          
          return Promise.props({
          	'userId': relation.userId,
-				'name': chance.first(),
+				'name': generateUserName(groupId, relation.userId),
 				'color': memberColor_promise,
 				'prevPadHtml': prevPadHtml_promise,
 				'ratingKnowledge': memberRatingKnowledge_promise,

@@ -10,6 +10,7 @@ import { HttpManagerService } from '../_services/http-manager.service';
 import { AlertService } from '../_services/alert.service';
 import { TopicService } from '../_services/topic.service';
 import { UserService } from '../_services/user.service';
+import { ActivityListService} from '../_services/activitylist.service';
 
 import { C } from '../../../shared/constants';
 import * as _ from 'underscore';
@@ -52,6 +53,7 @@ export class TopicComponent implements OnInit {
 		private topicService: TopicService,
 		private userService: UserService,
 		private activatedRoute: ActivatedRoute,
+		private activityListService: ActivityListService,
 		private httpManagerService: HttpManagerService) {}
 	
    ngOnInit() {
@@ -86,6 +88,14 @@ export class TopicComponent implements OnInit {
 			
 			// Reload topic data
 			this.loadTopic(this.topicId);
+			
+			// Add activity
+			this.activityListService.addActivity(C.ACT_PROPOSAL_CREATED, this.topicId).subscribe(res => {
+					if (!res)
+					{
+						console.log("Error: ACT_PROPOSAL_CREATED could not be added.");
+					}
+			});
 		});
 	}
 	

@@ -29,6 +29,11 @@ exports.cfg = {
 	REMINDER_GROUP_SECOND   : 1*C.MINUTE,
 	REMINDER_GROUP_LAZY     : 1*C.MINUTE,
 	
+	// Date and time format
+   DATEFORMAT_DATETIME: baseCfg.DATEFORMAT_DATETIME,
+   DATEFORMAT_DATE: baseCfg.DATEFORMAT_DATE,
+   DATEFORMAT_TIME: baseCfg.DATEFORMAT_TIME,
+	
 	PRIVATE: {
 		BASE_URL     : baseCfg.BASE_URL,
 		DATABASE_HOST: 'mongodb://localhost',

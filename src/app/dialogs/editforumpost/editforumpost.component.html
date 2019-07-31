@@ -1,0 +1,10 @@
+<h2 mat-dialog-title>{{ 'FORUM_DIALOG_EDIT_POST_TITLE' | translate }}</h2>
+
+<mat-dialog-content>
+	<editor-field [labelKey]="'FORUM_DIALOG_EDIT_POST_TEXT'" (onEditorCreated)="editorCreated($event)"></editor-field>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+	<button mat-raised-button color="primary" (click)="submit()">{{ 'FORM_BUTTON_SAVE' | translate }}</button>
+	<button mat-raised-button color="warn" (click)="close()">{{ 'FORM_BUTTON_CANCEL' | translate }}</button>
+</mat-dialog-actions>
