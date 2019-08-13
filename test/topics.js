@@ -39,6 +39,8 @@ describe('topics', () => {
    name: 'test'
   });
   console.log(res.body);
+  
+  expect(res.status).to.equal(200);
  })
  
  let list, first;
@@ -47,6 +49,7 @@ describe('topics', () => {
   set('Authorization', 'JWT ' + token).send();
   console.log(res.body);
   
+  expect(res.status).to.equal(200);
   list = res.body;
   first = list[0];
   expect(first.name).to.equal('test');
@@ -62,6 +65,7 @@ describe('topics', () => {
   set('Authorization', 'JWT ' + token).send();
   console.log(res.body);
   
+  expect(res.status).to.equal(200);
   first = res.body;
   //expect(first.name).to.equal('test'); // FIXME
   expect(first.stage).to.equal(0);
@@ -76,6 +80,7 @@ describe('topics', () => {
   set('Authorization', 'JWT ' + token).send();
   console.log(res.body);
   
+  expect(res.status).to.equal(200);
   first = res.body;
   expect(first.name).to.equal('test');
   expect(first.stage).to.equal(0);
@@ -89,6 +94,8 @@ describe('topics', () => {
   const res = await chai.request(app).patch('/json/topic/'+first._id).
   set('Authorization', 'JWT ' + token).send();
   console.log(res.body);
+  
+  expect(res.status).to.equal(200);
  })
  
  it('should vote topic', async () => {
@@ -97,6 +104,7 @@ describe('topics', () => {
   console.log(res.body);
   
   // TODO can vote on deleted topic?
+  expect(res.status).to.equal(200);
  })
  
  it('should unvote topic', async () => {
@@ -105,12 +113,15 @@ describe('topics', () => {
   console.log(res.body);
   
   // TODO can vote on deleted topic?
+  expect(res.status).to.equal(200);
  })
  
- it('should get topic', async () => {
+ it.skip('should get topic file', async () => {
   const res = await chai.request(app).get('/file/topic/'+first._id).
   set('Authorization', 'JWT ' + token).send();
   console.log(res.body);
+  
+  expect(res.status).to.equal(200);
  })
  
  /*it('should get topic editor', async () => {
@@ -123,6 +134,8 @@ describe('topics', () => {
   const res = await chai.request(app).delete('/json/topic/'+first._id).
   set('Authorization', 'JWT ' + token).send();
   console.log(res.body);
+  
+  expect(res.status).to.equal(200);
  })
 
 })
