@@ -68,6 +68,13 @@ test_platform:
   - sleep 1m
   - docker-compose -f docker-compose.dev.yml down
 
+test_integration:
+  stage: test
+  script:
+  - cp shared/config.base.default.js shared/config.base.js
+  - npm install
+  - npm run test_integration
+
 release_docker:
   image: docker:stable
   stage: release
