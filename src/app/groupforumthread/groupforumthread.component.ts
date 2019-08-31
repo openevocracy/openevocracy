@@ -2,6 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivatedRoute, Params } from '@angular/router';
 import { MatDialog } from '@angular/material';
+import { TranslateService } from '@ngx-translate/core';
 
 import { Observable } from 'rxjs';
 
@@ -43,6 +44,8 @@ export class GroupForumThreadComponent implements OnInit {
 	public posts: Post[];
 	public solvedButton: string;
 	public sortedBy: string = "";
+	public missingWordsComments: boolean[] = [];
+	public forumMinWordsCommentMsgTranslated: string = "";
 	public sortLabels = {
 		'sumVotes': 'FORUM_SORT_LABEL_VOTES',
 		'createdTimestamp': 'FORUM_SORT_LABEL_DATE'
@@ -66,7 +69,8 @@ export class GroupForumThreadComponent implements OnInit {
 		private httpManagerService: HttpManagerService,
 		private configService: ConfigService,
 		private userService: UserService,
-		private snackbarService: SnackbarService) {
+		private snackbarService: SnackbarService,
+		private translateService: TranslateService) {
 			// Store config
 			this.cfg = configService.get();
 			
@@ -112,10 +116,10 @@ export class GroupForumThreadComponent implements OnInit {
 					this.posts.push(new Post(post));
 				}.bind(this));
 				
+				// Sort posts
 				this.sortPosts('createdTimestamp', true, false);
-				//this.sortPosts('sumVotes');
 				
-				console.log(this.posts);
+				console.log(this.thread);
 				
 				// Return to subscribers
 				observer.next(true);
@@ -157,14 +161,35 @@ export class GroupForumThreadComponent implements OnInit {
 				this.solvedButton = 'FORUM_BUTTON_MARK_SOLVED';
 				
 				// Show snack bar notification
-				this.snackbarService.showSnackbar('FORUM_SNACKBAR_MARK_SOLVED');
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_MARK_UNSOLVED');
 			} else {
 				this.thread.closed = true;
 				this.solvedButton = 'FORUM_BUTTON_MARK_UNSOLVED';
 				
 				// Show snack bar notification
-				this.snackbarService.showSnackbar('FORUM_SNACKBAR_MARK_UNSOLVED');
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_MARK_SOLVED');
 			}
+		});
+	}
+	
+	/**
+	 * @desc: Changes the status of e-mail notifications
+	 */
+	public changeNotifyStatus(e) {
+		const data = {
+			'userId': this.userId,
+			'entityId': this.thread.threadId,
+			'status': e.checked
+		};
+		
+		// Post notify status to server
+		this.httpManagerService.post('/json/notify', data).subscribe(res => {
+			// Snackbar notification
+			if (e.checked)
+				this.snackbarService.showSnackbar('FORUM_THREAD_EMAIL_NOTIFY_STATUS_ON');
+			else
+				this.snackbarService.showSnackbar('FORUM_THREAD_EMAIL_NOTIFY_STATUS_OFF');
+			
 		});
 	}
 	
@@ -221,6 +246,11 @@ export class GroupForumThreadComponent implements OnInit {
 	 */
 	public showCommentField(idx) {
 		this.commentField = idx;
+		
+		// Add innerHTML for comment field
+		this.translateService.get('FORUM_MIN_WORDS_COMMENT_MSG', {'n': this.cfg.MIN_WORDS_FORUM_COMMENT}).subscribe(label => {
+			this.forumMinWordsCommentMsgTranslated = label;
+		});
 	}
 	
 	/**
@@ -231,15 +261,36 @@ export class GroupForumThreadComponent implements OnInit {
 	}
 	
 	/**
+	 * @desc: When the user types content to the comment textarea, the number of words are calculated
+	 * 		 If the number is lower than the limit from config, then the button is disabled and an info message is shown
+	 * @note: For identification, the postId is used, since the commentId is not available before the comment was created
+	 * 		 Since only one comment it possible in a post, the postId is unique
+	 */
+	public checkCommentWordLength(commentTextarea, postId) {
+		// Strip html (if any) and count number of words
+		const commentText = this.utilsService.stripHtml(commentTextarea);
+		const numWords = this.utilsService.countStringWords(commentText);
+		
+		// If number of words written in comment is higher or equal than the limit
+		if (numWords >= this.cfg.MIN_WORDS_FORUM_COMMENT) {
+			// Add element to array (if not already in list)
+			if (!this.missingWordsComments.includes(postId)) this.missingWordsComments.push(postId);
+		} else {
+			// Remove element from array
+			this.missingWordsComments = _.without(this.missingWordsComments, postId);
+		}
+	}
+	
+	/**
 	 * @desc: Sends a post request to the server when the user has written a new comment
 	 */
 	public submitComment(post) {
 		const comment = post.newComment;
 		
 		// Check if textarea is undefined or empty
-		if(_.isUndefined(comment) || comment.trim() == "")
+		if (_.isUndefined(comment) || comment.trim() == "")
 			return;
-			
+		
 		// Close textarea
 		this.hideCommentField();
 		

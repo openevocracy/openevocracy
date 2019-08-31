@@ -13,8 +13,8 @@ export class ActivityListService {
 	constructor(
 		private httpManagerService: HttpManagerService) { }
 		
-	public getActivityList(): Observable<Activity[]> {
-		return this.httpManagerService.get('/json/useractivitylist');
+	public getUserActivityList(profileId : string): Observable<Activity[]> {
+		return this.httpManagerService.get('/json/useractivitylist/' + profileId);
 	}
 	
 	public addActivity(type: number, targetId: string): Observable<any> {

@@ -150,9 +150,44 @@ function sendMailToUser(mailUser, mailSubject, mailSubjectParams, mailBody, mail
 exports.sendMailToUser = sendMailToUser;
 
 /**
+ * @desc: Takes user information from user id and calls sendMailToUser()
+ * @params:
+ *   mailId: id of user
+ *   other params same as sendMailToUser() function
+ */
+function sendMailToUserId(userId, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
+	// Get user from database
+	const user_promise = db.collection('users').findOneAsync({ '_id': userId }, { 'email': true, 'lang': true });
+	
+	// After user is found, send mail
+	user_promise.then(function(user) {
+		sendMailToUser(user, mailSubject, mailSubjectParams, mailBody, mailBodyParams);
+	});
+}
+exports.sendMailToUserId = sendMailToUserId;
+
+/**
+ * @desc: Takes user information from array of user ids and call sendMailToUser() for every user
+ * @params:
+ *   mailIds: several user ids
+ *   other params same as sendMailToUser() function
+ */
+function sendMailToUserIds(userIds, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
+	// Get users from database
+	const user_promise = db.collection('users').find({ '_id': { '$in': userIds } }, { 'email': true, 'lang': true }).toArrayAsync();
+	
+	// After user is found, send mail
+	user_promise.then(function(users) {
+		sendMailMulti(users, mailSubject, mailSubjectParams, mailBody, mailBodyParams);
+	});
+}
+exports.sendMailToUserIds = sendMailToUserIds;
+
+/**
  * @desc: send email to multiple users (find details in description of 'sendMail' function)
  * @params:
- *   mailUsers: an array with mailUser elements (see 'sendMail' func)
+ *   mailUsers: an array with mailUser elements (see 'sendMailToUser()' function)
+ *   other params same as sendMailToUser() function
  */
 function sendMailMulti(mailUsers, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	_.each(mailUsers, function(mailUser) {

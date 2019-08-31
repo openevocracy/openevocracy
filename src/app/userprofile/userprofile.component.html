@@ -1,6 +1,6 @@
 <mat-toolbar color="primary">
 	<div class="flex container">
-		<h1>{{ 'HEADER_MAINMENU_PROFILE' | translate }}</h1>
+		<h1>{{ header }}</h1>
 		<span class="flex-spacer"></span>
 	</div>
 </mat-toolbar>
@@ -12,8 +12,8 @@
 <div class="container">
 	<mat-tab-group>
 		<mat-tab label="{{ 'PROFILE_TAB_TITLE_OVERVIEW' | translate }}">
-			<h3>{{ 'SETTINGS_ACCOUNT_TITLE_ID' | translate }}:</h3>
-			<strong>{{ userId }}</strong>
+			<h3>{{ 'PROFILE_ID_TITLE' | translate }}:</h3>
+			<strong>{{ profileId }}</strong>
 		</mat-tab>
 		<mat-tab label="{{ 'PROFILE_TAB_TITLE_ACTIVITIES' | translate }}">
 			<!--div class="container">
@@ -21,7 +21,7 @@
 					<fa-icon [icon]="faPlus"></fa-icon>
 				</button>
 			</div-->
-			<div class="container">
+			<!--div class="container"-->
 				<mat-card *ngFor="let act of activityList" [ngClass]="'act'+act.type">
 					<mat-card-content>
 						<mat-card-title>{{act.timestamp | date: cfg.DATEFORMAT_DATETIME}}</mat-card-title>
@@ -67,7 +67,7 @@
 						</div>
 					</mat-card-footer>
 				</mat-card>
-			</div>
+			<!--/div-->
 		</mat-tab>
 	</mat-tab-group>
 </div>

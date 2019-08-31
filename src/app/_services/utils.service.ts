@@ -54,4 +54,12 @@ export class UtilsService {
 	public stripHtml(htmlString) {
 		return htmlString.replace(/<(?:.|\n)*?>/gm, '');
 	}
+	
+	/**
+	 * @desc: Count number of words in string
+	 */
+	public countStringWords(str) {
+		// Split and get length
+		return str.split(/\s+\b/).length;
+	}
 }

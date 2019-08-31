@@ -88,10 +88,18 @@ function manageConsensusStageAsync(topic, levelDuration) {
                 'finalDocument': finalDocumentHtmlPromise
             };
                         
-            //add activity
-            //for (users) {
-            //activities.actcreate(_userId, C.ACT_TOPIC_COMPLETE, topicId);
-            // }
+            // Add activity
+            var actPromise = activities.actcreate(topic.owner, C.ACT_TOPIC_COMPLETE, topicId);
+
+				var finalDocumentHtmlPromise = db.collection('groups')
+					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
+					.then(function(group) {
+						return db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
+				    }).then(function(docId) {
+				    	return pads.getPadHTMLAsync('group', docId);
+				    });
+		
+		
             break;
         case C.STAGE_REJECTED:
             // updates below are only required if topic was rejected

@@ -2,7 +2,8 @@
 	"HEADER_MAINMENU_TOPICLIST": "Topics",
 	"HEADER_MAINMENU_TIMELINE": "Timeline",
 	"HEADER_MAINMENU_SETTINGS": "Settings",
-	"HEADER_MAINMENU_PROFILE": "Profile",
+	"HEADER_MAINMENU_USER_PROFILE": "A user's profile",
+	"HEADER_MAINMENU_MY_PROFILE": "My profile",
 	"HEADER_MAINMENU_LOGOUT": "Logout",
 	"HEADER_MAINMENU_LANGUAGE": "Select language",
 	"HEADER_MAINMENU_FEEDBACK": "Feedback",
@@ -54,8 +55,9 @@
 	"SETTINGS_ACCOUNT_TITLE_CREDENTIALS": "Your credentials",
 	"SETTINGS_BUTTON_SAVE": "Save",
 		
+	"PROFILE_ID_TITLE": "Identification number",
 	"PROFILE_TAB_TITLE_OVERVIEW": "Overview",
-	"PROFILE_TAB_TITLE_ACTIVITIES": "My Activities",
+	"PROFILE_TAB_TITLE_ACTIVITIES": "Activities",
 	
 	"USER_PASSWORT_NOT_CORRECT": "Password is not correct. Did you <a href=\"{{email}}\">forget your password</a>?",
 	"USER_FORM_VALIDATION_ERROR": "There was something wrong with the entered data. Please check your input again.",
@@ -193,6 +195,11 @@
 	"FORUM_SORT_MENU_LABEL_VOTES": "Votes",
 	"FORUM_SORT_MENU_LABEL_DATE": "Date",
 	"FORUM_SNACKBAR_SORT_CHANGED": "The sorting of the responses was changed.",
+	"FORUM_MIN_WORDS_COMMENT_MSG": "Write at least {{n}} words.",
+	"FORUM_EMAIL_NOTIFY_STATUS_ON": "You will be informed about new threads in this forum.",
+	"FORUM_EMAIL_NOTIFY_STATUS_OFF": "You won't be informed anymore about new threads in this forum.",
+	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_ON": "You will be informed about new posts in this thread.",
+	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_OFF": "You won't be informed anymore about new posts in this thread.",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",

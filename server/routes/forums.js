@@ -1,12 +1,14 @@
 // General libraries
-var _ = require('underscore');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
-var Promise = require('bluebird');
+const _ = require('underscore');
+const db = require('../database').db;
+const ObjectId = require('mongodb').ObjectID;
+const Promise = require('bluebird');
 
 // Import routes
-var utils = require('../utils');
-var groups = require('./groups');
+const mail = require('../mail');
+const utils = require('../utils');
+const groups = require('./groups');
+const users = require('./users');
 
 function commentTextareaToHtml(str) {
 	// First strip html, then add <p> and replace \n by <br/>
@@ -27,12 +29,29 @@ function isUserAuthorizedAsync(userId, collection, entityId) {
 	});
 }
 
+/**
+ * @desc: Send email to all users watching the entity (e.g. forum or thread), exept the author
+ * @params:
+ *    entityId: id of entity users are watching (e.g. forum or thread)
+ *    authorId: id of author of the entity
+ *    mail: contains subject, subjectParams, body, bodyParams
+ **/
+function sendMailToWatchingUsersAsync(entityId, authorId, mail) {
+	return users.getNotifyUserIdsForEntity(entityId).then(function(userIds) {
+		// Remove author from list of userIds
+		const userIdsWithoutAuthor = utils.withoutObjectId(userIds, authorId);
+		
+		// Send mail to all users
+		mail.sendMailToUserIds(userIdsWithoutAuthor, mail.subject, mail.subjectParams, mail.body, mail.bodyParams);
+	});
+}
+
 /*
  * @desc: Query forum of specific group
  */
 exports.queryForum = function(req, res) {
 	var forumId = ObjectId(req.params.id);
-	//var userId = ObjectId(req.user._id);
+	var userId = ObjectId(req.user._id);
 	
 	// Get group
 	var group_promise = db.collection('groups').findOneAsync({'forumId': forumId}, {'topicId': true});
@@ -46,6 +65,9 @@ exports.queryForum = function(req, res) {
 	var topic_promise = group_promise.then(function(group) {
 		return db.collection('topics').findOneAsync({'_id': group.topicId}, {'name': true});
 	});
+	
+	// Get email notification status of user for this forum
+	const notifyStatus_promise = users.getEmailNotifyStatusAsync(userId, forumId);
 	
 	// Get threads
 	var threads_promise = group_promise.then(function(group) {
@@ -77,11 +99,13 @@ exports.queryForum = function(req, res) {
 	});
 	
 	// Send group id and topic name
-	Promise.join(group_promise, pad_promise, topic_promise, threads_promise).spread(function(group, pad, topic, threads) {
+	Promise.join(group_promise, pad_promise, topic_promise, notifyStatus_promise, threads_promise)
+		.spread(function(group, pad, topic, notifyStatus, threads) {
 		return {
 			'groupId': group._id,
 			'padId': pad._id,
 			'title': topic.name,
+			'notifyStatus': notifyStatus,
 			'threads': threads
 		};
 	}).then(res.json.bind(res));
@@ -92,8 +116,9 @@ exports.queryForum = function(req, res) {
  * @desc: Creates new thread in forum of specific group
  */
 exports.createThread = function(req, res) {
-	const userId = ObjectId(req.user._id);
+	const authorId = ObjectId(req.user._id);
 	const body = req.body;
+	const forumId = ObjectId(body.forumId);
 	
 	// Generate threadId and mainPostId
 	const threadId = ObjectId();
@@ -103,8 +128,8 @@ exports.createThread = function(req, res) {
 	const thread = {
 		'_id': threadId,
 		'mainPostId': mainPostId,
-		'forumId': ObjectId(body.forumId),
-		'authorId': userId,
+		'forumId': forumId,
+		'authorId': authorId,
 		'title': body.title,
 		'private': body.private,
 		'closed': false,
@@ -119,16 +144,28 @@ exports.createThread = function(req, res) {
 	const post = {
 		'_id': mainPostId,
 		'threadId': threadId,
-		'forumId': ObjectId(body.forumId),
-		'authorId': userId,
+		'forumId': forumId,
+		'authorId': authorId,
 		'html': body.html
 	};
 	
 	// Store main post in database
 	const post_promise = db.collection('forum_posts').insertAsync(post);
 	
-	// Wait for both promises and send response
-	Promise.join(thread_promise, post_promise).spread(function(thread, post) {
+	
+	// Send email to all users who are watching the forum, exept the author
+	const mail = {
+		'subject': 'EMAIL_NEW_THREAD_CREATED_SUBJECT', 'subjectParams': [],
+		'body': 'EMAIL_NEW_THREAD_CREATED_BODY', 'bodyParams': [authorId]
+	};
+	const notifyUsers_promise = sendMailToWatchingUsersAsync(forumId, authorId, mail);
+	
+	
+	// Add author to email notification for this thread
+	const notifyAddAuthor_promise = users.enableEmailNotifyAsync(threadId, authorId);
+	
+	// Wait for promises and send response
+	Promise.join(thread_promise, post_promise, notifyUsers_promise, notify_promise).spread(function(thread, post) {
 		return { 'thread': thread, 'post': post };
 	}).then(res.json.bind(res));
 };
@@ -165,8 +202,17 @@ exports.queryThread = function(req, res) {
 	const userId = ObjectId(req.user._id);
 	const threadId = ObjectId(req.params.id);
 	
-	// Get thread
-	const thread_promise = db.collection('forum_threads').findOneAsync({'_id': threadId});
+	// Get email notification status of user for this thread
+	const notifyStatus_promise = users.getEmailNotifyStatusAsync(userId, threadId);
+	
+	// Get thread and extend it by notify status
+	const thread_promise = notifyStatus_promise.then(function(notifyStatus) {
+		return db.collection('forum_threads')
+			.findOneAsync({'_id': threadId}).then(function(thread) {
+				// Extend thread by notify status
+				return _.extend(thread, { 'notifyStatus': notifyStatus });
+		});
+	}); 
 	
 	// Get group
 	var group_promise = thread_promise.then(function(thread) {
@@ -237,7 +283,7 @@ exports.queryThread = function(req, res) {
 		.updateAsync({ '_id': threadId }, { $inc: {'views': 1} });
 	
 	// Send result
-	Promise.join(thread_promise, posts_promise, viewsUpdate_promise)
+	Promise.join(thread_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise)
 		.spread(function(thread, posts, viewsUpdate) {
 		return {
 			'thread': thread,
@@ -308,26 +354,41 @@ exports.deleteThread = function(req, res) {
  * @desc: Creates new post in forum thread
  */
 exports.createPost = function(req, res) {
-	const userId = ObjectId(req.user._id);
+	const authorId = ObjectId(req.user._id);
 	const body = req.body;
+	const threadId = ObjectId(body.threadId);
 	
 	// Define post
 	const post = {
 		'html': body.html,
-		'threadId': ObjectId(body.threadId),
+		'threadId': threadId,
 		'forumId': ObjectId(body.forumId),
-		'authorId': userId
+		'authorId': authorId
 	};
 	
 	// Store post in database
 	const createPost_promise = db.collection('forum_posts').insertAsync(post);
 	
 	// Reopen thread if it was closed (just open it in any case) and set last activity
-	const lastResponse = { 'timestamp': Date.now(), 'userId': userId };
+	const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
 	const thread_promise = db.collection('forum_threads')
-		.updateAsync({ '_id': post.threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
+		.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
 	
-	Promise.all([createPost_promise, thread_promise]).then(res.json.bind(res));
+	// Send email to all users who are watching the thread, exept the author
+	const mail = {
+		'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
+		'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': [authorId]
+	};
+	const notifyUsers_promise = sendMailToWatchingUsersAsync(threadId, authorId, mail);
+		
+	// Add author to email notification for the related post
+	const notifyAddUser_promise = users.getEmailNotifyStatusAsync(authorId, threadId).then(function(status) {
+		// only if entry does not already exists (is null), otherwise the user has actively
+		// turned off notifications (and should not be bothered) or notifications are already enabled
+		return _.isNull(status) ? users.enableEmailNotifyAsync(authorId, threadId) : null;
+	});
+	
+	Promise.all([createPost_promise, thread_promise, notifyUsers_promise, notifyAddUser_promise]).then(res.json.bind(res));
 };
 
 /**

@@ -294,11 +294,10 @@ exports.query = function(req, res) {
 
 // GET /json/user/settings/:id
 exports.settings = function(req, res) {
-    var uid = ObjectId(req.params.id);
+    var userId = ObjectId(req.params.id);
     
-    db.collection('users').findOneAsync(
-        {'_id':uid},{'email': true}).
-        then(res.send.bind(res));
+    db.collection('users').findOneAsync({'_id': userId},{'email': true})
+        .then(res.send.bind(res));
 };
 
 // PATCH /json/user/settings/:id
@@ -457,7 +456,7 @@ exports.socketAuthentication = function(ws, userToken, cb) {
  * @desc: When user sends feedback, redirect it to feedback@openevocracy.org
  */
 exports.sendFeedback = function(req, res) {
-	let feedback = req.body.feedback;
+	const feedback = req.body.feedback;
 	
 	// Send mail
 	mail.sendMail('feedback@openevocracy.org', 'Evocracy | Feedback Nachricht', feedback);
@@ -466,3 +465,68 @@ exports.sendFeedback = function(req, res) {
 	utils.sendAlert(res, 200, 'success', 'DIALOG_FEEDBACK_SUCESSFULLY_SENT');
 };
 
+/**
+ * @desc: Enables or disables email notification for an entity (e.g. thread, post) for a specific user
+ */
+exports.notify = function(req, res) {
+	const userId = ObjectId(req.body.userId);
+	const entityId = ObjectId(req.body.entityId);
+	const status = req.body.status;
+	
+	// Enable or disable notify and return response
+	const notify_promise = (status ? enableEmailNotifyAsync(userId, entityId) : disableEmailNotifyAsync(userId, entityId));
+	notify_promise.then(res.send.bind(res));
+};
+
+/**
+ * @desc: Get status of email notification for an entity (e.g. forum, thread) for a specific user
+ * @return: status, which is null (no entry) or boolean (true for enabled, false for disabled)
+ **/
+function getEmailNotifyStatusAsync(userId, entityId) {
+	// Define query
+	const query = { 'userId': userId, 'entityId': entityId };
+	
+	// Get status (null if not exists, true if notify is enabled, false if disabled)
+	return db.collection('mail_notify').findOneAsync(query)
+		.then(function(notify) {
+			return (_.isNull(notify) ? null : notify.status);
+	});
+}
+exports.getEmailNotifyStatusAsync = getEmailNotifyStatusAsync;
+
+/**
+ * @desc: Enables email notification for an entity (e.g. forum, thread) for a specific user
+ * 		  If notification does not exist, create entry in database
+ */
+function enableEmailNotifyAsync(userId, entityId) {
+	// Define query
+	const query = { 'userId': userId, 'entityId': entityId };
+	
+	// If exists, set enable notifications, otherwise, add entry to collection
+	return db.collection('mail_notify')
+		.updateAsync(query, { $set: { 'status': true } }, { 'upsert': true });
+}
+exports.enableEmailNotifyAsync = enableEmailNotifyAsync;
+
+/**
+ * @desc: Disable email notification for an entity (e.g. forum, thread) for a specific user
+ */
+function disableEmailNotifyAsync(userId, entityId) {
+	// Define query
+	const query = { 'userId': userId, 'entityId': entityId };
+	
+	// Disable email notifications
+	return db.collection('mail_notify')
+		.updateAsync(query, { $set: { 'status': false } });
+}
+exports.disableEmailNotifyAsync = disableEmailNotifyAsync;
+
+/**
+ * @desc: Gets all user ids which should be notified for a specific entity (like thread or forum)
+ */
+exports.getNotifyUserIdsForEntity = function(entityId) {
+	// Get user ids, given entity ids
+	return db.collection('mail_notify')
+		.find({'entityId': entityId}, {'_id': false, 'userId': true}).toArrayAsync()
+		.map(function(notify) { return notify.userId; });
+};

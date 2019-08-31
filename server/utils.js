@@ -202,3 +202,12 @@ exports.checkConfig = function() {
 exports.stripHtml = function (htmlString) {
 	return htmlString.replace(/<(?:.|\n)*?>/gm, '');
 };
+
+/**
+ * @desc: Removes an object id from array of object ids
+ */
+exports.withoutObjectId = function(arr, idToRemove) {
+	return arr.filter(function(el) {
+		return !el.equals(idToRemove);
+	});
+};

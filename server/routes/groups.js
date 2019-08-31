@@ -1,19 +1,20 @@
 // General libraries
-var _ = require('underscore');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
-var Promise = require('bluebird');
-var Chance = require('chance');
-var Color = require('color');
+const _ = require('underscore');
+const db = require('../database').db;
+const ObjectId = require('mongodb').ObjectID;
+const Promise = require('bluebird');
+const Chance = require('chance');
+const Color = require('color');
 
 // Own references
-var C = require('../../shared/constants').C;
-var cfg = require('../../shared/config').cfg;
-var ratings = require('./ratings');
-var topics = require('./topics');
-var pads = require('./pads');
-var mail = require('../mail');
-var utils = require('../utils');
+const C = require('../../shared/constants').C;
+const cfg = require('../../shared/config').cfg;
+const ratings = require('./ratings');
+const topics = require('./topics');
+const pads = require('./pads');
+const users = require('./users');
+const mail = require('../mail');
+const utils = require('../utils');
 
 function getGroupMembersAsync(groupId) {
 	return db.collection('group_relations').find({'groupId': groupId}).toArrayAsync();
@@ -60,7 +61,6 @@ function assignParticipantsToGroups(participants) {
 /*
  * @desc: Generate username from chance library, using groupId and userId as seed
  */
- 
 function generateUserName(groupId, userId) {
 	// Create new chance object, which seed exists out of groupId and userId
    const seed = groupId.toString()+userId.toString();
@@ -83,31 +83,36 @@ exports.generateUserName = generateUserName;
  *    level: new level (old level +1)
  */
 function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, level) {
-	var chatRoomId = ObjectId();
-	var forumId = ObjectId();
+	const chatRoomId = ObjectId();
+	const forumId = ObjectId();
 	
 	// Create group itself
-	var group = { '_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'forumId': forumId, 'level': level };
-	var createGroup_promise =	db.collection('groups').insertAsync(group);
+	const group = { '_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'forumId': forumId, 'level': level };
+	const createGroup_promise =	db.collection('groups').insertAsync(group);
 	
 	// Create group pad
-	var pad = { '_id': padId, 'topicId': topicId, 'groupId': groupId, 'expiration': nextDeadline };
-	var createPadProposal_promise = pads.createPadAsync(pad, 'group');
+	const pad = { '_id': padId, 'topicId': topicId, 'groupId': groupId, 'expiration': nextDeadline };
+	const createPadProposal_promise = pads.createPadAsync(pad, 'group');
 	
 	// Create forum for group
-	var forum = { '_id': forumId, 'groupId': groupId };
-	var createForum_promise = db.collection('forums').insertAsync(forum);
+	const forum = { '_id': forumId, 'groupId': groupId };
+	const createForum_promise = db.collection('forums').insertAsync(forum);
 	
-	// Insert group members to database
-	var insertMembers_promise =
-	db.collection('group_relations').insertAsync(
-		_.map(groupRelations, function(rel) {
-			var prevGroupId = _.isUndefined(rel.prevGroupId) ? null : rel.prevGroupId;
-			return { 'groupId': groupId, 'userId': rel.userId, 'prevGroupId': prevGroupId, 'prevPadId': rel.prevPadId, 'lastActivity': -1 };
-		})
-	);
+	// Store group members
+	const members_promise = Promise.map(groupRelations, function(rel) {
+		// Enable email notifications of member for the forum
+		const enableNotify_promise = users.enableEmailNotifyAsync(rel.userId, forumId);
+		
+		// Add member to group relations collection
+		const prevGroupId = _.isUndefined(rel.prevGroupId) ? null : rel.prevGroupId;
+		const insert = { 'groupId': groupId, 'userId': rel.userId, 'prevGroupId': prevGroupId, 'prevPadId': rel.prevPadId, 'lastActivity': -1 };
+		const groupRelations_promise = db.collection('group_relations').insertAsync(insert);
+		
+		// Return promises
+		return Promise.join(enableNotify_promise, groupRelations_promise);
+	});
 	
-	return Promise.join(createPadProposal_promise, createGroup_promise, createForum_promise, insertMembers_promise);
+	return Promise.join(createPadProposal_promise, createGroup_promise, createForum_promise, members_promise);
 }
 
 /**
@@ -145,21 +150,21 @@ exports.createGroupsAsync = function(topic) {
 	var storeValidParticipantsPromise = validParticipants_promise.then(function(validParticipants) {
 		console.log(validParticipants);
 		return db.collection('topics').updateAsync(
-		{ '_id': topic._id },
-		{ $set: { 'validParticipants': _.size(validParticipants) } });
+			{ '_id': topic._id },
+			{ $set: { 'validParticipants': _.size(validParticipants) } });
 	});
 	
 	// Create group and notify members
-	var createGroupsPromise = validParticipants_promise.then(function(validParticipants) {
+	const createGroupsPromise = validParticipants_promise.then(function(validParticipants) {
 		return assignParticipantsToGroups(validParticipants);
 	}).map(function(group_members) {
 		// Create new group id
-		var topicId = topic._id;
-		var groupId = ObjectId();
+		const topicId = topic._id;
+		const groupId = ObjectId();
 		
 		// TODO Notifications
 		// Send mail to notify new group members
-		var send_mail_promise = db.collection('users')
+		const send_mail_promise = db.collection('users')
 			.find({'_id': { $in: group_members }}, {'email': true}).toArrayAsync()
 			.then(function(users) {
 				mail.sendMailMulti(users,
@@ -169,18 +174,16 @@ exports.createGroupsAsync = function(topic) {
 		
 		// Get group relations (previous pad ids and member ids)
 		// Note: previous group id is not possible here, since initially there is no previous group
-		var groupRelations_promise = db.collection('pads_proposal')
+		const groupRelations_promise = db.collection('pads_proposal')
 			.find({ 'topicId': topicId, 'ownerId': {$in: group_members} }, {'_id': true, 'ownerId': true}).toArrayAsync()
 			.map(function(rawGroupRelation) {
 				return { 'prevPadId': rawGroupRelation._id, 'userId': rawGroupRelation.ownerId };
-			});
-			
-			
+		});
 		
 		// Store group in database
-		var padId = ObjectId();
-		var nextDeadline = topic.nextDeadline;
-		var store_group_promise = groupRelations_promise.then(function(groupRelations) {
+		const padId = ObjectId();
+		const nextDeadline = topic.nextDeadline;
+		const store_group_promise = groupRelations_promise.then(function(groupRelations) {
 			console.log('groupRelations', groupRelations);
 			return storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 0);
 		});

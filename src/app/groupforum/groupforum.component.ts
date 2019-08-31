@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from "@angular/material";
@@ -9,6 +9,7 @@ import { EditThreadDialogComponent } from '../dialogs/editthread/editthread.comp
 
 import { UtilsService } from '../_services/utils.service';
 import { HttpManagerService } from '../_services/http-manager.service';
+import { UserService } from '../_services/user.service';
 import { SnackbarService } from '../_services/snackbar.service';
 
 import { faComment, faUsers, faLock } from '@fortawesome/free-solid-svg-icons';
@@ -18,14 +19,17 @@ import * as _ from 'underscore';
 @Component({
 	selector: 'app-groupforum',
 	templateUrl: './groupforum.component.html',
-	styleUrls: ['./groupforum.component.scss']
+	styleUrls: ['./groupforum.component.scss'],
+	encapsulation: ViewEncapsulation.None
 })
 export class GroupForumComponent implements OnInit {
 	
+	public userId: string;
 	public forumId: string;
 	public padId: string;
 	public prefix: string;
 	public title: string;
+	public notifyStatus: boolean = false;
 	public threads: Thread[];
 	
 	// FontAwesome icons
@@ -39,7 +43,11 @@ export class GroupForumComponent implements OnInit {
 		private httpManagerService: HttpManagerService,
 		private translateService: TranslateService,
 		private matDialog: MatDialog,
+		private userService: UserService,
 		private snackbarService: SnackbarService) {
+			
+		// Store user id of current user
+		this.userId = this.userService.getUserId();
 	}
 	
 	ngOnInit() {
@@ -51,6 +59,7 @@ export class GroupForumComponent implements OnInit {
 			this.httpManagerService.get('/json/group/forum/' + this.forumId).subscribe(res => {
 				this.padId = res.padId;
 				this.title = res.title;
+				this.notifyStatus = res.notifyStatus;
 				
 				// Initialize thread and construct all elements
 				this.threads = [];
@@ -96,6 +105,26 @@ export class GroupForumComponent implements OnInit {
 			
 			// Show snackbar notification
 			this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_THREAD');
+		});
+	}
+	
+	/**
+	 * @desc: Changes the status of e-mail notifications
+	 */
+	public changeNotifyStatus(e) {
+		const data = {
+			'userId': this.userId,
+			'entityId': this.forumId,
+			'status': e.checked
+		};
+		
+		// Post notify status to server
+		this.httpManagerService.post('/json/notify', data).subscribe(res => {
+			// Snackbar notification
+			if (e.checked)
+				this.snackbarService.showSnackbar('FORUM_EMAIL_NOTIFY_STATUS_ON');
+			else
+				this.snackbarService.showSnackbar('FORUM_EMAIL_NOTIFY_STATUS_OFF');
 		});
 	}
 

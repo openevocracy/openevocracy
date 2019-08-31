@@ -10,9 +10,12 @@
 		<button mat-button title="{{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}" [routerLink]="['/group/forum', thread?.forumId]">
 			<span><fa-icon [icon]="faArrowAltCircleLeft"></fa-icon> {{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}</span>
 		</button>
+		
 		<button *ngIf="thread?.authorId == userId" mat-button title="{{ solvedButton | translate }}" (click)="toggleSolved()">
 			<span><fa-icon [icon]="faCheckSquare"></fa-icon> {{ solvedButton | translate }}</span>
 		</button>
+		
+		<mat-slide-toggle id="watch-thread" [checked]="thread?.notifyStatus" (change)="changeNotifyStatus($event)">Watch</mat-slide-toggle>
 		
 		<button mat-button [matMenuTriggerFor]="menu">{{ 'FORUM_SORT_MENU_LABEL' | translate }} <fa-icon [icon]="faCaretDown"></fa-icon></button>
 		<mat-menu #menu="matMenu">
@@ -79,10 +82,11 @@
 						<span>{{ 'FORUM_LINK_ADD_COMMENT' | translate }}</span>
 					</a>
 					<div *ngIf="commentField==i" class="comment-field">
-						<div><textarea [(ngModel)]="post.newComment" placeholder="{{ 'FORUM_PLACEHOLDER_NEW_COMMENT' | translate }}" rows="3"></textarea></div>
-						<button mat-raised-button color="primary" title="{{ 'FORUM_BUTTON_NEW_COMMENT' | translate }}" (click)="submitComment(post)">
+						<div><textarea [(ngModel)]="post.newComment" (ngModelChange)="checkCommentWordLength(post.newComment, post.postId)" placeholder="{{ 'FORUM_PLACEHOLDER_NEW_COMMENT' | translate }}" rows="3"></textarea></div>
+						<button mat-raised-button color="primary" [disabled]="!missingWordsComments.includes(post.postId)" title="{{ 'FORUM_BUTTON_NEW_COMMENT' | translate }}" (click)="submitComment(post)">
 							<span>{{ 'FORUM_BUTTON_NEW_COMMENT' | translate }}</span>
 						</button>
+						<span class="minwords-message" *ngIf="!missingWordsComments.includes(post.postId)" [innerHTML]="forumMinWordsCommentMsgTranslated"></span>
 					</div>
 				</div>
 			</div>

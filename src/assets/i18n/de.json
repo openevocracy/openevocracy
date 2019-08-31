@@ -2,7 +2,8 @@
 	"HEADER_MAINMENU_TOPICLIST": "Themen",
 	"HEADER_MAINMENU_TIMELINE": "Timeline",
 	"HEADER_MAINMENU_SETTINGS": "Einstellungen",
-	"HEADER_MAINMENU_PROFILE": "Profil",
+	"HEADER_MAINMENU_USER_PROFILE": "Profil eines Benutzers",
+	"HEADER_MAINMENU_MY_PROFILE": "Mein Profil",
 	"HEADER_MAINMENU_LOGOUT": "Logout",
 	"HEADER_MAINMENU_LANGUAGE": "Sprache wählen",
 	"HEADER_MAINMENU_FEEDBACK": "Feedback",
@@ -54,8 +55,9 @@
 	"SETTINGS_ACCOUNT_TITLE_CREDENTIALS": "Deine Zugangsdaten",
 	"SETTINGS_BUTTON_SAVE": "Speichern",
 	
+	"PROFILE_ID_TITLE": "Identifikationsnummer",
 	"PROFILE_TAB_TITLE_OVERVIEW": "Übersicht",
-	"PROFILE_TAB_TITLE_ACTIVITIES": "Meine Aktivitäten",
+	"PROFILE_TAB_TITLE_ACTIVITIES": "Aktivitäten",
 	
 	"USER_PASSWORT_NOT_CORRECT": "Das Passwort ist nicht korrekt. Hast du dein <a href=\"{{email}}\">Passwort vergessen</a>?",
 	"USER_FORM_VALIDATION_ERROR": "Deine Eingabe war nicht ganz korrekt, prüfe deine Änderung nochmal auf Richtigkeit.",
@@ -193,6 +195,11 @@
 	"FORUM_SORT_MENU_LABEL_VOTES": "Votes",
 	"FORUM_SORT_MENU_LABEL_DATE": "Datum",
 	"FORUM_SNACKBAR_SORT_CHANGED": "Die Sortierung der Antworten wurde geändert.",
+	"FORUM_MIN_WORDS_COMMENT_MSG": "Schreibe mindestens {{n}} Worte.",
+	"FORUM_EMAIL_NOTIFY_STATUS_ON": "Du wirst ab sofort über neue Threads in diesem Forum informiert.",
+	"FORUM_EMAIL_NOTIFY_STATUS_OFF": "Du wirst ab sofort nicht mehr über neue Threads in diesem Forum informiert.",
+	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_ON": "Du wirst ab sofort über neue Beiträge in diesem Thread informiert.",
+	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_OFF": "Du wirst ab sofort nicht mehr über neue Beiträge in diesem Thread informiert.",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",

@@ -134,7 +134,7 @@ app.get('/json/activitylist', auth(), activities.getActivityList);
 /*
  * @desc: Get a user's activity list
  */
-app.get('/json/useractivitylist', auth(), activities.getUserActivityList);
+app.get('/json/useractivitylist/:id', auth(), activities.getUserActivityList);
 
 /*
  * @desc: Get, create and delete activities
@@ -299,6 +299,9 @@ app.get('/json/ping', utils.ping);
 
 // @desc: User feedback
 app.post('/json/feedback', users.sendFeedback);
+
+// @desc: Enable/Disable email notifications for user
+app.post('/json/notify', users.notify);
 
 // ###################
 // ###   T E S T   ###

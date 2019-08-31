@@ -32,7 +32,8 @@ exports.manageAndListActivitiesAsync = manageAndListActivitiesAsync;
  * @desc: Get whole activity list of a particular user
  */
 exports.getUserActivityList = function(req, res) {
-	manageAndListActivitiesAsync({ 'userId': req.user._id }).then(res.json.bind(res));
+   var userId = ObjectId(req.params.id);
+	manageAndListActivitiesAsync({ 'userId': userId }).then(res.json.bind(res));
 };
 
 /*
@@ -42,7 +43,7 @@ exports.getActivityList = function(req, res) {
 	manageAndListActivitiesAsync().then(res.json.bind(res));
 };
 
-exports.query = function(req, res) {
+exports.query = function(req, res) { // not tested yet / probably not properly implemented
    var activityId = ObjectId(req.activityId);
    var userId = ObjectId(req.userId);
    
@@ -58,7 +59,7 @@ exports.query = function(req, res) {
 
 
 // Actually creates an activity in the database
-function actcreate(_userId, _type, _targetId, res) {
+function actcreate(_userId, _type, _targetId) {
    // Create activity
    const activity = {
       _id: ObjectId(),
@@ -67,7 +68,7 @@ function actcreate(_userId, _type, _targetId, res) {
 	   targetId: _targetId
    };
    
-   db.collection('activities').insertAsync(activity).then(res.json.bind(res));
+   return db.collection('activities').insertAsync(activity);
 };
 exports.actcreate = actcreate;
 
@@ -82,7 +83,7 @@ exports.create = function(req, res) {
    }
 
    
-   actcreate(req.user._id, req.body.type, req.body.targetId, res);
+   actcreate(req.user._id, req.body.type, req.body.targetId).then(res.json.bind(res));
 };
 
 

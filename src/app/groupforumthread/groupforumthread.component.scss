@@ -7,8 +7,11 @@ hr { margin: 0; }
 .vote-fa fa-icon:hover, .post-vote fa-icon:focus, .post-vote fa-icon:active { color: $teal500; }
 
 #thread-toolbar { border-bottom: 5px solid $white; }
-#thread-toolbar.open { border-color: $green500; }
+#thread-toolbar.open { border-color: $red500; }
 #thread-toolbar.closed { border-color: $blue500; }
+
+#watch-thread { padding: 7.5px; }
+.mat-slide-toggle-content { font-weight: 500; }
 
 /* Post */
 .post {
@@ -43,6 +46,7 @@ hr { margin: 0; }
 .comment-add { padding: 20px 0; }
 .comment-add-link { cursor: pointer;  }
 .comment-field textarea { width: 100%; margin-bottom: 10px; padding: 5px; }
+.comment-add .minwords-message { margin-left: 1rem; }
 
 .comment-wrapper { margin-left: 40px; }
 .comment-text p { margin: 10px 0; }

@@ -50,7 +50,7 @@ describe('activities', () => {
  })
  
  it('should get user activities', async () => {
-  const res = await chai.request(app).get('/json/useractivitylist').
+  const res = await chai.request(app).get('/json/useractivitylist/'+userId).
   set('Authorization', 'JWT ' + token).send();
   console.log(res.body);
   
@@ -67,7 +67,7 @@ describe('activities', () => {
   console.log(res.body);
   expect(res.status).to.equal(200);
   
-  res = await chai.request(app).get('/json/useractivitylist').
+  res = await chai.request(app).get('/json/useractivitylist/'+userId).
   set('Authorization', 'JWT ' + token).send();
   console.log(res.body);
   expect(res.status).to.equal(200);
