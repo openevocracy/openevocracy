@@ -1,13 +1,13 @@
 <mat-toolbar color="primary">
 	<div class="flex container">
 		<div class="topic-title">
-			<p>{{prefix}}</p>
-			<h1>{{title}}</h1>
+			<!--<p>{{prefix}}</p>-->
+			<h1>{{ title }} / {{ groupName }}</h1>
 		</div>
 		
 		<span class="flex-spacer"></span>
 		
-		<mat-slide-toggle id="watch-forum" [checked]="notifyStatus" (change)="changeNotifyStatus($event)">Watch</mat-slide-toggle>
+		<mat-slide-toggle id="watch-forum" [checked]="notifyStatus" (change)="changeNotifyStatus($event)">{{ 'FORUM_BUTTON_WATCH' | translate }}</mat-slide-toggle>
 		
 		<button mat-button title="{{ 'FORUM_BUTTON_NEW_THREAD' | translate }}" (click)="openNewThreadDialog()">
 			<span><fa-icon [icon]="faComment"></fa-icon> {{ 'FORUM_BUTTON_NEW_THREAD' | translate }}</span>

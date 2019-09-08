@@ -108,8 +108,8 @@ function sendMail(toEmailAddress, subject, text) {
 			'from': '"Evocracy Project" <'+cfg.PRIVATE.MAIL_ADDRESS+'>',
 			'to': toEmailAddress,
 			'subject': subject,
-			'text': text //, // plaintext body
-			//html: '<b>Welcome/b>' // html body
+			//'text': text  // plaintext body
+			'html': text  // html body
 		};
 		
 		// Send mail via nodemailer if MAIL flag is true in config

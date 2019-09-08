@@ -30,5 +30,11 @@
     "EMAIL_REGISTRATION_MESSAGE": "Willkommen bei Evocracy,\n\nDu hast gerade auf {0} ein Benutzerkonto erstellt. Bitte bestätige deine E-Mail-Adresse, indem du auf folgenden Link klickst:\n\n{0}/login?v={1}&m={2}\n\nFalls du dich hier nicht registriert hast, ignodiere diese E-Mail einfach.\n",
     
     "EMAIL_PASSWORD_RESET_SUBJECT": "Neues Passwort",
-    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n du hast dir ein neues Passwort zusenden lassen. Dein temporäres Passwort lautet:\n\n{0}\n\n Wir empfehlen dir das Passwort direkt nach dem nächsten Login wieder auf ein Passwort deiner Wahl zu ändern."
+    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n du hast dir ein neues Passwort zusenden lassen. Dein temporäres Passwort lautet:\n\n{0}\n\n Wir empfehlen dir das Passwort direkt nach dem nächsten Login wieder auf ein Passwort deiner Wahl zu ändern.",
+    
+    "EMAIL_NEW_THREAD_CREATED_SUBJECT": "Neuer Thread",
+    "EMAIL_NEW_THREAD_CREATED_BODY": "<p>Hi,<br/><br/>im Forum der Gruppe {1} wurde ein neuer Thread von Benutzer {0} erstellt.</p><p>Schau direkt rein, was es Neues gibt: <a href='{2}'>{2}</a></p><p>-----</p><p>E-Mail-Benachrichtungen für neue Threads in dieser Gruppe kannst du im <a href=\"{3}\">Forum</a> deaktivieren. Dort kannst du den 'Beobachten'-Slider ausschalten.</p>",
+    
+    "EMAIL_NEW_POST_CREATED_SUBJECT": "Neuer Beitrag",
+    "EMAIL_NEW_POST_CREATED_BODY": "<p>Hi,<br/><br/>in einem Thread der Gruppe {1} wurde ein neuer Beitrag von Benutzer {0} erstellt.</p><p>Schau direkt rein, was es Neues gibt: <a href='{2}'>{2}</a></p><p>-----</p><p>E-Mail-Benachrichtungen für neue Beiträge in dieser Gruppe kannst du im <a href=\"{3}\">Thread</a> deaktivieren. Dort kannst du den 'Beobachten'-Slider ausschalten.</p>"
 }

@@ -29,6 +29,8 @@ export class GroupForumComponent implements OnInit {
 	public padId: string;
 	public prefix: string;
 	public title: string;
+	public groupName: string;
+	public threadName: string;
 	public notifyStatus: boolean = false;
 	public threads: Thread[];
 	
@@ -59,6 +61,7 @@ export class GroupForumComponent implements OnInit {
 			this.httpManagerService.get('/json/group/forum/' + this.forumId).subscribe(res => {
 				this.padId = res.padId;
 				this.title = res.title;
+				this.groupName = res.groupName;
 				this.notifyStatus = res.notifyStatus;
 				
 				// Initialize thread and construct all elements

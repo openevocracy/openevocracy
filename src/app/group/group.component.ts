@@ -153,6 +153,7 @@ export class GroupComponent extends EditorComponent implements OnInit, OnDestroy
 				
 				this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
 					this.group = new Group(res);
+					console.log(this.group);
 					this.topicId = res.topicId;
 					
 					// Add color of current member

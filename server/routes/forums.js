@@ -5,6 +5,7 @@ const ObjectId = require('mongodb').ObjectID;
 const Promise = require('bluebird');
 
 // Import routes
+var cfg = require('../../shared/config').cfg;
 const mail = require('../mail');
 const utils = require('../utils');
 const groups = require('./groups');
@@ -36,13 +37,13 @@ function isUserAuthorizedAsync(userId, collection, entityId) {
  *    authorId: id of author of the entity
  *    mail: contains subject, subjectParams, body, bodyParams
  **/
-function sendMailToWatchingUsersAsync(entityId, authorId, mail) {
+function sendMailToWatchingUsersAsync(entityId, authorId, content) {
 	return users.getNotifyUserIdsForEntity(entityId).then(function(userIds) {
 		// Remove author from list of userIds
 		const userIdsWithoutAuthor = utils.withoutObjectId(userIds, authorId);
 		
 		// Send mail to all users
-		mail.sendMailToUserIds(userIdsWithoutAuthor, mail.subject, mail.subjectParams, mail.body, mail.bodyParams);
+		mail.sendMailToUserIds(userIdsWithoutAuthor, content.subject, content.subjectParams, content.body, content.bodyParams);
 	});
 }
 
@@ -54,7 +55,7 @@ exports.queryForum = function(req, res) {
 	var userId = ObjectId(req.user._id);
 	
 	// Get group
-	var group_promise = db.collection('groups').findOneAsync({'forumId': forumId}, {'topicId': true});
+	var group_promise = db.collection('groups').findOneAsync({'forumId': forumId}, {'topicId': true, 'name': true});
 	
 	// Get group pad
 	var pad_promise = group_promise.then(function(group) {
@@ -103,6 +104,7 @@ exports.queryForum = function(req, res) {
 		.spread(function(group, pad, topic, notifyStatus, threads) {
 		return {
 			'groupId': group._id,
+			'groupName': group.name,
 			'padId': pad._id,
 			'title': topic.name,
 			'notifyStatus': notifyStatus,
@@ -152,20 +154,33 @@ exports.createThread = function(req, res) {
 	// Store main post in database
 	const post_promise = db.collection('forum_posts').insertAsync(post);
 	
-	
-	// Send email to all users who are watching the forum, exept the author
-	const mail = {
-		'subject': 'EMAIL_NEW_THREAD_CREATED_SUBJECT', 'subjectParams': [],
-		'body': 'EMAIL_NEW_THREAD_CREATED_BODY', 'bodyParams': [authorId]
-	};
-	const notifyUsers_promise = sendMailToWatchingUsersAsync(forumId, authorId, mail);
+	// Send email to all users who are watching the thread, exept the author
+	const notifyUsers_promise = db.collection('groups')
+		.findOneAsync({ 'forumId': forumId }, { 'name': true }).then((group) => {
+			
+			// Build link to forum and thread
+			const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
+			const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
+			
+			// Define parameter for email body
+			const bodyParams = [ groups.generateUserName(group._id, authorId), group.name, urlToThread, urlToForum ];
+			
+			// Define email translation strings
+			const mail = {
+				'subject': 'EMAIL_NEW_THREAD_CREATED_SUBJECT', 'subjectParams': [],
+				'body': 'EMAIL_NEW_THREAD_CREATED_BODY', 'bodyParams': bodyParams
+			};
+			
+			// Finally, send email to watching users
+			return sendMailToWatchingUsersAsync(forumId, authorId, mail);
+	});
 	
 	
 	// Add author to email notification for this thread
-	const notifyAddAuthor_promise = users.enableEmailNotifyAsync(threadId, authorId);
+	const notifyAddAuthor_promise = users.enableEmailNotifyAsync(authorId, threadId);
 	
 	// Wait for promises and send response
-	Promise.join(thread_promise, post_promise, notifyUsers_promise, notify_promise).spread(function(thread, post) {
+	Promise.join(thread_promise, post_promise, notifyUsers_promise, notifyAddAuthor_promise).spread(function(thread, post) {
 		return { 'thread': thread, 'post': post };
 	}).then(res.json.bind(res));
 };
@@ -357,12 +372,15 @@ exports.createPost = function(req, res) {
 	const authorId = ObjectId(req.user._id);
 	const body = req.body;
 	const threadId = ObjectId(body.threadId);
+	const forumId = ObjectId(body.forumId);
 	
 	// Define post
+	const postId = ObjectId();
 	const post = {
+		'_id': postId,
 		'html': body.html,
 		'threadId': threadId,
-		'forumId': ObjectId(body.forumId),
+		'forumId': forumId,
 		'authorId': authorId
 	};
 	
@@ -375,11 +393,24 @@ exports.createPost = function(req, res) {
 		.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
 	
 	// Send email to all users who are watching the thread, exept the author
-	const mail = {
-		'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
-		'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': [authorId]
-	};
-	const notifyUsers_promise = sendMailToWatchingUsersAsync(threadId, authorId, mail);
+	const notifyUsers_promise = db.collection('groups')
+		.findOneAsync({ 'forumId': forumId }, { 'name': true }).then((group) => {
+			
+			// Build link to thread
+			const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
+			
+			// Define parameter for email body
+			const bodyParams = [ groups.generateUserName(group._id, authorId), group.name, urlToThread+'#'+postId, urlToThread ];
+			
+			// Define email translation strings
+			const mail = {
+				'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
+				'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
+			};
+			
+			// Finally, send email to watching users
+			return sendMailToWatchingUsersAsync(threadId, authorId, mail);
+	});
 		
 	// Add author to email notification for the related post
 	const notifyAddUser_promise = users.getEmailNotifyStatusAsync(authorId, threadId).then(function(status) {

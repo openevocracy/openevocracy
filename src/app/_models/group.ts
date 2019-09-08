@@ -2,6 +2,7 @@ import { GroupMember } from './group-member';
 
 export class Group {
 	groupId: string;
+	name: string;
 	topicId: string;
 	docId: string;
 	chatRoomId: string;
@@ -14,6 +15,7 @@ export class Group {
 	
 	constructor(res: any) {
 		this.groupId = res.groupId;
+		this.name = res.name;
 		this.topicId = res.topicId;
 		this.docId = res.docId;
 		this.chatRoomId = res.chatRoomId;

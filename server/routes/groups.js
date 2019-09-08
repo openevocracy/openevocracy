@@ -86,9 +86,35 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 	const chatRoomId = ObjectId();
 	const forumId = ObjectId();
 	
+	// Sample group name
+	const groupName_promise = db.collection('groups').find({ 'topicId': topicId }, { 'name': true }).toArrayAsync()
+		.then(function(groups) {
+			// Initialize chance and sample city
+			const cityChance = new Chance(groupId.toString());
+			let groupName = cityChance.city();
+			
+			// Get groups names as array
+			const groupNames = _.pluck(groups, 'name');
+			
+			// Sample another group name, until group name is unique in this topic
+			while(_.contains(groupNames, groupName)) {
+				groupName = cityChance.city();
+			}
+			
+			return groupName;
+	});
+	
 	// Create group itself
-	const group = { '_id': groupId, 'topicId': topicId, 'chatRoomId': chatRoomId, 'forumId': forumId, 'level': level };
-	const createGroup_promise =	db.collection('groups').insertAsync(group);
+	const createGroup_promise = groupName_promise.then(function(groupName) {
+		// Define group data
+		const group = {
+			'_id': groupId, 'name': groupName, 'level': level,
+			'topicId': topicId, 'chatRoomId': chatRoomId, 'forumId': forumId
+		};
+		
+		// Store group in database
+		return db.collection('groups').insertAsync(group);
+	});
 	
 	// Create group pad
 	const pad = { '_id': padId, 'topicId': topicId, 'groupId': groupId, 'expiration': nextDeadline };
@@ -215,13 +241,6 @@ function getValidGroupsOfSpecificLevelAsync(topicId, level) {
 				// Check if proposal is valid
 				return isProposalValid(proposal.body);
 			});
-	}).then(function(groups) {
-		console.log('groups', groups);
-		// If no valid proposal exists: reject, otherwise return all valid groups
-		if(_.isEmpty(groups))
-			return Promise.reject({reason: 'REJECTED_NO_VALID_GROUP_PROPOSAL'});
-		else
-			return Promise.resolve(groups);
 	});
 }
 
@@ -254,6 +273,13 @@ exports.remixGroupsAsync = function(topic) {
 	});
     
 	return Promise.join(groups_promise, leaders_promise).spread(function(groups, leaders) {
+		/*
+		 * If there is NO group in the current topic level, there was not only one valid document in the current level
+		 */
+		if(_.size(groups) == 0) {
+			return Promise.reject({'reason': 'REJECTED_NO_VALID_GROUP_PROPOSAL'});
+		}
+		
 		/*
 		 * If there is only ONE group in the current topic level, then the topic is finished/passed
 		 */
@@ -446,6 +472,7 @@ exports.query = function(req, res) {
 			.spread(function(topic, group, isLastGroup, group_members) {
 				return {
 					'groupId': groupId,
+					'name': group.name,
 					'topicId': topicId,
 					'docId': pad.docId,
 					'level': group.level,

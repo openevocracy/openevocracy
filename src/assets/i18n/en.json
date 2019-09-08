@@ -200,6 +200,7 @@
 	"FORUM_EMAIL_NOTIFY_STATUS_OFF": "You won't be informed anymore about new threads in this forum.",
 	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_ON": "You will be informed about new posts in this thread.",
 	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_OFF": "You won't be informed anymore about new posts in this thread.",
+	"FORUM_BUTTON_WATCH": "Watch",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",

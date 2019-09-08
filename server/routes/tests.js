@@ -1,12 +1,12 @@
-var _ = require('underscore');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
-var Promise = require('bluebird');
+const _ = require('underscore');
+const db = require('../database').db;
+const ObjectId = require('mongodb').ObjectID;
+const Promise = require('bluebird');
 
-var topics = require('./topics');
-var groups = require('./groups');
+const topics = require('./topics');
+const groups = require('./groups');
 
-var tid = ObjectId('54f646ccc3a414a60d40d660');
+const tid = ObjectId('54f646ccc3a414a60d40d660');
 
 exports.clean_database = function(req, res) {
     db.collection('groups').drop();
@@ -176,10 +176,10 @@ exports.remix_groups = function(req, res) {
             });
         },
         function action() {
-            return db.collection('topics').findOneAsync({ '_id': tid }).
-            then(function(topic) {return fill_topic_user_ratings(topic).return(topic);}).
-            then(_.partial(topics.manageConsensusStage,_,0)).
-            then(function(topic) {
+            return db.collection('topics').findOneAsync({ '_id': tid })
+            .then(function(topic) {return fill_topic_user_ratings(topic).return(topic);})
+            .then(_.partial(topics.manageConsensusStage,_,0))
+            .then(function(topic) {
                 return db.collection('groups').find({ 'tid': tid, 'level': topic.level }).
                 toArrayAsync().then(function(groups) {
                     response_text += "<br/>level: " + topic.level + ", number of groups: " + _.size(groups) + ", sizes of each group: ";

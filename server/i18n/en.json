@@ -30,5 +30,11 @@
     "EMAIL_REGISTRATION_MESSAGE": "Welcome at Evocracy,\n\nYou just created an account at {0}. Please verify your email by visiting:\n\n{0}/login?v={1}&m={2}\n\nIf you did not register, just ignore this message.\n",
     
     "EMAIL_PASSWORD_RESET_SUBJECT": "New password",
-    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\nyou ordered a password reset for evocracy. Your temporary password is:\n\n{0}\n\nWe highly suggest to change the password directly after your next login to a password of your choice."
+    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\nyou ordered a password reset for evocracy. Your temporary password is:\n\n{0}\n\nWe highly suggest to change the password directly after your next login to a password of your choice.",
+    
+    "EMAIL_NEW_THREAD_CREATED_SUBJECT": "New thread",
+    "EMAIL_NEW_THREAD_CREATED_BODY": "<p>Hi,<br/><br/>user {0} created a new thread in the forum of the group {1}.</p><p>Have a look what's new: <a href='{2}'>{2}</a></p><p>-----</p><p>You can disable e-mail notifications in the <a href=\"{3}\">forum</a>. Just switch off the 'watch'-slider.</p>",
+    
+    "EMAIL_NEW_POST_CREATED_SUBJECT": "New post",
+    "EMAIL_NEW_POST_CREATED_BODY": "<p>Hi,<br/><br/>user {0} created a new post in a thread of the group {1}.</p><p>Have a look what's new: <a href='{2}'>{2}</a></p><p>-----</p><p>You can disable e-mail notifications in the <a href=\"{3}\">thread</a>. Just switch off the 'watch'-slider.</p>"
 }

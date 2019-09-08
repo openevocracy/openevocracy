@@ -15,7 +15,7 @@
 			<span><fa-icon [icon]="faCheckSquare"></fa-icon> {{ solvedButton | translate }}</span>
 		</button>
 		
-		<mat-slide-toggle id="watch-thread" [checked]="thread?.notifyStatus" (change)="changeNotifyStatus($event)">Watch</mat-slide-toggle>
+		<mat-slide-toggle id="watch-thread" [checked]="thread?.notifyStatus" (change)="changeNotifyStatus($event)">{{ 'FORUM_BUTTON_WATCH' | translate }}</mat-slide-toggle>
 		
 		<button mat-button [matMenuTriggerFor]="menu">{{ 'FORUM_SORT_MENU_LABEL' | translate }} <fa-icon [icon]="faCaretDown"></fa-icon></button>
 		<mat-menu #menu="matMenu">

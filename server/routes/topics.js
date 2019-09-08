@@ -88,9 +88,21 @@ function manageConsensusStageAsync(topic, levelDuration) {
                 'finalDocument': finalDocumentHtmlPromise
             };
                         
-            // Add activity
+            // Add activity for creator
             var actPromise = activities.actcreate(topic.owner, C.ACT_TOPIC_COMPLETE, topicId);
-
+            
+            // Add activities for participants
+				var actPromise2 = db.collection('topic_votes')
+					.find({'topicId': topicId}, {'userId': true}).toArrayAsync()
+					.then(function(userVotes) {
+							console.log("userVotes", userVotes);
+							_.each(userVotes, function(userId) {
+								activities.actcreate(userId, C.ACT_TOPIC_COMPLETE, topicId);
+								});
+						});
+		
+		
+				// Final document
 				var finalDocumentHtmlPromise = db.collection('groups')
 					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
 					.then(function(group) {
@@ -233,12 +245,12 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 	
 	// Number of participants per level
 	var participants_per_levels_promise = groups_promise.then(function(groups) {
-		var member_counts_per_groups_promise =
+		var memberCountsPerGroups_promise =
 		db.collection('group_relations').aggregateAsync( [
 			{ $match: { 'groupId': { $in: _.pluck(groups, '_id') } } },
 			{ $group: { '_id': '$groupId', member_count: { $sum : 1 } } } ] );
 		
-		return Promise.join(groups, member_counts_per_groups_promise);
+		return Promise.join(groups, memberCountsPerGroups_promise);
 	}).spread(function (groups, member_counts_per_groups) {
 		var member_counts_per_groups_sorted_by_levels =
 		_.groupBy(member_counts_per_groups, function(member_count) {
@@ -393,7 +405,7 @@ exports.getTopiclistElement = function(req, res) {
 	db.collection('topics').findOneAsync({'_id': topicId})
 		.then(manageTopicStateAsync).then(function(topic) {
 			return appendTopicInfoAsync(topic, userId, false);
-	}).then(res.json.bind(res));
+	}).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 exports.update = function(req, res) {

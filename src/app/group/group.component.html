@@ -3,7 +3,7 @@
 <div class="editor-toolbars">
 <mat-toolbar class="first-toolbar" color="primary">
 	<div class="flex container">
-		<h1>{{ group?.title }}</h1>
+		<h1>{{ group?.title }} / {{ group?.name }}</h1>
 		<span class="saved-text">
 			<span *ngIf="saved">{{ 'EDITOR_SAVED_CHANGES' | translate }}</span>
 			<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
