@@ -27,7 +27,7 @@
     "EMAIL_LEVEL_CHANGE_MESSAGE": "Hi,\n\ndas Thema {0} hat das nächste Lebel erreicht und du wirst wieder dabei sein.\nDu wurdest Gruppe #{1} zugewiesen. Du und deine anderen vier Mitglieder der Gruppe werdet erneut gemeinsam an einem kollaborativen Dokument arbeiten.\n\nHier geht es direkt zur Gruppe:\n{2}/group/{1}\n\nDanke für deine Beteiligung!\n",
     
     "EMAIL_REGISTRATION_SUBJECT": "Deine Registrierung bei Evocracy",
-    "EMAIL_REGISTRATION_MESSAGE": "Willkommen bei Evocracy,\n\nDu hast gerade auf {0} ein Benutzerkonto erstellt. Bitte bestätige deine E-Mail-Adresse, indem du auf folgenden Link klickst:\n\n{0}/login?v={1}&m={2}\n\nFalls du dich hier nicht registriert hast, ignodiere diese E-Mail einfach.\n",
+    "EMAIL_REGISTRATION_MESSAGE": "<p>Willkommen bei Evocracy,<br/><br/>Du hast gerade auf {0} ein Benutzerkonto erstellt. Bitte bestätige deine E-Mail-Adresse, indem du auf folgenden Link klickst:<br/><br/>{0}/login?v={1}&m={2}</p><p>Falls du dich hier nicht registriert hast, ignodiere diese E-Mail einfach.</p>",
     
     "EMAIL_PASSWORD_RESET_SUBJECT": "Neues Passwort",
     "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\n du hast dir ein neues Passwort zusenden lassen. Dein temporäres Passwort lautet:\n\n{0}\n\n Wir empfehlen dir das Passwort direkt nach dem nächsten Login wieder auf ein Passwort deiner Wahl zu ändern.",

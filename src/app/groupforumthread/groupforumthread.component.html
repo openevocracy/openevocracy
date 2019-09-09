@@ -76,17 +76,19 @@
 						</div>
 					</div>
 				</div>
-				<hr/>
-				<div class="comment-add">
-					<a class="comment-add-link" *ngIf="commentField!=i" (click)="showCommentField(i)" title="{{ 'FORUM_LINK_ADD_COMMENT' | translate }}">
-						<span>{{ 'FORUM_LINK_ADD_COMMENT' | translate }}</span>
-					</a>
-					<div *ngIf="commentField==i" class="comment-field">
-						<div><textarea [(ngModel)]="post.newComment" (ngModelChange)="checkCommentWordLength(post.newComment, post.postId)" placeholder="{{ 'FORUM_PLACEHOLDER_NEW_COMMENT' | translate }}" rows="3"></textarea></div>
-						<button mat-raised-button color="primary" [disabled]="!missingWordsComments.includes(post.postId)" title="{{ 'FORUM_BUTTON_NEW_COMMENT' | translate }}" (click)="submitComment(post)">
-							<span>{{ 'FORUM_BUTTON_NEW_COMMENT' | translate }}</span>
-						</button>
-						<span class="minwords-message" *ngIf="!missingWordsComments.includes(post.postId)" [innerHTML]="forumMinWordsCommentMsgTranslated"></span>
+				<div *ngIf="thread?.isGroupMember">
+					<hr/>
+					<div class="comment-add">
+						<a class="comment-add-link" *ngIf="commentField!=i" (click)="showCommentField(i)" title="{{ 'FORUM_LINK_ADD_COMMENT' | translate }}">
+							<span>{{ 'FORUM_LINK_ADD_COMMENT' | translate }}</span>
+						</a>
+						<div *ngIf="commentField==i" class="comment-field">
+							<div><textarea [(ngModel)]="post.newComment" (ngModelChange)="checkCommentWordLength(post.newComment, post.postId)" placeholder="{{ 'FORUM_PLACEHOLDER_NEW_COMMENT' | translate }}" rows="3"></textarea></div>
+							<button mat-raised-button color="primary" [disabled]="!missingWordsComments.includes(post.postId)" title="{{ 'FORUM_BUTTON_NEW_COMMENT' | translate }}" (click)="submitComment(post)">
+								<span>{{ 'FORUM_BUTTON_NEW_COMMENT' | translate }}</span>
+							</button>
+							<span class="minwords-message" *ngIf="!missingWordsComments.includes(post.postId)" [innerHTML]="forumMinWordsCommentMsgTranslated"></span>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -97,7 +99,7 @@
 		</div>
 	</div>
 	
-	<div id="newpost" class="post">
+	<div *ngIf="thread?.isGroupMember" id="newpost" class="post">
 		<h2>{{ 'FORUM_HEADING_NEW_POST' | translate }}</h2>
 		
 		<editor-field (onEditorCreated)="editorCreated($event)"></editor-field>
@@ -105,5 +107,9 @@
 		<button [disabled]="saving" mat-raised-button color="primary" title="{{ 'FORUM_BUTTON_NEW_POST' | translate }}" (click)="submitPost()">
 			<span>{{ 'FORUM_BUTTON_NEW_POST' | translate }}</span>
 		</button>
+	</div>
+	
+	<div *ngIf="!thread?.isGroupMember" id="newpost_private" class="post">
+		<p>{{ 'FORUM_NEW_POST_PRIVATE_MSG' | translate }}</p>
 	</div>
 </div>

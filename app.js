@@ -1,46 +1,38 @@
-var Promise = require('bluebird');
-var favicon = require('serve-favicon');
-var session = require('express-session')
-var multer = require('multer');
-var errorHandler = require('errorhandler');
-var db = require('./server/database').db;
+const _ = require('underscore');
+const express = require('express');
+const logger = require('morgan');
+const methodOverride = require('method-override');
+const bodyParser = require('body-parser');
+const http = require('http');
+const chats = require('./server/chats');
+const CronJob = require('cron').CronJob;
 
+const mail = require('./server/mail');
+const path = require('path');
+const app = express();
 
-var _ = require('underscore');
-var express = require('express');
-var logger = require('morgan');
-var methodOverride = require('method-override');
-var bodyParser = require('body-parser');
-var http = require('http');
-var chats = require('./server/chats');
-var CronJob = require('cron').CronJob;
+const passport = require('passport');
 
-var mail = require('./server/mail');
-var path = require('path');
-var app = express();
-
-var passport = require('passport');
-
-var cfg = require('./shared/config').cfg;
+const cfg = require('./shared/config').cfg;
 
 // Initalize mail
 mail.initializeMail();
 
 // Import routes
-var utils = require('./server/utils');
-var users = require('./server/routes/users');
-var topics = require('./server/routes/topics');
-var groups = require('./server/routes/groups');
-var forums = require('./server/routes/forums');
-var proposals = require('./server/routes/proposals');
-var ratings = require('./server/routes/ratings');
-var tests = require('./server/routes/tests');
-var pads = require('./server/routes/pads');
-var groupvis = require('./server/routes/groupvis');
-var activities = require('./server/routes/activities');
+const utils = require('./server/utils');
+const users = require('./server/routes/users');
+const topics = require('./server/routes/topics');
+const groups = require('./server/routes/groups');
+const forums = require('./server/routes/forums');
+const proposals = require('./server/routes/proposals');
+const ratings = require('./server/routes/ratings');
+const tests = require('./server/routes/tests');
+const pads = require('./server/routes/pads');
+const groupvis = require('./server/routes/groupvis');
+const activities = require('./server/routes/activities');
 
 // Set passport strategy
-var strategy = users.getStrategy();
+const strategy = users.getStrategy();
 passport.use(strategy);
 
 // All express environments
@@ -54,11 +46,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(methodOverride());
 
-var distPath = path.join(__dirname, 'dist');
+const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
 
 // Setup cronjob to run every minute
-var job = new CronJob({
+const job = new CronJob({
 	cronTime: '*/'+cfg.CRON_INTERVAL+' * * * *',
 	onTick: function() {
 		topics.manageAndListTopicsAsync().then(function(topics) {

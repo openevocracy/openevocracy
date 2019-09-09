@@ -230,8 +230,18 @@ exports.queryThread = function(req, res) {
 	}); 
 	
 	// Get group
-	var group_promise = thread_promise.then(function(thread) {
+	var group_promise = thread_promise.then((thread) => {
 		return db.collection('groups').findOneAsync({'forumId': thread.forumId}, {});
+	});
+	
+	// Check if current user is member of group and return boolean "isGroupMember" (important for functionality of private threads)
+	var isGroupMember_promise = group_promise.then((group) => {
+		return db.collection('group_relations').find({ 'groupId': group._id }).toArrayAsync().then((group_relations) => {
+			// Get members uderIds from relation
+			const members = _.pluck(group_relations, 'userId');
+			// Check if current user is part of members, returns true or false
+			return utils.containsObjectId(members, userId);
+		});
 	});
 	
 	// Get posts
@@ -298,10 +308,10 @@ exports.queryThread = function(req, res) {
 		.updateAsync({ '_id': threadId }, { $inc: {'views': 1} });
 	
 	// Send result
-	Promise.join(thread_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise)
-		.spread(function(thread, posts, viewsUpdate) {
+	Promise.join(thread_promise, isGroupMember_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise)
+		.spread(function(thread, isGroupMember, posts, viewsUpdate) {
 		return {
-			'thread': thread,
+			'thread': _.extend(thread, {'isGroupMember': isGroupMember}),
 			'posts': posts
 		};
 	}).then(res.json.bind(res));

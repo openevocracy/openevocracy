@@ -201,6 +201,7 @@
 	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_ON": "Du wirst ab sofort über neue Beiträge in diesem Thread informiert.",
 	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_OFF": "Du wirst ab sofort nicht mehr über neue Beiträge in diesem Thread informiert.",
 	"FORUM_BUTTON_WATCH": "Beobachten",
+	"FORUM_NEW_POST_PRIVATE_MSG": "Du hast nicht die Berechtigung in diesem privaten Thread zu schreiben, da du nicht Mitglied der verknüpften Gruppe bist.",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",
