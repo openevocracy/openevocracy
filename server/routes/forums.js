@@ -20,11 +20,11 @@ function commentTextareaToHtml(str) {
  * @desc: Check if user is authorized to edit or delete a specific entity
  *        An entity can be: thread, post or comment
  */
-function isUserAuthorizedAsync(userId, collection, entityId) {
+function isUserOwnerAsync(userId, collection, entityId) {
 	return db.collection(collection).findOneAsync({ '_id': entityId }, { 'authorId': true	})
-		.then(function(thread) {
+		.then(function(entity) {
 			// If user is not author, reject promise
-			if (!utils.equalId(userId, thread.authorId))
+			if (!utils.equalId(userId, entity.authorId))
 				return utils.rejectPromiseWithMessage(401, 'NOT_AUTHORIZED');
 			return true;
 	});
@@ -44,6 +44,43 @@ function sendMailToWatchingUsersAsync(entityId, authorId, content) {
 		
 		// Send mail to all users
 		mail.sendMailToUserIds(userIdsWithoutAuthor, content.subject, content.subjectParams, content.body, content.bodyParams);
+	});
+}
+
+/**
+ * @desc: Check if current user is member of a group
+ * @return: boolean flag, indicating if user is part of group or not
+ */
+function isGroupMemberAsync(groupId, userId) {
+	return db.collection('group_relations')
+		.find({ 'groupId': groupId }).toArrayAsync().then((relations) => {
+		
+		// Get members uderIds from relation
+		const members = _.pluck(relations, 'userId');
+		// Check if current user is part of members, returns true or false
+		return utils.containsObjectId(members, userId);
+	});
+}
+
+/**
+ * @desc: Checks if user is allowed to create a post or comment
+ * 		 First, checks if thread is private
+ * 		 If so, check if user is member of group
+ * @return: boolean flag, indicating if user is 
+ */
+function isUserAuthorizedToCreateAsync(threadId, userId) {
+	return db.collection('forum_threads')
+		.findOneAsync({ '_id': threadId }).then((thread) => {
+		
+		// If thread is public, directly return true
+		if(!thread.private)
+			return true;
+		
+		// If thread is private, check if user is member of group
+		return db.collection('groups')
+			.findOneAsync({ 'forumId': thread.forumId }, { '_id': true }).then((group) => {
+				return isGroupMemberAsync(group._id, userId);
+		});
 	});
 }
 
@@ -230,18 +267,13 @@ exports.queryThread = function(req, res) {
 	}); 
 	
 	// Get group
-	var group_promise = thread_promise.then((thread) => {
+	const group_promise = thread_promise.then((thread) => {
 		return db.collection('groups').findOneAsync({'forumId': thread.forumId}, {});
 	});
 	
-	// Check if current user is member of group and return boolean "isGroupMember" (important for functionality of private threads)
-	var isGroupMember_promise = group_promise.then((group) => {
-		return db.collection('group_relations').find({ 'groupId': group._id }).toArrayAsync().then((group_relations) => {
-			// Get members uderIds from relation
-			const members = _.pluck(group_relations, 'userId');
-			// Check if current user is part of members, returns true or false
-			return utils.containsObjectId(members, userId);
-		});
+	// Check if current user is member of group and return boolean (important for functionality of private threads)
+	const isGroupMember_promise = group_promise.then((group) => {
+		return isGroupMemberAsync(group._id, userId);
 	});
 	
 	// Get posts
@@ -327,7 +359,7 @@ exports.editThread = function(req, res) {
 	const updatedPost = req.body.updatedPost;
 	
 	// If user is author, store changes, otherwise reject
-	isUserAuthorizedAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
+	isUserOwnerAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
 		// Update post in database
 		const updatePost_promise = db.collection('forum_posts')
 		.updateAsync({ '_id': ObjectId(updatedPost.postId) }, { $set: {
@@ -359,7 +391,7 @@ exports.deleteThread = function(req, res) {
 	const threadId = ObjectId(req.params.id);
 	
 	// If user is author, delete thread, otherwise reject
-	isUserAuthorizedAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
+	isUserOwnerAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
 		// Delete thread
 		const deleteThread_promise = db.collection('forum_threads').removeByIdAsync(threadId);
 		
@@ -394,42 +426,50 @@ exports.createPost = function(req, res) {
 		'authorId': authorId
 	};
 	
-	// Store post in database
-	const createPost_promise = db.collection('forum_posts').insertAsync(post);
-	
-	// Reopen thread if it was closed (just open it in any case) and set last activity
-	const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
-	const thread_promise = db.collection('forum_threads')
-		.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
-	
-	// Send email to all users who are watching the thread, exept the author
-	const notifyUsers_promise = db.collection('groups')
-		.findOneAsync({ 'forumId': forumId }, { 'name': true }).then((group) => {
+	// Check if user is allowed to create a post
+	isUserAuthorizedToCreateAsync(threadId, authorId).then((isAuthorized) => {
+		if(!isAuthorized)
+			return utils.rejectPromiseWithMessage(401, 'NOT_AUTHORIZED');
 			
-			// Build link to thread
-			const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
-			
-			// Define parameter for email body
-			const bodyParams = [ groups.generateUserName(group._id, authorId), group.name, urlToThread+'#'+postId, urlToThread ];
-			
-			// Define email translation strings
-			const mail = {
-				'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
-				'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
-			};
-			
-			// Finally, send email to watching users
-			return sendMailToWatchingUsersAsync(threadId, authorId, mail);
-	});
+		// Store post in database
+		const createPost_promise = db.collection('forum_posts').insertAsync(post);
 		
-	// Add author to email notification for the related post
-	const notifyAddUser_promise = users.getEmailNotifyStatusAsync(authorId, threadId).then(function(status) {
-		// only if entry does not already exists (is null), otherwise the user has actively
-		// turned off notifications (and should not be bothered) or notifications are already enabled
-		return _.isNull(status) ? users.enableEmailNotifyAsync(authorId, threadId) : null;
-	});
-	
-	Promise.all([createPost_promise, thread_promise, notifyUsers_promise, notifyAddUser_promise]).then(res.json.bind(res));
+		// Reopen thread if it was closed (just open it in any case) and set last activity
+		const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
+		const thread_promise = db.collection('forum_threads')
+			.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
+		
+		// Send email to all users who are watching the thread, exept the author
+		const notifyUsers_promise = db.collection('groups')
+			.findOneAsync({ 'forumId': forumId }, { 'name': true }).then((group) => {
+				
+				// Build link to thread
+				const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
+				
+				// Define parameter for email body
+				const bodyParams = [ groups.generateUserName(group._id, authorId), group.name, urlToThread+'#'+postId, urlToThread ];
+				
+				// Define email translation strings
+				const mail = {
+					'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
+					'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
+				};
+				
+				// Finally, send email to watching users
+				return sendMailToWatchingUsersAsync(threadId, authorId, mail);
+		});
+			
+		// Add author to email notification for the related post
+		const notifyAddUser_promise = users.getEmailNotifyStatusAsync(authorId, threadId).then(function(status) {
+			// only if entry does not already exists (is null), otherwise the user has actively
+			// turned off notifications (and should not be bothered) or notifications are already enabled
+			return _.isNull(status) ? users.enableEmailNotifyAsync(authorId, threadId) : null;
+		});
+		
+		Promise.all([createPost_promise, thread_promise, notifyUsers_promise, notifyAddUser_promise])
+			.then(res.json.bind(res));
+		
+	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 /**
@@ -441,7 +481,7 @@ exports.editPost = function(req, res) {
 	const updatedPostHtml = req.body.updatedPostHtml;
 	
 	// If user is author, update post, otherwise reject
-	isUserAuthorizedAsync(userId, 'forum_posts', postId).then(function(isAuthorized) {
+	isUserOwnerAsync(userId, 'forum_posts', postId).then(function(isAuthorized) {
 		// Update post in database
 		const updatePost_promise = db.collection('forum_posts')
 			.updateAsync({ '_id': postId }, { $set: { 'html': updatedPostHtml } });
@@ -463,7 +503,7 @@ exports.deletePost = function(req, res) {
 	const postId = ObjectId(req.params.id);
 	
 	// If user is author, delete post, otherwise reject
-	isUserAuthorizedAsync(userId, 'forum_posts', postId).then(function(isAuthorized) {
+	isUserOwnerAsync(userId, 'forum_posts', postId).then(function(isAuthorized) {
 		
 		// Delete post
 		const deletePost_promise = db.collection('forum_posts').removeByIdAsync(postId);
@@ -472,8 +512,7 @@ exports.deletePost = function(req, res) {
 		const deleteComments_promise = db.collection('forum_comments').removeAsync({ 'postId': postId });
 		
 		// Send result to client
-		Promise.join(deletePost_promise, deleteComments_promise)
-			.then(res.json.bind(res));
+		Promise.join(deletePost_promise, deleteComments_promise).then(res.json.bind(res));
 		
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
@@ -482,7 +521,7 @@ exports.deletePost = function(req, res) {
  * @desc: Creates new comment for post in forum thread
  */
 exports.createComment = function(req, res) {
-	const userId = ObjectId(req.user._id);
+	const authorId = ObjectId(req.user._id);
 	const body = req.body;
 	
 	// Define comment
@@ -491,18 +530,25 @@ exports.createComment = function(req, res) {
 		'postId': ObjectId(body.postId),
 		'threadId': ObjectId(body.threadId),
 		'forumId': ObjectId(body.forumId),
-		'authorId': userId
+		'authorId': authorId
 	};
 	
-	// Store comment in database
-	const createComment_promise = db.collection('forum_comments').insertAsync(comment);
+	// Check if user is allowed to create a post
+	isUserAuthorizedToCreateAsync(comment.threadId, authorId).then((isAuthorized) => {
+		if(!isAuthorized)
+			return utils.rejectPromiseWithMessage(401, 'NOT_AUTHORIZED');
 	
-	// Set last activity
-	const lastResponse = { 'timestamp': Date.now(), 'userId': userId };
-	const thread_promise = db.collection('forum_threads')
-		.updateAsync({ '_id': comment.threadId }, { $set: { 'lastResponse': lastResponse } });
-	
-	Promise.all([createComment_promise, thread_promise]).then(res.json.bind(res));
+		// Store comment in database
+		const createComment_promise = db.collection('forum_comments').insertAsync(comment);
+		
+		// Set last activity
+		const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
+		const thread_promise = db.collection('forum_threads')
+			.updateAsync({ '_id': comment.threadId }, { $set: { 'lastResponse': lastResponse } });
+		
+		Promise.all([createComment_promise, thread_promise]).then(res.json.bind(res));
+		
+	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 /**
@@ -514,7 +560,7 @@ exports.editComment = function(req, res) {
 	const updatedCommentHtml = req.body.updatedCommentHtml;
 	
 	// If user is author, update comment, otherwise reject
-	isUserAuthorizedAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
+	isUserOwnerAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
 		// Update comment in database
 		const commentUpdate_promise = db.collection('forum_comments')
 			.updateAsync({ '_id': commentId }, { $set: { 'html': commentTextareaToHtml(updatedCommentHtml) } });
@@ -523,8 +569,8 @@ exports.editComment = function(req, res) {
 		const editNote_promise = db.collection('forum_edits')
 			.insertAsync({ 'entityId': commentId, 'authorId': userId });
 		
-		Promise.all([ commentUpdate_promise, editNote_promise ])
-			.then(res.json.bind(res));
+		Promise.all([ commentUpdate_promise, editNote_promise ]).then(res.json.bind(res));
+		
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
@@ -536,10 +582,10 @@ exports.deleteComment = function(req, res) {
 	const commentId = ObjectId(req.params.id);
 	
 	// If user is author, update comment, otherwise reject
-	isUserAuthorizedAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
+	isUserOwnerAsync(userId, 'forum_comments', commentId).then(function(isAuthorized) {
 		// Delete comment in database
-		db.collection('forum_comments').removeByIdAsync(commentId)
-			.then(res.json.bind(res));
+		db.collection('forum_comments').removeByIdAsync(commentId).then(res.json.bind(res));
+		
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
@@ -552,10 +598,11 @@ exports.updateSolved = function(req, res) {
 	const solved = req.body.solved;
 	
 	// If user is author, update solved state, otherwise reject
-	isUserAuthorizedAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
+	isUserOwnerAsync(userId, 'forum_threads', threadId).then(function(isAuthorized) {
 		// Update solved state
-		db.collection('forum_threads').updateAsync({'_id': threadId}, { $set: {'closed': solved} })
-			.then(res.json.bind(res));
+		db.collection('forum_threads')
+			.updateAsync({'_id': threadId}, { $set: {'closed': solved} }).then(res.json.bind(res));
+		
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
