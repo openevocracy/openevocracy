@@ -5,15 +5,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
-import { AlertService } from '../_services/alert.service';
-import { HttpManagerService } from '../_services/http-manager.service';
-import { UserService } from '../_services/user.service';
-import { ModalService } from '../_services/modal.service';
-import { CloseeditorModalService } from '../_services/modal.closeeditor.service';
+import { AlertService } from '../../_services/alert.service';
+import { HttpManagerService } from '../../_services/http-manager.service';
+import { UserService } from '../../_services/user.service';
+import { ModalService } from '../../_services/modal.service';
+import { CloseeditorModalService } from '../../_services/modal.closeeditor.service';
 
-import { EditorComponent } from '../editor/editor.component';
+import { EditorComponent } from '../../editor/editor.component';
 
-import { Group } from '../_models/group';
+import { Group } from '../../_models/group';
 
 import 'quill-authorship-evo';
 import * as $ from 'jquery';
@@ -22,16 +22,16 @@ import * as _ from 'underscore';
 import * as parseUrl from 'url-parse';
 import * as origin from 'get-location-origin';
 
-import { C } from '../../../shared/constants';
+import { C } from '../../../../shared/constants';
 
 import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay, faComments } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-group',
-	templateUrl: './group.component.html',
-	styleUrls: ['../editor/editor.component.scss', './group.component.scss']
+	templateUrl: './editor.component.html',
+	styleUrls: ['../../editor/editor.component.scss', './editor.component.scss']
 })
-export class GroupComponent extends EditorComponent implements OnInit, OnDestroy {
+export class GroupEditorComponent extends EditorComponent implements OnInit, OnDestroy {
 	public C;
 	public proposalHtml: string = "";
 	public group: Group;

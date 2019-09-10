@@ -3,14 +3,14 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from "@angular/material";
 
-import { Thread } from "../_models/forum/thread";
+import { Thread } from "../../../_models/forum/thread";
 
-import { EditThreadDialogComponent } from '../dialogs/editthread/editthread.component';
+import { EditThreadDialogComponent } from '../../../dialogs/editthread/editthread.component';
 
-import { UtilsService } from '../_services/utils.service';
-import { HttpManagerService } from '../_services/http-manager.service';
-import { UserService } from '../_services/user.service';
-import { SnackbarService } from '../_services/snackbar.service';
+import { UtilsService } from '../../../_services/utils.service';
+import { HttpManagerService } from '../../../_services/http-manager.service';
+import { UserService } from '../../../_services/user.service';
+import { SnackbarService } from '../../../_services/snackbar.service';
 
 import { faComment, faUsers, faLock } from '@fortawesome/free-solid-svg-icons';
 
@@ -18,11 +18,11 @@ import * as _ from 'underscore';
 
 @Component({
 	selector: 'app-groupforum',
-	templateUrl: './groupforum.component.html',
-	styleUrls: ['./groupforum.component.scss'],
+	templateUrl: './threadlist.component.html',
+	styleUrls: ['./threadlist.component.scss'],
 	encapsulation: ViewEncapsulation.None
 })
-export class GroupForumComponent implements OnInit {
+export class GroupForumThreadlistComponent implements OnInit {
 	
 	public userId: string;
 	public forumId: string;

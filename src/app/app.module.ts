@@ -71,16 +71,20 @@ import { ActivityListService } from './_services/activitylist.service';
 import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 
+// Group
+import { GroupEditorComponent } from './group/editor/editor.component';
+import { GroupvisComponent } from './groupvis/groupvis.component';
+import { GroupForumThreadlistComponent } from './group/forum/threadlist/threadlist.component';
+import { GroupForumThreadComponent } from './group/forum/thread/thread.component';
+import { GroupChatComponent } from './group/chat/chat.component';
+import { GroupMembersComponent } from './group/members/members.component';
+
 // New components (not sorted)
 import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
-import { GroupComponent } from './group/group.component';
-import { GroupvisComponent } from './groupvis/groupvis.component';
 import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
-import { GroupForumComponent } from './groupforum/groupforum.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
-import { GroupForumThreadComponent } from './groupforumthread/groupforumthread.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -110,7 +114,7 @@ export function loadConfig(configService: ConfigService) {
 		SettingsComponent,
 		EditorComponent,
 		ModalCloseeditorComponent,
-		GroupComponent,
+		GroupEditorComponent,
 		AddonePipe,
 		TimestampPipe,
 		GroupvisComponent,
@@ -118,13 +122,15 @@ export function loadConfig(configService: ConfigService) {
 		UserprofileComponent,
 		ShareDialogComponent,
 		FeedbackDialogComponent,
-		GroupForumComponent,
+		GroupForumThreadlistComponent,
 		EditThreadDialogComponent,
 		EditorFieldComponent,
 		GroupForumThreadComponent,
 		AskDeleteDialogComponent,
 		EditForumPostDialogComponent,
-		EditForumCommentDialogComponent
+		EditForumCommentDialogComponent,
+		GroupChatComponent,
+		GroupMembersComponent
 	],
 	imports: [
 		BrowserModule,

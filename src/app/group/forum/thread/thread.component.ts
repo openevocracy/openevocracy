@@ -6,21 +6,21 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { Observable } from 'rxjs';
 
-import { ShareDialogComponent } from '../dialogs/share/share.component';
-import { AskDeleteDialogComponent } from '../dialogs/askdelete/askdelete.component';
-import { EditForumPostDialogComponent } from '../dialogs/editforumpost/editforumpost.component';
-import { EditForumCommentDialogComponent } from '../dialogs/editforumcomment/editforumcomment.component';
-import { EditThreadDialogComponent } from '../dialogs/editthread/editthread.component';
+import { ShareDialogComponent } from '../../../dialogs/share/share.component';
+import { AskDeleteDialogComponent } from '../../../dialogs/askdelete/askdelete.component';
+import { EditForumPostDialogComponent } from '../../../dialogs/editforumpost/editforumpost.component';
+import { EditForumCommentDialogComponent } from '../../../dialogs/editforumcomment/editforumcomment.component';
+import { EditThreadDialogComponent } from '../../../dialogs/editthread/editthread.component';
 
-import { HttpManagerService } from '../_services/http-manager.service';
-import { UtilsService } from '../_services/utils.service';
-import { ConfigService } from '../_services/config.service';
-import { UserService } from '../_services/user.service';
-import { SnackbarService } from '../_services/snackbar.service';
+import { HttpManagerService } from '../../../_services/http-manager.service';
+import { UtilsService } from '../../../_services/utils.service';
+import { ConfigService } from '../../../_services/config.service';
+import { UserService } from '../../../_services/user.service';
+import { SnackbarService } from '../../../_services/snackbar.service';
 
-import { Thread } from "../_models/forum/thread";
-import { Post } from "../_models/forum/post";
-import { Edit } from "../_models/forum/edit";
+import { Thread } from "../../../_models/forum/thread";
+import { Post } from "../../../_models/forum/post";
+import { Edit } from "../../../_models/forum/edit";
 
 import { faArrowAltCircleLeft, faLock, faCaretUp, faCaretDown, faPenSquare, faTrash, faShareSquare, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 
@@ -28,8 +28,8 @@ import * as _ from 'underscore';
 
 @Component({
 	selector: 'app-groupforumthread',
-	templateUrl: './groupforumthread.component.html',
-	styleUrls: ['./groupforumthread.component.scss'],
+	templateUrl: './thread.component.html',
+	styleUrls: ['./thread.component.scss'],
 	encapsulation: ViewEncapsulation.None
 })
 export class GroupForumThreadComponent implements OnInit {
