@@ -141,8 +141,10 @@
 	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Expertise of this member regarding the topic",
 	"GROUP_MEMBER_PROPOSAL_CLOSE": "Schließen",
 	"GROUP_BUTTON_FORUM": "Forum",
+	"GROUP_BUTTON_DOCUMENT": "Document",
+	"GROUP_BUTTON_CHAT": "Chat",
+	"GROUP_BUTTON_MEMBERS": "Members",
 	
-	"FORUM_TITLE_PREFIX": "Forum of group {{id}} of topic:",
 	"FORUM_BUTTON_TO_GROUP": "To group",
 	"FORUM_BUTTON_NEW_THREAD": "Create thread",
 	"FORUM_DIALOG_NEW_THREAD_HEADING": "Create new thread",

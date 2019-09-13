@@ -61,7 +61,7 @@ export class TopicComponent implements OnInit {
 		this.userId = this.userService.getUserId();
 		
 		this.activatedRoute.params.subscribe(
-			(params: Params) => this.topicId = params['id']);
+			(params: Params) => this.topicId = params.id);
 		
 		this.loadTopic(this.topicId);
 	}
@@ -76,10 +76,10 @@ export class TopicComponent implements OnInit {
 		});
 	}
 	
-	private openEditor(pid) {
+	/*private openEditor(pid) {
 		// Redirect to editor view
 		this.router.navigate(['/editor/', pid]);
-	}
+	}*/
 	
 	private createProposal() {
 		this.httpManagerService.post('/json/proposal/create', {'topicId': this.topicId, 'userId': this.userId}).subscribe(res => {

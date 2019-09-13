@@ -363,6 +363,30 @@ exports.remixGroupsAsync = function(topic) {
 	});
 };
 
+/**
+ * @desc: Gets all data necessary for the group toolbar
+ */
+exports.getToolbar = function(req, res) {
+	const groupId = ObjectId(req.params.id);
+	const userId = ObjectId(req.user._id);
+	
+	const group_promise = db.collection('groups')
+		.findOneAsync({ '_id': groupId }).then((group) => {
+			return { 'name': group.name, 'topicId': group.topicId };
+	});
+	
+	const topic_promise = group_promise.then((group) => {
+		return db.collection('topics')
+			.findOneAsync({ '_id': group.topicId }).then((topic) => {
+				return { 'title': topic.name };
+		});
+	});
+		
+	Promise.join(group_promise, topic_promise).spread((group, topic) => {
+		return { 'groupName': group.name, 'topicTitle': topic.title };
+	}).then(res.json.bind(res));
+};
+
 /* @desc: Gets group editor information, necessary information are:
  *        - groupId, topicId, docId (can be found in pad)
  *        - level, name, nextDeadline (can be found in topic)
@@ -371,30 +395,29 @@ exports.remixGroupsAsync = function(topic) {
  *        - members (includes: color, name, userId, ratingIntegration, ratingKnowledge)
  */
 exports.query = function(req, res) {
-	var padId = ObjectId(req.params.id);
-	var userId = ObjectId(req.user._id);
+	const groupId = ObjectId(req.params.id);
+	const userId = ObjectId(req.user._id);
 	
 	// Get docId, groupId and topicId from group pad
-	var pad_promise = db.collection('pads_group').findOneAsync({'_id': padId});
+	const pad_promise = db.collection('pads_group').findOneAsync({'groupId': groupId});
 	
 	// Everything else depends on pad
 	pad_promise.then(function(pad) {
 		// Define some variables for simpler and more intuitie use
-		var groupId = pad.groupId;
-		var topicId = pad.topicId;
+		const topicId = pad.topicId;
 		
 		/*
 		 * Simple stuff
 		 */
 		
 		// Get topic name
-		var topic_promise = db.collection('topics').findOneAsync({'_id': topicId}, {'name': true});
+		const topic_promise = db.collection('topics').findOneAsync({'_id': topicId}, {'name': true});
 		
 		// Get chatRoomId from group
-		var group_promise = db.collection('groups').findOneAsync({'_id': pad.groupId});
+		const group_promise = db.collection('groups').findOneAsync({'_id': pad.groupId});
 		
 		// Count number of groups in current level to obtain if we are in last group (last level)
-		var isLastGroup_promise = group_promise.then(function(currentGroup) {
+		const isLastGroup_promise = group_promise.then(function(currentGroup) {
 			return db.collection('groups').countAsync({ 'topicId': currentGroup.topicId, 'level': currentGroup.level })
 				.then(function(numGroupsInCurrentLevel) {
 					return (numGroupsInCurrentLevel == 1) ? true : false;
@@ -406,10 +429,10 @@ exports.query = function(req, res) {
 		 */
 		
 		// Get group members
-		var groupRelations_promise = getGroupMembersAsync(groupId);
+		const groupRelations_promise = getGroupMembersAsync(groupId);
 		
 		// Get number of group members
-		var num_group_members_promise = groupRelations_promise.then(function(group_members) {
+		const num_group_members_promise = groupRelations_promise.then(function(group_members) {
 			return _.size(group_members);
 		});
 		
@@ -418,7 +441,7 @@ exports.query = function(req, res) {
 		const offset = chanceOffset.integer({min: 0, max: 360});
 		
 		// Get previous pads
-		var prevPads_promise = Promise.join(group_promise, groupRelations_promise).spread(function(group, groupRelations) {
+		const prevPads_promise = Promise.join(group_promise, groupRelations_promise).spread(function(group, groupRelations) {
 			var prevPadIds = _.pluck(groupRelations, 'prevPadId');
 			if (group.level == 0) {
 				return db.collection('pads_proposal')
@@ -430,28 +453,28 @@ exports.query = function(req, res) {
 		});
 		
 		// Get group members
-		var groupMembersDetails_promise = groupRelations_promise.map(function(relation, index) {
+		const groupMembersDetails_promise = groupRelations_promise.map(function(relation, index) {
 			
 			// Generate member color
-			var memberColor_promise = num_group_members_promise.then(function(numMembers) {
-				var hue = offset + index*(360/numMembers);
+			const memberColor_promise = num_group_members_promise.then(function(numMembers) {
+				const hue = offset + index*(360/numMembers);
 				return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
 			});
          
          // Get proposal html
-         var prevPadHtml_promise = Promise.join(group_promise, prevPads_promise).spread(function(group, prevPads) {
+         const prevPadHtml_promise = Promise.join(group_promise, prevPads_promise).spread(function(group, prevPads) {
          	if (group.level == 0) {
-	         	var prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': relation.userId});
+	         	const prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': relation.userId});
 	         	return pads.getPadHTMLAsync('proposal', prevUserPad.docId);
          	} else {
-         		var prevGroupPad = utils.findWhereObjectId(prevPads, {'groupId': relation.prevGroupId});
+         		const prevGroupPad = utils.findWhereObjectId(prevPads, {'groupId': relation.prevGroupId});
          		return pads.getPadHTMLAsync('group', prevGroupPad.docId);
          	}
          });
 			
 			// Get member rating
-			var memberRatingKnowledge_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_KNOWLEDGE);
-			var memberRatingIntegration_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_INTEGRATION);
+			const memberRatingKnowledge_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_KNOWLEDGE);
+			const memberRatingIntegration_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_INTEGRATION);
          
          return Promise.props({
          	'userId': relation.userId,
@@ -464,7 +487,7 @@ exports.query = function(req, res) {
 		});
 		
 		// Finally, set lastActivity for the member querying the group
-		var lastActivity_promise = db.collection('group_relations')
+		const lastActivity_promise = db.collection('group_relations')
 			.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
 		
 		// Collect all information and return

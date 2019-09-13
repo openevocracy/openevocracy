@@ -1,16 +1,16 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from "@angular/material";
 
-import { Thread } from "../../../_models/forum/thread";
+import { Thread } from "../../_models/forum/thread";
 
-import { EditThreadDialogComponent } from '../../../dialogs/editthread/editthread.component';
+import { EditThreadDialogComponent } from '../../dialogs/editthread/editthread.component';
 
-import { UtilsService } from '../../../_services/utils.service';
-import { HttpManagerService } from '../../../_services/http-manager.service';
-import { UserService } from '../../../_services/user.service';
-import { SnackbarService } from '../../../_services/snackbar.service';
+import { UtilsService } from '../../_services/utils.service';
+import { HttpManagerService } from '../../_services/http-manager.service';
+import { UserService } from '../../_services/user.service';
+import { SnackbarService } from '../../_services/snackbar.service';
 
 import { faComment, faUsers, faLock } from '@fortawesome/free-solid-svg-icons';
 
@@ -18,19 +18,14 @@ import * as _ from 'underscore';
 
 @Component({
 	selector: 'app-groupforum',
-	templateUrl: './threadlist.component.html',
-	styleUrls: ['./threadlist.component.scss'],
+	templateUrl: './forum.component.html',
+	styleUrls: ['./forum.component.scss'],
 	encapsulation: ViewEncapsulation.None
 })
-export class GroupForumThreadlistComponent implements OnInit {
+export class GroupForumComponent implements OnInit {
 	
 	public userId: string;
 	public forumId: string;
-	public padId: string;
-	public prefix: string;
-	public title: string;
-	public groupName: string;
-	public threadName: string;
 	public notifyStatus: boolean = false;
 	public threads: Thread[];
 	
@@ -40,6 +35,7 @@ export class GroupForumThreadlistComponent implements OnInit {
 	public faLock = faLock;
 
 	constructor(
+		private router: Router,
 		private utilsService: UtilsService,
 		private activatedRoute: ActivatedRoute,
 		private httpManagerService: HttpManagerService,
@@ -53,32 +49,22 @@ export class GroupForumThreadlistComponent implements OnInit {
 	}
 	
 	ngOnInit() {
-		// Get forum id from url
-		this.activatedRoute.params.subscribe((params: Params) => {
-			this.forumId = params.id;
+		// Get current groupId
+		const groupId = this.router.url.split('/')[2];
+		
+		// Get current forum information
+		this.httpManagerService.get('/json/group/forum/' + groupId).subscribe(res => {
+			this.forumId = res.forumId;
+			this.notifyStatus = res.notifyStatus;
 			
-			// Get current forum information
-			this.httpManagerService.get('/json/group/forum/' + this.forumId).subscribe(res => {
-				this.padId = res.padId;
-				this.title = res.title;
-				this.groupName = res.groupName;
-				this.notifyStatus = res.notifyStatus;
-				
-				// Initialize thread and construct all elements
-				this.threads = [];
-				_.each(res.threads, function(thread) {
-					this.threads.push(new Thread(thread));
-				}.bind(this));
-				
-				// Sort threads by last activity (either last response or creation time)
-				this.threads = _.sortBy(this.threads, 'lastActivityTimestamp').reverse();
-				
-				// Set pre title
-				const shortGroupId = this.utilsService.getShortId(res.groupId);
-				this.translateService.get('FORUM_TITLE_PREFIX', {'id': shortGroupId}).subscribe(label => {
-					this.prefix = label;
-				});
-			});
+			// Initialize thread and construct all elements
+			this.threads = [];
+			_.each(res.threads, function(thread) {
+				this.threads.push(new Thread(thread));
+			}.bind(this));
+			
+			// Sort threads by last activity (either last response or creation time)
+			this.threads = _.sortBy(this.threads, 'lastActivityTimestamp').reverse();
 		});
 	}
 	

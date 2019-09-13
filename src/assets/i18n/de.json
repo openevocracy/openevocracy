@@ -141,8 +141,10 @@
 	"GROUP_RATING_TOOLTIP_KNOWLEDGE": "Fachwissen dieses Mitglieds bezüglich des Themas",
 	"GROUP_MEMBER_PROPOSAL_CLOSE": "Schließen",
 	"GROUP_BUTTON_FORUM": "Forum",
+	"GROUP_BUTTON_DOCUMENT": "Dokument",
+	"GROUP_BUTTON_CHAT": "Chat",
+	"GROUP_BUTTON_MEMBERS": "Mitglieder",
 	
-	"FORUM_TITLE_PREFIX": "Forum der Gruppe {{id}} zum Thema:",
 	"FORUM_BUTTON_TO_GROUP": "Zur Gruppe",
 	"FORUM_BUTTON_NEW_THREAD": "Thread erstellen",
 	"FORUM_DIALOG_NEW_THREAD_HEADING": "Neuen Thread erstellen",
@@ -217,7 +219,7 @@
 	"EDITOR_PLACEHOLDER_GROUP": "Schreibt gemeinsam auf, auf welche Lösungsvorschläge ihr euch einigen konnte. Beachtet, dass Diskussionen über den Text im Chat, in den Textkommentaren und dem zugehörigen Forum geführt werden sollen. Das Dokument selbst soll keine Metainformationen enthalen ...",
 	"EDITOR_SNACKBAR_CLOSE_SECONDS": "Das Dokument schließt in {{s}} Sekunden.",
 	"EDITOR_SNACKBAR_CLOSE_MINUTES": "Das Dokument schließt in {{m}} Minuten.",
-	"EDITOR_CONNECTION_LOST": "Verbindungs verloren, Änderungen werden nicht gespeichert.",
+	"EDITOR_CONNECTION_LOST": "Verbindung verloren, Änderungen werden nicht gespeichert.",
 	
 	"PADVIEW_EXPIRATION_LABEL": "Ablaufdatum",
 	"PADVIEW_SUBTITLE_DATE": "um",

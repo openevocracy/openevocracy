@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GroupForumThreadlistComponent } from './groupforum.component';
+import { GroupForumComponent } from './groupforum.component';
 
-describe('GroupForumThreadlistComponent', () => {
-  let component: GroupForumThreadlistComponent;
-  let fixture: ComponentFixture<GroupForumThreadlistComponent>;
+describe('GroupForumComponent', () => {
+  let component: GroupForumComponent;
+  let fixture: ComponentFixture<GroupForumComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GroupForumThreadlistComponent ]
+      declarations: [ GroupForumComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(GroupForumThreadlistComponent);
+    fixture = TestBed.createComponent(GroupForumComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

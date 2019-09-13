@@ -283,6 +283,9 @@ app.post('/json/user/lang', auth(), users.setLanguage);
 // ###   M I S C   ###
 // ###################
 
+// @desc: Group toolbar
+app.get('/json/group/toolbar/:id', auth(), groups.getToolbar);
+
 // @desc: Config file
 app.get('/json/config', utils.config);
 
@@ -290,10 +293,10 @@ app.get('/json/config', utils.config);
 app.get('/json/ping', utils.ping);
 
 // @desc: User feedback
-app.post('/json/feedback', users.sendFeedback);
+app.post('/json/feedback', auth(), users.sendFeedback);
 
 // @desc: Enable/Disable email notifications for user
-app.post('/json/notify', users.notify);
+app.post('/json/notify', auth(), users.notify);
 
 // ###################
 // ###   T E S T   ###

@@ -88,28 +88,20 @@ function isUserAuthorizedToCreateAsync(threadId, userId) {
  * @desc: Query forum of specific group
  */
 exports.queryForum = function(req, res) {
-	var forumId = ObjectId(req.params.id);
+	var groupId = ObjectId(req.params.id);
 	var userId = ObjectId(req.user._id);
 	
 	// Get group
-	var group_promise = db.collection('groups').findOneAsync({'forumId': forumId}, {'topicId': true, 'name': true});
-	
-	// Get group pad
-	var pad_promise = group_promise.then(function(group) {
-		return db.collection('pads_group').findOneAsync({'groupId': group._id}, {'_id': true});
-	});
-	
-	// Get topic
-	var topic_promise = group_promise.then(function(group) {
-		return db.collection('topics').findOneAsync({'_id': group.topicId}, {'name': true});
-	});
+	var group_promise = db.collection('groups').findOneAsync({'_id': groupId});
 	
 	// Get email notification status of user for this forum
-	const notifyStatus_promise = users.getEmailNotifyStatusAsync(userId, forumId);
+	const notifyStatus_promise = group_promise.then((group) => {
+		return users.getEmailNotifyStatusAsync(userId, group.forumId);
+	});
 	
 	// Get threads
 	var threads_promise = group_promise.then(function(group) {
-		return db.collection('forum_threads').find({'forumId': forumId}).toArrayAsync().map(function(thread) {
+		return db.collection('forum_threads').find({'forumId': group.forumId}).toArrayAsync().map(function(thread) {
 			// Get sum of votes of mainpost
 			const sumMainpostVotes_promise = sumVotesAsync(thread.mainPostId);
 			
@@ -137,13 +129,10 @@ exports.queryForum = function(req, res) {
 	});
 	
 	// Send group id and topic name
-	Promise.join(group_promise, pad_promise, topic_promise, notifyStatus_promise, threads_promise)
-		.spread(function(group, pad, topic, notifyStatus, threads) {
+	Promise.join(group_promise, notifyStatus_promise, threads_promise)
+		.spread(function(group, notifyStatus, threads) {
 		return {
-			'groupId': group._id,
-			'groupName': group.name,
-			'padId': pad._id,
-			'title': topic.name,
+			'forumId': group.forumId,
 			'notifyStatus': notifyStatus,
 			'threads': threads
 		};

@@ -1,29 +1,13 @@
 <modal-closeeditor></modal-closeeditor>
 
 <div class="editor-toolbars">
-<mat-toolbar class="first-toolbar" color="primary">
+<mat-toolbar class="second-toolbar" color="primary">
 	<div class="flex container">
-		<h1>{{ group?.name }} / {{ group?.title }}</h1>
+		<div id="toolbar"></div>
 		<span class="saved-text">
 			<span *ngIf="saved">{{ 'EDITOR_SAVED_CHANGES' | translate }}</span>
 			<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
 		</span>
-		<span class="flex-spacer"></span>
-		<button mat-button title="{{ 'GROUP_BUTTON_FORUM' | translate }}" [routerLink]="['/group/forum', group?.forumId]">
-			<span><fa-icon [icon]="faComments"></fa-icon> {{ 'GROUP_BUTTON_FORUM' | translate }}</span>
-		</button>
-		<button mat-button (click)="enterFullscreen()" title="{{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}">
-			<span><fa-icon [icon]="faExpandArrowsAlt"></fa-icon> {{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}</span>
-		</button>
-		<button mat-button title="{{ 'FORM_BUTTON_CLOSE' | translate }}" (click)="closeEditor()">
-			<span><fa-icon [icon]="faTimes"></fa-icon> {{ 'FORM_BUTTON_CLOSE' | translate }}</span>
-		</button>
-	</div>
-</mat-toolbar>
-
-<mat-toolbar class="second-toolbar" color="primary">
-	<div class="flex container">
-		<div id="toolbar"></div>
 		<span class="flex-spacer"></span>
 		
 		<div *ngFor="let member of group?.members">

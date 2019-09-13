@@ -24,7 +24,7 @@ import * as origin from 'get-location-origin';
 
 import { C } from '../../../../shared/constants';
 
-import { faUser, faFile, faHandshake, faLightbulb, faExpandArrowsAlt, faPlay, faComments } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faFile, faHandshake, faLightbulb, faPlay } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-group',
@@ -53,12 +53,10 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	
 	// FontAwesome icons
 	public faUser = faUser;
-	public faExpandArrowsAlt = faExpandArrowsAlt;
 	public faFile = faFile;
 	public faHandshake = faHandshake;
 	public faLightbulb = faLightbulb;
 	public faPlay = faPlay;
-	public faComments = faComments;
 
   constructor(
 		protected snackBar: MatSnackBar,
@@ -147,42 +145,41 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		// Set quill editor
 		this.quillEditor = editor;
 		
+		// Get current groupId
+		const groupId = this.router.url.split('/')[2];
+		
 		// Get additional information and initalize socket
-		this.activatedRoute.params.subscribe((params: Params) => {
-				this.padId = params.id;
-				
-				this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
-					this.group = new Group(res);
-					console.log(this.group);
-					this.topicId = res.topicId;
-					
-					// Add color of current member
-					this.me = _.findWhere(res.members, { 'userId': this.userId });
-					this.quillEditor.getModule('authorship').addAuthor(this.userId, this.me.color);
-					
-					// Add colors of other members
-					_.map(res.members, function(member) {
-						if(member.userId != this.me.userId)
-							this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
-					}.bind(this));
-					
-					/*this.quillEditor.getModule('cursors').set({
-						id: this.me.userId,
-						name: this.me.name,
-						color: this.me.color,
-						range: 1
-					});*/
-					
-					// Initialize countdown
-					this.initCountdown(res.deadline);
-					
-					// Initialize socket
-					this.initalizePadSocket(this.group.docId);
-					
-					// Initialize chat
-					this.initalizeChatSocket(this.group.chatRoomId);
-				});
-			});
+		this.httpManagerService.get('/json/group/editor/' + groupId).subscribe((res) => {
+			this.group = new Group(res);
+			console.log(this.group);
+			this.topicId = res.topicId;
+			
+			// Add color of current member
+			this.me = _.findWhere(res.members, { 'userId': this.userId });
+			this.quillEditor.getModule('authorship').addAuthor(this.userId, this.me.color);
+			
+			// Add colors of other members
+			_.map(res.members, function(member) {
+				if(member.userId != this.me.userId)
+					this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
+			}.bind(this));
+			
+			/*this.quillEditor.getModule('cursors').set({
+				id: this.me.userId,
+				name: this.me.name,
+				color: this.me.color,
+				range: 1
+			});*/
+			
+			// Initialize countdown
+			this.initCountdown(res.deadline);
+			
+			// Initialize socket
+			this.initalizePadSocket(this.group.docId);
+			
+			// Initialize chat
+			this.initalizeChatSocket(this.group.chatRoomId);
+		});
 	}
 	
 	/*
