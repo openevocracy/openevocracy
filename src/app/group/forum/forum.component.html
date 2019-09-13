@@ -1,21 +1,19 @@
-<mat-toolbar color="primary">
+<mat-toolbar class="second-toolbar" color="primary">
 	<div class="flex container">
+		<span class="flex-spacer"></span>
+		
 		<button mat-button title="{{ 'FORUM_BUTTON_NEW_THREAD' | translate }}" (click)="openNewThreadDialog()">
-			<span><fa-icon [icon]="faComment"></fa-icon> {{ 'FORUM_BUTTON_NEW_THREAD' | translate }}</span>
+			<span><fa-icon [icon]="faPlusSquare"></fa-icon> {{ 'FORUM_BUTTON_NEW_THREAD' | translate }}</span>
 		</button>
 		
 		<mat-slide-toggle id="watch-forum" [checked]="notifyStatus" (change)="changeNotifyStatus($event)">{{ 'FORUM_BUTTON_WATCH' | translate }}</mat-slide-toggle>
-		
-		<span class="flex-spacer"></span>
-		
-		Members
 	</div>
 </mat-toolbar>
 
 <div class="threads container">
 	<section class="flex" *ngFor="let thread of threads" [ngClass]="{'closed': thread.closed, 'open': !thread.closed}">
 		<div>
-			<h2 [routerLink]="['/group/forum/thread', thread.threadId]">
+			<h2 [routerLink]="['/group', groupId, 'forum', 'thread', thread.threadId]">
 				<fa-icon *ngIf="thread.private" class="private" [icon]="faLock" title="{{ 'FORUM_THREAD_PRIVATE' | translate }}"></fa-icon>
 				<span class="thread-title">{{ thread.title }}</span>
 			</h2>

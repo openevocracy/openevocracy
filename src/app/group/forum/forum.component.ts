@@ -12,25 +12,26 @@ import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
 import { SnackbarService } from '../../_services/snackbar.service';
 
-import { faComment, faUsers, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faPlusSquare, faUsers, faLock } from '@fortawesome/free-solid-svg-icons';
 
 import * as _ from 'underscore';
 
 @Component({
 	selector: 'app-groupforum',
 	templateUrl: './forum.component.html',
-	styleUrls: ['./forum.component.scss'],
+	styleUrls: ['../group.component.scss', './forum.component.scss'],
 	encapsulation: ViewEncapsulation.None
 })
 export class GroupForumComponent implements OnInit {
 	
 	public userId: string;
 	public forumId: string;
+	public groupId: string;
 	public notifyStatus: boolean = false;
 	public threads: Thread[];
 	
 	// FontAwesome icons
-	public faComment = faComment;
+	public faPlusSquare = faPlusSquare;
 	public faUsers = faUsers;
 	public faLock = faLock;
 
@@ -50,10 +51,10 @@ export class GroupForumComponent implements OnInit {
 	
 	ngOnInit() {
 		// Get current groupId
-		const groupId = this.router.url.split('/')[2];
+		this.groupId = this.router.url.split('/')[2];
 		
 		// Get current forum information
-		this.httpManagerService.get('/json/group/forum/' + groupId).subscribe(res => {
+		this.httpManagerService.get('/json/group/forum/' + this.groupId).subscribe(res => {
 			this.forumId = res.forumId;
 			this.notifyStatus = res.notifyStatus;
 			

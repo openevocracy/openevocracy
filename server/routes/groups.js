@@ -387,6 +387,45 @@ exports.getToolbar = function(req, res) {
 	}).then(res.json.bind(res));
 };
 
+/**
+ *  @desc: Gets the member bar, which function is to:
+ * 		  - show the name and color of every member
+ * 		  - highligh which member the current user is
+ * 		  - show the online status of every member
+ */
+ exports.getMemberbar = function(req, res) {
+	const groupId = ObjectId(req.params.id);
+	const userId = ObjectId(req.user._id);
+	
+	// Get group members
+	const groupRelations_promise = getGroupMembersAsync(groupId);
+	
+	// Get number of group members
+	const numGroupMembers_promise = groupRelations_promise.then(function(group_members) {
+		return _.size(group_members);
+	});
+	
+	// Generate group specific color_offset
+	const chanceOffset = new Chance(groupId.toString());
+	const offset = chanceOffset.integer({min: 0, max: 360});
+	
+	// Get group members
+	groupRelations_promise.map(function(relation, index) {
+		
+		// Generate member color
+		const memberColor_promise = numGroupMembers_promise.then(function(numMembers) {
+			const hue = offset + index*(360/numMembers);
+			return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
+		});
+      
+      return Promise.props({
+      	'userId': relation.userId,
+			'name': generateUserName(groupId, relation.userId),
+			'color': memberColor_promise
+      });
+	}).then(res.json.bind(res));
+};
+
 /* @desc: Gets group editor information, necessary information are:
  *        - groupId, topicId, docId (can be found in pad)
  *        - level, name, nextDeadline (can be found in topic)

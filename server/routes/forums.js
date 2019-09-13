@@ -257,7 +257,7 @@ exports.queryThread = function(req, res) {
 	
 	// Get group
 	const group_promise = thread_promise.then((thread) => {
-		return db.collection('groups').findOneAsync({'forumId': thread.forumId}, {});
+		return db.collection('groups').findOneAsync({'forumId': thread.forumId});
 	});
 	
 	// Check if current user is member of group and return boolean (important for functionality of private threads)

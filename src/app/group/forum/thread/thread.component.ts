@@ -29,7 +29,7 @@ import * as _ from 'underscore';
 @Component({
 	selector: 'app-groupforumthread',
 	templateUrl: './thread.component.html',
-	styleUrls: ['./thread.component.scss'],
+	styleUrls: ['../../group.component.scss', './thread.component.scss'],
 	encapsulation: ViewEncapsulation.None
 })
 export class GroupForumThreadComponent implements OnInit {
@@ -40,9 +40,10 @@ export class GroupForumThreadComponent implements OnInit {
 	public fragment: string = "";
 	public editor;
 	public userId: string;
+	public groupId: string;
 	public thread: Thread;
 	public posts: Post[];
-	public solvedButton: string;
+	public solvedButtonTitle: string;
 	public sortedBy: string = "";
 	public missingWordsComments: boolean[] = [];
 	public forumMinWordsCommentMsgTranslated: string = "";
@@ -79,12 +80,16 @@ export class GroupForumThreadComponent implements OnInit {
 	}
 	
 	ngOnInit() {
+		this.activatedRoute.parent.params.subscribe((params: Params) => {
+			this.groupId = params.id;
+		});
+		
 		// Get forum id from url
 		this.activatedRoute.params.subscribe((params: Params) => {
 			const threadId = params.id;
 			this.loadThread(threadId).subscribe(res => {
 				// Set solved button label
-				this.solvedButton = this.thread.closed ? 'FORUM_BUTTON_MARK_UNSOLVED' : 'FORUM_BUTTON_MARK_SOLVED';
+				this.solvedButtonTitle = this.thread.closed ? 'FORUM_BUTTON_TITLE_UNSOLVED' : 'FORUM_BUTTON_TITLE_SOLVED';
 			});
 		});
 		
@@ -158,13 +163,13 @@ export class GroupForumThreadComponent implements OnInit {
 		this.httpManagerService.post('/json/group/forum/thread/solved', data).subscribe(res => {
 			if (this.thread.closed) {
 				this.thread.closed = false;
-				this.solvedButton = 'FORUM_BUTTON_MARK_SOLVED';
+				this.solvedButtonTitle = 'FORUM_BUTTON_TITLE_SOLVED';
 				
 				// Show snack bar notification
 				this.snackbarService.showSnackbar('FORUM_SNACKBAR_MARK_UNSOLVED');
 			} else {
 				this.thread.closed = true;
-				this.solvedButton = 'FORUM_BUTTON_MARK_UNSOLVED';
+				this.solvedButtonTitle = 'FORUM_BUTTON_TITLE_UNSOLVED';
 				
 				// Show snack bar notification
 				this.snackbarService.showSnackbar('FORUM_SNACKBAR_MARK_SOLVED');

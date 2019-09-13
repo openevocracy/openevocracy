@@ -87,6 +87,7 @@ import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { GroupComponent } from './group/group.component';
+import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -134,7 +135,8 @@ export function loadConfig(configService: ConfigService) {
 		GroupChatComponent,
 		GroupMembersComponent,
 		GroupToolbarComponent,
-		GroupComponent
+		GroupComponent,
+		GroupMemberbarComponent
 	],
 	imports: [
 		BrowserModule,

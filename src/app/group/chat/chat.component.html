@@ -1,3 +1,11 @@
+<mat-toolbar class="second-toolbar" id="thread-toolbar" color="primary" [ngClass]="{'closed': thread?.closed, 'open': !thread?.closed}">
+	<div class="flex container">
+		<span class="flex-spacer"></span>
+		
+		<memberbar></memberbar>
+	</div>
+</mat-toolbar>
+
 <div class="container">
 	<p>chat works!</p>
 </div>

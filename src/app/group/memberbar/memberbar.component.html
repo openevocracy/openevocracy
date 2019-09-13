@@ -1,0 +1,10 @@
+<span *ngFor="let member of groupMembers">
+	<button mat-button [matMenuTriggerFor]="menu" [ngClass]="{'me': member.userId == userId}">
+		<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}</span>
+	</button>
+	<mat-menu #menu="matMenu" [overlapTrigger]="false">
+		<button mat-menu-item [routerLink]="['/user/profile', member.userId]">
+			<span><fa-icon [icon]="faUser"></fa-icon> {{ 'GROUP_MEMBER_BUTTON_SHOW' | translate }}</span>
+		</button>
+	</mat-menu>
+</span>

@@ -24,6 +24,13 @@ hr { margin: 0; }
 .post.mainpost { margin-top: 20px; }
 .post-wrapper { padding: 10px 20px; }
 
+.post.mainpost .solved-toggle { padding: 0 10px; }
+.post.mainpost .mat-slide-toggle-content { font-size: 12px; }
+.post.mainpost .mat-slide-toggle-bar { width: 21px; height: 7px; }
+.post.mainpost .mat-slide-toggle-thumb { width: 12px; height: 12px; }
+.post.mainpost .mat-slide-toggle.mat-checked .mat-slide-toggle-thumb-container { transform: translate3d(10px,0,0); }
+.post.mainpost .mat-slide-toggle-thumb-container { width: 12px; height: 12px; }
+
 .mainpost-spacer { margin-bottom: 20px; margin-top: 30px; text-align: center; }
 .mainpost-spacer hr { margin-bottom: -12px; }
 .mainpost-spacer .sorting-label { display: inline-block; background-color: $grey200; padding: 0 10px; }

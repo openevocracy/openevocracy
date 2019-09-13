@@ -286,6 +286,9 @@ app.post('/json/user/lang', auth(), users.setLanguage);
 // @desc: Group toolbar
 app.get('/json/group/toolbar/:id', auth(), groups.getToolbar);
 
+// @desc: Group memberbar
+app.get('/json/group/memberbar/:id', auth(), groups.getMemberbar);
+
 // @desc: Config file
 app.get('/json/config', utils.config);
 

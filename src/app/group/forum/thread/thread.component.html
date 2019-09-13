@@ -1,4 +1,4 @@
-<mat-toolbar id="thread-toolbar" color="primary" [ngClass]="{'closed': thread?.closed, 'open': !thread?.closed}">
+<mat-toolbar class="second-toolbar" id="thread-toolbar" color="primary" [ngClass]="{'closed': thread?.closed, 'open': !thread?.closed}">
 	<div class="flex container">
 		<h1>
 			<fa-icon *ngIf="thread?.private" class="private" [icon]="faLock" title="{{ 'FORUM_THREAD_PRIVATE' | translate }}"></fa-icon>
@@ -7,12 +7,8 @@
 		
 		<span class="flex-spacer"></span>
 		
-		<button mat-button title="{{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}" [routerLink]="['/group/forum', thread?.forumId]">
+		<button mat-button title="{{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}" [routerLink]="['/group', groupId, 'forum']">
 			<span><fa-icon [icon]="faArrowAltCircleLeft"></fa-icon> {{ 'FORUM_BUTTON_BACK_TO_THREADLIST' | translate }}</span>
-		</button>
-		
-		<button *ngIf="thread?.authorId == userId" mat-button title="{{ solvedButton | translate }}" (click)="toggleSolved()">
-			<span><fa-icon [icon]="faCheckSquare"></fa-icon> {{ solvedButton | translate }}</span>
 		</button>
 		
 		<mat-slide-toggle id="watch-thread" [checked]="thread?.notifyStatus" (change)="changeNotifyStatus($event)">{{ 'FORUM_BUTTON_WATCH' | translate }}</mat-slide-toggle>
@@ -30,6 +26,9 @@
 		<div class="post" [id]="'post-'+post.postId" [ngClass]="{ 'highlighted': post.postId==fragment, 'mainpost': post.postId==thread.mainPostId}">
 			<div class="post-head">
 				<div class="post-links">
+					<span *ngIf="post.postId == thread.mainPostId && thread?.authorId == userId" class="solved-toggle" title="{{ solvedButtonTitle | translate }}">
+						<mat-slide-toggle [checked]="this.thread.closed" (change)="toggleSolved()">{{ 'FORUM_BUTTON_SOLVED' | translate }}</mat-slide-toggle>
+					</span>
 					<button mat-button title="{{ 'FORUM_BUTTON_SHARE' | translate }}" (click)="post.postId==thread.mainPostId ? shareThread() : sharePost(post.postId)">
 						<span><fa-icon [icon]="faShareSquare"></fa-icon> {{ 'FORUM_BUTTON_SHARE' | translate }}</span>
 					</button>
