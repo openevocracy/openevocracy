@@ -1,4 +1,7 @@
 {
+	"SERVER_CONNECTION_LOST": "Verbindung zum Server verloren. Versuche Verbindung erneut aufzubauen ...",
+	"SERVER_CONNECTED_AGAIN": "Verbindung zum Server ist wiederhergestellt.",
+	
 	"HEADER_MAINMENU_TOPICLIST": "Themen",
 	"HEADER_MAINMENU_TIMELINE": "Timeline",
 	"HEADER_MAINMENU_SETTINGS": "Einstellungen",

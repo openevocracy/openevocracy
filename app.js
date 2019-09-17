@@ -337,11 +337,13 @@ httpServer.listen(app.get('port'), function() {
 	console.log('Express server listening on port ' + app.get('port'));
 });
 
-var wssPad = new WebSocket.Server({ noServer: true });
-var wssChat = new WebSocket.Server({ noServer: true });
+let wssPad = new WebSocket.Server({ noServer: true });
+let wssChat = new WebSocket.Server({ noServer: true });
+let wssAlive = new WebSocket.Server({ noServer: true });
 
 pads.startPadServer(wssPad);
 chats.startChatServer(wssChat);
+users.startAliveServer(wssAlive, [wssPad, wssChat]);
 
 httpServer.on('upgrade', function upgrade(request, socket, head) {
 	var queryArr = request.url.split("/socket/")[1].split("/");
@@ -354,6 +356,10 @@ httpServer.on('upgrade', function upgrade(request, socket, head) {
 	} else if (connectionType === 'chat') {
 		wssChat.handleUpgrade(request, socket, head, function done(ws) {
 			wssChat.emit('connection', ws, request);
+		});
+	} else if (connectionType === 'alive') {
+		wssAlive.handleUpgrade(request, socket, head, function done(ws) {
+			wssAlive.emit('connection', ws, request);
 		});
 	} else {
 		socket.destroy();

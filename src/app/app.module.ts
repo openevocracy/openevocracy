@@ -66,6 +66,7 @@ import { LanguageService } from './_services/language.service';
 import { ConfigService } from './_services/config.service';
 import { SnackbarService } from './_services/snackbar.service';
 import { ActivityListService } from './_services/activitylist.service';
+import { ConnectionAliveService } from './_services/connection.service';
 
 // Shared
 import { cfg } from '../../shared/config';
@@ -176,6 +177,7 @@ export function loadConfig(configService: ConfigService) {
 		LanguageService,
 		SnackbarService,
 		ActivityListService,
+		ConnectionAliveService,
 		//{ provide: 'cfg', useValue: cfg },
 		/*{ provide: 'cfg',
 		  useFactory: (configService: ConfigService) => () => Promise.resolve(configService.get()),

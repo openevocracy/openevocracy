@@ -55,21 +55,20 @@ export class UserService {
 	
 	public authenticate(credentials) {
 		var self = this;
-		return this.http.post('/json/auth/login', credentials)
-			.map(raw => {
-				var res = raw.json();
-				
-				// Set ID and store token
-				self.setUser(res.id, res.token);
-				
-				// Redirect to front page
-				self.router.navigate(['/']);
-				
-				return true;
-			}).
-			catch(error => {
-				return self.httpManagerService.handleError(error);
-			});
+		return this.http.post('/json/auth/login', credentials).map(raw => {
+			var res = raw.json();
+			
+			// Set ID and store token
+			self.setUser(res.id, res.token);
+			
+			// Redirect to front page
+			self.router.navigate(['/']);
+			
+			return true;
+		}).
+		catch(error => {
+			return self.httpManagerService.handleError(error);
+		});
 	}
 	
 	public register(credentials) {

@@ -132,7 +132,7 @@ exports.countHtmlWords = function(html) {
  * @params:
  *    - wss: websocket
  */
-exports.pingInterval = function(wss) {
+/*exports.pingInterval = function(wss) {
 	setInterval(function() {
 		// Send ping to every client
 		wss.clients.forEach(function(ws) {
@@ -142,7 +142,7 @@ exports.pingInterval = function(wss) {
 			ws.ping(function() {});
 		});
 	}, 30000);
-};
+};*/
 
 /*
  * @desc: Send config file, but omit private configuration information

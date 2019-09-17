@@ -1,4 +1,7 @@
 {
+	"SERVER_CONNECTION_LOST": "Connection to server lost. Try to reconnect ...",
+	"SERVER_CONNECTED_AGAIN": "Successfully reconnected to server.",
+	
 	"HEADER_MAINMENU_TOPICLIST": "Topics",
 	"HEADER_MAINMENU_TIMELINE": "Timeline",
 	"HEADER_MAINMENU_SETTINGS": "Settings",

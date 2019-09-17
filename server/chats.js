@@ -144,23 +144,26 @@ function joinChatRoom(socket, chatRoomId, userId) {
  */
 exports.startChatServer = function(wss) {
 	wss.on('connection', function(ws, req) {
-		var vars = req.url.split("/socket/chat/")[1].split("/");
-		var chatRoomId = vars[0];
-		var userToken = vars[1];
+		const vars = req.url.split("/socket/chat/")[1].split("/");
+		const chatRoomId = vars[0];
+		const userToken = vars[1];
 		
 		// Authenticate user and initialize sharedb afterwards
 		users.socketAuthentication(ws, userToken, function(userId) {
 			// Initialize chat
 			joinChatRoom(ws, chatRoomId, userId);
+			
+			// Add userId to ws connection
+			ws.userId = userId;
 		});
 		
 		// Set socket alive initially and every time a pong is arriving
-		ws.isAlive = true;
+		/*ws.isAlive = true;
 		ws.on('pong', function() {
 			ws.isAlive = true;
-		});
+		});*/
 	});
 	
 	// Initalize ping interval
-	utils.pingInterval(wss);
+	//utils.pingInterval(wss);
 };

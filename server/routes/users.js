@@ -19,8 +19,11 @@ var cfg = require('../../shared/config').cfg;
 // Initialize jwt authentification
 var jwtOptions = {};
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
-jwtOptions.secretOrKey = bcrypt.genSaltSync(8);
+jwtOptions.secretOrKey = ((cfg.DEBUG) ? 'debug' : bcrypt.genSaltSync(8));
 exports.jwtOptions = jwtOptions;
+
+// User online cache
+let onlineUsers = [];
 
 var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
 	db.collection('users').findOneAsync({ '_id': ObjectId(jwt_payload.id), 'salt': jwt_payload.salt }).then(function (user) {
@@ -423,7 +426,7 @@ exports.navigation = function(req, res) {
  *    userToken: token of user, contains userId and salt
  *    cb: callback function
  */
-exports.socketAuthentication = function(ws, userToken, cb) {
+function socketAuthentication(ws, userToken, cb) {
 	// If token was not transmitted, return  and close connection
 	if(!userToken) {
 		ws.close();
@@ -431,11 +434,11 @@ exports.socketAuthentication = function(ws, userToken, cb) {
 	}
 	
 	// Get userToken from client request and decode
-	var decodedUserToken = jwt.verify(userToken, jwtOptions.secretOrKey);
+	const decodedUserToken = jwt.verify(userToken, jwtOptions.secretOrKey);
 	
 	// Read userId and salt from decoded token
-	var userId = ObjectId(decodedUserToken.id);
-	var userSalt = decodedUserToken.salt;
+	const userId = ObjectId(decodedUserToken.id);
+	const userSalt = decodedUserToken.salt;
 	
 	// Check if salt is correct; if yes, connect
 	return Promise.resolve(db.collection('users')
@@ -450,7 +453,8 @@ exports.socketAuthentication = function(ws, userToken, cb) {
 			// Callback
 			cb(userId);
 	}));
-};
+}
+exports.socketAuthentication = socketAuthentication;
 
 /*
  * @desc: When user sends feedback, redirect it to feedback@openevocracy.org
@@ -530,3 +534,91 @@ exports.getNotifyUserIdsForEntity = function(entityId) {
 		.find({'entityId': entityId}, {'_id': false, 'userId': true}).toArrayAsync()
 		.map(function(notify) { return notify.userId; });
 };
+
+/**
+ * @desc: Create socket to monitor if connection to clients is alive via ping pong
+ */
+exports.startAliveServer = function(wss, websockets) {
+	// Initialize stream and listener for WebSocket server
+	wss.on('connection', function(ws, req) {
+		// Get user token from websocket url
+		const userToken = req.url.split("/socket/alive/")[1];
+		
+		// Authenticate user and initialize ping pong
+		socketAuthentication(ws, userToken, function(userId) {
+			// Add user to online list
+			onlineUsers.push(userId);
+			
+			// Set socket alive initially and every time a pong is arriving from client
+			ws.isAlive = true;
+			ws.on('pong', function() {
+				ws.isAlive = true;
+			});
+			
+			// On close, terminate connection
+			ws.on('close', function() {
+				terminateUserConnections(websockets, userId);
+			});
+			
+			// On ping from client, respond with pong
+			ws.on('message', function(msg) {
+				if(msg == 'ping') {
+					ws.send('pong');
+				}
+			});
+			
+			// Initalize ping interval
+			pingInterval(wss, websockets);
+		});
+	});
+	
+	// TODO
+	// * Use pingIntervall function for wssAlive, but terminate ALL websockets (wssChat, wssPad, wssAlive), if client does not answer
+	// * Bind userId to every socket ws (like ws.userId = ...) to be able to filter out websockets to close
+	// * Shift pingIntervall to users file
+	// * Remove ping/pong from pads and chats
+	// * Create a list with all users which are connected and alive, remove users which went offline or did not respond anymore (on disconnect and if not alive anymore)
+};
+
+// TODO Remove utils.pingInterval
+function pingInterval(wssAlive, websockets) {
+	setInterval(function() {
+		// Send ping to every client
+		wssAlive.clients.forEach(function(ws) {
+			// Get user id of current websocket connection
+			const userId = ws.userId;
+			// If websocket is still not alive after 30 seconds, close all websockets
+			if (!ws.isAlive) {
+				// Terminate all other websockets (wssPad, wssChat) using userId and remove user from online list
+				terminateUserConnections(websockets, userId);
+				
+				// Finally terminate wssAlive websocket and return
+				return ws.terminate();
+			}
+			
+			// Set isAlive to false and ping client again
+			ws.isAlive = false;
+			ws.ping(function() {});
+			// If the client responds within 30 seconds, the isAlive status is reset to true
+		});
+	}, 30000);
+}
+
+/**
+ * @desc: Shut down websocket connections and remove user from online list
+ */
+function terminateUserConnections(websockets, userId) {
+	// Shut down websocket connections
+	websockets.forEach(function(wss) {
+		// Find connection which is dead using userId
+		const wsConnection = utils.findWhereObjectId(wss.clients, {'userId': userId});
+		// Terminate if connection was found
+		if (wsConnection) {
+			const terminated = wsConnection.terminate();
+			console.log('terminated', terminated);
+		}
+	});
+	
+	// Remove user from online list
+	onlineUsers = utils.withoutObjectId(onlineUsers, userId);
+}

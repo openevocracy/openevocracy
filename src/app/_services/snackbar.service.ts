@@ -16,14 +16,15 @@ export class SnackbarService {
 	/**
 	 * @desc: Show snackbar notification
 	 */
-	public showSnackbar(title, afterDismissed?) {
+	public showSnackbar(title, afterDismissed?, durationTime?) {
 		forkJoin(
 			this.translateService.get(title),
 			this.translateService.get('FORM_BUTTON_CLOSE'))
 		.subscribe(([msg, action]) => {
-			// Open snackbar for 5 seconds
+			// Open snackbar for 5 seconds or for specified time
+			const duration = ((durationTime) ? durationTime : 5000);
 			const snackBarRef = this.snackBar.open(msg, action, {
-				'duration': 5000
+				'duration': duration
 			});
 			// If afterDismissed callback was given as argument, call function after dismiss
 			if (afterDismissed) {

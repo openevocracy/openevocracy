@@ -42,19 +42,22 @@ exports.startPadServer = function(wss) {
 	
 	// Initialize stream and listener for WebSocket server
 	wss.on('connection', function(ws, req) {
-		var userToken = req.url.split("/socket/pad/")[1];
+		const userToken = req.url.split("/socket/pad/")[1];
 		// Authenticate user and initialize sharedb afterwards
 		users.socketAuthentication(ws, userToken, function(userId) {
 			// If salt is correct, create stream, let backend listen to stream and hand over userId for middleware
-			var stream = new WebSocketJSONStream(ws);
+			const stream = new WebSocketJSONStream(ws);
 			backend.listen(stream, {'userId': userId});
+			
+			// Add userId to ws connection
+			ws.userId = userId;
 		});
 		
 		// Set socket alive initially and every time a pong is arriving
-		ws.isAlive = true;
+		/*ws.isAlive = true;
 		ws.on('pong', function() {
 			ws.isAlive = true;
-		});
+		});*/
 	});
 	
 	// Middleware to hook into connection process
@@ -73,7 +76,7 @@ exports.startPadServer = function(wss) {
 	connection = backend.connect();
 	
 	// Initalize ping interval
-	utils.pingInterval(wss);
+	//utils.pingInterval(wss);
 };
 
 /*
