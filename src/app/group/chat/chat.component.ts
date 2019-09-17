@@ -6,7 +6,8 @@ import { Component, OnInit } from '@angular/core';
 	styleUrls: ['../group.component.scss', './chat.component.scss']
 })
 export class GroupChatComponent implements OnInit {
-
+	public thread: any;
+	
 	constructor() { }
 	
 	ngOnInit() {
