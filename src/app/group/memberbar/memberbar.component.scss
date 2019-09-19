@@ -2,3 +2,15 @@
 @import "~styles/variables";
 
 button.me { background-color: rgba(255,255,255,0.2); }
+.membericon { position: relative; }
+.badge {
+	position: absolute;
+	top: -5px;
+	left: -8px;
+	display: block;
+	width: 10px;
+	height: 10px;
+	border-radius: 5px;
+	background-color: $lightgreenA400;
+	box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+}

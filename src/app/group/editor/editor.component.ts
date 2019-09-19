@@ -27,7 +27,7 @@ import { C } from '../../../../shared/constants';
 import { faUser, faFile, faHandshake, faLightbulb, faPlay } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
-	selector: 'app-group',
+	selector: 'app-editor',
 	templateUrl: './editor.component.html',
 	styleUrls: ['../../editor/editor.component.scss', './editor.component.scss']
 })
@@ -178,7 +178,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 			this.initalizePadSocket(this.group.docId);
 			
 			// Initialize chat
-			this.initalizeChatSocket(this.group.chatRoomId);
+			//this.initalizeChatSocket(this.group.chatRoomId);
 		});
 	}
 	

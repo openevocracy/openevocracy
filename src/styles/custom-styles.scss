@@ -10,9 +10,6 @@ body { font-family: Roboto, sans-serif; font-weight: 300; color: $grey800; backg
 h1,h2,h3,h4,h5,h6 { font-weight: 300; }
 hr { border-color: $grey400; }
 
-/* Global IDs */
-#wrapper { margin: 64px auto 76px auto; }
-
 /* Global Classes */
 body.modal-open { overflow: hidden; }
 .flex { display: flex; }

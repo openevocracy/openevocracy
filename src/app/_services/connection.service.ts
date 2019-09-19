@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable, EventEmitter, OnDestroy } from '@angular/core';
 
 import { UserService } from './user.service';
 
@@ -6,7 +6,7 @@ import * as parseUrl from 'url-parse';
 import * as origin from 'get-location-origin';
 
 @Injectable()
-export class ConnectionAliveService {
+export class ConnectionAliveService implements OnDestroy {
 	
 	// Define global variables
 	public isAlive:boolean = true;
@@ -27,6 +27,19 @@ export class ConnectionAliveService {
 		// Get user token from user service
 		this.userToken = this.userService.getToken();
 	}
+	
+	/*
+	 * @desc: Lifecylce hook, used to close socket connection properly if depending components are destroyed
+	 */
+	ngOnDestroy() {
+		// Close pad socket
+		if (this.aliveSocket)
+			this.aliveSocket.close();
+		
+		// Stop ping interval
+		if (this.pingInterval)
+			clearInterval(this.pingInterval);
+	}
 
 	/**
 	 * @desc: Initializes socket connection to server, the job is to regularily
@@ -35,13 +48,12 @@ export class ConnectionAliveService {
 	public init() {
 		const parsed = parseUrl(origin);
 		const protocol = parsed.protocol.includes('https') ? 'wss://' : 'ws://';
-		this.aliveSocket = new WebSocket(protocol + parsed.host + '/socket/alive/'+this.userToken);
+		this.aliveSocket = new WebSocket(protocol + parsed.host + '/socket/alive/' + this.userToken);
 		
 		this.aliveSocket.onopen = function(event) {
-			console.log('connected');
-			
 			// If connection was broken before and is reconnected now
 			if (!this.isAlive) {
+				console.log('onopen reconnect');
 				// Set isAlive true again and stop retry interval, since it was successful
 				this.isAlive = true;
 				//clearInterval(this.retryInterval);
@@ -65,6 +77,10 @@ export class ConnectionAliveService {
 			}
 		}.bind(this);
 		
+		this.aliveSocket.onerror = function (err) {
+			console.log(err);
+		};
+		
 		// WebSocket connection was closed from server
 		this.aliveSocket.onclose = function(e) {
 			console.log('onclose');
@@ -78,9 +94,11 @@ export class ConnectionAliveService {
 	 */
 	public startPingInterval() {
 		this.pingInterval = setInterval(() => {
+			console.log('interval');
 			if (!this.isAlive) {
+				console.log('connection lost');
 				// If server does not respond anymore, disable connection
-				this.disableConnection();
+				//this.disableConnection();
 				// Close socket
 				this.aliveSocket.close();
 			}
@@ -99,19 +117,23 @@ export class ConnectionAliveService {
 	 */
 	public disableConnection() {
 		// Stop interval
+		console.log('stop interval');
 		clearInterval(this.pingInterval);
-		// Trigger offline event if was connected before
-		if (this.isConnected) {
-			// Wait one second to avoid visual effects when just reloading (F5) the tab
-			setTimeout(() => {
+		
+		// Wait 500 ms to avoid visual effects when reloading (F5) the tab
+		setTimeout(() => {
+			console.log('emit event, connected false');
+			// Trigger offline event if was connected before
+			if (this.isConnected)
 				this.connectionLost.emit(true);
-			}, 1000);
-		}
-		// Set flags to disconnected
-		this.isAlive = false;
-		this.isConnected = false;
-		// Retry connection
-		this.startRetryTimeout();
+			
+			// Set flags to disconnected
+			this.isAlive = false;
+			this.isConnected = false;
+			
+			// Retry connection
+			this.startRetryTimeout();
+		}, 500);
 	}
 	
 	/**
@@ -121,8 +143,9 @@ export class ConnectionAliveService {
 	public startRetryTimeout() {
 		// Wait 1 seconds and retry connection
 		this.retryTimeout = setTimeout(() => {
+			console.log('retry');
 			this.init();
-		}, 1000);
+		}, 5000);
 	}
 
 }

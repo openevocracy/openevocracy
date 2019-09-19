@@ -1,0 +1,21 @@
+/* Import variables */
+@import "~styles/variables";
+
+:host { flex: 1; display: flex; flex-direction: column; }
+
+#chat-wrapper { display: flex; flex: 1; flex-direction: column; padding: 15px 0; /*background-color: #f00;*/ }
+#chat-wrapper form { /*position: absolute; bottom: 10px; left: 0; width: 100%;*/ padding: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); background-color: $white; }
+#chat-wrapper .mat-input-container { width: calc(100% - 70px); }
+#chat-wrapper .mat-raised-button { min-width: 0; max-width: 50px; margin-left: 10px; }
+
+#chat-messages { flex: 1 1 auto; height: 0; overflow-y: auto; }
+
+.chat-message .default-message { background-color: $white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); padding: 10px; margin: 0 0 10px 15px; }
+.chat-message.me .default-message { margin: 0 15px 10px 0; }
+.default-message .message-username { filter: saturate(8); }
+.default-message .message-date { float: right; color: $grey500; }
+.default-message .message-header {}
+
+.chat-message .status-message { padding: 5px; margin: 0 15px 10px 15px; }
+.status-message .message-date { float: right; color: $grey500; line-height: 1.9rem; }
+.status-message .message-body { color: $grey700; }

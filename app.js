@@ -289,6 +289,9 @@ app.get('/json/group/toolbar/:id', auth(), groups.getToolbar);
 // @desc: Group memberbar
 app.get('/json/group/memberbar/:id', auth(), groups.getMemberbar);
 
+// @desc: Group memberbar
+app.get('/json/group/membersonline/:id', auth(), groups.getOnlineMembers);
+
 // @desc: Config file
 app.get('/json/config', utils.config);
 

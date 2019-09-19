@@ -48,6 +48,14 @@ function getUserByMailAsync(email) {
     return db.collection('users').findOneAsync({'email': email}, {'_id': true, 'email': true, 'lang': true});
 }
 
+/**
+ * @desc: Checks if user is in onlineUsers list, returns true or false
+ */
+function isOnline(userId) {
+	return utils.containsObjectId(onlineUsers, userId);
+}
+exports.isOnline = isOnline;
+
 // POST /api/auth/login
 // @desc: logs in a user
 exports.login = function(req, res) {
@@ -368,55 +376,55 @@ exports.setLanguage = function(req, res) {
 
 // GET /json/user/navi
 exports.navigation = function(req, res) {
-    var uid = ObjectId(req.user._id);
-
-    var topicsPrePromise = db.collection('topic_proposals').
-        find({'source': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
-            return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
-                {'name': true, 'stage': true, 'level': true, 'nextDeadline': true}).toArrayAsync();
-        });
-    
-    var proposalsPromise = topicsPrePromise.filter(function(topic) {
-        return topic.stage == C.STAGE_PROPOSAL;
-    }).map(function(topic){
-        return db.collection('topic_proposals').
-            findOneAsync({'source': uid, 'tid': topic._id}, {'_id': true}).
-            then(function(proposal) {
-                if(proposal)
-                    return {'_id': proposal._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
-                else
-                    return null;
-            });
-    });
-    
-    var groupsPromise = topicsPrePromise.filter(function(topic) {
-        return topic.stage == C.STAGE_CONSENSUS;
-    }).map(function(topic) {
-        return db.collection('group_relations')
-            .find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
-                return db.collection('groups').findOneAsync(
-                    {'_id': { $in: _.pluck(group_members, 'gid')}, 'tid': topic._id, 'level': topic.level },
-                    {'_id': true});
-            }).then(function(group) {
-                if(group)
-                    return {'_id': group._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
-                else
-                    return null;
-            });
-    }).filter(function(group) {
-        return _.isObject(group);
-    });
-    
-    var topicsPromise = topicsPrePromise.filter(function(topic) {
-        return (topic.stage == C.STAGE_SELECTION || topic.stage == C.STAGE_PROPOSAL || topic.stage == C.STAGE_CONSENSUS);
-    });
-    
-    Promise.props({
-        'proposals': proposalsPromise,
-        'topics': topicsPromise,
-        'groups': groupsPromise
-    }).then(res.json.bind(res)).
-    catch(utils.isOwnError,utils.handleOwnError(res));
+	var uid = ObjectId(req.user._id);
+	
+	var topicsPrePromise = db.collection('topic_proposals')
+		.find({'source': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
+			return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
+				{'name': true, 'stage': true, 'level': true, 'nextDeadline': true}).toArrayAsync();
+		});
+	
+	var proposalsPromise = topicsPrePromise.filter(function(topic) {
+		return topic.stage == C.STAGE_PROPOSAL;
+	}).map(function(topic){
+		return db.collection('topic_proposals').
+			findOneAsync({'source': uid, 'tid': topic._id}, {'_id': true}).
+			then(function(proposal) {
+				if(proposal)
+					return {'_id': proposal._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
+				else
+					return null;
+		});
+	});
+	
+	var groupsPromise = topicsPrePromise.filter(function(topic) {
+		return topic.stage == C.STAGE_CONSENSUS;
+	}).map(function(topic) {
+		return db.collection('group_relations')
+		.find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
+			return db.collection('groups').findOneAsync(
+				{'_id': { $in: _.pluck(group_members, 'gid')}, 'tid': topic._id, 'level': topic.level },
+				{'_id': true});
+		}).then(function(group) {
+			if(group)
+				return {'_id': group._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
+			else
+				return null;
+		});
+	}).filter(function(group) {
+		return _.isObject(group);
+	});
+	
+	var topicsPromise = topicsPrePromise.filter(function(topic) {
+		return (topic.stage == C.STAGE_SELECTION || topic.stage == C.STAGE_PROPOSAL || topic.stage == C.STAGE_CONSENSUS);
+	});
+	
+	Promise.props({
+		'proposals': proposalsPromise,
+		'topics': topicsPromise,
+		'groups': groupsPromise
+	}).then(res.json.bind(res)).
+	catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
 /*
@@ -541,13 +549,16 @@ exports.getNotifyUserIdsForEntity = function(entityId) {
 exports.startAliveServer = function(wss, websockets) {
 	// Initialize stream and listener for WebSocket server
 	wss.on('connection', function(ws, req) {
+		console.log('connected');
+		
 		// Get user token from websocket url
 		const userToken = req.url.split("/socket/alive/")[1];
 		
 		// Authenticate user and initialize ping pong
 		socketAuthentication(ws, userToken, function(userId) {
-			// Add user to online list
-			onlineUsers.push(userId);
+			// Add user to online list if not already in
+			if (!isOnline(userId))
+				onlineUsers.push(userId);
 			
 			// Set socket alive initially and every time a pong is arriving from client
 			ws.isAlive = true;
@@ -574,13 +585,14 @@ exports.startAliveServer = function(wss, websockets) {
 	
 	// TODO
 	// * Use pingIntervall function for wssAlive, but terminate ALL websockets (wssChat, wssPad, wssAlive), if client does not answer
-	// * Bind userId to every socket ws (like ws.userId = ...) to be able to filter out websockets to close
-	// * Shift pingIntervall to users file
 	// * Remove ping/pong from pads and chats
-	// * Create a list with all users which are connected and alive, remove users which went offline or did not respond anymore (on disconnect and if not alive anymore)
+	// * Remove utils.pingInterval on server and editor.initServerPing on client
 };
 
-// TODO Remove utils.pingInterval
+/**
+ * @desc: Pings the client in a given interval, if the client does not answer,
+ *        remove it from users online list and close all related socket connections
+ */
 function pingInterval(wssAlive, websockets) {
 	setInterval(function() {
 		// Send ping to every client

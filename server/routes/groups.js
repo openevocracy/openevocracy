@@ -61,7 +61,7 @@ function assignParticipantsToGroups(participants) {
 /*
  * @desc: Generate username from chance library, using groupId and userId as seed
  */
-function generateUserName(groupId, userId) {
+function generateMemberName(groupId, userId) {
 	// Create new chance object, which seed exists out of groupId and userId
    const seed = groupId.toString()+userId.toString();
    const chanceName = new Chance(seed);
@@ -69,7 +69,42 @@ function generateUserName(groupId, userId) {
    // Generate name and return
    return chanceName.first();
 }
-exports.generateUserName = generateUserName;
+exports.generateMemberName = generateMemberName;
+
+/**
+ * @desc: Generate color offset for groupId
+ */
+function getGroupColorOffset(groupId) {
+	// Generate group specific color_offset
+	const chanceOffset = new Chance(groupId.toString());
+	return chanceOffset.integer({min: 0, max: 360});
+}
+exports.getGroupColorOffset = getGroupColorOffset;
+
+/**
+ * @desc: Generate color for specific member
+ */
+function generateMemberColor(userId, offset, index, numMembers) {
+	// Calculate color for every member and return as array
+	const hue = offset + index*(360/numMembers);
+	return Color({h: hue, s: 20, v: 100}).hex();
+}
+exports.generateMemberColor = generateMemberColor;
+
+/**
+ * @desc: Generate color for all members of a group
+ */
+function generateMemberColors(groupId, userIds) {
+	// Get offset for group and number of members
+	const offset = getGroupColorOffset(groupId);
+	const numMembers = _.size(userIds);
+	
+	// Calculate color for every member and return as array
+	return _.map(userIds, (userId, index) => {
+		return generateMemberColor(userId, offset, index, numMembers);
+	});
+}
+exports.generateMemberColors = generateMemberColors;
 
 /*
  * @desc: Store group, group pad and members in database
@@ -410,7 +445,7 @@ exports.getToolbar = function(req, res) {
 	const offset = chanceOffset.integer({min: 0, max: 360});
 	
 	// Get group members
-	groupRelations_promise.map(function(relation, index) {
+	groupRelations_promise.map((relation, index) => {
 		
 		// Generate member color
 		const memberColor_promise = numGroupMembers_promise.then(function(numMembers) {
@@ -420,9 +455,24 @@ exports.getToolbar = function(req, res) {
       
       return Promise.props({
       	'userId': relation.userId,
-			'name': generateUserName(groupId, relation.userId),
-			'color': memberColor_promise
+			'name': generateMemberName(groupId, relation.userId),
+			'color': memberColor_promise,
+			'isOnline': users.isOnline(relation.userId)
       });
+	}).then(res.json.bind(res));
+};
+
+exports.getOnlineMembers = function(req, res) {
+	const groupId = ObjectId(req.params.id);
+	const userId = ObjectId(req.user._id);
+	
+	// Get all group relations
+	getGroupMembersAsync(groupId).map((relation) => {
+		// Check if member is online and return isOnline status
+		return {
+			'userId': relation.userId,
+			'isOnline': users.isOnline(relation.userId)
+		};
 	}).then(res.json.bind(res));
 };
 
@@ -517,7 +567,7 @@ exports.query = function(req, res) {
          
          return Promise.props({
          	'userId': relation.userId,
-				'name': generateUserName(groupId, relation.userId),
+				'name': generateMemberName(groupId, relation.userId),
 				'color': memberColor_promise,
 				'prevPadHtml': prevPadHtml_promise,
 				'ratingKnowledge': memberRatingKnowledge_promise,

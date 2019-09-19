@@ -109,11 +109,11 @@ exports.queryForum = function(req, res) {
 			const numPosts_promise = db.collection('forum_posts').countAsync({ 'threadId': thread._id });
 			
 			// Add author name (can be null if not available)
-			const authorName = groups.generateUserName(group._id, thread.authorId);
+			const authorName = groups.generateMemberName(group._id, thread.authorId);
 			
 			// Add user name to last activity, if last activity exists
 			if(thread.lastResponse)
-				thread.lastResponse.userName = groups.generateUserName(group._id, thread.lastResponse.userId);
+				thread.lastResponse.userName = groups.generateMemberName(group._id, thread.lastResponse.userId);
 			
 			// Add sum of votes of mainpost and number of posts to every thread
 			return Promise.join(sumMainpostVotes_promise, numPosts_promise)
@@ -189,7 +189,7 @@ exports.createThread = function(req, res) {
 			const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
 			
 			// Define parameter for email body
-			const bodyParams = [ groups.generateUserName(group._id, authorId), group.name, urlToThread, urlToForum ];
+			const bodyParams = [ groups.generateMemberName(group._id, authorId), group.name, urlToThread, urlToForum ];
 			
 			// Define email translation strings
 			const mail = {
@@ -276,7 +276,7 @@ exports.queryThread = function(req, res) {
 			const postSumVotes_promise = sumVotesAsync(post._id);
 			
 			// Add post author name (can be null if not available)
-			const postAuthorName_promise = groups.generateUserName(group._id, post.authorId);
+			const postAuthorName_promise = groups.generateMemberName(group._id, post.authorId);
 			
 			// Get edits of this post
 			const postEdits_promise = db.collection('forum_edits').find({ 'entityId': post._id }).toArrayAsync();
@@ -290,7 +290,7 @@ exports.queryThread = function(req, res) {
 				const commentSumVotes_promise = sumVotesAsync(comment._id);
 				
 				// Add comment author name (can be null if not available)
-				const commentAuthorName_promise = groups.generateUserName(group._id, comment.authorId);
+				const commentAuthorName_promise = groups.generateMemberName(group._id, comment.authorId);
 				
 				// Get edits of this comment
 				const commentEdits_promise = db.collection('forum_edits').find({ 'entityId': comment._id }).toArrayAsync();
@@ -436,7 +436,7 @@ exports.createPost = function(req, res) {
 				const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
 				
 				// Define parameter for email body
-				const bodyParams = [ groups.generateUserName(group._id, authorId), group.name, urlToThread+'#'+postId, urlToThread ];
+				const bodyParams = [ groups.generateMemberName(group._id, authorId), group.name, urlToThread+'#'+postId, urlToThread ];
 				
 				// Define email translation strings
 				const mail = {

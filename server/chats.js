@@ -1,15 +1,16 @@
 // General libraries
-var _ = require('underscore');
-var C = require('../shared/constants').C;
-var ObjectId = require('mongodb').ObjectID;
-var db = require('./database').db;
+const _ = require('underscore');
+const C = require('../shared/constants').C;
+const ObjectId = require('mongodb').ObjectID;
+const db = require('./database').db;
 
 // Own references
-var users = require('./routes/users');
-var utils = require('./utils');
+const groups = require('./routes/groups');
+const users = require('./routes/users');
+const utils = require('./utils');
 
 // Rooms cache
-var rooms = {};
+let rooms = {};
 
 /*
  * @desc: Function called via route from client in order to get information
@@ -20,48 +21,78 @@ var rooms = {};
  *    res: response to client
  */
 exports.getChatRoomMessages = function(req, res) {
-	var chatRoomId = ObjectId(req.params.id);
-	var userId = ObjectId(req.user._id);
+	const groupId = ObjectId(req.params.id);
+	const userId = ObjectId(req.user._id);
 	
-	// Try to get room from cache, define user and prepare current timestamp
-	var room = rooms[chatRoomId];
-	var user = {'userId': userId};
-	var now = new Date().getTime();
+	// Get chat room id
+	const chatRommId_promise = db.collection('groups')
+		.findOneAsync({ '_id': groupId }, { 'chatRoomId': true })
+		.then((group) => { return group.chatRoomId; });
 	
-	// Load chat room from either cache or database
-	var chatRoom_promise = null;
-	if (_.isUndefined(room)) {
-		// Try to load the chat messages from database
-		chatRoom_promise = db.collection('chat_messages')
-			.find({'chatRoomId': chatRoomId}, { 'text': true, 'userId': true, 'type': true }).toArrayAsync()
-			.then(function (messages) {
-				if(_.isNull(messages)) {
-					// Chat does not exist yet, create it in cache
-					room = { 'messages': [], 'users': [user], 'cacheUpdate': now };
-				} else {
-					// Chat exists but it is not cached yet
-					room = { 'messages': messages, 'users': [user], 'cacheUpdate': now };
-				}
-				rooms[chatRoomId] = room;
-				return room;
-		});
-	} else {
-		// Update cache update time
-		room.cacheUpdate = now;
+	chatRommId_promise.then((chatRoomId) => {
+		// Try to get room from cache, define user and prepare current timestamp
+		let room = rooms[chatRoomId];
+		const user = { 'userId': userId };
+		const now = new Date().getTime();
 		
-		// Add current user to room, if not exists
-		var existingUser = utils.findWhereObjectId(room.users, {'userId': userId});
-		if (_.isUndefined(existingUser))	room.users.push(user);
-		
-		// Return room
-		chatRoom_promise = Promise.resolve({
-			'messages': room.messages,
-			'users': _.pluck(room.users, 'userId')
-		});
-	}
-	
-	chatRoom_promise.then(res.send.bind(res));
+		// Load chat room from either cache or database
+		if (_.isUndefined(room)) {
+			// Try to load the chat messages from database
+			return db.collection('chat_messages')
+				.find({'chatRoomId': chatRoomId}, { 'text': true, 'userId': true, 'type': true }).toArrayAsync()
+				.then(function (messages) {
+					if(_.isNull(messages)) {
+						// Chat does not exist yet, create it in cache
+						room = { 'messages': [], 'users': [user], 'cacheUpdate': now };
+					} else {
+						// Chat exists but it is not cached yet
+						room = { 'messages': messages, 'users': [user], 'cacheUpdate': now };
+					}
+					rooms[chatRoomId] = room;
+					
+					// Extend users with color and name
+					room.users = extendUsers(groupId, room.users);
+					
+					return _.extend(room, { 'chatRoomId': chatRoomId });
+			});
+		} else {
+			// Update cache update time
+			room.cacheUpdate = now;
+			
+			// Add current user to room, if not exists
+			var existingUser = utils.findWhereObjectId(room.users, {'userId': userId});
+			if (_.isUndefined(existingUser))	room.users.push(user);
+			
+			// Extend users with color and name
+			const users = extendUsers(groupId, room.users);
+			
+			// Return room
+			return Promise.resolve({
+				'chatRoomId': chatRoomId,
+				'messages': room.messages,
+				'users': users
+			});
+		}
+	}).then(res.send.bind(res));
 };
+
+/**
+ * @desc: Extend users by color, name and online status
+ */
+function extendUsers(groupId, users) {
+	// Get color offset and number of members in group
+	const colorOffset = groups.getGroupColorOffset(groupId);
+	const numMembers = _.size(users);
+	
+	return _.map(users, (user, index) => {
+		return {
+			'userId': user.userId,
+			'color': groups.generateMemberColor(user.userId, colorOffset, index, numMembers),
+			'name': groups.generateMemberName(groupId, user.userId)/*,
+			'isOnline': users.isOnline(user.userId)*/
+		};
+	});
+}
 
 /*
  * @desc: Sends a message to all other clients in chatroom
