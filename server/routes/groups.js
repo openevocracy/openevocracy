@@ -72,36 +72,22 @@ function generateMemberName(groupId, userId) {
 exports.generateMemberName = generateMemberName;
 
 /**
- * @desc: Generate color offset for groupId
- */
-function getGroupColorOffset(groupId) {
-	// Generate group specific color_offset
-	const chanceOffset = new Chance(groupId.toString());
-	return chanceOffset.integer({min: 0, max: 360});
-}
-exports.getGroupColorOffset = getGroupColorOffset;
-
-/**
- * @desc: Generate color for specific member
- */
-function generateMemberColor(userId, offset, index, numMembers) {
-	// Calculate color for every member and return as array
-	const hue = offset + index*(360/numMembers);
-	return Color({h: hue, s: 20, v: 100}).hex();
-}
-exports.generateMemberColor = generateMemberColor;
-
-/**
  * @desc: Generate color for all members of a group
+ * @note: It is important to generate all colors together, given all userIds,
+ * 		 since the colors are chosen in a way that they have maximal distance in color space
  */
 function generateMemberColors(groupId, userIds) {
-	// Get offset for group and number of members
-	const offset = getGroupColorOffset(groupId);
+	// Generate group specific color_offset
+	const chance = new Chance(groupId.toString());
+	const colorOffset = chance.integer({min: 0, max: 360});
+	
+	// Get number of members in group
 	const numMembers = _.size(userIds);
 	
 	// Calculate color for every member and return as array
 	return _.map(userIds, (userId, index) => {
-		return generateMemberColor(userId, offset, index, numMembers);
+		const hue = colorOffset + index*(360/numMembers);
+		return Color({h: hue, s: 20, v: 100}).hex();
 	});
 }
 exports.generateMemberColors = generateMemberColors;
@@ -159,14 +145,25 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 	const forum = { '_id': forumId, 'groupId': groupId };
 	const createForum_promise = db.collection('forums').insertAsync(forum);
 	
+	// Sample colors for users
+	const userColors = generateMemberColors(groupId, _.pluck(groupRelations, 'userId'));
+	console.log('storeGroupAsync userColors', userColors);
+	
 	// Store group members
-	const members_promise = Promise.map(groupRelations, function(rel) {
+	const members_promise = Promise.map(groupRelations, function(rel, index) {
 		// Enable email notifications of member for the forum
 		const enableNotify_promise = users.enableEmailNotifyAsync(rel.userId, forumId);
 		
 		// Add member to group relations collection
 		const prevGroupId = _.isUndefined(rel.prevGroupId) ? null : rel.prevGroupId;
-		const insert = { 'groupId': groupId, 'userId': rel.userId, 'prevGroupId': prevGroupId, 'prevPadId': rel.prevPadId, 'lastActivity': -1 };
+		const insert = {
+			'groupId': groupId,
+			'userId': rel.userId,
+			'userColor': userColors[index],
+			'prevGroupId': prevGroupId,
+			'prevPadId': rel.prevPadId,
+			'lastActivity': -1
+		};
 		const groupRelations_promise = db.collection('group_relations').insertAsync(insert);
 		
 		// Return promises
@@ -525,10 +522,6 @@ exports.query = function(req, res) {
 			return _.size(group_members);
 		});
 		
-		// Generate group specific color_offset
-		const chanceOffset = new Chance(groupId.toString());
-		const offset = chanceOffset.integer({min: 0, max: 360});
-		
 		// Get previous pads
 		const prevPads_promise = Promise.join(group_promise, groupRelations_promise).spread(function(group, groupRelations) {
 			var prevPadIds = _.pluck(groupRelations, 'prevPadId');
@@ -543,12 +536,6 @@ exports.query = function(req, res) {
 		
 		// Get group members
 		const groupMembersDetails_promise = groupRelations_promise.map(function(relation, index) {
-			
-			// Generate member color
-			const memberColor_promise = num_group_members_promise.then(function(numMembers) {
-				const hue = offset + index*(360/numMembers);
-				return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
-			});
          
          // Get proposal html
          const prevPadHtml_promise = Promise.join(group_promise, prevPads_promise).spread(function(group, prevPads) {
@@ -568,7 +555,7 @@ exports.query = function(req, res) {
          return Promise.props({
          	'userId': relation.userId,
 				'name': generateMemberName(groupId, relation.userId),
-				'color': memberColor_promise,
+				'color': relation.userColor,
 				'prevPadHtml': prevPadHtml_promise,
 				'ratingKnowledge': memberRatingKnowledge_promise,
 				'ratingIntegration': memberRatingIntegration_promise

@@ -22,7 +22,7 @@
 		</div>
 	</div>
 	<form [formGroup]="chatForm" (ngSubmit)="sendChatMessage()" novalidate><mat-form-field>
-			<input matInput formControlName="msg" type="text" placeholder="{{ 'CHAT_MESSAGE_LABEL' | translate }}">
+			<input matInput [ngxTribute]="options" formControlName="msg" type="text" placeholder="{{ 'CHAT_MESSAGE_LABEL' | translate }}">
 		</mat-form-field>
 		
 		<button mat-raised-button color="primary" type="submit">

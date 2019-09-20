@@ -6,6 +6,9 @@ import { UserService } from '../../_services/user.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { TranslateService } from '@ngx-translate/core';
 
+import { TributeOptions } from 'tributejs';
+import { NgxTributeModule } from 'ngx-tribute';
+
 import * as parseUrl from 'url-parse';
 import * as origin from 'get-location-origin';
 import * as $ from 'jquery';
@@ -20,6 +23,14 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons';
 	styleUrls: ['../group.component.scss', './chat.component.scss']
 })
 export class GroupChatComponent implements OnInit {
+	
+	options: TributeOptions<any> = {
+		values: [
+			{ key: 'foo', value: 'Foo' },
+			{ key: 'bar', value: 'Bar' },
+			{ key: 'baz', value: 'Baz' }
+		]
+	};
 	
 	public C = C;
 	
@@ -58,6 +69,13 @@ export class GroupChatComponent implements OnInit {
 	}
 	
 	ngOnInit() {
+		/*this.quillEditor.getModule('cursors').set({
+			id: this.me.userId,
+			name: this.me.name,
+			color: this.me.color,
+			range: 1
+		});*/
+		
 		// Initialize chat
 		this.initalizeChatSocket();
 	}

@@ -155,10 +155,10 @@ exports.config = function(req, res) {
 /*
  * @desc: ping request from client, response with timestamp
  */
-exports.ping = function(req, res) {
+/*exports.ping = function(req, res) {
 	var now = Date.now();
 	res.json({'timestamp': now});
-};
+};*/
 
 
 /**

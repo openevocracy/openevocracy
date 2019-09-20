@@ -54,9 +54,9 @@ export class ConnectionAliveService implements OnDestroy {
 			// If connection was broken before and is reconnected now
 			if (!this.isAlive) {
 				console.log('onopen reconnect');
-				// Set isAlive true again and stop retry interval, since it was successful
+				// Set isAlive and isConnected to true again
 				this.isAlive = true;
-				//clearInterval(this.retryInterval);
+				this.isConnected = true;
 				// Emit reconnection event
 				this.connectionReconnected.emit(true);
 			}
@@ -85,7 +85,8 @@ export class ConnectionAliveService implements OnDestroy {
 		this.aliveSocket.onclose = function(e) {
 			console.log('onclose');
 			// Disable connection, when socket is closed
-			this.disableConnection();
+			if (this.isConnected)
+				this.disableConnection();
 		}.bind(this);
 	}
 	
@@ -95,7 +96,7 @@ export class ConnectionAliveService implements OnDestroy {
 	public startPingInterval() {
 		this.pingInterval = setInterval(() => {
 			console.log('interval');
-			if (!this.isAlive) {
+			if (!this.isAlive && this.isConnected) {
 				console.log('connection lost');
 				// If server does not respond anymore, disable connection
 				//this.disableConnection();

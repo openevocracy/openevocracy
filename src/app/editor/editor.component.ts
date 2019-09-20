@@ -33,7 +33,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 	public title: string;
 	public saved: boolean = true;
 	public placeholder: string;
-	public connectionAlreadyLost: boolean = false;
+	//public connectionAlreadyLost: boolean = false;
 	public manualClose: boolean = false;
 	public padId: string;
 	public userId: string;
@@ -43,7 +43,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 	public userToken: string;
 	public type: string;
 	public deadlineInterval;
-	public pingInterval;
+	//public pingInterval;
 	public padSocket;
 	public modalSubscription: Subscription;
 	
@@ -97,7 +97,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.translatePlaceholder(key);
 		
 		// Initialize ping
-		this.initServerPing();
+		//this.initServerPing();
 	}
 	
 	ngOnDestroy() {
@@ -113,8 +113,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 		// Stop countdown
 		if (this.deadlineInterval)
 			clearInterval(this.deadlineInterval);
-		if (this.pingInterval)
-			clearInterval(this.pingInterval);
+		/*if (this.pingInterval)
+			clearInterval(this.pingInterval);*/
 	}
 	
 	protected translatePlaceholder(key) {
@@ -217,8 +217,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 			this.padSocket.onclose = function(e) {
 				// If pad socket was not closed actively (on destroy), inform user that
 				// socket is broken, ask for reload and freeze editor
-				if(!this.manualClose)
-					this.connectionLostMessage();
+				//if(!this.manualClose)
+				//	this.connectionLostMessage();
 			}.bind(this);
 	
 			this.enableEdit();
@@ -228,7 +228,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 	/*
 	 * @desc: Send ping to server in specific interval
 	 */
-	protected initServerPing() {
+	/*protected initServerPing() {
 		// Send ping every 15 seconds
 		this.pingInterval = setInterval(function() {
 			this.httpManagerService.get('/json/ping').subscribe(res => {}, err => {
@@ -236,12 +236,12 @@ export class EditorComponent implements OnInit, OnDestroy {
 				this.connectionLostMessage();
 			});
 		}.bind(this), 15000);
-	}
+	}*/
 	
 	/*
 	 * @desc: Show message that connection is lost and redirect after some time
 	 */
-	protected connectionLostMessage() {
+	/*protected connectionLostMessage() {
 		if (this.connectionAlreadyLost)
 			return;
 		
@@ -261,7 +261,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		
 		// Mark connection already lost to avoid that this function is called twice
 		this.connectionAlreadyLost = true
-	}
+	}*/
 	
 	private getCollectionFromURL() {
 		var key = this.router.url.split("/")[1];

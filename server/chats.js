@@ -1,6 +1,7 @@
 // General libraries
 const _ = require('underscore');
 const C = require('../shared/constants').C;
+const Promise = require('bluebird');
 const ObjectId = require('mongodb').ObjectID;
 const db = require('./database').db;
 
@@ -28,8 +29,11 @@ exports.getChatRoomMessages = function(req, res) {
 	const chatRommId_promise = db.collection('groups')
 		.findOneAsync({ '_id': groupId }, { 'chatRoomId': true })
 		.then((group) => { return group.chatRoomId; });
+		
+	// Get extended users in chat room
+	const extendedUsers_promise = extendUsersAsync(groupId);
 	
-	chatRommId_promise.then((chatRoomId) => {
+	Promise.join(chatRommId_promise, extendedUsers_promise).spread((chatRoomId, extendedUsers) => {
 		// Try to get room from cache, define user and prepare current timestamp
 		let room = rooms[chatRoomId];
 		const user = { 'userId': userId };
@@ -50,10 +54,11 @@ exports.getChatRoomMessages = function(req, res) {
 					}
 					rooms[chatRoomId] = room;
 					
-					// Extend users with color and name
-					room.users = extendUsers(groupId, room.users);
-					
-					return _.extend(room, { 'chatRoomId': chatRoomId });
+					return {
+						'chatRoomId': chatRoomId,
+						'messages': room.messages,
+						'users': extendedUsers
+					};
 			});
 		} else {
 			// Update cache update time
@@ -63,14 +68,11 @@ exports.getChatRoomMessages = function(req, res) {
 			var existingUser = utils.findWhereObjectId(room.users, {'userId': userId});
 			if (_.isUndefined(existingUser))	room.users.push(user);
 			
-			// Extend users with color and name
-			const users = extendUsers(groupId, room.users);
-			
 			// Return room
 			return Promise.resolve({
 				'chatRoomId': chatRoomId,
 				'messages': room.messages,
-				'users': users
+				'users': extendedUsers
 			});
 		}
 	}).then(res.send.bind(res));
@@ -79,18 +81,17 @@ exports.getChatRoomMessages = function(req, res) {
 /**
  * @desc: Extend users by color, name and online status
  */
-function extendUsers(groupId, users) {
-	// Get color offset and number of members in group
-	const colorOffset = groups.getGroupColorOffset(groupId);
-	const numMembers = _.size(users);
-	
-	return _.map(users, (user, index) => {
-		return {
-			'userId': user.userId,
-			'color': groups.generateMemberColor(user.userId, colorOffset, index, numMembers),
-			'name': groups.generateMemberName(groupId, user.userId)/*,
-			'isOnline': users.isOnline(user.userId)*/
-		};
+function extendUsersAsync(groupId) {
+	// Get user color from databse
+	return db.collection('group_relations')
+		.find({ 'groupId': groupId }, { 'userId': true, 'userColor': true })
+		.toArrayAsync().map((member) => {
+			return { 
+				'userId': member.userId,
+				'color': member.userColor,
+				'name': groups.generateMemberName(groupId, member.userId)/*,
+				'isOnline': users.isOnline(user.userId)*/
+			};
 	});
 }
 
