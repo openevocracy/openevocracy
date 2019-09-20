@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Http, Response } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { UtilsService } from './utils.service';
 import { HttpManagerService } from './http-manager.service';
+
+import 'rxjs/add/operator/map';
 
 import * as _ from 'underscore';
 
@@ -16,7 +18,7 @@ class Credentials {
 export class UserService {
 
 	constructor(
-		private http: Http,
+		private http: HttpClient,
 		private router: Router,
 		private utilsService: UtilsService,
 		private httpManagerService: HttpManagerService) {}
@@ -54,12 +56,10 @@ export class UserService {
 	}
 	
 	public authenticate(credentials) {
-		var self = this;
-		return this.http.post('/json/auth/login', credentials).map(raw => {
-			var res = raw.json();
-			
+		let self = this;
+		return this.http.post('/json/auth/login', credentials).map((res) => {
 			// Set ID and store token
-			self.setUser(res.id, res.token);
+			self.setUser(res['id'], res['token']);
 			
 			// Redirect to front page
 			self.router.navigate(['/']);

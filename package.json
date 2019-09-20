@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 0.0.0.0 --port 3000 --public-host https://develop.openevocracy.org --proxy-config proxy.conf.json",
+    "start": "ng serve --host 0.0.0.0 --port 3000 --public-host https://develop.openevocracy.org --proxy-config proxy.conf.json --disable-host-check",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
@@ -30,7 +30,6 @@
     "@ngx-translate/core": "^11.0.1",
     "@ngx-translate/http-loader": "^4.0.0",
     "@types/jquery": "^3.3.31",
-    "angular-star-rating": "^4.0.0-beta.3",
     "app-root-path": "2.2.1",
     "async-lock": "^1.2.2",
     "bcrypt": "^3.0.6",
@@ -72,7 +71,7 @@
     "mailcomposer": "^4.0.2",
     "method-override": "*",
     "methods": "*",
-    "mongodb": "^3.3.2",
+    "mongodb": "^2.2.19",
     "mongoist": "^2.0.0",
     "mongoskin": "*",
     "morgan": "^1.9.1",
@@ -95,6 +94,7 @@
     "request-promise": "4.2.4",
     "rich-text": "4.0.0",
     "rxjs": "^6.5.3",
+    "rxjs-compat": "^6.0.0-rc.0",
     "send": "0.17.1",
     "serve-favicon": "^2.5.0",
     "sharedb": "^1.0.0-beta.23",
@@ -106,6 +106,7 @@
     "strformat": "0.0.7",
     "topo": "^3.0.3",
     "tributejs": "^3.7.3",
+    "tslib": "^1.10.0",
     "underscore": "*",
     "underscore.string": "^3.3.5",
     "url-parse": "^1.4.7",
@@ -114,10 +115,10 @@
     "vis": "*",
     "websocket-json-stream": "0.0.3",
     "ws": "^7.1.2",
-    "zone.js": "^0.10.2",
-    "rxjs-compat": "^6.0.0-rc.0"
+    "zone.js": "~0.9.1"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "~0.803.5",
     "@angular/cli": "^8.2.0",
     "@angular/compiler-cli": "^8.2.0",
     "@angular/language-service": "^8.2.0",
@@ -125,10 +126,9 @@
     "@types/jasmine": "^3.4.0",
     "@types/jasminewd2": "^2.0.6",
     "@types/node": "^12.7.5",
-    "codelyzer": "^5.1.1",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
-    "css-star-rating": "^1.2.4",
+    "codelyzer": "^5.0.1",
     "jasmine-core": "~3.4.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "^4.3.0",
@@ -143,6 +143,6 @@
     "protractor": "^5.4.2",
     "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
-    "typescript": "~3.6.3"
+    "typescript": "~3.5.3"
   }
 }

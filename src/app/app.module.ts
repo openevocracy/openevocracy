@@ -1,7 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule, APP_INITIALIZER } from '@angular/core';
-import { HttpModule } from '@angular/http';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -12,7 +11,7 @@ import 'hammerjs';
 import { MaterialModule } from './_modules/material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { QuillModule } from 'ngx-quill';
-import { StarRatingModule } from 'angular-star-rating';
+//import { StarRatingModule } from 'angular-star-rating';
 
 // Routing
 import { AppRoutingModule } from './_routing/app-routing.module';
@@ -146,12 +145,11 @@ export function loadConfig(configService: ConfigService) {
 		FontAwesomeModule,
 		AppRoutingModule,
 		PublicRoutingModule,
-		HttpModule,
 		HttpClientModule,
 		FormsModule,
 		ReactiveFormsModule,
-		QuillModule,
-		StarRatingModule.forRoot(),
+		QuillModule.forRoot(),
+		//StarRatingModule.forRoot(),
 		TranslateModule.forRoot({
 			loader: {
 				provide: TranslateLoader,

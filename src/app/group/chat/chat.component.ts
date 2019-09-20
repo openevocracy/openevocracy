@@ -24,7 +24,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons';
 })
 export class GroupChatComponent implements OnInit {
 	
-	options: TributeOptions<any> = {
+	public options: TributeOptions<any> = {
 		values: [
 			{ key: 'foo', value: 'Foo' },
 			{ key: 'bar', value: 'Bar' },
