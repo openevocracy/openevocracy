@@ -13,7 +13,7 @@
 					<small class="message-date">{{ message._id | timestamp | date:'HH:mm, yyyy-MM-dd' }}</small>
 					<strong class="message-username" [ngStyle]="{'color': memberColors[message.userId]}">{{ memberNames[message.userId] }}</strong>
 				</div>
-				<div class="message-body">{{ message.text }}</div>
+				<div class="message-body" [innerHTML]="message.text">{{ message.text }}</div>
 			</div>
 			<div *ngIf="message.type == C.CHATMSG_ONLINE || message.type == C.CHATMSG_OFFLINE" class="status-message">
 				<small class="message-date">{{ message._id | timestamp | date:'HH:mm, yyyy-MM-dd' }}</small>
@@ -21,8 +21,9 @@
 			</div>
 		</div>
 	</div>
-	<form [formGroup]="chatForm" (ngSubmit)="sendChatMessage()" novalidate><mat-form-field>
-			<input matInput formControlName="msg" type="text" placeholder="{{ 'CHAT_MESSAGE_LABEL' | translate }}">
+	<form [formGroup]="chatForm" (ngSubmit)="sendChatMessage()" novalidate>
+		<mat-form-field>
+			<input matInput [mention]="mentionList" formControlName="msg" type="text" placeholder="{{ 'CHAT_MESSAGE_LABEL' | translate }}">
 		</mat-form-field>
 		
 		<button mat-raised-button color="primary" type="submit">

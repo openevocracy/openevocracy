@@ -1,14 +1,16 @@
 // General libraries
 const _ = require('underscore');
-const C = require('../shared/constants').C;
 const Promise = require('bluebird');
 const ObjectId = require('mongodb').ObjectID;
 const db = require('./database').db;
 
 // Own references
+const C = require('../shared/constants').C;
+var cfg = require('../shared/config').cfg;
 const groups = require('./routes/groups');
 const users = require('./routes/users');
 const utils = require('./utils');
+var mail = require('./mail');
 
 // Rooms cache
 let rooms = {};
@@ -116,7 +118,7 @@ function sendToSocketsInRoom(roomUsers, msg) {
  */
 function removeUserFromRoom(roomUsers, userId) {
 	return _.reject(roomUsers, function(roomUser) {
-		return (roomUser.userId.toString() == userId.toString());
+		return utils.equalId(roomUser.userId, userId);
 	});
 }
 
@@ -198,4 +200,17 @@ exports.startChatServer = function(wss) {
 	
 	// Initalize ping interval
 	//utils.pingInterval(wss);
+};
+
+exports.sendMailToMentionedUsers = function(req, res) {
+	const groupId = ObjectId(req.body.groupId);
+	const userIds = _.map(req.body.userIds, (userId) => { return ObjectId(userId) });
+	const userId = ObjectId(req.user._id);
+	
+	db.collection('groups').findOneAsync({ '_id': groupId }, { 'name': true })
+		.then((group) => {
+			mail.sendMailToUserIds(userIds,
+				'EMAIL_CHAT_MENTIONED_SUBJECT', [group.name],
+				'EMAIL_CHAT_MENTIONED_MESSAGE', [cfg.PRIVATE.BASE_URL, groupId, group.name]);
+	}).then(res.send.bind(res));
 };

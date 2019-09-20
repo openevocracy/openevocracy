@@ -11,6 +11,7 @@ import 'hammerjs';
 import { MaterialModule } from './_modules/material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { QuillModule } from 'ngx-quill';
+import { MentionModule } from 'angular-mentions';
 //import { StarRatingModule } from 'angular-star-rating';
 
 // Routing
@@ -149,6 +150,7 @@ export function loadConfig(configService: ConfigService) {
 		FormsModule,
 		ReactiveFormsModule,
 		QuillModule.forRoot(),
+		MentionModule,
 		//StarRatingModule.forRoot(),
 		TranslateModule.forRoot({
 			loader: {

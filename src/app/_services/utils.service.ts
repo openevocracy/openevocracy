@@ -62,4 +62,14 @@ export class UtilsService {
 		// Split and get length
 		return str.split(/\s+\b/).length;
 	}
+	
+	/**
+	 * @desc: Replace all occurencies of 'find' in a string 'str' and replace it by 'replace'
+	 */
+	public replaceAll(str, find, replace) {
+		// Make search safe against special characters in regular expressions
+		const findSave = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+		// Replace all
+		return str.replace(new RegExp(findSave, 'g'), replace);
+	}
 }

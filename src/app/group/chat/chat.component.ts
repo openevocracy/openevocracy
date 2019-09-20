@@ -3,11 +3,9 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { UserService } from '../../_services/user.service';
+import { UtilsService } from '../../_services/utils.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { TranslateService } from '@ngx-translate/core';
-
-import { TributeOptions } from 'tributejs';
-import { NgxTributeModule } from 'ngx-tribute';
 
 import * as parseUrl from 'url-parse';
 import * as origin from 'get-location-origin';
@@ -24,14 +22,6 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons';
 })
 export class GroupChatComponent implements OnInit {
 	
-	public options: TributeOptions<any> = {
-		values: [
-			{ key: 'foo', value: 'Foo' },
-			{ key: 'bar', value: 'Bar' },
-			{ key: 'baz', value: 'Baz' }
-		]
-	};
-	
 	public C = C;
 	
 	public userId;
@@ -45,6 +35,8 @@ export class GroupChatComponent implements OnInit {
 	public memberColors = {};
 	public memberNames = {};
 	//public membersOnline;
+	public mentionList = [];
+	public mentionListAll = [];
 	
 	public faPlay = faPlay;
 	
@@ -52,6 +44,7 @@ export class GroupChatComponent implements OnInit {
 		private httpManagerService: HttpManagerService,
 		private translateService: TranslateService,
 		private userService: UserService,
+		private utilsService: UtilsService,
 		private router: Router,
 		private formBuilder: FormBuilder
 	) {
@@ -90,15 +83,23 @@ export class GroupChatComponent implements OnInit {
 		// Get all existing messages in chat room
 		this.httpManagerService.get('/json/chat/room/' + this.groupId).subscribe(res => {
 			
-			// Store existing messages
-			this.messages = res.messages;
-			this.members = res.users;
-			
 			// Add member color and member name map
+			this.members = res.users;
 			_.each(this.members, (member) => {
 				this.memberColors[member.userId] = member.color;
 				this.memberNames[member.userId] = member.name;
 				//this.membersOnline[member.userId] = member.isOnline;
+			});
+			
+			// Add names to mention list
+			this.mentionListAll = _.pluck(this.members, 'name');
+			this.mentionListAll.push('all');
+			this.mentionList = _.without(this.mentionListAll, this.memberNames[this.userId]);
+			
+			// Add tags to mentions in messages, needs to be called after mentionList is created
+			this.messages = res.messages;
+			_.each(this.messages, (msg) => {
+				msg.text = this.addTagToMention(msg.text);
 			});
 			
 			// Open WebSocket connection
@@ -123,8 +124,9 @@ export class GroupChatComponent implements OnInit {
 				// Parse message from server
 				var msg = JSON.parse(e.data);
 				
-				// If it's a normal message, just add message to messages array
+				// If it's a normal message, add tag to mention
 				if (msg.type == C.CHATMSG_DEFAULT) {
+					msg.text = this.addTagToMention(msg.text)
 					this.messages.push(msg);
 					return;
 				}
@@ -135,12 +137,6 @@ export class GroupChatComponent implements OnInit {
 						msg.text = this.memberNames[msg.userId] + " " + label;
 						this.messages.push(msg);
 					});
-					
-					// Update status of specific user
-					/*if (msg.type == C.CHATMSG_ONLINE)
-						this.membersOnline[msg.userId] = true;
-					else if (msg.type == C.CHATMSG_OFFLINE)
-						this.membersOnline[msg.userId] = false;*/
 				}
 			}.bind(this);
 			
@@ -151,8 +147,6 @@ export class GroupChatComponent implements OnInit {
 				/*if(!this.manualClose)
 					this.connectionLostMessage();*/
 			}.bind(this);
-			// Show chat
-			//this.chatReady = true;
 			
 			// Scroll down
 			this.scrollDown();
@@ -179,14 +173,37 @@ export class GroupChatComponent implements OnInit {
 		if(!this.chatForm.valid)
 			return;
 		
-		// Send message
-		this.chatSocket.send(JSON.stringify({
-			'type': C.CHATMSG_DEFAULT,
-			'text': this.chatForm.value.msg
-		}));
+		// Get message from form
+		const msg = this.chatForm.value.msg;
 		
 		// Clear form
 		this.chatForm.setValue({'msg': ''});
+		
+		// Send message
+		this.chatSocket.send(JSON.stringify({
+			'type': C.CHATMSG_DEFAULT,
+			'text': msg
+		}));
+		
+		// Define user ids by name
+		const userIdsByName = {};
+		_.each(this.members, (member) => { userIdsByName[member.name] = member.userId; });
+		
+		// Collect user ids which are mentioned in message
+		const mentionedUserIds = _.chain(this.mentionList)
+			.filter((name) => { return msg.includes('@'+name); })  // filters all names which are mentioned
+			.map((name) => {  // gets ids of all user names which are mentioned
+				if (name == 'all') {
+					return _.without(_.pluck(this.members, 'userId'), this.userId);
+				} else
+					return userIdsByName[name]
+			}).flatten().uniq().value();
+		
+		// If at least one user was mentioned, send mail to mentioned users
+		const data = { 'groupId': this.groupId, 'userIds': mentionedUserIds };
+		if (mentionedUserIds.length > 0) {
+			this.httpManagerService.post('/json/chat/mentioned/', data).subscribe();
+		}
 	}
 	
 	/*
@@ -207,6 +224,18 @@ export class GroupChatComponent implements OnInit {
 		observer.observe(node, {
 			childList: true
 		});
+	}
+	
+	/**
+	 * @desc: Add tag around mentioned name of member
+	 */
+	private addTagToMention(msg) {
+		// Add an html tag to the mentioned names in the message
+		_.each(this.mentionListAll, (name) => {
+			const htmlName = '<strong>@'+name+'</strong>';
+			msg = this.utilsService.replaceAll(msg, '@'+name, htmlName);
+		});
+		return msg;
 	}
 
 }

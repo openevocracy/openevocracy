@@ -211,3 +211,13 @@ exports.withoutObjectId = function(arr, idToRemove) {
 		return !el.equals(idToRemove);
 	});
 };
+
+/**
+ * @desc: Replace all occurencies of 'find' in a string 'str' and replace it by 'replace'
+ */
+exports.replaceAll = function(str, find, replace) {
+	// Make search safe against special characters in regular expressions
+	const findSave = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+	// Replace all
+	return str.replace(new RegExp(findSave, 'g'), replace);
+};

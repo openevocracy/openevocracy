@@ -211,6 +211,9 @@ app.post('/json/group/forum/thread/solved', auth(), forums.updateSolved);
 // @desc: Get chat room
 app.get('/json/chat/room/:id', auth(), chats.getChatRoomMessages);
 
+// @desc: Send mail to all mentioned users
+app.post('/json/chat/mentioned/', auth(), chats.sendMailToMentionedUsers);
+
 // #####################
 // ### R A T I N G S ###
 // #####################
