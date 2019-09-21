@@ -1,0 +1,7 @@
+/* Import variables */
+@import "~styles/variables";
+
+.container.box { background-color: $white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); margin-top: 20px; }
+
+.header { height: 30px; }
+.header h3 { line-height: 30px; margin: 0; padding: 0; }

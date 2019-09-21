@@ -13,8 +13,6 @@ import { CloseeditorModalService } from '../../_services/modal.closeeditor.servi
 
 import { EditorComponent } from '../../editor/editor.component';
 
-import { Group } from '../../_models/group';
-
 import 'quill-authorship-evo';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
@@ -31,7 +29,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 export class GroupEditorComponent extends EditorComponent implements OnInit, OnDestroy {
 	
 	public proposalHtml: string = "";
-	public group: Group;
+	public members;
 	public me;
 	
 	// Classes and styles for member proposal column
@@ -59,6 +57,14 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		this.quillModules = _.extend(this.quillModules,{
 			'authorship': { 'enabled': true, 'authorId': this.userId }
 		});
+		
+		
+		/*this.quillEditor.getModule('cursors').set({
+			id: this.me.userId,
+			name: this.me.name,
+			color: this.me.color,
+			range: 1
+		});*/
 	}
 	
 	/*
@@ -88,8 +94,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	
 	/*
 	 * @desc: Overwrites editorCreated in editor component.
-	 *        Mainly gets further information about group from server and
-	 *        adds chat functionallity in addition to editor.
+	 *        Mainly gets further information about group from server.
 	 *        The function is called from editor component.
 	 *
 	 * @params:
@@ -110,15 +115,14 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		
 		// Get additional information and initalize socket
 		this.httpManagerService.get('/json/group/editor/' + groupId).subscribe((res) => {
-			this.group = new Group(res);
-			this.topicId = res.topicId;
+			this.members = res.members
 			
 			// Add color of current member
 			this.me = _.findWhere(res.members, { 'userId': this.userId });
 			this.quillEditor.getModule('authorship').addAuthor(this.userId, this.me.color);
 			
 			// Add colors of other members
-			_.map(res.members, (member) => {
+			_.map(this.members, (member) => {
 				if(member.userId != this.me.userId)
 					this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
 			});
@@ -127,7 +131,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 			this.initCountdown(res.deadline);
 			
 			// Initialize socket
-			this.initalizePadSocket(this.group.docId);
+			this.initalizePadSocket(res.docId);
 		});
 	}
 	

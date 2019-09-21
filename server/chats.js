@@ -23,7 +23,7 @@ let rooms = {};
  *    req: request from client (contains chat room id)
  *    res: response to client
  */
-exports.getChatRoomMessages = function(req, res) {
+exports.queryChatRoomMessages = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 	

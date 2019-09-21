@@ -43,15 +43,15 @@ export class GroupMemberbarComponent implements OnInit {
 			});
 		});
 		
-		// Call online members every minute
+		// Call online members every minute		this.queryOnlineMembers();
 		this.onlineInterval = setInterval(() => {
 			this.httpManagerService.get('/json/group/membersonline/' + groupId).subscribe(res => {
 				// Update isOnline status of group members
-				_.each(res, (user) => {
+				_.each(this.groupMembers, (user) => {
 					let member = _.findWhere(this.groupMembers, { 'userId': user.userId })
 					member.isOnline = user.isOnline;
-				});
 			});
+		});
 		}, 60000);
 	}
 

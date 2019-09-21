@@ -153,17 +153,29 @@ app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
 // @desc: Get proposal information
 app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
 
-/*** Group ***/
+// ##################
+// ### G R O U P  ###
+// ##################
 
 // @desc: Get detailed information about group pad
-app.get('/json/group/editor/:id', auth(), groups.query);
+app.get('/json/group/editor/:id', auth(), groups.queryEditor);
 
 // @desc: Get group information
 app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 
-// ############################
-// ### G R O U P  F O R U M ###
-// ############################
+// @desc: Group main toolbar with topic and group title
+app.get('/json/group/toolbar/:id', auth(), groups.queryToolbar);
+
+// @desc: Group toolbar, showing members and their only state
+app.get('/json/group/memberbar/:id', auth(), groups.queryMemberbar);
+
+// @desc: Group online status of members
+app.get('/json/group/membersonline/:id', auth(), groups.queryOnlineMembers);
+
+// @desc: Group members, including ratings and previous documents
+app.get('/json/group/members/:id', auth(), groups.queryGroupMembers);
+
+/* Forum */
 
 // @desc: Vote for entity (post or comment)
 app.post('/json/group/forum/vote', auth(), forums.vote);
@@ -209,7 +221,7 @@ app.post('/json/group/forum/thread/solved', auth(), forums.updateSolved);
 // ###################
 
 // @desc: Get chat room
-app.get('/json/chat/room/:id', auth(), chats.getChatRoomMessages);
+app.get('/json/chat/room/:id', auth(), chats.queryChatRoomMessages);
 
 // @desc: Send mail to all mentioned users
 app.post('/json/chat/mentioned/', auth(), chats.sendMailToMentionedUsers);
@@ -285,15 +297,6 @@ app.post('/json/user/lang', auth(), users.setLanguage);
 // ###################
 // ###   M I S C   ###
 // ###################
-
-// @desc: Group toolbar
-app.get('/json/group/toolbar/:id', auth(), groups.getToolbar);
-
-// @desc: Group memberbar
-app.get('/json/group/memberbar/:id', auth(), groups.getMemberbar);
-
-// @desc: Group memberbar
-app.get('/json/group/membersonline/:id', auth(), groups.getOnlineMembers);
 
 // @desc: Config file
 app.get('/json/config', utils.config);

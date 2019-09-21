@@ -62,13 +62,6 @@ export class GroupChatComponent implements OnInit {
 	}
 	
 	ngOnInit() {
-		/*this.quillEditor.getModule('cursors').set({
-			id: this.me.userId,
-			name: this.me.name,
-			color: this.me.color,
-			range: 1
-		});*/
-		
 		// Initialize chat
 		this.initalizeChatSocket();
 	}

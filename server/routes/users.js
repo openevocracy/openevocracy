@@ -22,7 +22,8 @@ jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
 jwtOptions.secretOrKey = ((cfg.DEBUG) ? 'debug' : bcrypt.genSaltSync(8));
 exports.jwtOptions = jwtOptions;
 
-// User online cache
+// User online cache and ping interval
+let pingInterval;
 let onlineUsers = [];
 
 var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
@@ -577,24 +578,23 @@ exports.startAliveServer = function(wss, websockets) {
 					ws.send('pong');
 				}
 			});
-			
-			// Initalize ping interval
-			pingInterval(wss, websockets);
 		});
 	});
 	
+	// Initalize ping interval
+	if(!pingInterval)
+		startPingInterval(wss, websockets);
+	
 	// TODO
-	// * Use pingIntervall function for wssAlive, but terminate ALL websockets (wssChat, wssPad, wssAlive), if client does not answer
-	// * Remove ping/pong from pads and chats
-	// * Remove utils.pingInterval on server and editor.initServerPing on client
+	// * (Client) Reconnect pad and chat socket, when reconnect event is called
 };
 
 /**
  * @desc: Pings the client in a given interval, if the client does not answer,
  *        remove it from users online list and close all related socket connections
  */
-function pingInterval(wssAlive, websockets) {
-	setInterval(function() {
+function startPingInterval(wssAlive, websockets) {
+	pingInterval = setInterval(function() {
 		// Send ping to every client
 		wssAlive.clients.forEach(function(ws) {
 			// Get user id of current websocket connection
@@ -602,6 +602,7 @@ function pingInterval(wssAlive, websockets) {
 			// If websocket is still not alive after 30 seconds, close all websockets
 			if (!ws.isAlive) {
 				// Terminate all other websockets (wssPad, wssChat) using userId and remove user from online list
+				console.log('terminate connection');
 				terminateUserConnections(websockets, userId);
 				
 				// Finally terminate wssAlive websocket and return
@@ -610,7 +611,7 @@ function pingInterval(wssAlive, websockets) {
 			
 			// Set isAlive to false and ping client again
 			ws.isAlive = false;
-			ws.ping(function() {});
+			ws.ping();
 			// If the client responds within 30 seconds, the isAlive status is reset to true
 		});
 	}, 30000);

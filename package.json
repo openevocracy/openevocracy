@@ -86,6 +86,7 @@
     "passport-local": "^1.0.0",
     "phantom-html2pdf": "4.0.2",
     "popper.js": "^1.15.0",
+    "process": "^0.11.10",
     "quill-authorship-evo": "^1.0.0",
     "quill-cursors": "^2.1.1",
     "quill-delta-to-html": "^0.10.13",

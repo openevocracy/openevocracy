@@ -35,7 +35,13 @@ exports.startPadServer = function(wss) {
 	ShareDB.types.register(richText.type);
 	
 	// Create shareDB backend with mongo adapter
-	backend = new ShareDB({'db': sharedb});
+	backend = new ShareDB({
+		'db': sharedb,
+		// The following options serve only to squelch errors.
+		// It should be possible to remove these when ShareDB 1.0 is released.
+		 disableDocAction: true,
+		 disableSpaceDelimitedActions: true
+	});
 	
 	// Register ShareDBAccess middleware
 	ShareDBAccess(backend);

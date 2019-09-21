@@ -398,7 +398,7 @@ exports.remixGroupsAsync = function(topic) {
 /**
  * @desc: Gets all data necessary for the group toolbar
  */
-exports.getToolbar = function(req, res) {
+exports.queryToolbar = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 	
@@ -425,7 +425,7 @@ exports.getToolbar = function(req, res) {
  * 		  - highligh which member the current user is
  * 		  - show the online status of every member
  */
- exports.getMemberbar = function(req, res) {
+ exports.queryMemberbar = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 	
@@ -459,7 +459,7 @@ exports.getToolbar = function(req, res) {
 	}).then(res.json.bind(res));
 };
 
-exports.getOnlineMembers = function(req, res) {
+exports.queryOnlineMembers = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 	
@@ -473,115 +473,102 @@ exports.getOnlineMembers = function(req, res) {
 	}).then(res.json.bind(res));
 };
 
-/* @desc: Gets group editor information, necessary information are:
- *        - groupId, topicId, docId (can be found in pad)
- *        - level, name, nextDeadline (can be found in topic)
- *        - chatRoomId (can be found in group)
- *        - isLastGroup
- *        - members (includes: color, name, userId, ratingIntegration, ratingKnowledge)
+/**
+ * @desc: Gets information about group members, mainly for rating and previous documents
  */
-exports.query = function(req, res) {
+exports.queryGroupMembers = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
+	
+	// Get group
+	const group_promise = db.collection('groups').findOneAsync({'_id': groupId});
+	
+	// Get group members
+	const groupRelations_promise = getGroupMembersAsync(groupId);
+	
+	// Get previous pads
+	const prevPads_promise = Promise.join(group_promise, groupRelations_promise).spread(function(group, groupRelations) {
+		var prevPadIds = _.pluck(groupRelations, 'prevPadId');
+		if (group.level == 0) {
+			return db.collection('pads_proposal')
+				.find({ '_id': {$in: prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
+		} else {
+			return db.collection('pads_group')
+				.find({ '_id': {$in: prevPadIds} }, { 'groupId': true, 'docId': true }).toArrayAsync();
+		}
+	});
+	
+	// Count number of groups in current level to obtain if we are in last group (last level)
+	const isLastGroup_promise = group_promise.then(function(group) {
+		return db.collection('groups').countAsync({ 'topicId': group.topicId, 'level': group.level })
+			.then(function(numGroupsInCurrentLevel) {
+				return (numGroupsInCurrentLevel == 1) ? true : false;
+		});
+	});
+	
+	// Get group members
+	const groupMembersDetails_promise = groupRelations_promise.map((relation) => {
+      
+      // Get proposal html
+      const prevPadHtml_promise = Promise.join(group_promise, prevPads_promise).spread(function(group, prevPads) {
+      	if (group.level == 0) {
+         	const prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': relation.userId});
+         	return pads.getPadHTMLAsync('proposal', prevUserPad.docId);
+      	} else {
+      		const prevGroupPad = utils.findWhereObjectId(prevPads, {'groupId': relation.prevGroupId});
+      		return pads.getPadHTMLAsync('group', prevGroupPad.docId);
+      	}
+      });
+		
+		// Get member rating
+		const memberRatingKnowledge_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_KNOWLEDGE);
+		const memberRatingIntegration_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_INTEGRATION);
+      
+      return Promise.props({
+      	'userId': relation.userId,
+			'name': generateMemberName(groupId, relation.userId),
+			'color': relation.userColor,
+			'prevPadHtml': prevPadHtml_promise,
+			'ratingKnowledge': memberRatingKnowledge_promise,
+			'ratingIntegration': memberRatingIntegration_promise
+      });
+	});
+	
+	Promise.join(groupMembersDetails_promise, isLastGroup_promise)
+		.spread((groupMembers, isLastGroup) => {
+			return { 'members': groupMembers, 'isLastGroup': isLastGroup };
+	}).then(res.json.bind(res));
+};
+
+/**
+ * @desc: Gets group editor information, mainly information about the pad
+ */
+exports.queryEditor = function(req, res) {
+	const groupId = ObjectId(req.params.id);
+	const userId = ObjectId(req.user._id);
+	
+	// Set lastActivity for the member querying the group
+	const lastActivity_promise = db.collection('group_relations')
+		.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
 	
 	// Get docId, groupId and topicId from group pad
 	const pad_promise = db.collection('pads_group').findOneAsync({'groupId': groupId});
 	
-	// Everything else depends on pad
-	pad_promise.then(function(pad) {
-		// Define some variables for simpler and more intuitie use
-		const topicId = pad.topicId;
-		
-		/*
-		 * Simple stuff
-		 */
-		
-		// Get topic name
-		const topic_promise = db.collection('topics').findOneAsync({'_id': topicId}, {'name': true});
-		
-		// Get chatRoomId from group
-		const group_promise = db.collection('groups').findOneAsync({'_id': pad.groupId});
-		
-		// Count number of groups in current level to obtain if we are in last group (last level)
-		const isLastGroup_promise = group_promise.then(function(currentGroup) {
-			return db.collection('groups').countAsync({ 'topicId': currentGroup.topicId, 'level': currentGroup.level })
-				.then(function(numGroupsInCurrentLevel) {
-					return (numGroupsInCurrentLevel == 1) ? true : false;
-			});
-		});
-		
-		/*
-		 * Group Members
-		 */
-		
-		// Get group members
-		const groupRelations_promise = getGroupMembersAsync(groupId);
-		
-		// Get number of group members
-		const num_group_members_promise = groupRelations_promise.then(function(group_members) {
-			return _.size(group_members);
-		});
-		
-		// Get previous pads
-		const prevPads_promise = Promise.join(group_promise, groupRelations_promise).spread(function(group, groupRelations) {
-			var prevPadIds = _.pluck(groupRelations, 'prevPadId');
-			if (group.level == 0) {
-				return db.collection('pads_proposal')
-					.find({ '_id': {$in: prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
-			} else {
-				return db.collection('pads_group')
-					.find({ '_id': {$in: prevPadIds} }, { 'groupId': true, 'docId': true }).toArrayAsync();
-			}
-		});
-		
-		// Get group members
-		const groupMembersDetails_promise = groupRelations_promise.map(function(relation, index) {
-         
-         // Get proposal html
-         const prevPadHtml_promise = Promise.join(group_promise, prevPads_promise).spread(function(group, prevPads) {
-         	if (group.level == 0) {
-	         	const prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': relation.userId});
-	         	return pads.getPadHTMLAsync('proposal', prevUserPad.docId);
-         	} else {
-         		const prevGroupPad = utils.findWhereObjectId(prevPads, {'groupId': relation.prevGroupId});
-         		return pads.getPadHTMLAsync('group', prevGroupPad.docId);
-         	}
-         });
-			
-			// Get member rating
-			const memberRatingKnowledge_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_KNOWLEDGE);
-			const memberRatingIntegration_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_INTEGRATION);
-         
-         return Promise.props({
-         	'userId': relation.userId,
-				'name': generateMemberName(groupId, relation.userId),
-				'color': relation.userColor,
-				'prevPadHtml': prevPadHtml_promise,
-				'ratingKnowledge': memberRatingKnowledge_promise,
-				'ratingIntegration': memberRatingIntegration_promise
-         });
-		});
-		
-		// Finally, set lastActivity for the member querying the group
-		const lastActivity_promise = db.collection('group_relations')
-			.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
-		
-		// Collect all information and return
-		return Promise.join(topic_promise, group_promise, isLastGroup_promise, groupMembersDetails_promise, lastActivity_promise)
-			.spread(function(topic, group, isLastGroup, group_members) {
-				return {
-					'groupId': groupId,
-					'name': group.name,
-					'topicId': topicId,
-					'docId': pad.docId,
-					'level': group.level,
-					'title': topic.name,
-					'deadline': pad.expiration,
-					'chatRoomId': group.chatRoomId,
-					'forumId': group.forumId,
-					'isLastGroup': isLastGroup,
-					'members': group_members
-				};
-		});
+	// Get group members
+	const groupMembers_promise = getGroupMembersAsync(groupId).map((relation) => {
+		return {
+      	'userId': relation.userId,
+			'name': generateMemberName(groupId, relation.userId),
+			'color': relation.userColor
+      };
+	});
+
+	Promise.join(pad_promise, groupMembers_promise, lastActivity_promise)
+		.spread((pad, groupMembers) => {
+			return {
+				'docId': pad.docId,
+				'deadline': pad.expiration,
+				'members': groupMembers
+			};
 	}).then(res.json.bind(res));
 };

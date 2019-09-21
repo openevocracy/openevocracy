@@ -38,7 +38,7 @@
 <div class="editor-wrapper container">
 	<div class="row">
 		<div class="editor-center">
-			<quill-editor class="col" [ngClass]="classColEditor" [modules]="quillModules" [style]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>
+			<quill-editor class="col" [ngClass]="classColEditor" [modules]="quillModules" [styles]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>
 			<!--<div id="member-proposal" class="col" [ngClass]="classColProposal">
 				<button mat-raised-button color="primary" class="pull-right" title="{{ 'GROUP_MEMBER_PROPOSAL_CLOSE' | translate }}" (click)="closeMemberProposal()">
 					<span><fa-icon [icon]="faTimes"></fa-icon> {{ 'GROUP_MEMBER_PROPOSAL_CLOSE' | translate }}</span>
