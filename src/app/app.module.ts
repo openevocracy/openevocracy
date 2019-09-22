@@ -89,6 +89,7 @@ import { UserprofileComponent } from './userprofile/userprofile.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { GroupComponent } from './group/group.component';
 import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
+import { StarratingComponent } from './starrating/starrating.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -137,7 +138,8 @@ export function loadConfig(configService: ConfigService) {
 		GroupMembersComponent,
 		GroupToolbarComponent,
 		GroupComponent,
-		GroupMemberbarComponent
+		GroupMemberbarComponent,
+		StarratingComponent
 	],
 	imports: [
 		BrowserModule,

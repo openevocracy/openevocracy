@@ -45,7 +45,7 @@ export class GroupToolbarComponent implements OnInit {
 			// Get data for toolbar from server
 			this.httpManagerService.get('/json/group/toolbar/' + this.groupId).subscribe(res => {
 				// Define title
-				this.title = res.groupName + ' / ' + res.topicTitle;
+				this.title = '(' + res.groupName + ') ' + res.topicTitle;
 			});
 		});
 	}

@@ -14,12 +14,13 @@ exports.C = {
    STAGE_PASSED    :  3,
    
    // Rating types 
-   RATING_KNOWLEDGE  :  1,
-   RATING_INTEGRATION:  2,
+   RATING_KNOWLEDGE  : 1,
+   RATING_INTEGRATION: 2,
+   RATING_ENGAGEMENT:  3,
    
    // Chat message types
    CHATMSG_DEFAULT: 0,
-   CHATMSG_ONLINE: 1,
+   CHATMSG_ONLINE:  1,
    CHATMSG_OFFLINE: 2,
    
    // Activity types

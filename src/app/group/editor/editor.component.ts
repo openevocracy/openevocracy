@@ -136,48 +136,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	}
 	
 	/*
-	 * @desc: Opens a member proposal
-	 */
-	/*private openMemberProposal(html: string, color: string) {
-		this.classColEditor = 'col-xs-6';
-		this.classColProposal = 'col-xs-6';
-		this.styleColProposal = {'background-color': color};
-		this.proposalHtml = html;
-	}*/
-	
-	/*
-	 * @desc: When a member proposal was open and user closes or
-	 *        chooses antoher member proposal, this function is called
-	 *        in order to close the particular member proposal. 
-	 */
-	/*public closeMemberProposal() {
-		this.classColEditor = 'col-xs-12';
-		this.classColProposal = 'hidden';
-		this.proposalHtml = "";
-	}*/
-	
-	/*
-	 * @desc: Posts rating of user to server
-	 *
-	 * @params:
-	 *    e:           event (given by rate component)
-	 *    ratedUserId: user which was rated
-	 *    type:        type of rating (e.g. default message, online message)
-	 */
-	/*private rate(e, ratedUserId, type) {
-		// Do not post new rating to server, if the new rating is equal to the old rating
-		var ratedMember = _.findWhere(this.group.members, {'userId': ratedUserId});
-		if(type == C.RATING_INTEGRATION && ratedMember.ratingIntegration == e.rating)
-			return;
-		if(type == C.RATING_KNOWLEDGE && ratedMember.ratingKnowledge == e.rating)	
-			return;
-			
-		// Post rating to server
-		var rating = {	'groupId': this.group.groupId, 'ratedUserId': ratedUserId, 'score': e.rating, 'type': type };
-		this.httpManagerService.post('/json/ratings/rate', rating).subscribe();
-	}*/
-	
-	/*
 	 * @desc: Opens 'productive mode'
 	 */
 	/*public enterFullscreen() {

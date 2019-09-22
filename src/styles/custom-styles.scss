@@ -26,14 +26,14 @@ button.close { padding: 0; background: transparent; border: 0; }
 div.hspace { float: left; overflow: hidden; height: 1px; width: 0px; }
 
 /* Rating */
-$color-negative-rating: $red700 !default;
+/*$color-negative-rating: $red700 !default;
 $color-ok-rating: $yellow700 !default;
 $color-positive-rating: $green700 !default;
-$color-default-rating: $grey700 !default;
+$color-default-rating: $grey700 !default;*/
 
 //@import "~css-star-rating/scss/star-rating";
 
-.rating {
+/*.rating {
 	align-items: left; justify-content: left;
 	-webkit-box-align: left; -webkit-box-pack: left;
 	-ms-flex-align: left; -ms-flex-pack: left;
@@ -41,7 +41,7 @@ $color-default-rating: $grey700 !default;
 	display: block;
 	margin: 14px 0;
 	height: 20px;
-}
+}*/
 
 /* Mention */
 mention-list ul {

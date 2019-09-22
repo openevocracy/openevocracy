@@ -1,20 +1,47 @@
 <mat-toolbar class="second-toolbar" color="primary">
 	<div class="flex container">
-		Currently chosen member name
+		<h1><fa-icon [icon]="faUser" [style.color]="members[chosenMemberId]?.color"></fa-icon> {{ members[chosenMemberId]?.name }}</h1>
 		<span class="flex-spacer"></span>
-		Choose member
+		<div id="usermenu">
+			<button mat-button [matMenuTriggerFor]="menu">
+				<span>{{ 'GROUP_MEMBERS_CHOOSE_MEMBER' | translate }} <fa-icon [icon]="faCaretDown"></fa-icon></span>
+			</button>
+			<mat-menu #menu="matMenu" [overlapTrigger]="false">
+				<button mat-menu-item [ngClass]="{'active': member.userId == chosenMemberId}" *ngFor="let member of membersArray" (click)="chooseMember(member.userId)">
+					<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}</span>
+				</button>
+			</mat-menu>
+		</div>
 	</div>
 </mat-toolbar>
 
-<!-- only show if not last level -->
-<div class="container box">
+<!-- *ngIf="!isLastGroup" -->
+<div class="container box box-rating">
 	<div class="header">
-		<h3>Rating</h3>
-		<span class="flex-spacer"></span>
-		<span>3,2 / 2</span>
+		<h3>{{ 'GROUP_MEMBERS_RATING_HEADING' | translate }}</h3>
+	</div>
+	<div class="content rating">
+		<table>
+			<tr>
+				<td><span matTooltip="{{ 'GROUP_RATING_TOOLTIP_KNOWLEDGE' | translate }}"><fa-icon [icon]="faInfoCircle"></fa-icon></span> {{ 'GROUP_RATING_KNOWLEDGE' | translate }}</td>
+				<td><span matTooltip="{{ 'GROUP_RATING_TOOLTIP_INTEGRATION' | translate }}"><fa-icon [icon]="faInfoCircle"></fa-icon></span> {{ 'GROUP_RATING_INTEGRATION' | translate }}</td>
+				<td><span matTooltip="{{ 'GROUP_RATING_TOOLTIP_ENGAGEMENT' | translate }}"><fa-icon [icon]="faInfoCircle"></fa-icon></span> {{ 'GROUP_RATING_ENGAGEMENT' | translate }}</td>
+			</tr>
+			<tr>
+				<td><starrating [ratingId]="C.RATING_KNOWLEDGE" [rateValue]="members[chosenMemberId]?.ratingKnowledge" (onRate)="onRate($event)"></starrating></td>
+				<td><starrating [ratingId]="C.RATING_INTEGRATION" [rateValue]="members[chosenMemberId]?.ratingIntegration" (onRate)="onRate($event)"></starrating></td>
+				<td><starrating [ratingId]="C.RATING_ENGAGEMENT" [rateValue]="3" (onRate)="onRate($event)"></starrating></td>
+			</tr>
+		</table>
 	</div>
 </div>
 
-<div class="container box">
-	<div class="header"><h3>Previous proposal</h3></div>
+<div class="container box box-pad">
+	<div class="header flex">
+		<h3>{{ 'GROUP_MEMBERS_PREV_PROPOSAL_HEADING' | translate }}</h3>
+		<span class="flex-spacer"></span>
+		<!-- If level > 0 -->
+		<button mat-raised-button color="primary"><fa-icon [icon]="faUsers"></fa-icon> Previous group</button>
+	</div>
+	<div class="content pad" [innerHtml]="members[chosenMemberId]?.prevPadHtml"></div>
 </div>

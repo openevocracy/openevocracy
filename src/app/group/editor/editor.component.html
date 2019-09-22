@@ -11,26 +11,6 @@
 		<span class="flex-spacer"></span>
 		
 		<memberbar></memberbar>
-		
-		<!--<div *ngFor="let member of group?.members">
-			<button mat-button [matMenuTriggerFor]="menu" [ngClass]="{'me': member.userId == userId}">
-				<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}<span *ngIf="online[member.userId]"> *</span></span>
-			</button>
-			<mat-menu #menu="matMenu" [overlapTrigger]="false">
-				<a mat-menu-item class="rating-button" matTooltip="{{ 'GROUP_RATING_TOOLTIP_INTEGRATION' | translate }}" [matTooltipPosition]="'left'">
-					<fa-icon [icon]="faHandshake"></fa-icon> <star-rating staticColor="123" [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingIntegration" (ratingChange)="rate($event, member.userId, C.RATING_INTEGRATION)"></star-rating>
-				</a>
-				<a mat-menu-item class="rating-button" matTooltip="{{ 'GROUP_RATING_TOOLTIP_KNOWLEDGE' | translate }}" [matTooltipPosition]="'left'">
-					<fa-icon [icon]="faLightbulb"></fa-icon> <star-rating staticColor="123" [starType]="'svg'" [showHalfStars]="true" [hoverEnabled]="true" [rating]="member.ratingKnowledge" (ratingChange)="rate($event, member.userId, C.RATING_KNOWLEDGE)"></star-rating>
-				</a>
-				<button mat-menu-item (click)="openMemberProposal(member.prevPadHtml, member.color)">
-					<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_MEMBER_BUTTON_PROPOSAL' | translate }}</span>
-				</button>
-				<button mat-menu-item [routerLink]="['/user/profile', member.userId]">
-					<span><fa-icon [icon]="faUser"></fa-icon> {{ 'GROUP_MEMBER_BUTTON_SHOW' | translate }}</span>
-				</button>
-			</mat-menu>
-		</div>-->
 	</div>
 </mat-toolbar>
 </div>
@@ -39,12 +19,6 @@
 	<div class="row">
 		<div class="editor-center">
 			<quill-editor class="col" [ngClass]="classColEditor" [modules]="quillModules" [styles]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>
-			<!--<div id="member-proposal" class="col" [ngClass]="classColProposal">
-				<button mat-raised-button color="primary" class="pull-right" title="{{ 'GROUP_MEMBER_PROPOSAL_CLOSE' | translate }}" (click)="closeMemberProposal()">
-					<span><fa-icon [icon]="faTimes"></fa-icon> {{ 'GROUP_MEMBER_PROPOSAL_CLOSE' | translate }}</span>
-				</button>
-				<div id="member-proposal-content" [ngStyle]="styleColProposal" [innerHtml]="proposalHtml"></div>
-			</div>-->
 		</div>
 	</div>
 </div>
