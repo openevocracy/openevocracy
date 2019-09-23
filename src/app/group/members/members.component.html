@@ -7,7 +7,7 @@
 				<span>{{ 'GROUP_MEMBERS_CHOOSE_MEMBER' | translate }} <fa-icon [icon]="faCaretDown"></fa-icon></span>
 			</button>
 			<mat-menu #menu="matMenu" [overlapTrigger]="false">
-				<button mat-menu-item [ngClass]="{'active': member.userId == chosenMemberId}" *ngFor="let member of membersArray" (click)="chooseMember(member.userId)">
+				<button mat-menu-item [ngClass]="{ 'active': member.userId == chosenMemberId }" *ngFor="let member of memberArray" (click)="chooseMember(member.userId)">
 					<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}</span>
 				</button>
 			</mat-menu>
@@ -23,14 +23,14 @@
 	<div class="content rating">
 		<table>
 			<tr>
-				<td><span matTooltip="{{ 'GROUP_RATING_TOOLTIP_KNOWLEDGE' | translate }}"><fa-icon [icon]="faInfoCircle"></fa-icon></span> {{ 'GROUP_RATING_KNOWLEDGE' | translate }}</td>
-				<td><span matTooltip="{{ 'GROUP_RATING_TOOLTIP_INTEGRATION' | translate }}"><fa-icon [icon]="faInfoCircle"></fa-icon></span> {{ 'GROUP_RATING_INTEGRATION' | translate }}</td>
-				<td><span matTooltip="{{ 'GROUP_RATING_TOOLTIP_ENGAGEMENT' | translate }}"><fa-icon [icon]="faInfoCircle"></fa-icon></span> {{ 'GROUP_RATING_ENGAGEMENT' | translate }}</td>
+				<td *ngFor="let rating of members[chosenMemberId]?.ratings">
+					<span matTooltip="{{ rating.tooltip | translate }}"><fa-icon [icon]="faInfoCircle"></fa-icon></span> {{ rating.label | translate }}
+				</td>
 			</tr>
 			<tr>
-				<td><starrating [ratingId]="C.RATING_KNOWLEDGE" [rateValue]="members[chosenMemberId]?.ratingKnowledge" (onRate)="onRate($event)"></starrating></td>
-				<td><starrating [ratingId]="C.RATING_INTEGRATION" [rateValue]="members[chosenMemberId]?.ratingIntegration" (onRate)="onRate($event)"></starrating></td>
-				<td><starrating [ratingId]="C.RATING_ENGAGEMENT" [rateValue]="3" (onRate)="onRate($event)"></starrating></td>
+				<td *ngFor="let rating of members[chosenMemberId]?.ratings">
+					<starrating [ratingId]="rating.type" [rateValue]="rating.score" (onRate)="onRate($event)"></starrating>
+				</td>
 			</tr>
 		</table>
 	</div>
@@ -41,7 +41,7 @@
 		<h3>{{ 'GROUP_MEMBERS_PREV_PROPOSAL_HEADING' | translate }}</h3>
 		<span class="flex-spacer"></span>
 		<!-- If level > 0 -->
-		<button mat-raised-button color="primary"><fa-icon [icon]="faUsers"></fa-icon> Previous group</button>
+		<!--<button mat-raised-button color="primary"><fa-icon [icon]="faUsers"></fa-icon> Previous group</button>-->
 	</div>
 	<div class="content pad" [innerHtml]="members[chosenMemberId]?.prevPadHtml"></div>
 </div>

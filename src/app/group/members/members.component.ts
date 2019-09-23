@@ -21,7 +21,7 @@ export class GroupMembersComponent implements OnInit {
 	public userId;
 	public groupId;
 	public chosenMemberId;
-	public membersArray;
+	public memberArray;
 	public members = {};
 	public isLastGroup;
 	
@@ -29,6 +29,12 @@ export class GroupMembersComponent implements OnInit {
 	public faUsers = faUsers;
 	public faCaretDown = faCaretDown;
 	public faInfoCircle = faInfoCircle;
+	
+	public ratingLabels = [
+		{ 'type': C.RATING_KNOWLEDGE, 'label': 'GROUP_RATING_KNOWLEDGE', 'tooltip': 'GROUP_RATING_TOOLTIP_KNOWLEDGE' },
+		{ 'type': C.RATING_INTEGRATION, 'label': 'GROUP_RATING_INTEGRATION', 'tooltip': 'GROUP_RATING_TOOLTIP_INTEGRATION' },
+		{ 'type': C.RATING_ENGAGEMENT, 'label': 'GROUP_RATING_ENGAGEMENT', 'tooltip': 'GROUP_RATING_TOOLTIP_ENGAGEMENT' }
+	];
 
 	constructor(
 		private router: Router,
@@ -38,7 +44,7 @@ export class GroupMembersComponent implements OnInit {
 		// Get user id from user service
 		this.userId = this.userService.getUserId();
 		
-		// Initiliaze chosenMemberId with userId of current user
+		// Initialize chosenMemberId with userId of current user
 		this.chosenMemberId = this.userId;
 	}
 	
@@ -49,16 +55,24 @@ export class GroupMembersComponent implements OnInit {
 		// Get members
 		this.httpManagerService.get('/json/group/members/' + this.groupId).subscribe((res) => {
 			
-			// Define members as object, where keys are userIds
-			this.membersArray = res.members;
-			_.each(this.membersArray, (member) => {
+			// Get array of member ids
+			this.memberArray = res.members;
+			
+			// Define members as object, where keys are userIds and add labels to rating
+			_.each(this.memberArray, (member) => {
+				// Add label and tooltip to ratings array
+				member.ratings = _.map(member.ratings, (rating) => {
+					const labels = _.findWhere(this.ratingLabels, { 'type': rating.type });
+					return _.extend(rating, labels);
+				});
+				// Define members as object, key is userId
 				this.members[member.userId] = member;
 			});
 			
 			// If group is last group, don't show ratings
 			this.isLastGroup = res.isLastGroup;
 			
-			console.log(res);
+			console.log(this.members);
 		});
 	}
 	
@@ -73,17 +87,19 @@ export class GroupMembersComponent implements OnInit {
 	 * @desc: When a user choses a star, store new value locally and on server
 	 */
 	private onRate(e) {
+		// Get rating from rated member
+		const memberRatings = this.members[this.chosenMemberId].ratings;
+		let rating = _.findWhere(memberRatings, { 'type': e.ratingId });
+		
+		// Check if anything has changed, if not: stop evalulation
+		if (rating.score == e.ratingValue)
+			return;
+		
+		// Update rating in local members array
+		rating.score = e.ratingValue;
+		
 		// Post rating to server
 		this.postRating(e.ratingId, e.ratingValue);
-		
-		// Update members local rating values
-		switch(e.ratingId) {
-			case C.RATING_INTEGRATION:
-				this.members[this.chosenMemberId].ratingIntegration = e.ratingValue; break;
-			case C.RATING_KNOWLEDGE: 
-				this.members[this.chosenMemberId].ratingKnowledge = e.ratingValue; break;
-			//case C.RATING_ENGAGEMENT: this.members[this.chosenMemberId].ratingIntegration = e.ratingValue; break;
-		}
 	}
 	
 	/*
@@ -94,15 +110,6 @@ export class GroupMembersComponent implements OnInit {
 	 *    ratingValue: value of rating (1 to 5)
 	 */
 	private postRating(ratingId, ratingValue) {
-		// Do not post new rating to server, if the new rating is equal to the old rating
-		const ratedMember = this.members[this.chosenMemberId];
-		if(ratingId == C.RATING_INTEGRATION && ratedMember.ratingIntegration == ratingValue)
-			return;
-		if(ratingId == C.RATING_KNOWLEDGE && ratedMember.ratingKnowledge == ratingValue)	
-			return;
-		/*if(ratingId == C.RATING_ENGAGEMENT && ratedMember.ratingEngagement == ratingValue)	
-			return;*/
-			
 		// Post rating to server
 		const rating = { 'groupId': this.groupId, 'ratedUserId': this.chosenMemberId, 'score': ratingValue, 'type': ratingId };
 		this.httpManagerService.post('/json/ratings/rate', rating).subscribe();

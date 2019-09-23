@@ -19,8 +19,6 @@ import * as _ from 'underscore';
 
 import { C } from '../../../../shared/constants';
 
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
-
 @Component({
 	selector: 'app-editor',
 	templateUrl: './editor.component.html',
@@ -31,14 +29,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	public proposalHtml: string = "";
 	public members;
 	public me;
-	
-	// Classes and styles for member proposal column
-	/*public classColEditor: string = 'col-xs-12';
-	public classColProposal: string = 'hidden';
-	public styleColProposal = {'background-color': '#fff'};*/
-	
-	// FontAwesome icons
-	public faTimes = faTimes;
 
   constructor(
 		protected snackBar: MatSnackBar,

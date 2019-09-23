@@ -521,16 +521,21 @@ exports.queryGroupMembers = function(req, res) {
       });
 		
 		// Get member rating
-		const memberRatingKnowledge_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_KNOWLEDGE);
+		/*const memberRatingKnowledge_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_KNOWLEDGE);
 		const memberRatingIntegration_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_INTEGRATION);
+		const memberRatingEngagement_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_ENGAGEMENT);*/
+		
+		const memberRatings_promise = ratings.getMemberRatingsAsync(relation.userId, groupId, userId);
       
       return Promise.props({
       	'userId': relation.userId,
 			'name': generateMemberName(groupId, relation.userId),
 			'color': relation.userColor,
 			'prevPadHtml': prevPadHtml_promise,
-			'ratingKnowledge': memberRatingKnowledge_promise,
-			'ratingIntegration': memberRatingIntegration_promise
+			/*'ratingKnowledge': memberRatingKnowledge_promise,
+			'ratingIntegration': memberRatingIntegration_promise,
+			'ratingEngagement': memberRatingEngagement_promise*/
+			'ratings': memberRatings_promise
       });
 	});
 	

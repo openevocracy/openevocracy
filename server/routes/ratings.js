@@ -43,7 +43,7 @@ exports.rate = function(req, res) {
 	var score = parseInt(req.body.score, 10);
 	
 	// Return 402: score is not between 1 and 5
-	if(score < 0 || score > 5) {
+	if(score < 1 || score > 5) {
 		res.sendStatus(402);
 		return;
 	}
@@ -90,10 +90,28 @@ exports.getGroupLeaderAsync = function(groupId) {
 	});
 };
 
+exports.getMemberRatingsAsync = function(ratedUserId, groupId, userId) {
+	return db.collection('ratings').find(
+		{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId }, { '_id': false, 'type': true, 'score': true })
+	.toArrayAsync().then(function(ratings) {
+		// Create array with all rating types
+		const types = [C.RATING_KNOWLEDGE, C.RATING_INTEGRATION, C.RATING_ENGAGEMENT];
+		// Map through all types
+		return _.map(types, (type) => {
+			// Have a look if rating for current type is present
+			const rating = _.findWhere(ratings, { 'type': type });
+			// If rating is available, set rating to current score, if not, just set it to zero
+			const score = rating ? rating.score : 0;
+			// Return rating
+			return { 'type': type, 'score': score };
+		});
+	});
+};
+
 exports.getMemberRatingAsync = function(ratedUserId, groupId, userId, type) {
 	return db.collection('ratings').findOneAsync(
 		{'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type}, {'score': true}).
 	then(function(rating) {
 		return rating ? rating.score : 0;
 	});
-}
+};
