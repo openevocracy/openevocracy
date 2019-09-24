@@ -41,7 +41,7 @@
 		<h3>{{ 'GROUP_MEMBERS_PREV_PROPOSAL_HEADING' | translate }}</h3>
 		<span class="flex-spacer"></span>
 		<!-- If level > 0 -->
-		<!--<button mat-raised-button color="primary"><fa-icon [icon]="faUsers"></fa-icon> Previous group</button>-->
+		<button mat-raised-button *ngIf="members[chosenMemberId]?.prevGroupId" color="primary" title="{{ 'GROUP_BUTTON_TITLE_PREVIOUS_GROUP' | translate }}" [routerLink]="['/group', members[chosenMemberId]?.prevGroupId]"><fa-icon [icon]="faUsers"></fa-icon> {{ 'GROUP_BUTTON_LABEL_PREVIOUS_GROUP' | translate }}</button>
 	</div>
 	<div class="content pad" [innerHtml]="members[chosenMemberId]?.prevPadHtml"></div>
 </div>

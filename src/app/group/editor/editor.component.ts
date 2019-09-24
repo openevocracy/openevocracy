@@ -124,22 +124,5 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 			this.initalizePadSocket(res.docId);
 		});
 	}
-	
-	/*
-	 * @desc: Opens 'productive mode'
-	 */
-	/*public enterFullscreen() {
-		var element = document.documentElement;
-		
-		if(element.requestFullscreen) {
-			element.requestFullscreen();
-		/*} else if(element.mozRequestFullScreen) {
-			element.mozRequestFullScreen();
-		} else if(element.msRequestFullscreen) {
-			element.msRequestFullscreen();/
-		} else if(element.webkitRequestFullscreen) {
-			element.webkitRequestFullscreen();
-		}
-	}*/
 
 }

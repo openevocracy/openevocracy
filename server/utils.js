@@ -128,23 +128,6 @@ exports.countHtmlWords = function(html) {
 };
 
 /*
- * @desc: ping all socket clients
- * @params:
- *    - wss: websocket
- */
-/*exports.pingInterval = function(wss) {
-	setInterval(function() {
-		// Send ping to every client
-		wss.clients.forEach(function(ws) {
-			if (ws.isAlive === false) return ws.terminate();
-			
-			ws.isAlive = false;
-			ws.ping(function() {});
-		});
-	}, 30000);
-};*/
-
-/*
  * @desc: Send config file, but omit private configuration information
  *        (e.g. mail credentials)
  */

@@ -137,6 +137,8 @@
 	"GROUPVIS_DETAIL_GROUP_BUTTON_LABEL": "Go to group",
 	"GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL": "Go to proposal",
 	
+	"GROUP_SUBTITLE_1": "The group ends on",
+	"GROUP_SUBTITLE_2": "at",
 	"GROUP_BUTTON_PRODUCTIVE_MODE": "Productive mode",
 	"GROUP_MEMBER_BUTTON_PROPOSAL": "Member proposal",
 	"GROUP_MEMBER_BUTTON_SHOW": "Visit profile",
@@ -153,6 +155,8 @@
 	"GROUP_BUTTON_DOCUMENT": "Document",
 	"GROUP_BUTTON_CHAT": "Chat",
 	"GROUP_BUTTON_MEMBERS": "Members",
+	"GROUP_BUTTON_LABEL_PREVIOUS_GROUP": "Previous group",
+	"GROUP_BUTTON_LABEL_PREVIOUS_TITLE": "Open member's previous group",
 	
 	"FORUM_BUTTON_TO_GROUP": "To group",
 	"FORUM_BUTTON_NEW_THREAD": "Create thread",

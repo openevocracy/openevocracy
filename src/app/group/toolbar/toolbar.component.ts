@@ -15,6 +15,7 @@ export class GroupToolbarComponent implements OnInit {
 	public activeTab: string = 'editor';
 	public groupId: string;
 	public title: string;
+	public expiration: number;
   
 	public faExpandArrowsAlt = faExpandArrowsAlt;
 	public faComments = faComments;
@@ -46,8 +47,28 @@ export class GroupToolbarComponent implements OnInit {
 			this.httpManagerService.get('/json/group/toolbar/' + this.groupId).subscribe(res => {
 				// Define title
 				this.title = '(' + res.groupName + ') ' + res.topicTitle;
+				
+				// Define expiration
+				this.expiration = res.expiration;
 			});
 		});
 	}
+	
+	/*
+	 * @desc: Opens 'productive mode'
+	 */
+	/*public enterFullscreen() {
+		var element = document.documentElement;
+		
+		if(element.requestFullscreen) {
+			element.requestFullscreen();
+		/*} else if(element.mozRequestFullScreen) {
+			element.mozRequestFullScreen();
+		} else if(element.msRequestFullscreen) {
+			element.msRequestFullscreen();/
+		} else if(element.webkitRequestFullscreen) {
+			element.webkitRequestFullscreen();
+		}
+	}*/
 
 }

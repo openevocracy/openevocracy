@@ -1,4 +1,8 @@
 /* Import variables */
 @import "~styles/variables";
 
+.group-title h1 { line-height: 30px; padding-top: 10px; font-size: 20px; font-weight: normal; }
+.group-title p { margin: 0; font-size: 12px; font-weight: 300; line-height: 16px; padding-bottom: 8px; }
+
+button { height: 38px; margin-top: 12px; }
 button.active { background-color: rgba(255,255,255,0.2); }

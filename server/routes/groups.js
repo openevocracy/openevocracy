@@ -402,20 +402,30 @@ exports.queryToolbar = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 	
+	// Get group name and topic id
 	const group_promise = db.collection('groups')
 		.findOneAsync({ '_id': groupId }).then((group) => {
 			return { 'name': group.name, 'topicId': group.topicId };
 	});
 	
+	// Get topic title
 	const topic_promise = group_promise.then((group) => {
 		return db.collection('topics')
 			.findOneAsync({ '_id': group.topicId }).then((topic) => {
 				return { 'title': topic.name };
 		});
 	});
+	
+	// Get expiration of group pad
+	const pad_promise = db.collection('pads_group')
+		.findOneAsync({ 'groupId': groupId }, { 'expiration': true });
 		
-	Promise.join(group_promise, topic_promise).spread((group, topic) => {
-		return { 'groupName': group.name, 'topicTitle': topic.title };
+	Promise.join(group_promise, topic_promise, pad_promise).spread((group, topic, pad) => {
+		return {
+			'groupName': group.name,
+			'topicTitle': topic.title,
+			'expiration': pad.expiration
+		};
 	}).then(res.json.bind(res));
 };
 
@@ -520,21 +530,15 @@ exports.queryGroupMembers = function(req, res) {
       	}
       });
 		
-		// Get member rating
-		/*const memberRatingKnowledge_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_KNOWLEDGE);
-		const memberRatingIntegration_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_INTEGRATION);
-		const memberRatingEngagement_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_ENGAGEMENT);*/
-		
+		// Get member ratings
 		const memberRatings_promise = ratings.getMemberRatingsAsync(relation.userId, groupId, userId);
       
       return Promise.props({
       	'userId': relation.userId,
 			'name': generateMemberName(groupId, relation.userId),
 			'color': relation.userColor,
+			'prevGroupId': relation.prevGroupId,
 			'prevPadHtml': prevPadHtml_promise,
-			/*'ratingKnowledge': memberRatingKnowledge_promise,
-			'ratingIntegration': memberRatingIntegration_promise,
-			'ratingEngagement': memberRatingEngagement_promise*/
 			'ratings': memberRatings_promise
       });
 	});
@@ -556,7 +560,7 @@ exports.queryEditor = function(req, res) {
 	const lastActivity_promise = db.collection('group_relations')
 		.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
 	
-	// Get docId, groupId and topicId from group pad
+	// Get docId from group pad
 	const pad_promise = db.collection('pads_group').findOneAsync({'groupId': groupId});
 	
 	// Get group members
@@ -572,7 +576,6 @@ exports.queryEditor = function(req, res) {
 		.spread((pad, groupMembers) => {
 			return {
 				'docId': pad.docId,
-				'deadline': pad.expiration,
 				'members': groupMembers
 			};
 	}).then(res.json.bind(res));
