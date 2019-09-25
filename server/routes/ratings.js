@@ -48,10 +48,12 @@ exports.rate = function(req, res) {
 		// Check if user is member of group, otherwise reject
 		const member = _.findWhere(members, { 'userId': userId });
 		if (_.isUndefined(member))
+			return null;
 			return utils.rejectPromiseWithMessage(403, 'FORBIDDEN');
 			
 		// Check if score is between 1 and 5
 		if(score < 1 || score > 5)
+			return null;
 			return utils.rejectPromiseWithMessage(400, 'BAD_REQUEST');
 		
 		// Store rating in database

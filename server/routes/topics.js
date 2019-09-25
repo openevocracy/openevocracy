@@ -66,7 +66,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
 				
 				// get the pad id of final document
 				// e.g. the proposal pad id of the group in the last level
-				var finalDocumentHtmlPromise = db.collection('groups')
+				const finalDocumentHtml_promise = db.collection('groups')
 					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
 					.then(function(group) {
 						return db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
@@ -75,7 +75,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
 				    });
             
             // Get pad PDF and save it in file system
-            finalDocumentHtmlPromise.then(pads.getPadPDFAsync).then(function(data) {
+            finalDocumentHtml_promise.then(pads.getPadPDFAsync).then(function(data) {
                 var filename = path.join(appRoot.path, 'files/documents', topicId+'.pdf');
                 return fs.writeFileAsync(filename,data);
             });
@@ -85,32 +85,21 @@ function manageConsensusStageAsync(topic, levelDuration) {
                 'stage': (topic.stage = C.STAGE_PASSED),
                 'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_PASSED,prevDeadline)),
                 'stagePassedStarted': Date.now(),
-                'finalDocument': finalDocumentHtmlPromise
+                'finalDocument': finalDocumentHtml_promise
             };
                         
-            // Add activity for creator
-            var actPromise = activities.actcreate(topic.owner, C.ACT_TOPIC_COMPLETE, topicId);
+            // Add activity for author
+            const authorActivity_promise = activities.storeActivity(topic.owner, C.ACT_TOPIC_COMPLETE, topicId);
             
             // Add activities for interested persons (persons who voted for the respective topics)
-				var actPromise2 = db.collection('topic_votes')
+				const interestedActivity_promise = db.collection('topic_votes')
 					.find({'topicId': topicId}, {'userId': true}).toArrayAsync()
 					.then(function(userVotes) {
 							_.each(userVotes, function(el) {
 									if (!utils.equalId(el.userId, topic.owner)) // if activity has not yet been added
-										activities.actcreate(el.userId, C.ACT_TOPIC_COMPLETE, topicId);
+										activities.storeActivity(el.userId, C.ACT_TOPIC_COMPLETE, topicId);
 								});
 						});
-		
-		
-				// Final document
-				var finalDocumentHtmlPromise = db.collection('groups')
-					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
-					.then(function(group) {
-						return db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
-				    }).then(function(docId) {
-				    	return pads.getPadHTMLAsync('group', docId);
-				    });
-		
 		
             break;
         case C.STAGE_REJECTED:
@@ -392,7 +381,7 @@ exports.getTopiclist = function(req, res) {
 	manageAndListTopicsAsync().then(function(topics) {
 		// Promise.map does not work above
 		Promise.map(topics, _.partial(appendTopicInfoAsync, _, userId, false)).then(res.json.bind(res));
-	});
+	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 /*

@@ -354,6 +354,11 @@ pads.startPadServer(wssPad);
 chats.startChatServer(wssChat);
 users.startAliveServer(wssAlive, [wssPad, wssChat]);
 
+// Show unhandled rejection error (UnhandledPromiseRejectionWarning)
+process.on('unhandledRejection', (reason, p) => {
+	console.log('UnhandledPromiseRejectionWarning at ', reason);
+});
+
 httpServer.on('upgrade', function upgrade(request, socket, head) {
 	var queryArr = request.url.split("/socket/")[1].split("/");
 	var connectionType = queryArr[0];

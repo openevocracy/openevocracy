@@ -310,9 +310,8 @@ exports.remixGroupsAsync = function(topic) {
 		/*
 		 * If there is NO group in the current topic level, there was not only one valid document in the current level
 		 */
-		if(_.size(groups) == 0) {
-			return Promise.reject({'reason': 'REJECTED_NO_VALID_GROUP_PROPOSAL'});
-		}
+		if(_.size(groups) == 0)
+			return Promise.reject({ 'reason': 'REJECTED_NO_VALID_GROUP_PROPOSAL' });
 		
 		/*
 		 * If there is only ONE group in the current topic level, then the topic is finished/passed
@@ -342,12 +341,12 @@ exports.remixGroupsAsync = function(topic) {
 		var groupsMemberIds_promise = assignParticipantsToGroups(leaders);
 		
 		// Add activities for all delegates
-		var actPromise = function(leaders) {
-					_.each(leaders, function(el) {
-							console.log("Leader", el)
-							activities.actcreate(el, C.ACT_ELECTED_DELEGATE, topicId);
-						});
-					};
+		/*const createActivity_promise = (leaders) => {
+			_.each(leaders, function(el) {
+				console.log("Leader", el)
+				activities.storeActivity(el, C.ACT_ELECTED_DELEGATE, topicId);
+			});
+		};*/
 		
 		// Insert all groups into database
 		var nextLevel = topic.level+1;
@@ -397,7 +396,7 @@ exports.remixGroupsAsync = function(topic) {
             
 			return Promise.join(sendMail_promise, storeGroup_promise);
 		}).return({'nextStage': C.STAGE_CONSENSUS});  // We stay in consensus stage
-	}).catch(utils.isOwnError,function(error) {
+	}).catch(function(error) {
 		return {
 			'nextStage': C.STAGE_REJECTED,
 			'rejectedReason': error.reason

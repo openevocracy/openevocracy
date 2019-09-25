@@ -1,21 +1,11 @@
+// General libraries
 var _ = require('underscore');
 var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
-//var requirejs = require('requirejs');
-var fs = Promise.promisifyAll(require('fs'));
-var path = require('path');
-var appRoot = require('app-root-path');
-var AsyncLock = require('async-lock');
-var lock = new AsyncLock();
 
-var C = require('../../shared/constants').C;
-//var cfg = requirejs('public/js/setup/configs');
-var cfg = require('../../shared/config').cfg;
-var groups = require('./groups');
-var pads = require('./pads');
+// Own references
 var utils = require('../utils');
-var mail = require('../mail');
 
 /**
  * gets all activities from database that satisfy the filter
@@ -32,7 +22,7 @@ exports.manageAndListActivitiesAsync = manageAndListActivitiesAsync;
  * @desc: Get whole activity list of a particular user
  */
 exports.getUserActivityList = function(req, res) {
-   var userId = ObjectId(req.params.id);
+   const userId = ObjectId(req.params.id);
 	manageAndListActivitiesAsync({ 'userId': userId }).then(res.json.bind(res));
 };
 
@@ -44,13 +34,13 @@ exports.getActivityList = function(req, res) {
 };
 
 exports.query = function(req, res) { // not tested yet / probably not properly implemented
-   var activityId = ObjectId(req.activityId);
-   var userId = ObjectId(req.userId);
+   const activityId = ObjectId(req.activityId);
+   const userId = ObjectId(req.userId);
    
    db.collection('activities').findOneAsync({ '_id': activityId })
       .then(function(act) {
          if(_.isNull(act))
-            return utils.rejectPromiseWithAlert(404, 'danger', 'ACTIVITY_NOT_FOUND');
+            return utils.rejectPromiseWithMessage(404, 'NOT_FOUND');
          else
             return act;
       }).then(res.json.bind(res))
@@ -58,9 +48,11 @@ exports.query = function(req, res) { // not tested yet / probably not properly i
 };
 
 
-// Actually creates an activity in the database
-function actcreate(_userId, _type, _targetId) {
-   // Create activity
+/**
+ * @desc: Creates an activity in the database
+ */
+function storeActivity(_userId, _type, _targetId) {
+   // Define activity object
    const activity = {
       _id: ObjectId(),
       userId: _userId,
@@ -68,33 +60,34 @@ function actcreate(_userId, _type, _targetId) {
 	   targetId: _targetId
    };
    
+   // Adds object to database
    return db.collection('activities').insertAsync(activity);
-};
-exports.actcreate = actcreate;
+}
+exports.storeActivity = storeActivity;
 
 
-// Creates an activity (to be called from POST)
+/**
+ * @desc: Creates an activity (to be called from POST)
+ */
 exports.create = function(req, res) {
 
-   // reject if user ID is missing
-   if(_.isEmpty(req.user._id)) {
-      utils.sendAlert(res, 400, 'danger', 'USER_ID_EMPTY');
-      return;
-   }
+   // Reject if user id is missing
+   if(_.isEmpty(req.user._id))
+      return utils.rejectPromiseWithMessage(400, 'BAD_REQUEST');
 
-   
-   actcreate(req.user._id, req.body.type, req.body.targetId).then(res.json.bind(res));
+   // Stores activity in database
+   storeActivity(req.user._id, req.body.type, req.body.targetId)
+      .then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 
 exports.delete = function(req,res) {
-    var actId = ObjectId(req.params.id);
-    var uid = ObjectId(req.user._id);
-
-    db.collection('activities').findOneAsync({ '_id': actId })
-      .then(function(activity) {
-         return db.collection('activities').removeByIdAsync(activity._id )
-                .then(res.json.bind(res))
-                .catch(utils.isOwnError,utils.handleOwnError(res));
-       });
+	const actId = ObjectId(req.params.id);
+	const userId = ObjectId(req.user._id);
+	
+	// FIXME: Why this? (comment from Carlo)
+	db.collection('activities').findOneAsync({ '_id': actId }).then(function(activity) {
+		return db.collection('activities').removeByIdAsync(activity._id)
+			.then(res.json.bind(res));
+	});
 };
