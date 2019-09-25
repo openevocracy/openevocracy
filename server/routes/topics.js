@@ -91,13 +91,13 @@ function manageConsensusStageAsync(topic, levelDuration) {
             // Add activity for creator
             var actPromise = activities.actcreate(topic.owner, C.ACT_TOPIC_COMPLETE, topicId);
             
-            // Add activities for participants
+            // Add activities for interested persons (persons who voted for the respective topics)
 				var actPromise2 = db.collection('topic_votes')
 					.find({'topicId': topicId}, {'userId': true}).toArrayAsync()
 					.then(function(userVotes) {
-							console.log("userVotes", userVotes);
-							_.each(userVotes, function(userId) {
-								activities.actcreate(userId, C.ACT_TOPIC_COMPLETE, topicId);
+							_.each(userVotes, function(el) {
+									if (!utils.equalId(el.userId, topic.owner)) // if activity has not yet been added
+										activities.actcreate(el.userId, C.ACT_TOPIC_COMPLETE, topicId);
 								});
 						});
 		

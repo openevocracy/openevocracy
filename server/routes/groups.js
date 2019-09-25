@@ -15,6 +15,7 @@ const pads = require('./pads');
 const users = require('./users');
 const mail = require('../mail');
 const utils = require('../utils');
+const activities = require('./activities');
 
 function getGroupMembersAsync(groupId) {
 	return db.collection('group_relations').find({'groupId': groupId}).toArrayAsync();
@@ -303,6 +304,7 @@ exports.remixGroupsAsync = function(topic) {
 			});
 		});
 	});
+	
     
 	return Promise.join(groups_promise, leaders_promise).spread(function(groups, leaders) {
 		/*
@@ -338,6 +340,14 @@ exports.remixGroupsAsync = function(topic) {
        */
 		// Assign members to groups
 		var groupsMemberIds_promise = assignParticipantsToGroups(leaders);
+		
+		// Add activities for all delegates
+		var actPromise = function(leaders) {
+					_.each(leaders, function(el) {
+							console.log("Leader", el)
+							activities.actcreate(el, C.ACT_ELECTED_DELEGATE, topicId);
+						});
+					};
 		
 		// Insert all groups into database
 		var nextLevel = topic.level+1;

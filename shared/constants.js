@@ -26,7 +26,7 @@ exports.C = {
    // Activity types
    ACT_TOPIC_CREATE: 1, // created topic
    ACT_PROPOSAL_CREATED: 2, // created proposal
-   ACT_ELECTED_DELEGATE: 3, // was elected as delegate
+   ACT_ELECTED_DELEGATE: 3, // was selected as delegate
    ACT_DROP_OUT: 4, // dropped out of group phase
    ACT_TOPIC_COMPLETE: 5, // topic was completed in which the user participated
    ACT_MENTIONED: 6, // the user was mentioned in a group

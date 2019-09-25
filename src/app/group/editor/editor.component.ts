@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AlertService } from '../../_services/alert.service';
+import { ConnectionAliveService } from '../../_services/connection.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
 import { ModalService } from '../../_services/modal.service';
@@ -29,6 +30,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	public proposalHtml: string = "";
 	public members;
 	public me;
+	public docId;
 
   constructor(
 		protected snackBar: MatSnackBar,
@@ -39,15 +41,15 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
-		protected translateService: TranslateService
+		protected translateService: TranslateService,
+		protected connectionAliveService: ConnectionAliveService
 	) {
-		super(snackBar, alertService, router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService, translateService);
+		super(snackBar, alertService, router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService, translateService, connectionAliveService);
 		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
 			'authorship': { 'enabled': true, 'authorId': this.userId }
 		});
-		
 		
 		/*this.quillEditor.getModule('cursors').set({
 			id: this.me.userId,
@@ -69,7 +71,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	 * @desc: Lifecylce hook, used to close socket connection properly if view is destroyed
 	 */
 	ngOnDestroy() {
-		this.manualClose = true;
 		// Close pad socket
 		if (this.padSocket)
 			this.padSocket.close();
@@ -105,7 +106,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		
 		// Get additional information and initalize socket
 		this.httpManagerService.get('/json/group/editor/' + groupId).subscribe((res) => {
-			this.members = res.members
+			this.members = res.members;
 			
 			// Add color of current member
 			this.me = _.findWhere(res.members, { 'userId': this.userId });
@@ -121,7 +122,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 			this.initCountdown(res.deadline);
 			
 			// Initialize socket
-			this.initalizePadSocket(res.docId);
+			this.initializePadSocket(res.docId);
 		});
 	}
 

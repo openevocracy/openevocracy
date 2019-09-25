@@ -32,8 +32,6 @@ export class ConnectionAliveService implements OnDestroy {
 	 * @desc: Lifecylce hook, used to close socket connection properly if depending components are destroyed
 	 */
 	ngOnDestroy() {
-		console.log('ngOnDestroy');
-		
 		// Stop ping interval
 		if (this.pingInterval)
 			clearInterval(this.pingInterval);
@@ -53,10 +51,8 @@ export class ConnectionAliveService implements OnDestroy {
 		this.aliveSocket = new WebSocket(protocol + parsed.host + '/socket/alive/' + this.userToken);
 		
 		this.aliveSocket.onopen = (event) => {
-			console.log('onopen');
 			// If connection was broken before and is reconnected now
 			if (!this.isConnectionAssumed) {
-				console.log('onopen reconnect');
 				// Set isConnectionAssumed and isConnected to true again
 				this.isConnectionAssumed = true;
 				this.isConnected = true;
@@ -79,15 +75,14 @@ export class ConnectionAliveService implements OnDestroy {
 		};
 		
 		this.aliveSocket.onerror = (err) => {
-			console.log('onerror', err);
-			// Disable connection and retry
-			this.disableConnection();
-			this.startRetryTimeout();
+			//console.log('onerror', err);
 		};
 		
 		// WebSocket connection was closed from server
 		this.aliveSocket.onclose = (event) => {
-			console.log('onclose', event);
+			//console.log('onclose', event);
+			// Disable connection and retry
+			this.disconnectAndRetry();
 		};
 	}
 	
@@ -97,11 +92,8 @@ export class ConnectionAliveService implements OnDestroy {
 	public startPingInterval() {
 		this.pingInterval = setInterval(() => {
 			if (!this.isConnectionAssumed && this.isConnected) {
-				console.log('connection lost');
-				// If server does not respond anymore, disable connection
-				this.disableConnection();
-				// Retry connection
-				this.startRetryTimeout();
+				// If server does not respond anymore, disable connection and retry
+				this.disconnectAndRetry();
 			}
 			
 			// Assume connection as interrupted until receiving pong
@@ -116,15 +108,12 @@ export class ConnectionAliveService implements OnDestroy {
 	 *        an event for disconnect is triggert to inform the system about a disconnect.
 	 *        Also try to reconnect to the server.
 	 */
-	public disableConnection() {
+	public disconnectAndRetry() {
 		// Stop interval
-		console.log('stop interval');
 		clearInterval(this.pingInterval);
-		console.log('interval stopped');
 		
 		// Wait 500 ms to avoid visual effects when reloading (F5) the tab
 		setTimeout(() => {
-			console.log('emit event, connected before', this.isConnected);
 			// Trigger offline event if was connected before
 			if (this.isConnected)
 				this.connectionLost.emit(true);
@@ -132,6 +121,9 @@ export class ConnectionAliveService implements OnDestroy {
 			// Set flags to disconnected
 			this.isConnectionAssumed = false;
 			this.isConnected = false;
+			
+			// Retry connection
+			this.startRetryTimeout();
 		}, 500);
 	}
 	
@@ -142,7 +134,6 @@ export class ConnectionAliveService implements OnDestroy {
 	public startRetryTimeout() {
 		// Wait 5 seconds and retry connection
 		this.retryTimeout = setTimeout(() => {
-			console.log('retry');
 			// If is normally not necessary since retry timeout is only called when connection is closed
 			// it's here for safety, in order to really avoid double connections
 			if(!this.isConnected)

@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserService } from '../../_services/user.service';
 import { UtilsService } from '../../_services/utils.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
+import { ConnectionAliveService } from '../../_services/connection.service';
 import { TranslateService } from '@ngx-translate/core';
 
 import * as parseUrl from 'url-parse';
@@ -46,7 +47,8 @@ export class GroupChatComponent implements OnInit {
 		private userService: UserService,
 		private utilsService: UtilsService,
 		private router: Router,
-		private formBuilder: FormBuilder
+		private formBuilder: FormBuilder,
+		private connectionAliveService: ConnectionAliveService
 	) {
 		// Get user token and userId from user service
 		this.userToken = this.userService.getToken();
@@ -59,11 +61,26 @@ export class GroupChatComponent implements OnInit {
 		
 		// Get current groupId
 		this.groupId = this.router.url.split('/')[2];
+		
+		// Listen to connection lost event
+		this.connectionAliveService.connectionLost.subscribe((res) => {
+			// If connection is lost, close pad socket connection
+			console.log('chat event: connection lost');
+			if (this.chatSocket)
+				this.chatSocket.close();
+		});
+		
+		// Listen to connection reconnected event
+		this.connectionAliveService.connectionReconnected.subscribe((res) => {
+			console.log('chat event: reconnected');
+			// If connection is lost, reconnect pad socket
+			this.initializeChatSocket();
+		});
 	}
 	
 	ngOnInit() {
 		// Initialize chat
-		this.initalizeChatSocket();
+		this.initializeChatSocket();
 	}
 	
 	/*
@@ -71,8 +88,7 @@ export class GroupChatComponent implements OnInit {
 	 *        First do get request in order to get chat room information (including past messages),
 	 *        then obtain who is online and initialize socker listener (onOpen, onMessage).
 	 */
-	private initalizeChatSocket() {
-		
+	private initializeChatSocket() {
 		// Get all existing messages in chat room
 		this.httpManagerService.get('/json/chat/room/' + this.groupId).subscribe(res => {
 			
@@ -101,7 +117,7 @@ export class GroupChatComponent implements OnInit {
 			this.chatSocket = new WebSocket(protocol + parsed.host + '/socket/chat/'+res.chatRoomId+'/'+this.userToken);
 			
 			// WebSocket connection was established
-			this.chatSocket.onopen = function () {
+			this.chatSocket.onopen = (event) => {
 				// Send online status message
 				this.chatSocket.send(JSON.stringify({
 					'type': C.CHATMSG_ONLINE,
@@ -110,12 +126,12 @@ export class GroupChatComponent implements OnInit {
 				
 				// Start mutation observer to check if alert was added
 				this.startMutationObserver();
-			}.bind(this);
+			};
 			
 			// New Websocket message comes in
-			this.chatSocket.onmessage = function (e) {
+			this.chatSocket.onmessage = (event) => {
 				// Parse message from server
-				var msg = JSON.parse(e.data);
+				var msg = JSON.parse(event.data);
 				
 				// If it's a normal message, add tag to mention
 				if (msg.type == C.CHATMSG_DEFAULT) {
@@ -131,15 +147,12 @@ export class GroupChatComponent implements OnInit {
 						this.messages.push(msg);
 					});
 				}
-			}.bind(this);
+			};
 			
 			// WebSocket connection was closed from server
-			this.chatSocket.onclose = function(e) {
-				// If chat socket was not closed actively (on destroy), inform user that
-				// socket is broken, ask for reload and freeze chat
-				/*if(!this.manualClose)
-					this.connectionLostMessage();*/
-			}.bind(this);
+			this.chatSocket.onclose = (event) => {
+				//console.log(event);
+			};
 			
 			// Scroll down
 			this.scrollDown();

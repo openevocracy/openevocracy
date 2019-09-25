@@ -1,10 +1,12 @@
 // General libraries
-var _ = require('underscore');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
+const _ = require('underscore');
+const db = require('../database').db;
+const ObjectId = require('mongodb').ObjectID;
 
 // Own references
-var C = require('../../shared/constants').C;
+const C = require('../../shared/constants').C;
+const utils = require('../utils');
+const groups = require('./groups');
 
 // NOTE Currently not in use
 // called if ratings are queried, responds with rating from database
@@ -35,25 +37,28 @@ exports.count = function(req, res) {
  * desc: Save rating
  */
 exports.rate = function(req, res) {
-	var ratedUserId = ObjectId(req.body.ratedUserId); // The user who was rated
-	var groupId = ObjectId(req.body.groupId);
-	var userId = ObjectId(req.user._id);
-	console.log(ratedUserId, groupId, userId);
-	var type = parseInt(req.body.type, 10);
-	var score = parseInt(req.body.score, 10);
+	const ratedUserId = ObjectId(req.body.ratedUserId);  // The user who was rated
+	const groupId = ObjectId(req.body.groupId);
+	const userId = ObjectId(req.user._id);
+	const type = parseInt(req.body.type, 10);
+	const score = parseInt(req.body.score, 10);
 	
-	// Return 402: score is not between 1 and 5
-	if(score < 1 || score > 5) {
-		res.sendStatus(402);
-		return;
-	}
-    
-	db.collection('ratings').updateAsync(
-		{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type },
-		{ $set: { 'score': score } }, { upsert: true })
-	.then(function(rating) {
-		return true;
-	}).then(res.json.bind(res));
+	// Check if request is valid and store data
+	groups.getGroupMembersAsync(groupId).then((members) => {
+		// Check if user is member of group, otherwise reject
+		const member = _.findWhere(members, { 'userId': userId });
+		if (_.isUndefined(member))
+			return utils.rejectPromiseWithMessage(403, 'FORBIDDEN');
+			
+		// Check if score is between 1 and 5
+		if(score < 1 || score > 5)
+			return utils.rejectPromiseWithMessage(400, 'BAD_REQUEST');
+		
+		// Store rating in database
+		return db.collection('ratings').updateAsync(
+				{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type },
+				{ $set: { 'score': score } }, { upsert: true });
+	}).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 /*
