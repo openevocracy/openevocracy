@@ -1,18 +1,20 @@
-var _ = require('underscore');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
-var Promise = require('bluebird');
+// General libraries
+const _ = require('underscore');
+const ObjectId = require('mongodb').ObjectID;
+const Promise = require('bluebird');
 
-var C = require('../../shared/constants').C;
-var utils = require('../utils');
-var pads = require('./pads');
+// Own references
+const C = require('../../shared/constants').C;
+const db = require('../database').db;
+const utils = require('../utils');
+const pads = require('./pads');
 
 /*
  * @desc: Create new proposal
  */
 exports.create = function(req, res) {
-	var topicId = ObjectId(req.body.topicId);
-	var userId = ObjectId(req.body.userId);
+	const topicId = ObjectId(req.body.topicId);
+	const userId = ObjectId(req.body.userId);
 	
 	db.collection('topics').findOneAsync({ '_id': topicId }).then(function(topic) {
 		// Check if topic is at least in proposal stage to create proposal

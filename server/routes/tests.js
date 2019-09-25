@@ -167,7 +167,7 @@ exports.remix_groups = function(req, res) {
         'level': 0,
         'nextDeadline': Date.now()}).
     then(_.partial(fill_topic_participants,tid,10)).
-    then(_.partial(groups.createGroupsAsync,{'_id':tid})).
+    then(_.partial(groups.manage.createGroupsAsync,{'_id':tid})).
     then(_.partial(promiseWhile,
         function condition() {
             return db.collection('topics').findOneAsync({ '_id': tid }, { 'stage': true}).

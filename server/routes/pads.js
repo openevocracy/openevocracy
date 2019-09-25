@@ -1,30 +1,30 @@
 // General libraries
-var _ = require('underscore');
-var Promise = require('bluebird');
-var ObjectId = require('mongodb').ObjectID;
-var db = require('../database').db;
-var pdf = require('phantom-html2pdf');
+const _ = require('underscore');
+const Promise = require('bluebird');
+const ObjectId = require('mongodb').ObjectID;
+const pdf = require('phantom-html2pdf');
 
 // Collaborative libraries for pad synchronization
-var ShareDB = require('sharedb');
-var richText = require('rich-text');
-var WebSocketJSONStream = require('websocket-json-stream');
-var ShareDBAccess = require('sharedb-access');
-var sharedb = require('../database').sharedb;
-var QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
+const ShareDB = require('sharedb');
+const richText = require('rich-text');
+const WebSocketJSONStream = require('websocket-json-stream');
+const ShareDBAccess = require('sharedb-access');
+const sharedb = require('../database').sharedb;
+const QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
 
 // Own references
-var users = require('./users');
-var utils = require('../utils');
+const db = require('../database').db;
+const utils = require('../utils');
+const users = require('./users');
 
 // ShareDB backend and connection
-var backend;
-var connection;
+let backend;
+let connection;
 
 // Pads cache
-var pads_topic_description = {};
-var pads_proposal = {};
-var pads_group = {};
+let pads_topic_description = {};
+let pads_proposal = {};
+let pads_group = {};
 
 /*
  * @desc: Create shareDB connection and define socket events

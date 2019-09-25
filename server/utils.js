@@ -1,7 +1,4 @@
 const _ = require('underscore');
-const rp = require('request-promise');
-const db = require('./database').db;
-const ObjectId = require('mongodb').ObjectID;
 const cfg = require('../shared/config').cfg;
 const fs = require('fs');
 

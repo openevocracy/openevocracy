@@ -1,23 +1,21 @@
-var _ = require('underscore');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
-var Promise = require('bluebird');
-//var requirejs = require('requirejs');
-var fs = Promise.promisifyAll(require('fs'));
-var path = require('path');
-var appRoot = require('app-root-path');
-var AsyncLock = require('async-lock');
-var lock = new AsyncLock();
+// General libraries
+const _ = require('underscore');
+const ObjectId = require('mongodb').ObjectID;
+const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
+const path = require('path');
+const appRoot = require('app-root-path');
+const AsyncLock = require('async-lock');
+const lock = new AsyncLock();
 
-var C = require('../../shared/constants').C;
-//var cfg = requirejs('public/js/setup/configs');
-var cfg = require('../../shared/config').cfg;
-var groups = require('./groups');
-var pads = require('./pads');
-var utils = require('../utils');
-var mail = require('../mail');
-
-var activities = require('./activities');
+// Own references
+const C = require('../../shared/constants').C;
+const cfg = require('../../shared/config').cfg;
+const db = require('../database').db;
+const utils = require('../utils');
+const groups = require('./groups');
+const pads = require('./pads');
+const activities = require('./activities');
 
 function calculateDeadline(nextStage, prevDeadline, levelDuration) {
     // define standard parameter
@@ -51,7 +49,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
     // it will get a default value in calculateDeadline if not set (for testing purposes)
     var prevDeadline = topic.nextDeadline;
     
-    return groups.remixGroupsAsync(topic).then(function(result) {
+    return groups.manage.remixGroupsAsync(topic).then(function(result) {
         var update_set_promise;
         switch(result.nextStage) {
         case C.STAGE_CONSENSUS:
@@ -192,7 +190,7 @@ function manageTopicStateAsync(topic) {
 			// Set the next deadline here, so we can use it in createGroupsAsync.
 			topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
 			
-			return groups.createGroupsAsync(topic).then(function(groups) {
+			return groups.manage.createGroupsAsync(topic).then(function(groups) {
 				var stageStartedEntryName;
 				
 				if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {

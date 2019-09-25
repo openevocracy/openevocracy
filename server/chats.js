@@ -6,11 +6,11 @@ const db = require('./database').db;
 
 // Own references
 const C = require('../shared/constants').C;
-var cfg = require('../shared/config').cfg;
+const cfg = require('../shared/config').cfg;
 const groups = require('./routes/groups');
 const users = require('./routes/users');
 const utils = require('./utils');
-var mail = require('./mail');
+const mail = require('./mail');
 
 // Rooms cache
 let rooms = {};
@@ -91,7 +91,7 @@ function extendUsersAsync(groupId) {
 			return { 
 				'userId': member.userId,
 				'color': member.userColor,
-				'name': groups.generateMemberName(groupId, member.userId)/*,
+				'name': groups.helper.generateMemberName(groupId, member.userId)/*,
 				'isOnline': users.isOnline(user.userId)*/
 			};
 	});

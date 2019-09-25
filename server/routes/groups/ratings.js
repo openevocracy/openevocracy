@@ -1,12 +1,12 @@
 // General libraries
 const _ = require('underscore');
-const db = require('../database').db;
 const ObjectId = require('mongodb').ObjectID;
 
 // Own references
-const C = require('../../shared/constants').C;
-const utils = require('../utils');
-const groups = require('./groups');
+const C = require('../../../shared/constants').C;
+const db = require('../../database').db;
+const utils = require('../../utils');
+const helper = require('./helper');
 
 // NOTE Currently not in use
 // called if ratings are queried, responds with rating from database
@@ -44,7 +44,7 @@ exports.rate = function(req, res) {
 	const score = parseInt(req.body.score, 10);
 	
 	// Check if request is valid and store data
-	groups.getGroupMembersAsync(groupId).then((members) => {
+	helper.getGroupMembersAsync(groupId).then((members) => {
 		// Check if user is member of group, otherwise reject
 		const member = _.findWhere(members, { 'userId': userId });
 		if (_.isUndefined(member))

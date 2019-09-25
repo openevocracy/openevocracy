@@ -1,23 +1,25 @@
-var _ = require('underscore');
-var bcrypt = require('bcrypt');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
-var Promise = require('bluebird');
-var validate = require('validate.js');
+// General libraries
+const _ = require('underscore');
+const bcrypt = require('bcrypt');
+const db = require('../database').db;
+const ObjectId = require('mongodb').ObjectID;
+const Promise = require('bluebird');
+const validate = require('validate.js');
 
-var passportJWT = require("passport-jwt");
-var ExtractJwt = passportJWT.ExtractJwt;
-var JwtStrategy = passportJWT.Strategy;
-var jwt = require('jsonwebtoken');
+// Passport JWT authentification
+const passportJWT = require("passport-jwt");
+const ExtractJwt = passportJWT.ExtractJwt;
+const JwtStrategy = passportJWT.Strategy;
+const jwt = require('jsonwebtoken');
 
-var mail = require('../mail');
-var utils = require('../utils');
-
-var C = require('../../shared/constants').C;
-var cfg = require('../../shared/config').cfg;
+// Own references
+const C = require('../../shared/constants').C;
+const cfg = require('../../shared/config').cfg;
+const mail = require('../mail');
+const utils = require('../utils');
 
 // Initialize jwt authentification
-var jwtOptions = {};
+let jwtOptions = {};
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
 jwtOptions.secretOrKey = ((cfg.DEBUG) ? 'debug' : bcrypt.genSaltSync(8));
 exports.jwtOptions = jwtOptions;
