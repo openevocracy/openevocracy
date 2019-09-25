@@ -15,7 +15,7 @@ exports.C = {
    
    // Rating types 
    RATING_KNOWLEDGE  : 1,
-   RATING_INTEGRATION: 2,
+   RATING_COOPERATION: 2,
    RATING_ENGAGEMENT:  3,
    
    // Chat message types

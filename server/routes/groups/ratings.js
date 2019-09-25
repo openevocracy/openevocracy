@@ -102,7 +102,7 @@ exports.getMemberRatingsAsync = function(ratedUserId, groupId, userId) {
 		{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId }, { '_id': false, 'type': true, 'score': true })
 	.toArrayAsync().then(function(ratings) {
 		// Create array with all rating types
-		const types = [C.RATING_KNOWLEDGE, C.RATING_INTEGRATION, C.RATING_ENGAGEMENT];
+		const types = [C.RATING_KNOWLEDGE, C.RATING_COOPERATION, C.RATING_ENGAGEMENT];
 		// Map through all types
 		return _.map(types, (type) => {
 			// Have a look if rating for current type is present

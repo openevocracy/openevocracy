@@ -32,7 +32,7 @@ export class GroupMembersComponent implements OnInit {
 	
 	public ratingLabels = [
 		{ 'type': C.RATING_KNOWLEDGE, 'label': 'GROUP_RATING_KNOWLEDGE', 'tooltip': 'GROUP_RATING_TOOLTIP_KNOWLEDGE' },
-		{ 'type': C.RATING_INTEGRATION, 'label': 'GROUP_RATING_INTEGRATION', 'tooltip': 'GROUP_RATING_TOOLTIP_INTEGRATION' },
+		{ 'type': C.RATING_COOPERATION, 'label': 'GROUP_RATING_COOPERATION', 'tooltip': 'GROUP_RATING_TOOLTIP_COOPERATION' },
 		{ 'type': C.RATING_ENGAGEMENT, 'label': 'GROUP_RATING_ENGAGEMENT', 'tooltip': 'GROUP_RATING_TOOLTIP_ENGAGEMENT' }
 	];
 
