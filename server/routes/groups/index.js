@@ -1,5 +1,6 @@
-exports.groupvis = require("./groupvis.js");
-exports.manage = require("./manage.js");
-exports.query = require("./query.js");
-exports.ratings = require("./ratings.js");
+exports.groupvis = require("./groupvis");
+exports.manage = require("./manage");
+exports.query = require("./query");
+exports.ratings = require("./ratings");
 exports.helper = require('./helper');
+exports.badges = require('./badges');

@@ -6,16 +6,16 @@
 		</div>
 		<span class="flex-spacer"></span>
 		
-		<button mat-button [ngClass]="{'active': activeTab == 'editor'}" title="{{ 'GROUP_BUTTON_DOCUMENT' | translate }}" [routerLink]="['/group', groupId, 'editor']">
+		<button mat-button [matBadge]="editorBadge" matBadgeColor="warn" [ngClass]="{'active': activeTab == 'editor'}" title="{{ 'GROUP_BUTTON_DOCUMENT' | translate }}" [routerLink]="['/group', groupId, 'editor']">
 			<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_BUTTON_DOCUMENT' | translate }}</span>
 		</button>
-		<button mat-button [ngClass]="{'active': activeTab == 'chat'}" title="{{ 'GROUP_BUTTON_CHAT' | translate }}" [routerLink]="['/group', groupId, 'chat']">
+		<button mat-button [matBadge]="'8'" matBadgeColor="warn" [ngClass]="{'active': activeTab == 'chat'}" title="{{ 'GROUP_BUTTON_CHAT' | translate }}" [routerLink]="['/group', groupId, 'chat']">
 			<span><fa-icon [icon]="faComments"></fa-icon> {{ 'GROUP_BUTTON_CHAT' | translate }}</span>
 		</button>
-		<button mat-button [ngClass]="{'active': activeTab == 'forum'}" title="{{ 'GROUP_BUTTON_FORUM' | translate }}" [routerLink]="['/group', groupId, 'forum']">
+		<button mat-button [matBadge]="'2'" matBadgeColor="warn" [ngClass]="{'active': activeTab == 'forum'}" title="{{ 'GROUP_BUTTON_FORUM' | translate }}" [routerLink]="['/group', groupId, 'forum']">
 			<span><fa-icon [icon]="faComments"></fa-icon> {{ 'GROUP_BUTTON_FORUM' | translate }}</span>
 		</button>
-		<button mat-button [ngClass]="{'active': activeTab == 'members'}" title="{{ 'GROUP_BUTTON_MEMBERS' | translate }}" [routerLink]="['/group', groupId, 'members']">
+		<button mat-button [matBadge]="'&#8288;'" matBadgeColor="warn" [ngClass]="{'active': activeTab == 'members'}" title="{{ 'GROUP_BUTTON_MEMBERS' | translate }}" [routerLink]="['/group', groupId, 'members']">
 			<span><fa-icon [icon]="faUsers"></fa-icon> {{ 'GROUP_BUTTON_MEMBERS' | translate }}</span>
 		</button>
 		<!--<button mat-button (click)="enterFullscreen()" title="{{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}">

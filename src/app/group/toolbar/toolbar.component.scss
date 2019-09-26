@@ -6,3 +6,6 @@
 
 button { height: 38px; margin-top: 12px; }
 button.active { background-color: rgba(255,255,255,0.2); }
+
+.mat-badge-medium.mat-badge-overlap.mat-badge-after .mat-badge-content { right: -6px; }
+.mat-badge-medium.mat-badge-above .mat-badge-content { top: -6px; }

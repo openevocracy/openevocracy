@@ -2,11 +2,11 @@
 const _ = require('underscore');
 const Promise = require('bluebird');
 const ObjectId = require('mongodb').ObjectID;
-const db = require('./database').db;
 
 // Own references
 const C = require('../shared/constants').C;
 const cfg = require('../shared/config').cfg;
+const db = require('./database').db;
 const groups = require('./routes/groups');
 const users = require('./routes/users');
 const utils = require('./utils');
@@ -106,7 +106,7 @@ function extendUsersAsync(groupId) {
 function sendToSocketsInRoom(roomUsers, msg) {
 	_.each(roomUsers, function(user) {
 		// Send message to all users in rooom
-		user.socket.send(JSON.stringify(msg), function(err) {
+		user.socket.send(JSON.stringify(msg), (err) => {
 			if (!_.isUndefined(err))
 				console.error(err);
 		});
@@ -134,10 +134,10 @@ function removeUserFromRoom(roomUsers, userId) {
  *    userId: the id of the currently connecting user
  */
 function joinChatRoom(socket, chatRoomId, userId) {
-	var room = rooms[chatRoomId];
+	let room = rooms[chatRoomId];
 		
 	// Add current user socket
-	var user = utils.findWhereObjectId(room.users, {'userId': userId});
+	let user = utils.findWhereObjectId(room.users, {'userId': userId});
 	user.socket = socket;
 	
 	// When socket receives a message
@@ -190,16 +190,7 @@ exports.startChatServer = function(wss) {
 			// Add userId to ws connection
 			ws.userId = userId;
 		});
-		
-		// Set socket alive initially and every time a pong is arriving
-		/*ws.isAlive = true;
-		ws.on('pong', function() {
-			ws.isAlive = true;
-		});*/
 	});
-	
-	// Initalize ping interval
-	//utils.pingInterval(wss);
 };
 
 exports.sendMailToMentionedUsers = function(req, res) {

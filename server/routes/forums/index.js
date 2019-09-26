@@ -1,6 +1,6 @@
-exports.helper = require("./helper.js");
-exports.misc = require("./misc.js");
-exports.comment = require("./comment.js");
-exports.post = require("./post.js");
-exports.thread = require("./thread.js");
+exports.helper = require("./helper");
+exports.misc = require("./misc");
+exports.comment = require("./comment");
+exports.post = require("./post");
+exports.thread = require("./thread");
 exports.forum = require('./forum');

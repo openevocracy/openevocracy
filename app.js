@@ -214,10 +214,7 @@ app.patch('/json/group/forum/comment/:id', auth(), forums.comment.edit);
 // @desc: Delete comment in forum thread
 app.delete('/json/group/forum/comment/:id', auth(), forums.comment.delete);
 
-
-// ###################
-// ###   C H A T   ###
-// ###################
+/* Chat */
 
 // @desc: Get chat room
 app.get('/json/chat/room/:id', auth(), chats.queryChatRoomMessages);
@@ -225,9 +222,7 @@ app.get('/json/chat/room/:id', auth(), chats.queryChatRoomMessages);
 // @desc: Send mail to all mentioned users
 app.post('/json/chat/mentioned/', auth(), chats.sendMailToMentionedUsers);
 
-// #####################
-// ### R A T I N G S ###
-// #####################
+/* Ratings */
 
 app.get('/json/ratings/count', auth(), groups.ratings.count);
 app.get('/json/ratings/:id', auth(), groups.ratings.query);
@@ -235,9 +230,7 @@ app.get('/json/ratings/:id', auth(), groups.ratings.query);
 // @desc: Store a new rating value
 app.post('/json/ratings/rate', auth(), groups.ratings.rate);
 
-// #############################
-// ###   G R O U P - V I S   ###
-// #############################
+/* Group vis */
 
 // @desc: Get group vis data to visualize topic hierarchy
 app.get('/json/groupvis/:id', auth(), groups.groupvis.query);
@@ -348,10 +341,12 @@ httpServer.listen(app.get('port'), function() {
 let wssPad = new WebSocket.Server({ noServer: true });
 let wssChat = new WebSocket.Server({ noServer: true });
 let wssAlive = new WebSocket.Server({ noServer: true });
+let wssBadge = new WebSocket.Server({ noServer: true });
 
 pads.startPadServer(wssPad);
 chats.startChatServer(wssChat);
 users.startAliveServer(wssAlive, [wssPad, wssChat]);
+groups.badges.startGroupBadgeServer(wssBadge);
 
 // Show unhandled rejection error (UnhandledPromiseRejectionWarning)
 process.on('unhandledRejection', (reason, p) => {
@@ -373,6 +368,10 @@ httpServer.on('upgrade', function upgrade(request, socket, head) {
 	} else if (connectionType === 'alive') {
 		wssAlive.handleUpgrade(request, socket, head, function done(ws) {
 			wssAlive.emit('connection', ws, request);
+		});
+	} else if (connectionType === 'badge') {
+		wssAlive.handleUpgrade(request, socket, head, function done(ws) {
+			wssBadge.emit('connection', ws, request);
 		});
 	} else {
 		socket.destroy();

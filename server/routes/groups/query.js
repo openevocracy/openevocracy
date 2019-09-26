@@ -12,6 +12,7 @@ const pads = require('../pads');
 const users = require('../users');
 const ratings = require('./ratings');
 const helper = require('./helper');
+const badge = require('./badge');
 
 /**
  * @desc: Gets all data necessary for the group toolbar
@@ -38,11 +39,16 @@ exports.toolbar = function(req, res) {
 	const pad_promise = db.collection('pads_group')
 		.findOneAsync({ 'groupId': groupId }, { 'expiration': true });
 		
-	Promise.join(group_promise, topic_promise, pad_promise).spread((group, topic, pad) => {
+	// Get current badge status
+	const badge_promise = badge.getBadgeStatusAsync(userId, groupId);
+		
+	Promise.join(group_promise, topic_promise, pad_promise, badge_promise)
+		.spread((group, topic, pad, badge) => {
 		return {
 			'groupName': group.name,
 			'topicTitle': topic.title,
-			'expiration': pad.expiration
+			'expiration': pad.expiration,
+			'badge': badge
 		};
 	}).then(res.json.bind(res));
 };

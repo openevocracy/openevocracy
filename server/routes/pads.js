@@ -15,6 +15,7 @@ const QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtm
 // Own references
 const db = require('../database').db;
 const utils = require('../utils');
+const groups = require('./groups');
 const users = require('./users');
 
 // ShareDB backend and connection
@@ -58,12 +59,6 @@ exports.startPadServer = function(wss) {
 			// Add userId to ws connection
 			ws.userId = userId;
 		});
-		
-		// Set socket alive initially and every time a pong is arriving
-		/*ws.isAlive = true;
-		ws.on('pong', function() {
-			ws.isAlive = true;
-		});*/
 	});
 	
 	// Middleware to hook into connection process
@@ -80,9 +75,6 @@ exports.startPadServer = function(wss) {
 	
 	// Establish connection to shareDB
 	connection = backend.connect();
-	
-	// Initalize ping interval
-	//utils.pingInterval(wss);
 };
 
 /*
@@ -158,13 +150,14 @@ function initializeAccessControl() {
 		return true;
 	});
 	backend.allowUpdate('docs_group', function(docId, oldDoc, newDoc, ops, session) {
+		let currentPad;
 		// If user is member of group and document is not expired
 		if (pads_group[docId]) {
-			// If pad is already in cache, check condition
-			return checkOwnerAndExpirationGroup(session, pads_group[docId]);
+			// If pad is already in cache, just use it
+			currentPad = pads_group[docId];
 		} else {
-			// If pad is not in cache, get it from database, store it in cache and check condition
-			return Promise.resolve(db.collection('pads_group').findOneAsync({'docId': ObjectId(docId)}, { 'groupId': true, 'expiration': true })
+			// If pad is not in cache, get it from database, store it in cache and use it
+			currentPad = Promise.resolve(db.collection('pads_group').findOneAsync({'docId': ObjectId(docId)}, { 'groupId': true, 'expiration': true })
 				.then(function(pad) {
 					var members_promise = db.collection('group_relations').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
 					return Promise.join(pad, members_promise);
@@ -173,9 +166,17 @@ function initializeAccessControl() {
 					pad.ownerIds = _.pluck(members, 'userId');
 					// Store pad in cache
 					pads_group[docId] = pad;
-					// Check condition
-					return checkOwnerAndExpirationGroup(session, pad);
+					// Return pad
+					return pad;
 			}));
+		}
+		
+		// Check if user is owner and doc is not expired, finally return
+		if (checkOwnerAndExpirationGroup(session, currentPad)) {
+			// Inform group toolbar badge about update
+			groups.badges.sendEditorUpdate(session.userId, currentPad);
+			// Return true and allow update
+			return true;
 		}
 	});
 }
