@@ -328,6 +328,11 @@ app.all('/*', function(req, res, next) {
 // ### S E R V E R ###
 // ###################
 
+// Show unhandled rejection error (UnhandledPromiseRejectionWarning)
+process.on('unhandledRejection', (reason, p) => {
+	console.log('UnhandledPromiseRejectionWarning at ', reason);
+});
+
 // Is this necessary?
 app.use(express.static('node_modules/quill/dist'));
 
@@ -345,13 +350,8 @@ let wssBadge = new WebSocket.Server({ noServer: true });
 
 pads.startPadServer(wssPad);
 chats.startChatServer(wssChat);
-users.startAliveServer(wssAlive, [wssPad, wssChat]);
 groups.badges.startGroupBadgeServer(wssBadge);
-
-// Show unhandled rejection error (UnhandledPromiseRejectionWarning)
-process.on('unhandledRejection', (reason, p) => {
-	console.log('UnhandledPromiseRejectionWarning at ', reason);
-});
+users.startAliveServer(wssAlive, [wssPad, wssChat]);
 
 httpServer.on('upgrade', function upgrade(request, socket, head) {
 	var queryArr = request.url.split("/socket/")[1].split("/");
@@ -365,13 +365,13 @@ httpServer.on('upgrade', function upgrade(request, socket, head) {
 		wssChat.handleUpgrade(request, socket, head, function done(ws) {
 			wssChat.emit('connection', ws, request);
 		});
+	} else if (connectionType === 'badge') {
+		wssBadge.handleUpgrade(request, socket, head, function done(ws) {
+			wssBadge.emit('connection', ws, request);
+		});
 	} else if (connectionType === 'alive') {
 		wssAlive.handleUpgrade(request, socket, head, function done(ws) {
 			wssAlive.emit('connection', ws, request);
-		});
-	} else if (connectionType === 'badge') {
-		wssAlive.handleUpgrade(request, socket, head, function done(ws) {
-			wssBadge.emit('connection', ws, request);
 		});
 	} else {
 		socket.destroy();

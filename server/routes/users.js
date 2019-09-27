@@ -552,7 +552,6 @@ exports.getNotifyUserIdsForEntity = function(entityId) {
 exports.startAliveServer = function(wss, websockets) {
 	// Initialize stream and listener for WebSocket server
 	wss.on('connection', function(ws, req) {
-		console.log('connected');
 		
 		// Get user token from websocket url
 		const userToken = req.url.split("/socket/alive/")[1];
@@ -604,7 +603,6 @@ function startPingInterval(wssAlive, websockets) {
 			// If websocket is still not alive after 30 seconds, close all websockets
 			if (!ws.isAlive) {
 				// Terminate all other websockets (wssPad, wssChat) using userId and remove user from online list
-				console.log('terminate connection');
 				terminateUserConnections(websockets, userId);
 				
 				// Finally terminate wssAlive websocket and return
@@ -628,10 +626,8 @@ function terminateUserConnections(websockets, userId) {
 		// Find connection which is dead using userId
 		const wsConnection = utils.findWhereObjectId(wss.clients, {'userId': userId});
 		// Terminate if connection was found
-		if (wsConnection) {
-			const terminated = wsConnection.terminate();
-			console.log('terminated', terminated);
-		}
+		if (wsConnection)
+			wsConnection.terminate();
 	});
 	
 	// Remove user from online list

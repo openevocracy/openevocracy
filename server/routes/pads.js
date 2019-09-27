@@ -150,16 +150,16 @@ function initializeAccessControl() {
 		return true;
 	});
 	backend.allowUpdate('docs_group', function(docId, oldDoc, newDoc, ops, session) {
-		let currentPad;
+		let currentPad_promise;
 		// If user is member of group and document is not expired
 		if (pads_group[docId]) {
 			// If pad is already in cache, just use it
-			currentPad = pads_group[docId];
+			currentPad_promise = Promise.resolve(pads_group[docId]);
 		} else {
 			// If pad is not in cache, get it from database, store it in cache and use it
-			currentPad = Promise.resolve(db.collection('pads_group').findOneAsync({'docId': ObjectId(docId)}, { 'groupId': true, 'expiration': true })
+			currentPad_promise = db.collection('pads_group').findOneAsync({'docId': ObjectId(docId)}, { 'groupId': true, 'expiration': true })
 				.then(function(pad) {
-					var members_promise = db.collection('group_relations').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
+					const members_promise = db.collection('group_relations').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
 					return Promise.join(pad, members_promise);
 				}).spread(function(pad, members) {
 					// Add owners to pad
@@ -168,16 +168,20 @@ function initializeAccessControl() {
 					pads_group[docId] = pad;
 					// Return pad
 					return pad;
-			}));
+			});
 		}
 		
-		// Check if user is owner and doc is not expired, finally return
-		if (checkOwnerAndExpirationGroup(session, currentPad)) {
-			// Inform group toolbar badge about update
-			groups.badges.sendEditorUpdate(session.userId, currentPad);
-			// Return true and allow update
-			return true;
-		}
+		return currentPad_promise.then((currentPad) => {
+			// Check if user is owner and doc is not expired, finally return
+			if (checkOwnerAndExpirationGroup(session, currentPad)) {
+				// Inform group toolbar badge about update
+				groups.badges.sendEditorUpdate(session.userId, currentPad);
+				// Return true and allow update
+				return true;
+			}
+			
+			return false;
+		});
 	});
 }
 
