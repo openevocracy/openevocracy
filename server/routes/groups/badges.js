@@ -55,6 +55,9 @@ function incrementBadgeStatusAsync(userId, groupId, entity) {
 	return db.collection('group_badges').updateAsync(query, { $inc: entity }, { 'upsert': true });
 }
 
+/**
+ * @desc: Starts the socket server for toolbar badges
+ */
 exports.startGroupBadgeServer = function(wss) {
 	wss.on('connection', function(ws, req) {
 		const vars = req.url.split("/socket/badge/")[1].split("/");
@@ -93,7 +96,53 @@ exports.startGroupBadgeServer = function(wss) {
 	});
 };
 
-exports.sendChatUpdate = function(userId, chatRoomId) {
+/**
+ * @desc: Update the editor badge in toolbar, every time a delta is sent from any member
+ * @note: This function is called very often, when a member starts writing something,
+ * 		 therefore, it is very important to reduce database operations as much as possible
+ */
+exports.updateEditorBadge = function(userId, pad) {
+	// Get group and all members, but remove self
+	const groupId = pad.groupId;
+	const memberIds = utils.withoutObjectId(pad.ownerIds, userId);
+	
+	memberIds.forEach((memberId) => {
+		// Try to load badge status from cache
+		const badgeStatusFromCache = getFromCache(memberId, groupId);
+		
+		// If badge status is not in cache, add it to cache, to speed up the next function call
+		let badgeStatus_promise = Promise.resolve(badgeStatusFromCache);
+		if (!_.isUndefined(badgeStatusFromCache)) {
+			badgeStatus_promise = getBadgeStatusAsync(userId, groupId).then((badge) => {
+				// Push badge status to badge cache
+				badgeCache.push(badge);
+			});
+		}
+		
+		badgeStatus_promise.then((badgeStatus) => {
+			// If editorUnseen is already true, return here and save socket and hard disk
+			if (badgeStatus.editorUnseen == 1)
+				return;
+			
+			// If not, set editorUnseen to 1
+			badgeStatus.editorUnseen = 1;
+			
+			// If socket is available on cached status, send message through socket
+			if (!_.isUndefined(badgeStatus.socket)) {
+				// Send socket message to each member of the group
+				badgeStatus.socket.send(JSON.stringify({ 'editorUnseen': badgeStatus.editorUnseen }));
+			}
+			
+			// Store new badge state in database
+			updateBadgeStatusAsync(memberId, groupId, { 'editorUnseen': badgeStatus.editorUnseen });
+		});
+	});
+};
+
+/**
+ * @desc: Update the chat badge in toolbar, every time a chat message comes in chat room
+ */
+exports.updateChatBadge = function(userId, chatRoomId) {
 	db.collection('groups')
 		.findOneAsync({ 'chatRoomId': chatRoomId }, { '_id': true }).then((group) => {
 			const relations_promise = groups.helper.getGroupMembersAsync(group._id);
@@ -102,14 +151,14 @@ exports.sendChatUpdate = function(userId, chatRoomId) {
 		const allMemberIds = _.pluck(relations, 'userId');
 		// Remove own user
 		const memberIds = utils.withoutObjectId(allMemberIds, userId);
-		
-		console.log(memberIds);
 	
 		memberIds.forEach((memberId) => {
 			// Try to load badge status from cache
 			const badgeStatus = getFromCache(memberId, groupId);
-			// Add 1 to chatUnseen
-			badgeStatus.chatUnseen += 1;
+			
+			// Add 1 to forumUnseen, if badgeStatus is available
+			if (!_.isUndefined(badgeStatus))
+				badgeStatus.chatUnseen += 1;
 			
 			// If socket is available, send message through socket
 			if (!_.isUndefined(badgeStatus.socket)) {
@@ -117,39 +166,53 @@ exports.sendChatUpdate = function(userId, chatRoomId) {
 				badgeStatus.socket.send(JSON.stringify({ 'chatUnseen': badgeStatus.chatUnseen }));
 			}
 			
-			// Store new badge state in database
+			// Increment badge state in database
 			incrementBadgeStatusAsync(memberId, groupId, { 'chatUnseen': 1 });
 		});
 	
 	});
 };
 
-exports.sendEditorUpdate = function(userId, pad) {
-	// Get group and all members, but remove self
-	const groupId = pad.groupId;
-	const memberIds = utils.withoutObjectId(pad.ownerIds, userId);
-	
-	memberIds.forEach((memberId) => {
+/**
+ * @desc: Update the forum badge in toolbar, every time a post is created
+ */
+exports.updateForumBadge = function(userId, groupId) {
+	groups.helper.getGroupMembersAsync(groupId).map((rel) => {
+		// Don't send something, when member equals own user
+		if (utils.equalId(rel.userId, userId))
+			return;
+		
 		// Try to load badge status from cache
-		const badgeStatus = getFromCache(memberId, groupId);
+		const badgeStatus = getFromCache(rel.userId, groupId);
+		
+		// Add 1 to forumUnseen, if badgeStatus is available
+		if (!_.isUndefined(badgeStatus))
+			badgeStatus.forumUnseen += 1;
 		
 		// If socket is available, send message through socket
 		if (!_.isUndefined(badgeStatus.socket)) {
 			// Send socket message to each member of the group
-			badgeStatus.socket.send(JSON.stringify({ 'editorUnseen': 1 }));
+			badgeStatus.socket.send(JSON.stringify({ 'forumUnseen': badgeStatus.forumUnseen }));
 		}
 		
-		// If badge is cached and editorUnseen is already true, return here and save hard disk
-		if (!_.isUndefined(badgeStatus) && (badgeStatus.editorUnseen == 1))
-			return;
-		
-		// Set editorUnseen to 1
-		badgeStatus.editorUnseen = 1;
-		// If previous condition is not met, store new badge state in database
-		updateBadgeStatusAsync(memberId, groupId, { 'editorUnseen': 1 });
+		// Increment badge state in database
+		incrementBadgeStatusAsync(rel.userId, groupId, { 'forumUnseen': 1 });
 	});
 };
 
+/**
+ * @desc: Update the members badge in toolbar, when group is created initially
+ * @note: For every member in the group, the function is called seperately
+ */
+exports.updateMembersBadge = function(memberId, groupId) {
+	// Just set value in database
+	return updateBadgeStatusAsync(memberId, groupId, { 'membersUnseen': 1 });
+};
+
+/**
+ * @desc: When a group member clicks on a tab (and has seen the new content),
+ * 		 remove badge and reset values in database
+ */
 function toolbarTabVisited(userId, groupId, badgeToUpdate) {
 	// Define condition to check values from client
 	const check = ['editor', 'chat', 'forum', 'members'].includes(badgeToUpdate);

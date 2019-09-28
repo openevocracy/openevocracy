@@ -15,6 +15,7 @@ const pads = require('../pads');
 const users = require('../users');
 const activities = require('../activities');
 const ratings = require('./ratings');
+const badges = require('./badges');
 const helper = require('./helper');
 
 /**
@@ -135,6 +136,9 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 			'lastActivity': -1
 		};
 		const groupRelations_promise = db.collection('group_relations').insertAsync(insert);
+		
+		// Set members badge
+		badges.updateMembersBadge(rel.userId, groupId);
 		
 		// Return promises
 		return Promise.join(enableNotify_promise, groupRelations_promise);

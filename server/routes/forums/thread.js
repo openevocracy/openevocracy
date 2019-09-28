@@ -51,9 +51,11 @@ exports.create = function(req, res) {
 	// Store main post in database
 	const post_promise = db.collection('forum_posts').insertAsync(post);
 	
+	// Get group
+	const group_promise = db.collection('groups').findOneAsync({ 'forumId': forumId });
+	
 	// Send email to all users who are watching the thread, exept the author
-	const notifyUsers_promise = db.collection('groups')
-		.findOneAsync({ 'forumId': forumId }, { 'name': true }).then((group) => {
+	const notifyUsers_promise = group_promise.then((group) => {
 			
 			// Build link to forum and thread
 			const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
@@ -76,9 +78,15 @@ exports.create = function(req, res) {
 	// Add author to email notification for this thread
 	const notifyAddAuthor_promise = users.enableEmailNotifyAsync(authorId, threadId);
 	
+	// Update toolbar badge
+	const updateBadge_promise = group_promise.then((group) => {
+		return groups.badges.updateForumBadge(authorId, group._id);
+	});
+	
 	// Wait for promises and send response
-	Promise.join(thread_promise, post_promise, notifyUsers_promise, notifyAddAuthor_promise).spread(function(thread, post) {
-		return { 'thread': thread, 'post': post };
+	Promise.join(thread_promise, post_promise, notifyUsers_promise, notifyAddAuthor_promise, updateBadge_promise)
+		.spread(function(thread, post) {
+			return { 'thread': thread, 'post': post };
 	}).then(res.json.bind(res));
 };
 

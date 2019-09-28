@@ -42,10 +42,12 @@ exports.create = function(req, res) {
 		const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
 		const thread_promise = db.collection('forum_threads')
 			.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
+			
+		// Get group
+		const group_promise = db.collection('groups').findOneAsync({ 'forumId': forumId });
 		
 		// Send email to all users who are watching the thread, exept the author
-		const notifyUsers_promise = db.collection('groups')
-			.findOneAsync({ 'forumId': forumId }, { 'name': true }).then((group) => {
+		const notifyUsers_promise = group_promise.then((group) => {
 				
 				// Build link to thread
 				const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
@@ -70,7 +72,12 @@ exports.create = function(req, res) {
 			return _.isNull(status) ? users.enableEmailNotifyAsync(authorId, threadId) : null;
 		});
 		
-		Promise.all([createPost_promise, thread_promise, notifyUsers_promise, notifyAddUser_promise])
+		// Update toolbar badge
+		const updateBadge_promise = group_promise.then((group) => {
+			return groups.badges.updateForumBadge(authorId, group._id);
+		});
+		
+		Promise.all([createPost_promise, thread_promise, notifyUsers_promise, notifyAddUser_promise, updateBadge_promise])
 			.then(res.json.bind(res));
 		
 	}).catch(utils.isOwnError, utils.handleOwnError(res));

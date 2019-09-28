@@ -162,7 +162,7 @@ function joinChatRoom(socket, chatRoomId, userId) {
 			db.collection('chat_messages').insertAsync(msg);
 			
 			// Update toolbar badge
-			groups.badges.sendChatUpdate(userId, chatRoomId);
+			groups.badges.updateChatBadge(userId, chatRoomId);
 		}
 		
 		// Send message to all users in room

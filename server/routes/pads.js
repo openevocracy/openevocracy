@@ -175,7 +175,7 @@ function initializeAccessControl() {
 			// Check if user is owner and doc is not expired, finally return
 			if (checkOwnerAndExpirationGroup(session, currentPad)) {
 				// Inform group toolbar badge about update
-				groups.badges.sendEditorUpdate(session.userId, currentPad);
+				groups.badges.updateEditorBadge(session.userId, currentPad);
 				// Return true and allow update
 				return true;
 			}
