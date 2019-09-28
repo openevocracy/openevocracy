@@ -47,6 +47,14 @@ function updateBadgeStatusAsync(userId, groupId, entity) {
 	return db.collection('group_badges').updateAsync(query, { $set: entity }, { 'upsert': true });
 }
 
+/**
+ * @desc: Increment badge status in database
+ */
+function incrementBadgeStatusAsync(userId, groupId, entity) {
+	const query = { 'userId': userId, 'groupId': groupId };
+	return db.collection('group_badges').updateAsync(query, { $inc: entity }, { 'upsert': true });
+}
+
 exports.startGroupBadgeServer = function(wss) {
 	wss.on('connection', function(ws, req) {
 		const vars = req.url.split("/socket/badge/")[1].split("/");
@@ -82,6 +90,37 @@ exports.startGroupBadgeServer = function(wss) {
 				badgeCache = removeFromCache(userId, groupId);
 			});
 		});
+	});
+};
+
+exports.sendChatUpdate = function(userId, chatRoomId) {
+	db.collection('groups')
+		.findOneAsync({ 'chatRoomId': chatRoomId }, { '_id': true }).then((group) => {
+			const relations_promise = groups.helper.getGroupMembersAsync(group._id);
+			return Promise.join(group._id, relations_promise);
+	}).spread((groupId, relations) => {
+		const allMemberIds = _.pluck(relations, 'userId');
+		// Remove own user
+		const memberIds = utils.withoutObjectId(allMemberIds, userId);
+		
+		console.log(memberIds);
+	
+		memberIds.forEach((memberId) => {
+			// Try to load badge status from cache
+			const badgeStatus = getFromCache(memberId, groupId);
+			// Add 1 to chatUnseen
+			badgeStatus.chatUnseen += 1;
+			
+			// If socket is available, send message through socket
+			if (!_.isUndefined(badgeStatus.socket)) {
+				// Send socket message to each member of the group
+				badgeStatus.socket.send(JSON.stringify({ 'chatUnseen': badgeStatus.chatUnseen }));
+			}
+			
+			// Store new badge state in database
+			incrementBadgeStatusAsync(memberId, groupId, { 'chatUnseen': 1 });
+		});
+	
 	});
 };
 
@@ -123,12 +162,13 @@ function toolbarTabVisited(userId, groupId, badgeToUpdate) {
 	
 	// Load badge status from cache and update
 	const badgeStatus = getFromCache(userId, groupId);
-	badgeStatus[key] = null;
+	badgeStatus[key] = 0;
 	
 	// Store value in database
-	updateBadgeStatusAsync(userId, groupId, { [key]: null });
+	updateBadgeStatusAsync(userId, groupId, { [key]: 0 });
 }
 
-exports.manageGroupAction = function() {
+exports.sendUpdate = function() {
+	
 	
 };

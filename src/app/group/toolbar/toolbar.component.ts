@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
 
 import { HttpManagerService } from '../../_services/http-manager.service';
@@ -16,7 +16,7 @@ import { faTimes, faExpandArrowsAlt, faComments, faUsers, faFile } from '@fortaw
 	templateUrl: './toolbar.component.html',
 	styleUrls: ['./toolbar.component.scss']
 })
-export class GroupToolbarComponent implements OnInit {
+export class GroupToolbarComponent implements OnInit, OnDestroy {
 	
 	public activeTab: string = 'editor';
 	public userToken;
@@ -53,7 +53,7 @@ export class GroupToolbarComponent implements OnInit {
 		this.router.events.subscribe((event: Event) => {
 			// If navigation starts, contains source route
 			if (event instanceof NavigationStart) {
-				// Clear badges view, depending on current tab
+				// Clear badges database value
 				this.clearBadgeDatabase();
          }
 			
@@ -61,7 +61,7 @@ export class GroupToolbarComponent implements OnInit {
 			if (event instanceof NavigationEnd) {
 				// Get current path and define active tab
 				this.activeTab = this.router.url.split('/')[3];
-				// Clear badges database value, depending on current tab
+				// Clear badges view
 				this.clearBadgeView();
          }
 		});
@@ -99,6 +99,11 @@ export class GroupToolbarComponent implements OnInit {
 		});
 	}
 	
+	ngOnDestroy() {
+		// Clear badges database value
+		this.clearBadgeDatabase();
+	}
+	
 	private initBadgeSocket() {
 		// Open WebSocket connection
 		const parsed = parseUrl(origin);
@@ -133,17 +138,18 @@ export class GroupToolbarComponent implements OnInit {
 	}
 	
 	private updateBadge(el) {
+		console.log('el', el);
 		if (el.hasOwnProperty('editorUnseen') && this.activeTab != 'editor')
-			this.editorBadge = el.editorUnseen;
+			this.editorBadge = (el.editorUnseen == 0) ? null : el.editorUnseen;
 			
 		if (el.hasOwnProperty('chatUnseen') && this.activeTab != 'chat')
-			this.chatBadge = el.chatUnseen;
+			this.chatBadge = (el.chatUnseen == 0) ? null : el.chatUnseen;
 			
 		if (el.hasOwnProperty('forumUnseen') && this.activeTab != 'forum')
-			this.forumBadge = el.forumUnseen;
+			this.forumBadge = (el.forumUnseen == 0) ? null : el.forumUnseen;
 			
 		if (el.hasOwnProperty('membersUnseen') && this.activeTab != 'members')
-			this.membersBadge = el.membersUnseen;
+			this.membersBadge = (el.membersUnseen == 0) ? null : el.membersUnseen;
 	}
 	
 	/**

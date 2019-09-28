@@ -134,6 +134,8 @@ function removeUserFromRoom(roomUsers, userId) {
  *    userId: the id of the currently connecting user
  */
 function joinChatRoom(socket, chatRoomId, userId) {
+	chatRoomId = ObjectId(chatRoomId);
+	
 	let room = rooms[chatRoomId];
 		
 	// Add current user socket
@@ -147,17 +149,20 @@ function joinChatRoom(socket, chatRoomId, userId) {
 		// Create message id (to have timestamp of message)
 		msg._id = ObjectId();
 		// Append chat room id and user id
-		msg.chatRoomId = ObjectId(chatRoomId);
+		msg.chatRoomId = chatRoomId;
 		msg.userId  = userId;
 		// Strip html tags
 		msg.text = msg.text.replace(/(<([^>]+)>)/ig, '');
 		
-		// Save only default messages in cache/database
+		// Some things which are only evaluated for default messages
 		if (msg.type == C.CHATMSG_DEFAULT) {
 			// Save in cache
 			room.messages.push(msg);
 			// Save in database
 			db.collection('chat_messages').insertAsync(msg);
+			
+			// Update toolbar badge
+			groups.badges.sendChatUpdate(userId, chatRoomId);
 		}
 		
 		// Send message to all users in room
