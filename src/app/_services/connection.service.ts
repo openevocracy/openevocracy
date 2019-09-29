@@ -140,5 +140,4 @@ export class ConnectionAliveService implements OnDestroy {
 				this.init();
 		}, 5000);
 	}
-
 }

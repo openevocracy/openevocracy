@@ -10,6 +10,7 @@
 	"HEADER_MAINMENU_LOGOUT": "Logout",
 	"HEADER_MAINMENU_LANGUAGE": "Sprache wählen",
 	"HEADER_MAINMENU_FEEDBACK": "Feedback",
+	"HEADER_MAINMENU_SHARE": "Teilen",
 	
 	"FOOTER_MENU_ABOUT": "Über uns",
 	"FOOTER_MENU_IMPRESS": "Impressum",
@@ -107,7 +108,6 @@
 	"TOPIC_BUTTON_RESULT_DOWNLOAD": "Ergebnis runterladen",
 	"TOPIC_BUTTON_STRUCTURE": "Prozessübersicht",
 	"TOPIC_BUTTON_AUTHOR": "Autor",
-	"TOPIC_BUTTON_SHARE": "Teilen",
 	"TOPICLIST_LABEL_VOTE": "Stimme",
 	"TOPICLIST_LABEL_VOTES": "Stimmen",
 	"TOPICLIST_LABEL_PROPOSAL": "Vorschlag",

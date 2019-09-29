@@ -104,6 +104,9 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		this.clearBadgeDatabase();
 	}
 	
+	/**
+	 * @desc: Initialize badge socket
+	 */
 	private initBadgeSocket() {
 		// Open WebSocket connection
 		const parsed = parseUrl(origin);
@@ -137,6 +140,9 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		};
 	}
 	
+	/**
+	 * @desc: Update badge value in view
+	 */
 	private updateBadge(el) {
 		console.log('el', el);
 		if (el.hasOwnProperty('editorUnseen') && this.activeTab != 'editor')
@@ -153,7 +159,7 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 	}
 	
 	/**
-	 * @desc: Clear badge of the tab wich was just opend
+	 * @desc: Clear badge view of the tab wich was just opend
 	 */
 	private clearBadgeView() {
 		switch(this.activeTab) {
@@ -172,26 +178,12 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		}
 	}
 	
+	/**
+	 * @desc: Clear badge database state of the tab wich was just opend
+	 */
 	private clearBadgeDatabase() {
 		// Send tab string to server which was seen by the user
 		this.badgeSocket.send(this.activeTab);
 	}
-	
-	/*
-	 * @desc: Opens 'productive mode'
-	 */
-	/*public enterFullscreen() {
-		var element = document.documentElement;
-		
-		if(element.requestFullscreen) {
-			element.requestFullscreen();
-		/*} else if(element.mozRequestFullScreen) {
-			element.mozRequestFullScreen();
-		} else if(element.msRequestFullscreen) {
-			element.msRequestFullscreen();/
-		} else if(element.webkitRequestFullscreen) {
-			element.webkitRequestFullscreen();
-		}
-	}*/
 
 }
