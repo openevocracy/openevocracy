@@ -10,6 +10,7 @@ const utils = require('../../utils');
 const groups = require('../groups');
 const users = require('../users');
 const helper = require('./helper');
+const misc = require('./misc');
 
 /*
  * @desc: Creates new thread in forum of specific group
@@ -51,11 +52,9 @@ exports.create = function(req, res) {
 	// Store main post in database
 	const post_promise = db.collection('forum_posts').insertAsync(post);
 	
-	// Get group
-	const group_promise = db.collection('groups').findOneAsync({ 'forumId': forumId });
-	
-	// Send email to all users who are watching the thread, exept the author
-	const notifyUsers_promise = group_promise.then((group) => {
+	// Perform a lot of tasks, where group is necessary
+	const group_promise = db.collection('groups')
+		.findOneAsync({ 'forumId': forumId }).then((group) => {
 			
 			// Build link to forum and thread
 			const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
@@ -70,21 +69,20 @@ exports.create = function(req, res) {
 				'body': 'EMAIL_NEW_THREAD_CREATED_BODY', 'bodyParams': bodyParams
 			};
 			
-			// Finally, send email to watching users
-			return helper.sendMailToWatchingUsersAsync(forumId, authorId, mail);
+			// Finally, send email to watching users, exept the author
+			const sendMail_promise = helper.sendMailToWatchingUsersAsync(forumId, authorId, mail);
+			
+			// Store visited status in database (badge and thread viewed)
+			const threadViewed = misc.threadVisited(group._id, threadId, authorId);
+				
+			return Promise.all([sendMail_promise, threadViewed]);
 	});
-	
 	
 	// Add author to email notification for this thread
 	const notifyAddAuthor_promise = users.enableEmailNotifyAsync(authorId, threadId);
 	
-	// Update toolbar badge
-	const updateBadge_promise = group_promise.then((group) => {
-		return groups.badges.updateForumBadge(authorId, group._id);
-	});
-	
 	// Wait for promises and send response
-	Promise.join(thread_promise, post_promise, notifyUsers_promise, notifyAddAuthor_promise, updateBadge_promise)
+	Promise.join(thread_promise, post_promise, group_promise, notifyAddAuthor_promise)
 		.spread(function(thread, post) {
 			return { 'thread': thread, 'post': post };
 	}).then(res.json.bind(res));
@@ -182,8 +180,12 @@ exports.query = function(req, res) {
 	const viewsUpdate_promise = db.collection('forum_threads')
 		.updateAsync({ '_id': threadId }, { $inc: {'views': 1} });
 	
+	// Add thread to viewed list for current user
+	const threadViewedByUser_promise = db.collection('forum_threads_viewed')
+			.updateAsync({ 'userId': userId }, { $addToSet: { 'viewed': threadId } }, { 'upsert': true });
+
 	// Send result
-	Promise.join(thread_promise, isGroupMember_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise)
+	Promise.join(thread_promise, isGroupMember_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise, threadViewedByUser_promise)
 		.spread(function(thread, isGroupMember, posts, viewsUpdate) {
 		return {
 			'thread': _.extend(thread, {'isGroupMember': isGroupMember}),

@@ -40,14 +40,22 @@ exports.query = function(req, res) {
 			if(thread.lastResponse)
 				thread.lastResponse.userName = groups.helper.generateMemberName(group._id, thread.lastResponse.userId);
 			
+			// Get viewed status for all threads in current forum
+			const viewedStatus_promise = db.collection('forum_threads_viewed')
+				.findOneAsync({ 'userId': userId, 'viewed': thread._id }).then((value) => {
+					// Return true if value was found, false if not
+					return !_.isNull(value);
+			});
+			
 			// Add sum of votes of mainpost and number of posts to every thread
-			return Promise.join(sumMainpostVotes_promise, numPosts_promise)
-				.spread(function(sumMainpostVotes, numPosts) {
+			return Promise.join(sumMainpostVotes_promise, numPosts_promise, viewedStatus_promise)
+				.spread(function(sumMainpostVotes, numPosts, viewedStatus) {
 					// Reduce numPosts by 1 since the main post shall not be counted
 					return _.extend(thread, {
 						'sumMainpostVotes': sumMainpostVotes,
 						'postCount': (numPosts-1),
-						'authorName': authorName
+						'authorName': authorName,
+						'wasViewed': viewedStatus
 					});
 			});
 		});

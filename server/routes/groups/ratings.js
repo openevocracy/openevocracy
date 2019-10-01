@@ -16,7 +16,7 @@ exports.query = function(req, res) {
 	var userId = ObjectId(req.user._id);
 	var type = parseInt(req.params.type, 10);
 	
-	db.collection('ratings')
+	db.collection('group_ratings')
 		.findOneAsync({ 'groupId': groupId, 'userId': userId, 'ratedUserId': ratedUserId, 'type': type })
 		.then(res.json.bind(res));
 };
@@ -28,7 +28,7 @@ exports.count = function(req, res) {
 	var groupId = ObjectId(req.body.gid);
 	var type = parseInt(req.params.type, 10);
 	
-	db.collection('ratings')
+	db.collection('group_ratings')
 		.countAsync({ 'groupId': groupId, 'ratedUserId': ratedUserId, 'type': type })
 		.then(res.json.bind(res));
 };
@@ -46,18 +46,16 @@ exports.rate = function(req, res) {
 	// Check if request is valid and store data
 	helper.getGroupMembersAsync(groupId).then((members) => {
 		// Check if user is member of group, otherwise reject
-		const member = _.findWhere(members, { 'userId': userId });
+		const member = utils.findWhereObjectId(members, { 'userId': userId });
 		if (_.isUndefined(member))
-			return null;
 			return utils.rejectPromiseWithMessage(403, 'FORBIDDEN');
 			
 		// Check if score is between 1 and 5
 		if(score < 1 || score > 5)
-			return null;
 			return utils.rejectPromiseWithMessage(400, 'BAD_REQUEST');
 		
 		// Store rating in database
-		return db.collection('ratings').updateAsync(
+		return db.collection('group_ratings').updateAsync(
 				{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type },
 				{ $set: { 'score': score } }, { upsert: true });
 	}).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
@@ -68,7 +66,7 @@ exports.rate = function(req, res) {
  * @param: group id
  */
 exports.getGroupLeaderAsync = function(groupId) {
-	return db.collection('ratings')
+	return db.collection('group_ratings')
 		.find({ 'groupId': groupId }, { 'ratedUserId': true, 'score': true }).toArrayAsync()
 		.then(function(ratings) {
 			if(_.isEmpty(ratings))
@@ -98,7 +96,7 @@ exports.getGroupLeaderAsync = function(groupId) {
 };
 
 exports.getMemberRatingsAsync = function(ratedUserId, groupId, userId) {
-	return db.collection('ratings').find(
+	return db.collection('group_ratings').find(
 		{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId }, { '_id': false, 'type': true, 'score': true })
 	.toArrayAsync().then(function(ratings) {
 		// Create array with all rating types
@@ -116,7 +114,7 @@ exports.getMemberRatingsAsync = function(ratedUserId, groupId, userId) {
 };
 
 exports.getMemberRatingAsync = function(ratedUserId, groupId, userId, type) {
-	return db.collection('ratings').findOneAsync(
+	return db.collection('group_ratings').findOneAsync(
 		{'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type}, {'score': true}).
 	then(function(rating) {
 		return rating ? rating.score : 0;

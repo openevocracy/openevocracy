@@ -9,6 +9,7 @@ import { AlertService } from '../_services/alert.service';
 import { ConnectionAliveService } from '../_services/connection.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
+import { EditorService } from '../_services/editor.service';
 import { ModalService } from '../_services/modal.service';
 import { CloseeditorModalService } from '../_services/modal.closeeditor.service';
 
@@ -42,7 +43,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 	public userToken: string;
 	public type: string;
 	public deadlineInterval;
-	//public pingInterval;
 	public padSocket;
 	public modalSubscription: Subscription;
 	
@@ -60,7 +60,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
 		protected translateService: TranslateService,
-		protected connectionAliveService: ConnectionAliveService
+		protected connectionAliveService: ConnectionAliveService,
+		protected editorService: EditorService
 	) {
 		this.userId = this.userService.getUserId();
 		this.userToken = this.userService.getToken();
@@ -80,7 +81,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		}
 		
 		// Modal
-		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe(close => {
+		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe((close) => {
 			// Close modal
 			this.modalService.close();
 			
@@ -121,8 +122,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 		// Stop countdown
 		if (this.deadlineInterval)
 			clearInterval(this.deadlineInterval);
-		/*if (this.pingInterval)
-			clearInterval(this.pingInterval);*/
 	}
 	
 	protected translatePlaceholder(key) {
@@ -152,6 +151,9 @@ export class EditorComponent implements OnInit, OnDestroy {
 		// Get additional information and initalize socket
 		this.activatedRoute.params.subscribe((params: Params) => {
 			this.padId = params.id;
+			
+			// Register saved status of editor in editor service
+			this.editorService.setIsSaved(this.padId, true);
 			
 			this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
 				this.title = res.title;
@@ -243,8 +245,11 @@ export class EditorComponent implements OnInit, OnDestroy {
 		return 'docs_'+key;
 	}
 	
+	/**
+	 * @desc: Closes the editor
+	 */
 	public closeEditor() {
-		if (!this.saved) {
+		if (!this.editorService.isSaved(this.padId)) {
 			this.modalService.open({});
 			return;
 		}
@@ -253,17 +258,25 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.router.navigate(['/topic', this.topicId]);
 	}
 	
+	/**
+	 * @desc: Set editor status to saved
+	 */
 	protected setSaved() {
-		this.saved = true;
+		this.saved = true;  // Important for template
+		this.editorService.setIsSaved(this.padId, true);
 	}
 	
+	/**
+	 * @desc: Is called when text has changed in editor
+	 */
 	public contentChanged(e) {
 		// If input source is not user, do not send a change to server
 		if(e.source != 'user')
 			return;
 			
 		// Set unsaved text
-		this.saved = false;
+		this.saved = false;  // Important for template
+		this.editorService.setIsSaved(this.padId, false);
 	}
 	
 	private redirectToView() {

@@ -1,3 +1,5 @@
+<modal-closeeditor></modal-closeeditor>
+
 <mat-toolbar class="first-toolbar" color="primary">
 	<div class="flex container">
 		<div class="group-title">
@@ -18,11 +20,8 @@
 		<button mat-button [matBadge]="membersBadge" matBadgeColor="warn" class="badge-transparent" [ngClass]="{'active': activeTab == 'members'}" title="{{ 'GROUP_BUTTON_MEMBERS' | translate }}" [routerLink]="['/group', groupId, 'members']">
 			<span><fa-icon [icon]="faUsers"></fa-icon> {{ 'GROUP_BUTTON_MEMBERS' | translate }}</span>
 		</button>
-		<!--<button mat-button (click)="enterFullscreen()" title="{{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}">
-			<span><fa-icon [icon]="faExpandArrowsAlt"></fa-icon> {{ 'GROUP_BUTTON_PRODUCTIVE_MODE' | translate }}</span>
+		<button mat-button title="{{ 'FORM_BUTTON_CLOSE' | translate }}" (click)="closeGroup()">
+			<span><fa-icon [icon]="faTimes"></fa-icon></span>
 		</button>
-		<button mat-button title="{{ 'FORM_BUTTON_CLOSE' | translate }}" (click)="closeEditor()">
-			<span><fa-icon [icon]="faTimes"></fa-icon> {{ 'FORM_BUTTON_CLOSE' | translate }}</span>
-		</button>-->
 	</div>
 </mat-toolbar>

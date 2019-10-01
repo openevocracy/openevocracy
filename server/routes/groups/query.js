@@ -31,7 +31,7 @@ exports.toolbar = function(req, res) {
 	const topic_promise = group_promise.then((group) => {
 		return db.collection('topics')
 			.findOneAsync({ '_id': group.topicId }).then((topic) => {
-				return { 'title': topic.name };
+				return { 'topicId': topic._id, 'title': topic.name };
 		});
 	});
 	
@@ -47,6 +47,8 @@ exports.toolbar = function(req, res) {
 		return {
 			'groupName': group.name,
 			'topicTitle': topic.title,
+			'topicId': topic.topicId,
+			'padId': pad._id,
 			'expiration': pad.expiration,
 			'badge': badge
 		};
@@ -202,6 +204,7 @@ exports.editor = function(req, res) {
 	Promise.join(pad_promise, groupMembers_promise, lastActivity_promise)
 		.spread((pad, groupMembers) => {
 			return {
+				'padId': pad._id,
 				'docId': pad.docId,
 				'members': groupMembers
 			};

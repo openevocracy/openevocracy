@@ -64,6 +64,8 @@ export class GroupForumComponent implements OnInit {
 				this.threads.push(new Thread(thread));
 			}.bind(this));
 			
+			console.log(this.threads);
+			
 			// Sort threads by last activity (either last response or creation time)
 			this.threads = _.sortBy(this.threads, 'lastActivityTimestamp').reverse();
 		});

@@ -109,13 +109,17 @@ exports.updateEditorBadge = function(userId, pad) {
 	memberIds.forEach((memberId) => {
 		// Try to load badge status from cache
 		const badgeStatusFromCache = getFromCache(memberId, groupId);
+		console.log(badgeCache);
 		
 		// If badge status is not in cache, add it to cache, to speed up the next function call
 		let badgeStatus_promise = Promise.resolve(badgeStatusFromCache);
-		if (!_.isUndefined(badgeStatusFromCache)) {
-			badgeStatus_promise = getBadgeStatusAsync(userId, groupId).then((badge) => {
+		if (_.isUndefined(badgeStatusFromCache)) {
+			badgeStatus_promise = getBadgeStatusAsync(memberId, groupId).then((badge) => {
 				// Push badge status to badge cache
 				badgeCache.push(badge);
+				
+				// Return badge status
+				return badge;
 			});
 		}
 		
@@ -175,29 +179,24 @@ exports.updateChatBadge = function(userId, chatRoomId) {
 
 /**
  * @desc: Update the forum badge in toolbar, every time a post is created
+ * @note: For every member in the group, the function is called seperately
  */
-exports.updateForumBadge = function(userId, groupId) {
-	groups.helper.getGroupMembersAsync(groupId).map((rel) => {
-		// Don't send something, when member equals own user
-		if (utils.equalId(rel.userId, userId))
-			return;
-		
-		// Try to load badge status from cache
-		const badgeStatus = getFromCache(rel.userId, groupId);
-		
-		// Add 1 to forumUnseen, if badgeStatus is available
-		if (!_.isUndefined(badgeStatus))
-			badgeStatus.forumUnseen += 1;
-		
-		// If socket is available, send message through socket
-		if (!_.isUndefined(badgeStatus.socket)) {
-			// Send socket message to each member of the group
-			badgeStatus.socket.send(JSON.stringify({ 'forumUnseen': badgeStatus.forumUnseen }));
-		}
-		
-		// Increment badge state in database
-		incrementBadgeStatusAsync(rel.userId, groupId, { 'forumUnseen': 1 });
-	});
+exports.updateForumBadge = function(memberId, groupId) {
+	// Try to load badge status from cache
+	const badgeStatus = getFromCache(memberId, groupId);
+	
+	// Add 1 to forumUnseen, if badgeStatus is available
+	if (!_.isUndefined(badgeStatus))
+		badgeStatus.forumUnseen += 1;
+	
+	// If socket is available, send message through socket
+	if (!_.isUndefined(badgeStatus.socket)) {
+		// Send socket message to each member of the group
+		badgeStatus.socket.send(JSON.stringify({ 'forumUnseen': badgeStatus.forumUnseen }));
+	}
+	
+	// Increment badge state in database
+	incrementBadgeStatusAsync(memberId, groupId, { 'forumUnseen': 1 });
 };
 
 /**

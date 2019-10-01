@@ -167,7 +167,8 @@ export class GroupChatComponent implements OnInit {
 	 */
 	private scrollDown() {
 		const chat = document.getElementById('chat-messages');
-   	chat.scrollTop = chat.scrollHeight - chat.clientHeight;
+		if (chat)
+   		chat.scrollTop = chat.scrollHeight - chat.clientHeight;
 	}
 	
 	/*

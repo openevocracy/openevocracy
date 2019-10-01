@@ -97,7 +97,7 @@ export class HttpManagerService {
 		if(this.cfg.DEBUG)
 			console.error(error);
 		// If server sends 401 'Unauthorized'
-		if(_.has(error, 'status') && error.status == 401 && error._body == 'Unauthorized') {
+		if(_.has(error, 'status') && error.status == 401 && error.error == 'Unauthorized') {
 			// Delete token in local storage and redirect
 			window.localStorage.removeItem('currentUser');
 			this.router.navigate(['/login']);

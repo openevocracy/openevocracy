@@ -19,6 +19,7 @@ section {
 .closed { border-color: $blue500; }
 h2 { display: inline-block; margin: 5px 0; font-weight: 500; cursor: pointer; }
 h2 .thread-title:hover, section h2 .thread-title:focus, section h2 .thread-title:active { color: $teal500; }
+.viewed h2 { font-weight: 300; }
 .meta a { color: inherit; }
 .meta a:hover, .meta a:focus, .meta a:active { color: $teal500; text-decoration: none; }
 

@@ -11,6 +11,7 @@ import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
 import { ModalService } from '../../_services/modal.service';
 import { CloseeditorModalService } from '../../_services/modal.closeeditor.service';
+import { EditorService } from '../../_services/editor.service';
 
 import { EditorComponent } from '../../editor/editor.component';
 
@@ -42,9 +43,10 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
 		protected translateService: TranslateService,
-		protected connectionAliveService: ConnectionAliveService
+		protected connectionAliveService: ConnectionAliveService,
+		protected editorService: EditorService
 	) {
-		super(snackBar, alertService, router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService, translateService, connectionAliveService);
+		super(snackBar, alertService, router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService, translateService, connectionAliveService, editorService);
 		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
@@ -117,6 +119,10 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 				if(member.userId != this.me.userId)
 					this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
 			});
+			
+			// Register saved status of editor in editor service
+			this.padId = res.padId;
+			this.editorService.setIsSaved(this.padId, true);
 			
 			// Initialize countdown
 			this.initCountdown(res.deadline);

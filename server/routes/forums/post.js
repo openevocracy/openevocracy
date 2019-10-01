@@ -10,6 +10,7 @@ const utils = require('../../utils');
 const groups = require('../groups');
 const users = require('../users');
 const helper = require('./helper');
+const misc = require('./misc');
 
 /**
  * @desc: Creates new post in forum thread
@@ -42,12 +43,10 @@ exports.create = function(req, res) {
 		const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
 		const thread_promise = db.collection('forum_threads')
 			.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
-			
-		// Get group
-		const group_promise = db.collection('groups').findOneAsync({ 'forumId': forumId });
 		
-		// Send email to all users who are watching the thread, exept the author
-		const notifyUsers_promise = group_promise.then((group) => {
+		// Perform a lot of tasks, where group is necessary
+		const group_promise = db.collection('groups')
+			.findOneAsync({ 'forumId': forumId }).then((group) => {
 				
 				// Build link to thread
 				const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
@@ -61,10 +60,15 @@ exports.create = function(req, res) {
 					'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
 				};
 				
-				// Finally, send email to watching users
-				return helper.sendMailToWatchingUsersAsync(threadId, authorId, mail);
+				// Finally, send email to watching users, exept the author
+				const sendMail_promise = helper.sendMailToWatchingUsersAsync(threadId, authorId, mail);
+				
+				// Store visited status in database (badge and thread viewed)
+				const threadViewed = misc.threadVisited(group._id, threadId, authorId);
+				
+				return Promise.all([sendMail_promise, threadViewed]);
 		});
-			
+		
 		// Add author to email notification for the related post
 		const notifyAddUser_promise = users.getEmailNotifyStatusAsync(authorId, threadId).then(function(status) {
 			// only if entry does not already exists (is null), otherwise the user has actively
@@ -72,14 +76,9 @@ exports.create = function(req, res) {
 			return _.isNull(status) ? users.enableEmailNotifyAsync(authorId, threadId) : null;
 		});
 		
-		// Update toolbar badge
-		const updateBadge_promise = group_promise.then((group) => {
-			return groups.badges.updateForumBadge(authorId, group._id);
-		});
-		
-		Promise.all([createPost_promise, thread_promise, notifyUsers_promise, notifyAddUser_promise, updateBadge_promise])
+		return Promise.all([createPost_promise, thread_promise, group_promise, notifyAddUser_promise])
 			.then(res.json.bind(res));
-		
+	
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
