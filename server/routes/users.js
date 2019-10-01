@@ -129,7 +129,7 @@ exports.sendVerificationMailAgain = function(req, res) {
 };
 
 function sendVerificationMail(user) {
-	mail.fToUser(user,
+	mail.sendMailToUser(user,
 		'EMAIL_REGISTRATION_SUBJECT', [],
 		'EMAIL_REGISTRATION_MESSAGE', [cfg.PRIVATE.BASE_URL, user._id.toString(), user.email]);
 }
