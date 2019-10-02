@@ -1,47 +1,39 @@
 <mat-toolbar class="second-toolbar" color="primary">
-	<div class="flex container">
-		<h1><fa-icon [icon]="faUser" [style.color]="members[chosenMemberId]?.color"></fa-icon> {{ members[chosenMemberId]?.name }}</h1>
-		<span class="flex-spacer"></span>
-		<div id="usermenu">
-			<button mat-button [matMenuTriggerFor]="menu">
-				<span>{{ 'GROUP_MEMBERS_CHOOSE_MEMBER' | translate }} <fa-icon [icon]="faCaretDown"></fa-icon></span>
-			</button>
-			<mat-menu #menu="matMenu" [overlapTrigger]="false">
-				<button mat-menu-item [ngClass]="{ 'active': member.userId == chosenMemberId }" *ngFor="let member of memberArray" (click)="chooseMember(member.userId)">
-					<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}</span>
-				</button>
-			</mat-menu>
-		</div>
+	<div class="container">
+		<button *ngFor="let member of memberArray" mat-button [ngClass]="{ 'active': member.userId == chosenMemberId }" (click)="chooseMember(member.userId)">
+			<span><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon> {{ member.name }}</span>
+		</button>
 	</div>
 </mat-toolbar>
 
-<!-- *ngIf="!isLastGroup" -->
-<div class="container box box-rating">
-	<div class="header">
-		<h3>{{ 'GROUP_MEMBERS_RATING_HEADING' | translate }}</h3>
+<div class="container" [@animation]="animationState">
+	<div *ngIf="isLastGroup" class="box box-rating">
+		<div class="header">
+			<h3>{{ 'GROUP_MEMBERS_RATING_HEADING' | translate }}</h3>
+		</div>
+		<div class="content rating">
+			<table>
+				<tr>
+					<td *ngFor="let rating of members[chosenMemberId]?.ratings">
+						<span matTooltip="{{ rating.tooltip | translate }}"><fa-icon [icon]="faInfoCircle"></fa-icon></span> {{ rating.label | translate }}
+					</td>
+				</tr>
+				<tr>
+					<td *ngFor="let rating of members[chosenMemberId]?.ratings">
+						<starrating [ratingId]="rating.type" [rateValue]="rating.score" (onRate)="onRate($event)"></starrating>
+					</td>
+				</tr>
+			</table>
+		</div>
 	</div>
-	<div class="content rating">
-		<table>
-			<tr>
-				<td *ngFor="let rating of members[chosenMemberId]?.ratings">
-					<span matTooltip="{{ rating.tooltip | translate }}"><fa-icon [icon]="faInfoCircle"></fa-icon></span> {{ rating.label | translate }}
-				</td>
-			</tr>
-			<tr>
-				<td *ngFor="let rating of members[chosenMemberId]?.ratings">
-					<starrating [ratingId]="rating.type" [rateValue]="rating.score" (onRate)="onRate($event)"></starrating>
-				</td>
-			</tr>
-		</table>
+	
+	<div class="box box-pad">
+		<div class="header flex">
+			<h3>{{ 'GROUP_MEMBERS_PREV_PROPOSAL_HEADING' | translate }}</h3>
+			<span class="flex-spacer"></span>
+			<!-- If level > 0 -->
+			<button mat-raised-button *ngIf="members[chosenMemberId]?.prevGroupId" color="primary" title="{{ 'GROUP_BUTTON_TITLE_PREVIOUS_GROUP' | translate }}" [routerLink]="['/group', members[chosenMemberId]?.prevGroupId]"><fa-icon [icon]="faUsers"></fa-icon> {{ 'GROUP_BUTTON_LABEL_PREVIOUS_GROUP' | translate }}</button>
+		</div>
+		<div class="content pad" [innerHtml]="members[chosenMemberId]?.prevPadHtml"></div>
 	</div>
-</div>
-
-<div class="container box box-pad">
-	<div class="header flex">
-		<h3>{{ 'GROUP_MEMBERS_PREV_PROPOSAL_HEADING' | translate }}</h3>
-		<span class="flex-spacer"></span>
-		<!-- If level > 0 -->
-		<button mat-raised-button *ngIf="members[chosenMemberId]?.prevGroupId" color="primary" title="{{ 'GROUP_BUTTON_TITLE_PREVIOUS_GROUP' | translate }}" [routerLink]="['/group', members[chosenMemberId]?.prevGroupId]"><fa-icon [icon]="faUsers"></fa-icon> {{ 'GROUP_BUTTON_LABEL_PREVIOUS_GROUP' | translate }}</button>
-	</div>
-	<div class="content pad" [innerHtml]="members[chosenMemberId]?.prevPadHtml"></div>
 </div>

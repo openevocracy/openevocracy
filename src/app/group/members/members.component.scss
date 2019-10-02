@@ -1,9 +1,10 @@
 /* Import variables */
 @import "~styles/variables";
 
-#usermenu button.active { background-color: $grey300; }
+.second-toolbar .container { text-align: center; }
+.second-toolbar button.active { background-color: rgba(255,255,255,0.2); }
 
-.container.box { background-color: $white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); margin-top: 20px; padding: 0; }
+.box { background-color: $white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); margin-top: 20px; padding: 0; }
 .box-pad { margin-bottom: 20px; }
 
 .header { height: 44px; padding: 0 25px; border-bottom: 1px solid $grey400; }

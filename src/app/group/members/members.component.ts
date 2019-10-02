@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { trigger, style, animate, transition, state } from '@angular/animations';
 import { Router } from '@angular/router';
 
 import { UserService } from '../../_services/user.service';
@@ -13,7 +14,14 @@ import { faUser, faUsers, faCaretDown, faInfoCircle } from '@fortawesome/free-so
 @Component({
 	selector: 'app-members',
 	templateUrl: './members.component.html',
-	styleUrls: ['../group.component.scss', './members.component.scss']
+	styleUrls: ['../group.component.scss', './members.component.scss'],
+	animations: [ trigger('animation', [
+			state('show', style({ 'opacity': '1' })),
+			state('hide', style({ 'opacity': '0' })),
+			transition('show=>hide', animate('300ms ease-out')),
+			transition('hide=>show', animate('300ms ease-in'))
+		])
+	]
 })
 export class GroupMembersComponent implements OnInit {
 
@@ -24,6 +32,7 @@ export class GroupMembersComponent implements OnInit {
 	public memberArray;
 	public members = {};
 	public isLastGroup;
+	public animationState = 'show';
 	
 	public faUser = faUser;
 	public faUsers = faUsers;
@@ -71,8 +80,6 @@ export class GroupMembersComponent implements OnInit {
 			
 			// If group is last group, don't show ratings
 			this.isLastGroup = res.isLastGroup;
-			
-			console.log(this.members);
 		});
 	}
 	
@@ -80,7 +87,14 @@ export class GroupMembersComponent implements OnInit {
 	 * @desc: When user chooses another member, switch view data to chosen member
 	 */
 	private chooseMember(userId) {
-		this.chosenMemberId = userId;
+		// First hide content
+		this.animationState = 'hide';
+		setTimeout(() => {
+			// Change member
+			this.chosenMemberId = userId;
+			//Show content
+			this.animationState = 'show';
+		}, 300);
 	}
 	
 	/**
