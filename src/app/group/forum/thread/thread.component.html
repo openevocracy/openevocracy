@@ -23,7 +23,7 @@
 
 <div class="container">
 	<div *ngFor="let post of posts; let i = index;">
-		<div class="post" [id]="'post-'+post.postId" [ngClass]="{ 'highlighted': post.postId==fragment, 'mainpost': post.postId==thread.mainPostId}">
+		<div class="post" [id]="post.postId" [ngClass]="{ 'highlighted': post.postId==fragment, 'mainpost': post.postId==thread.mainPostId}">
 			<div class="post-head">
 				<div class="post-links">
 					<span *ngIf="post.postId == thread.mainPostId && thread?.authorId == userId" class="solved-toggle" title="{{ solvedButtonTitle | translate }}">

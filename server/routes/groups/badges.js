@@ -190,7 +190,7 @@ exports.updateForumBadge = function(memberId, groupId) {
 		badgeStatus.forumUnseen += 1;
 	
 	// If socket is available, send message through socket
-	if (!_.isUndefined(badgeStatus.socket)) {
+	if (!_.isUndefined(badgeStatus) && !_.isUndefined(badgeStatus.socket)) {
 		// Send socket message to each member of the group
 		badgeStatus.socket.send(JSON.stringify({ 'forumUnseen': badgeStatus.forumUnseen }));
 	}
