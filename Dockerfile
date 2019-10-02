@@ -4,7 +4,7 @@ FROM node:8 as builder
 WORKDIR /home/node/app
 COPY shared/ shared/
 COPY src/ src/
-COPY package.json tsconfig.json .
+COPY package.json tsconfig.json ./
 RUN npm install
 RUN npm run build -- --prod
 
@@ -17,7 +17,7 @@ WORKDIR /home/node/app
 COPY --from=builder /home/node/app/dist/ dist/
 COPY shared/ shared/
 COPY server/ server/
-COPY app.js package.json .
+COPY app.js package.json ./
 RUN npm install --production
 
 ENV PORT 8080
