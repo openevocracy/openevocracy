@@ -11,6 +11,7 @@ const groups = require('./routes/groups');
 const users = require('./routes/users');
 const utils = require('./utils');
 const mail = require('./mail');
+const activities = require('./routes/activities');
 
 // Rooms cache
 let rooms = {};
@@ -202,6 +203,12 @@ exports.sendMailToMentionedUsers = function(req, res) {
 	const groupId = ObjectId(req.body.groupId);
 	const userIds = _.map(req.body.userIds, (userId) => { return ObjectId(userId) });
 	const userId = ObjectId(req.user._id);
+	
+	// add activities for mentioned users
+	_.each(userIds, function(el) {
+		console.log("User mentioned: ", el)
+		activities.storeActivity(el, C.ACT_MENTIONED, groupId);
+	});
 	
 	db.collection('groups').findOneAsync({ '_id': groupId }, { 'name': true })
 		.then((group) => {

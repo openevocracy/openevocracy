@@ -285,12 +285,12 @@ exports.remixGroupsAsync = function(topic) {
 		var groupsMemberIds_promise = assignParticipantsToGroups(leaders);
 		
 		// Add activities for all delegates
-		const createActivity_promise = (leaders) => {
+		const createActivity_promise = groupsMemberIds_promise.then((leaders) => {
 			_.each(leaders, function(el) {
 				console.log("Leader", el)
 				activities.storeActivity(el, C.ACT_ELECTED_DELEGATE, topicId);
 			});
-		};
+		});
 		
 		// Insert all groups into database
 		var nextLevel = topic.level+1;

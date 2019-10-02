@@ -124,7 +124,7 @@ export class GroupForumThreadComponent implements OnInit {
 				// Sort posts
 				this.sortPosts('createdTimestamp', true, false);
 				
-				console.log(this.thread);
+				console.log(this.posts);
 				
 				// Return to subscribers
 				observer.next(true);
@@ -221,7 +221,7 @@ export class GroupForumThreadComponent implements OnInit {
 	public vote(entityId: string, entity: any, voteValue: number) {
 		// Define data to post to server
 		const preUserVote = entity.userVote;
-		const postUserVote = preUserVote != voteValue ? voteValue : 0
+		const postUserVote = ((preUserVote != voteValue) ? voteValue : 0);
 		const data = {
 			'userId': this.userId,
 			'entityId': entityId,

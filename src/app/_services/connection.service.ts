@@ -82,7 +82,7 @@ export class ConnectionAliveService implements OnDestroy {
 		this.aliveSocket.onclose = (event) => {
 			//console.log('onclose', event);
 			// Disable connection and retry
-			this.disconnectAndRetry();
+			this.disconnect({ 'retry': true });
 		};
 	}
 	
@@ -93,7 +93,7 @@ export class ConnectionAliveService implements OnDestroy {
 		this.pingInterval = setInterval(() => {
 			if (!this.isConnectionAssumed && this.isConnected) {
 				// If server does not respond anymore, disable connection and retry
-				this.disconnectAndRetry();
+				this.disconnect({ 'retry': true });
 			}
 			
 			// Assume connection as interrupted until receiving pong
@@ -106,9 +106,9 @@ export class ConnectionAliveService implements OnDestroy {
 	/**
 	 * @desc: Disables connections, which means that the ping interval is stopped and
 	 *        an event for disconnect is triggert to inform the system about a disconnect.
-	 *        Also try to reconnect to the server.
+	 *		  If params.retry is set to true, try to reconnect.
 	 */
-	public disconnectAndRetry() {
+	public disconnect(params) {
 		// Stop interval
 		clearInterval(this.pingInterval);
 		
@@ -116,14 +116,14 @@ export class ConnectionAliveService implements OnDestroy {
 		setTimeout(() => {
 			// Trigger offline event if was connected before
 			if (this.isConnected)
-				this.connectionLost.emit(true);
+				this.connectionLost.emit(params.retry);
 			
 			// Set flags to disconnected
 			this.isConnectionAssumed = false;
 			this.isConnected = false;
 			
-			// Retry connection
-			this.startRetryTimeout();
+			if (params.retry)
+				this.startRetryTimeout();
 		}, 500);
 	}
 	
