@@ -4,7 +4,7 @@ FROM node:10 as builder
 WORKDIR /home/node/app
 COPY shared/ shared/
 COPY src/ src/
-COPY package.json tsconfig.json ./
+COPY package.json tsconfig.json angular.json ./
 RUN npm install
 RUN npm run build -- --prod
 
