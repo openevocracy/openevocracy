@@ -209,7 +209,7 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 	/**
 	 * @desc: Closes the group
 	 */
-	private closeGroup() {
+	public closeGroup() {
 		// Check if document is saved to avoid loss of data
 		// Note that if isSaved is undefined, just close the group, in that case the editor does not already or not anymore exist
 		const isSaved = this.editorService.isSaved(this.padId)

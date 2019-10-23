@@ -38,6 +38,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 	public padId: string;
 	public userId: string;
 	public topicId: string;
+	public classColEditor;
 	public quillModules;
 	public quillEditor;
 	public userToken: string;

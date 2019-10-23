@@ -176,7 +176,7 @@ export class GroupChatComponent implements OnInit {
 	 *        clicked the send button or pressed enter.
 	 *        Message will be send via socket and form will be cleared after sending.
 	 */
-	private sendChatMessage() {
+	public sendChatMessage() {
 		if(!this.chatForm.valid)
 			return;
 		
