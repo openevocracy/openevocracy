@@ -72,7 +72,7 @@
     "mailcomposer": "^4.0.2",
     "method-override": "*",
     "methods": "*",
-    "mongodb": "^2.2.19",
+    "mongodb": "^2.2.36",
     "mongoist": "^2.0.0",
     "mongoskin": "*",
     "morgan": "^1.9.1",
