@@ -1,0 +1,8 @@
+/* Import variables */
+@import "~styles/variables";
+
+fieldset { border: none; padding: 0; margin: 0; }
+input { display: none; }
+label { color: $grey400; cursor: pointer; }
+label.active { color: $amberA700; }
+label.hover, label.active.hover { color: $amberA200; }

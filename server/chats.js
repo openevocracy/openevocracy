@@ -1,15 +1,20 @@
 // General libraries
-var _ = require('underscore');
-var C = require('../shared/constants').C;
-var ObjectId = require('mongodb').ObjectID;
-var db = require('./database').db;
+const _ = require('underscore');
+const Promise = require('bluebird');
+const ObjectId = require('mongodb').ObjectID;
 
 // Own references
-var users = require('./routes/users');
-var utils = require('./utils');
+const C = require('../shared/constants').C;
+const cfg = require('../shared/config').cfg;
+const db = require('./database').db;
+const groups = require('./routes/groups');
+const users = require('./routes/users');
+const utils = require('./utils');
+const mail = require('./mail');
+const activities = require('./routes/activities');
 
 // Rooms cache
-var rooms = {};
+let rooms = {};
 
 /*
  * @desc: Function called via route from client in order to get information
@@ -19,49 +24,79 @@ var rooms = {};
  *    req: request from client (contains chat room id)
  *    res: response to client
  */
-exports.getChatRoomMessages = function(req, res) {
-	var chatRoomId = ObjectId(req.params.id);
-	var userId = ObjectId(req.user._id);
+exports.queryChatRoomMessages = function(req, res) {
+	const groupId = ObjectId(req.params.id);
+	const userId = ObjectId(req.user._id);
 	
-	// Try to get room from cache, define user and prepare current timestamp
-	var room = rooms[chatRoomId];
-	var user = {'userId': userId};
-	var now = new Date().getTime();
-	
-	// Load chat room from either cache or database
-	var chatRoom_promise = null;
-	if (_.isUndefined(room)) {
-		// Try to load the chat messages from database
-		chatRoom_promise = db.collection('chat_messages')
-			.find({'chatRoomId': chatRoomId}, { 'text': true, 'userId': true, 'type': true }).toArrayAsync()
-			.then(function (messages) {
-				if(_.isNull(messages)) {
-					// Chat does not exist yet, create it in cache
-					room = { 'messages': [], 'users': [user], 'cacheUpdate': now };
-				} else {
-					// Chat exists but it is not cached yet
-					room = { 'messages': messages, 'users': [user], 'cacheUpdate': now };
-				}
-				rooms[chatRoomId] = room;
-				return room;
-		});
-	} else {
-		// Update cache update time
-		room.cacheUpdate = now;
+	// Get chat room id
+	const chatRommId_promise = db.collection('groups')
+		.findOneAsync({ '_id': groupId }, { 'chatRoomId': true })
+		.then((group) => { return group.chatRoomId; });
 		
-		// Add current user to room, if not exists
-		var existingUser = utils.findWhereObjectId(room.users, {'userId': userId});
-		if (_.isUndefined(existingUser))	room.users.push(user);
-		
-		// Return room
-		chatRoom_promise = Promise.resolve({
-			'messages': room.messages,
-			'users': _.pluck(room.users, 'userId')
-		});
-	}
+	// Get extended users in chat room
+	const extendedUsers_promise = extendUsersAsync(groupId);
 	
-	chatRoom_promise.then(res.send.bind(res));
+	Promise.join(chatRommId_promise, extendedUsers_promise).spread((chatRoomId, extendedUsers) => {
+		// Try to get room from cache, define user and prepare current timestamp
+		let room = rooms[chatRoomId];
+		const user = { 'userId': userId };
+		const now = new Date().getTime();
+		
+		// Load chat room from either cache or database
+		if (_.isUndefined(room)) {
+			// Try to load the chat messages from database
+			return db.collection('chat_messages')
+				.find({'chatRoomId': chatRoomId}, { 'text': true, 'userId': true, 'type': true }).toArrayAsync()
+				.then(function (messages) {
+					if(_.isNull(messages)) {
+						// Chat does not exist yet, create it in cache
+						room = { 'messages': [], 'users': [user], 'cacheUpdate': now };
+					} else {
+						// Chat exists but it is not cached yet
+						room = { 'messages': messages, 'users': [user], 'cacheUpdate': now };
+					}
+					rooms[chatRoomId] = room;
+					
+					return {
+						'chatRoomId': chatRoomId,
+						'messages': room.messages,
+						'users': extendedUsers
+					};
+			});
+		} else {
+			// Update cache update time
+			room.cacheUpdate = now;
+			
+			// Add current user to room, if not exists
+			var existingUser = utils.findWhereObjectId(room.users, {'userId': userId});
+			if (_.isUndefined(existingUser))	room.users.push(user);
+			
+			// Return room
+			return Promise.resolve({
+				'chatRoomId': chatRoomId,
+				'messages': room.messages,
+				'users': extendedUsers
+			});
+		}
+	}).then(res.send.bind(res));
 };
+
+/**
+ * @desc: Extend users by color, name and online status
+ */
+function extendUsersAsync(groupId) {
+	// Get user color from databse
+	return db.collection('group_relations')
+		.find({ 'groupId': groupId }, { 'userId': true, 'userColor': true })
+		.toArrayAsync().map((member) => {
+			return { 
+				'userId': member.userId,
+				'color': member.userColor,
+				'name': groups.helper.generateMemberName(groupId, member.userId)/*,
+				'isOnline': users.isOnline(user.userId)*/
+			};
+	});
+}
 
 /*
  * @desc: Sends a message to all other clients in chatroom
@@ -72,7 +107,7 @@ exports.getChatRoomMessages = function(req, res) {
 function sendToSocketsInRoom(roomUsers, msg) {
 	_.each(roomUsers, function(user) {
 		// Send message to all users in rooom
-		user.socket.send(JSON.stringify(msg), function(err) {
+		user.socket.send(JSON.stringify(msg), (err) => {
 			if (!_.isUndefined(err))
 				console.error(err);
 		});
@@ -84,7 +119,7 @@ function sendToSocketsInRoom(roomUsers, msg) {
  */
 function removeUserFromRoom(roomUsers, userId) {
 	return _.reject(roomUsers, function(roomUser) {
-		return (roomUser.userId.toString() == userId.toString());
+		return utils.equalId(roomUser.userId, userId);
 	});
 }
 
@@ -100,10 +135,12 @@ function removeUserFromRoom(roomUsers, userId) {
  *    userId: the id of the currently connecting user
  */
 function joinChatRoom(socket, chatRoomId, userId) {
-	var room = rooms[chatRoomId];
+	chatRoomId = ObjectId(chatRoomId);
+	
+	let room = rooms[chatRoomId];
 		
 	// Add current user socket
-	var user = utils.findWhereObjectId(room.users, {'userId': userId});
+	let user = utils.findWhereObjectId(room.users, {'userId': userId});
 	user.socket = socket;
 	
 	// When socket receives a message
@@ -113,17 +150,20 @@ function joinChatRoom(socket, chatRoomId, userId) {
 		// Create message id (to have timestamp of message)
 		msg._id = ObjectId();
 		// Append chat room id and user id
-		msg.chatRoomId = ObjectId(chatRoomId);
+		msg.chatRoomId = chatRoomId;
 		msg.userId  = userId;
 		// Strip html tags
 		msg.text = msg.text.replace(/(<([^>]+)>)/ig, '');
 		
-		// Save only default messages in cache/database
+		// Some things which are only evaluated for default messages
 		if (msg.type == C.CHATMSG_DEFAULT) {
 			// Save in cache
 			room.messages.push(msg);
 			// Save in database
 			db.collection('chat_messages').insertAsync(msg);
+			
+			// Update toolbar badge
+			groups.badges.updateChatBadge(userId, chatRoomId);
 		}
 		
 		// Send message to all users in room
@@ -156,14 +196,24 @@ exports.startChatServer = function(wss) {
 			// Add userId to ws connection
 			ws.userId = userId;
 		});
-		
-		// Set socket alive initially and every time a pong is arriving
-		/*ws.isAlive = true;
-		ws.on('pong', function() {
-			ws.isAlive = true;
-		});*/
+	});
+};
+
+exports.sendMailToMentionedUsers = function(req, res) {
+	const groupId = ObjectId(req.body.groupId);
+	const userIds = _.map(req.body.userIds, (userId) => { return ObjectId(userId) });
+	const userId = ObjectId(req.user._id);
+	
+	// add activities for mentioned users
+	_.each(userIds, function(el) {
+		console.log("User mentioned: ", el)
+		activities.storeActivity(el, C.ACT_MENTIONED, groupId);
 	});
 	
-	// Initalize ping interval
-	//utils.pingInterval(wss);
+	db.collection('groups').findOneAsync({ '_id': groupId }, { 'name': true })
+		.then((group) => {
+			mail.sendMailToUserIds(userIds,
+				'EMAIL_CHAT_MENTIONED_SUBJECT', [group.name],
+				'EMAIL_CHAT_MENTIONED_MESSAGE', [cfg.PRIVATE.BASE_URL, groupId, group.name]);
+	}).then(res.send.bind(res));
 };

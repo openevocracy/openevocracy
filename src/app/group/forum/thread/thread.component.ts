@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { ViewportScroller } from '@angular/common';
 import { Router } from '@angular/router';
 import { ActivatedRoute, Params } from '@angular/router';
 import { MatDialog } from '@angular/material';
@@ -47,6 +48,7 @@ export class GroupForumThreadComponent implements OnInit {
 	public sortedBy: string = "";
 	public missingWordsComments: boolean[] = [];
 	public forumMinWordsCommentMsgTranslated: string = "";
+	public fragmentTimeout;
 	public sortLabels = {
 		'sumVotes': 'FORUM_SORT_LABEL_VOTES',
 		'createdTimestamp': 'FORUM_SORT_LABEL_DATE'
@@ -71,7 +73,8 @@ export class GroupForumThreadComponent implements OnInit {
 		private configService: ConfigService,
 		private userService: UserService,
 		private snackbarService: SnackbarService,
-		private translateService: TranslateService) {
+		private translateService: TranslateService,
+		private viewportScroller: ViewportScroller) {
 			// Store config
 			this.cfg = configService.get();
 			
@@ -90,18 +93,30 @@ export class GroupForumThreadComponent implements OnInit {
 			this.loadThread(threadId).subscribe(res => {
 				// Set solved button label
 				this.solvedButtonTitle = this.thread.closed ? 'FORUM_BUTTON_TITLE_UNSOLVED' : 'FORUM_BUTTON_TITLE_SOLVED';
+				
+				// Get fragment and jump to related anchor, if fragment is given
+				const fragment = this.router.url.split('#')[1];
+				if (!_.isUndefined(fragment)) {
+					// (hack) Since the DOM is not finished at that point, setTimout helps to do the anchor jump correctly
+					setTimeout(() => { this.navigateToUrlWithFragment(fragment) }, 0);
+				}
 			});
 		});
+	}
+	
+	/**
+	 * @desc: Highlights the currently selected post
+	 */
+	public highlightFragment(fragment) {
+		this.fragment = fragment;
 		
-		// Get fragment from url
-		this.activatedRoute.fragment.subscribe(fragment => {
-			this.fragment = fragment;
+		// Clear fragment highlight timeout to avoid display problems, when user clicks too fast
+		clearTimeout(this.fragmentTimeout);
 			
-			// Remove highlight after 10 seconds
-			setTimeout(function() {
-				this.fragment = "";
-			}.bind(this), 10000);
-		});
+		// Remove highlight after 10 seconds
+		this.fragmentTimeout = setTimeout(function() {
+			this.fragment = "";
+		}.bind(this), 10000);
 	}
 	
 	/**
@@ -124,7 +139,7 @@ export class GroupForumThreadComponent implements OnInit {
 				// Sort posts
 				this.sortPosts('createdTimestamp', true, false);
 				
-				console.log(this.thread);
+				console.log(this.posts);
 				
 				// Return to subscribers
 				observer.next(true);
@@ -132,6 +147,9 @@ export class GroupForumThreadComponent implements OnInit {
 		});
 	}
 	
+	/**
+	 * @desc: Sort posts (except main post) in thread
+	 */
 	public sortPosts(by: string, reverse: boolean = false, showSnackbar: boolean = true) {
 		// Remove and retun first element
 		const mainpost = this.posts.shift();
@@ -154,6 +172,9 @@ export class GroupForumThreadComponent implements OnInit {
 			this.snackbarService.showSnackbar('FORUM_SNACKBAR_SORT_CHANGED');
 	}
 	
+	/**
+	 * @desc: Toggle between thread status solved/unsolved
+	 */
 	public toggleSolved() {
 		const data = {
 			'threadId': this.thread.threadId,
@@ -221,7 +242,7 @@ export class GroupForumThreadComponent implements OnInit {
 	public vote(entityId: string, entity: any, voteValue: number) {
 		// Define data to post to server
 		const preUserVote = entity.userVote;
-		const postUserVote = preUserVote != voteValue ? voteValue : 0
+		const postUserVote = ((preUserVote != voteValue) ? voteValue : 0);
 		const data = {
 			'userId': this.userId,
 			'entityId': entityId,
@@ -386,8 +407,15 @@ export class GroupForumThreadComponent implements OnInit {
 	 * @desc: Navigate to current URL, but with other fragment (after '#')
 	 */
 	public navigateToUrlWithFragment(fragment) {
-		// Set URL to anchor of post
-		return this.router.navigate( [this.getUrlwithoutFragment()], {'fragment': fragment});
+		console.log('navigateToUrlWithFragment', fragment);
+		// Jump to anchor of fragment
+		this.viewportScroller.scrollToAnchor(fragment);
+		
+		// Highlight post
+		this.highlightFragment(fragment);
+		
+		// Finally set route
+		return this.router.navigate( [this.getUrlwithoutFragment()], { 'fragment': fragment } );
 	}
 	
 	/**
@@ -468,7 +496,7 @@ export class GroupForumThreadComponent implements OnInit {
 	 * @desc: Opens the share dialog and shows share link for specific post
 	 */
 	public sharePost(postId) {
-		this.navigateToUrlWithFragment(postId).then(()=>{
+		this.navigateToUrlWithFragment(postId).then(() => {
 			// Show share dialog after url was set
 			this.matDialog.open(ShareDialogComponent);
 		});

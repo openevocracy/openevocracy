@@ -7,7 +7,6 @@ var db = require('./database').db;
 var utils = require('./utils');
 var i18next = require('i18next');
 var strformat = require('strformat');
-var ratings = require('./routes/ratings');
 var groups = require('./routes/groups');
 
 var C = require('../shared/constants').C;
@@ -255,7 +254,7 @@ function sendEmailToMembersOfSpecificGroups(mailType, gids, tid, mailSubject, ma
 
 function sendEmailToAllActiveGroupMembers(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// Remind members that the deadline of the level (group) is coming
-	return groups.getGroupsOfSpecificLevelAsync(topic._id, topic.level).then(function(groups) {
+	return groups.helper.getGroupsOfSpecificLevelAsync(topic._id, topic.level).then(function(groups) {
 		sendEmailToMembersOfSpecificGroups(
 			mailType, _.pluck(groups, '_id'), topic._id,
 			mailSubject, mailSubjectParams, mailBody, mailBodyParams);
@@ -300,9 +299,9 @@ function sendEmailRatingReminderToGroupMembers(mailType, topic, mailSubject, mai
 		return Promise.resolve();
 	
 	// Find groups which are currently active
-	return groups.getGroupsOfSpecificLevelAsync(topic._id, topic.level).filter(function(group) {
+	return groups.helper.getGroupsOfSpecificLevelAsync(topic._id, topic.level).filter(function(group) {
 		// Find out if leader can be figured out for every group
-		return ratings.getGroupLeaderAsync(group._id).then(_.isUndefined);
+		return groups.ratings.getGroupLeaderAsync(group._id).then(_.isUndefined);
 	}).then(function(leaderless_groups) {
 		console.log('no rating in:', leaderless_groups);
 		// send mail to all group members

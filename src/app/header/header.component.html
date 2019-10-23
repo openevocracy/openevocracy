@@ -10,6 +10,10 @@
 			
 			<span class="flex-spacer"></span>
 			
+			<button mat-icon-button title="{{ 'HEADER_MAINMENU_SHARE' | translate}}" (click)="openShareDialog()">
+				<fa-icon [icon]="faShareSquare"></fa-icon>
+			</button>
+			
 			<button mat-icon-button title="{{ 'HEADER_MAINMENU_FEEDBACK' | translate}}" (click)="openFeedbackDialog()">
 				<fa-icon [icon]="faCommentAlt"></fa-icon>
 			</button>
@@ -30,10 +34,10 @@
 				<fa-icon [icon]="faCogs"></fa-icon>
 			</button>
 			<mat-menu #settings="matMenu" [overlapTrigger]="false">
-				<button mat-menu-item [routerLink]="['/user/profile', uid]">
+				<button mat-menu-item [routerLink]="['/user/profile', userId]">
 					<span>{{ 'HEADER_MAINMENU_MY_PROFILE' | translate }}</span>
 				</button>
-				<button mat-menu-item [routerLink]="['/settings', uid]">
+				<button mat-menu-item [routerLink]="['/settings', userId]">
 					<span>{{ 'HEADER_MAINMENU_SETTINGS' | translate }}</span>
 				</button>
 				<button mat-menu-item (click)="logout()">

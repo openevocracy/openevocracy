@@ -132,7 +132,7 @@ function fill_topic_user_ratings(topic) {
     }).map(function(group_member) {
         return {'ruid': group_member.uid, 'gid': group_member.gid, 'score': 3};
     // insert all ratings into database
-    }).then(db.collection('ratings').insertAsync.bind(db.collection('ratings')));
+    }).then(db.collection('group_ratings').insertAsync.bind(db.collection('group_ratings')));
 }
 
 exports.create_groups = function(req, res) {
@@ -167,7 +167,7 @@ exports.remix_groups = function(req, res) {
         'level': 0,
         'nextDeadline': Date.now()}).
     then(_.partial(fill_topic_participants,tid,10)).
-    then(_.partial(groups.createGroupsAsync,{'_id':tid})).
+    then(_.partial(groups.manage.createGroupsAsync,{'_id':tid})).
     then(_.partial(promiseWhile,
         function condition() {
             return db.collection('topics').findOneAsync({ '_id': tid }, { 'stage': true}).

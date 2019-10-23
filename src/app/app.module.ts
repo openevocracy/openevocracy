@@ -1,7 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule, APP_INITIALIZER } from '@angular/core';
-import { HttpModule } from '@angular/http';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -12,7 +11,8 @@ import 'hammerjs';
 import { MaterialModule } from './_modules/material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { QuillModule } from 'ngx-quill';
-import { StarRatingModule } from 'angular-star-rating';
+import { MentionModule } from 'angular-mentions';
+//import { StarRatingModule } from 'angular-star-rating';
 
 // Routing
 import { AppRoutingModule } from './_routing/app-routing.module';
@@ -89,6 +89,7 @@ import { UserprofileComponent } from './userprofile/userprofile.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { GroupComponent } from './group/group.component';
 import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
+import { StarratingComponent } from './starrating/starrating.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -137,7 +138,8 @@ export function loadConfig(configService: ConfigService) {
 		GroupMembersComponent,
 		GroupToolbarComponent,
 		GroupComponent,
-		GroupMemberbarComponent
+		GroupMemberbarComponent,
+		StarratingComponent
 	],
 	imports: [
 		BrowserModule,
@@ -146,12 +148,12 @@ export function loadConfig(configService: ConfigService) {
 		FontAwesomeModule,
 		AppRoutingModule,
 		PublicRoutingModule,
-		HttpModule,
 		HttpClientModule,
 		FormsModule,
 		ReactiveFormsModule,
-		QuillModule,
-		StarRatingModule.forRoot(),
+		QuillModule.forRoot(),
+		MentionModule,
+		//StarRatingModule.forRoot(),
 		TranslateModule.forRoot({
 			loader: {
 				provide: TranslateLoader,

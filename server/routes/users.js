@@ -1,28 +1,31 @@
-var _ = require('underscore');
-var bcrypt = require('bcrypt');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
-var Promise = require('bluebird');
-var validate = require('validate.js');
+// General libraries
+const _ = require('underscore');
+const bcrypt = require('bcrypt');
+const db = require('../database').db;
+const ObjectId = require('mongodb').ObjectID;
+const Promise = require('bluebird');
+const validate = require('validate.js');
 
-var passportJWT = require("passport-jwt");
-var ExtractJwt = passportJWT.ExtractJwt;
-var JwtStrategy = passportJWT.Strategy;
-var jwt = require('jsonwebtoken');
+// Passport JWT authentification
+const passportJWT = require("passport-jwt");
+const ExtractJwt = passportJWT.ExtractJwt;
+const JwtStrategy = passportJWT.Strategy;
+const jwt = require('jsonwebtoken');
 
-var mail = require('../mail');
-var utils = require('../utils');
-
-var C = require('../../shared/constants').C;
-var cfg = require('../../shared/config').cfg;
+// Own references
+const C = require('../../shared/constants').C;
+const cfg = require('../../shared/config').cfg;
+const mail = require('../mail');
+const utils = require('../utils');
 
 // Initialize jwt authentification
-var jwtOptions = {};
+let jwtOptions = {};
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
 jwtOptions.secretOrKey = ((cfg.DEBUG) ? 'debug' : bcrypt.genSaltSync(8));
 exports.jwtOptions = jwtOptions;
 
-// User online cache
+// User online cache and ping interval
+let pingInterval;
 let onlineUsers = [];
 
 var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
@@ -47,6 +50,14 @@ function savePasswordInDatabaseAsync(uid, password) {
 function getUserByMailAsync(email) {
     return db.collection('users').findOneAsync({'email': email}, {'_id': true, 'email': true, 'lang': true});
 }
+
+/**
+ * @desc: Checks if user is in onlineUsers list, returns true or false
+ */
+function isOnline(userId) {
+	return utils.containsObjectId(onlineUsers, userId);
+}
+exports.isOnline = isOnline;
 
 // POST /api/auth/login
 // @desc: logs in a user
@@ -368,55 +379,55 @@ exports.setLanguage = function(req, res) {
 
 // GET /json/user/navi
 exports.navigation = function(req, res) {
-    var uid = ObjectId(req.user._id);
-
-    var topicsPrePromise = db.collection('topic_proposals').
-        find({'source': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
-            return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
-                {'name': true, 'stage': true, 'level': true, 'nextDeadline': true}).toArrayAsync();
-        });
-    
-    var proposalsPromise = topicsPrePromise.filter(function(topic) {
-        return topic.stage == C.STAGE_PROPOSAL;
-    }).map(function(topic){
-        return db.collection('topic_proposals').
-            findOneAsync({'source': uid, 'tid': topic._id}, {'_id': true}).
-            then(function(proposal) {
-                if(proposal)
-                    return {'_id': proposal._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
-                else
-                    return null;
-            });
-    });
-    
-    var groupsPromise = topicsPrePromise.filter(function(topic) {
-        return topic.stage == C.STAGE_CONSENSUS;
-    }).map(function(topic) {
-        return db.collection('group_relations')
-            .find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
-                return db.collection('groups').findOneAsync(
-                    {'_id': { $in: _.pluck(group_members, 'gid')}, 'tid': topic._id, 'level': topic.level },
-                    {'_id': true});
-            }).then(function(group) {
-                if(group)
-                    return {'_id': group._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
-                else
-                    return null;
-            });
-    }).filter(function(group) {
-        return _.isObject(group);
-    });
-    
-    var topicsPromise = topicsPrePromise.filter(function(topic) {
-        return (topic.stage == C.STAGE_SELECTION || topic.stage == C.STAGE_PROPOSAL || topic.stage == C.STAGE_CONSENSUS);
-    });
-    
-    Promise.props({
-        'proposals': proposalsPromise,
-        'topics': topicsPromise,
-        'groups': groupsPromise
-    }).then(res.json.bind(res)).
-    catch(utils.isOwnError,utils.handleOwnError(res));
+	var uid = ObjectId(req.user._id);
+	
+	var topicsPrePromise = db.collection('topic_proposals')
+		.find({'source': uid}, {'tid': true}).toArrayAsync().then(function(tids) {
+			return db.collection('topics').find({'_id': { $in: _.pluck(tids, 'tid') }},
+				{'name': true, 'stage': true, 'level': true, 'nextDeadline': true}).toArrayAsync();
+		});
+	
+	var proposalsPromise = topicsPrePromise.filter(function(topic) {
+		return topic.stage == C.STAGE_PROPOSAL;
+	}).map(function(topic){
+		return db.collection('topic_proposals').
+			findOneAsync({'source': uid, 'tid': topic._id}, {'_id': true}).
+			then(function(proposal) {
+				if(proposal)
+					return {'_id': proposal._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
+				else
+					return null;
+		});
+	});
+	
+	var groupsPromise = topicsPrePromise.filter(function(topic) {
+		return topic.stage == C.STAGE_CONSENSUS;
+	}).map(function(topic) {
+		return db.collection('group_relations')
+		.find({'uid': uid}, {'gid': true}).toArrayAsync().then(function(group_members) {
+			return db.collection('groups').findOneAsync(
+				{'_id': { $in: _.pluck(group_members, 'gid')}, 'tid': topic._id, 'level': topic.level },
+				{'_id': true});
+		}).then(function(group) {
+			if(group)
+				return {'_id': group._id, 'name': topic.name, 'nextDeadline': topic.nextDeadline};
+			else
+				return null;
+		});
+	}).filter(function(group) {
+		return _.isObject(group);
+	});
+	
+	var topicsPromise = topicsPrePromise.filter(function(topic) {
+		return (topic.stage == C.STAGE_SELECTION || topic.stage == C.STAGE_PROPOSAL || topic.stage == C.STAGE_CONSENSUS);
+	});
+	
+	Promise.props({
+		'proposals': proposalsPromise,
+		'topics': topicsPromise,
+		'groups': groupsPromise
+	}).then(res.json.bind(res)).
+	catch(utils.isOwnError,utils.handleOwnError(res));
 };
 
 /*
@@ -541,13 +552,15 @@ exports.getNotifyUserIdsForEntity = function(entityId) {
 exports.startAliveServer = function(wss, websockets) {
 	// Initialize stream and listener for WebSocket server
 	wss.on('connection', function(ws, req) {
+		
 		// Get user token from websocket url
 		const userToken = req.url.split("/socket/alive/")[1];
 		
 		// Authenticate user and initialize ping pong
 		socketAuthentication(ws, userToken, function(userId) {
-			// Add user to online list
-			onlineUsers.push(userId);
+			// Add user to online list if not already in
+			if (!isOnline(userId))
+				onlineUsers.push(userId);
 			
 			// Set socket alive initially and every time a pong is arriving from client
 			ws.isAlive = true;
@@ -566,23 +579,23 @@ exports.startAliveServer = function(wss, websockets) {
 					ws.send('pong');
 				}
 			});
-			
-			// Initalize ping interval
-			pingInterval(wss, websockets);
 		});
 	});
 	
+	// Initalize ping interval
+	if(!pingInterval)
+		startPingInterval(wss, websockets);
+	
 	// TODO
-	// * Use pingIntervall function for wssAlive, but terminate ALL websockets (wssChat, wssPad, wssAlive), if client does not answer
-	// * Bind userId to every socket ws (like ws.userId = ...) to be able to filter out websockets to close
-	// * Shift pingIntervall to users file
-	// * Remove ping/pong from pads and chats
-	// * Create a list with all users which are connected and alive, remove users which went offline or did not respond anymore (on disconnect and if not alive anymore)
+	// * (Client) Reconnect pad and chat socket, when reconnect event is called
 };
 
-// TODO Remove utils.pingInterval
-function pingInterval(wssAlive, websockets) {
-	setInterval(function() {
+/**
+ * @desc: Pings the client in a given interval, if the client does not answer,
+ *        remove it from users online list and close all related socket connections
+ */
+function startPingInterval(wssAlive, websockets) {
+	pingInterval = setInterval(function() {
 		// Send ping to every client
 		wssAlive.clients.forEach(function(ws) {
 			// Get user id of current websocket connection
@@ -598,7 +611,7 @@ function pingInterval(wssAlive, websockets) {
 			
 			// Set isAlive to false and ping client again
 			ws.isAlive = false;
-			ws.ping(function() {});
+			ws.ping();
 			// If the client responds within 30 seconds, the isAlive status is reset to true
 		});
 	}, 30000);
@@ -613,10 +626,8 @@ function terminateUserConnections(websockets, userId) {
 		// Find connection which is dead using userId
 		const wsConnection = utils.findWhereObjectId(wss.clients, {'userId': userId});
 		// Terminate if connection was found
-		if (wsConnection) {
-			const terminated = wsConnection.terminate();
-			console.log('terminated', terminated);
-		}
+		if (wsConnection)
+			wsConnection.terminate();
 	});
 	
 	// Remove user from online list

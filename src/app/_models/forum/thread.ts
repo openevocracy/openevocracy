@@ -22,6 +22,7 @@ export class Thread {
 	lastResponse: Response;
 	notifyStatus: boolean;
 	isGroupMember: boolean;
+	wasViewed: boolean;
 	
 	/* Calculated values */
 	createdTimestamp: number;
@@ -43,6 +44,7 @@ export class Thread {
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
 		this.notifyStatus = _.isNull(res.notifyStatus) ? false : res.notifyStatus;
 		this.isGroupMember = res.isGroupMember;
+		this.wasViewed = res.wasViewed;
 		
 		// If last response is not set, use creation time as last activity (important for sorting)
 		this.lastActivityTimestamp = res.lastResponse ? res.lastResponse.timestamp : this.createdTimestamp;

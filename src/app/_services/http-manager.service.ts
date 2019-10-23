@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
-import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
@@ -9,6 +9,8 @@ import { AlertService } from '../_services/alert.service';
 import { ConfigService } from '../_services/config.service';
 
 import 'rxjs/add/observable/throw';
+import 'rxjs/add/operator/map';
+
 import * as _ from 'underscore';
 
 @Injectable()
@@ -16,7 +18,7 @@ export class HttpManagerService {
 	private cfg: any;
 
 	constructor(
-		private http: Http,
+		private http: HttpClient,
 		private router: Router,
 		private alert: AlertService,
 		private translate: TranslateService,
@@ -30,10 +32,12 @@ export class HttpManagerService {
 		if (_.isUndefined(currentUser) || _.isNull(currentUser)) {
 			return null;
 		} else {
-			var token = JSON.parse(currentUser).token;
-			let headers = new Headers({ 'Authorization': 'JWT ' + token});
-			let options = new RequestOptions({ headers: headers });
-			return options;
+			const token = JSON.parse(currentUser).token;
+			const headers = new HttpHeaders({ 'Authorization': 'JWT ' + token});
+			return { 'headers': headers };
+			
+			//let options = new HttpRequest({ 'headers': headers });
+			//return options;
 		}
 	}
 	
@@ -44,8 +48,8 @@ export class HttpManagerService {
 	}
 	
 	public getFile(url) {
-		var options = this.getOptions();
-		options.responseType = ResponseContentType.ArrayBuffer;
+		let options = this.getOptions();
+		options = _.extend(options, { 'responseType': 'blob' });
 		return this.http.get(url, options)
 			.map(res => {
 				var body = res['_body'];
@@ -83,26 +87,23 @@ export class HttpManagerService {
 			.catch(error => { return this.handleError(error); });
 	}
 	
-	public extractData(res: Response) {
-		let body = res.json();
+	public extractData(res) {
 		if(this.cfg.DEBUG)
-			console.log('http response', body);
-		return body || { };
+			console.log('http response', res);
+		return res || { };
 	}
 	
-	public handleError(raw: Response | any) {
+	public handleError(error) {
 		if(this.cfg.DEBUG)
-			console.error(raw);
+			console.error(error);
 		// If server sends 401 'Unauthorized'
-		if(_.has(raw, 'status') && raw.status == 401 && raw._body == 'Unauthorized') {
+		if(_.has(error, 'status') && error.status == 401 && error.error == 'Unauthorized') {
 			// Delete token in local storage and redirect
 			window.localStorage.removeItem('currentUser');
 			this.router.navigate(['/login']);
 			
-			return Observable.throw(raw);
+			return Observable.throw(error);
 		}
-		
-		var error = raw.json();
 		
 		// Show alert component if alert object is part of the server response
 		var self = this;

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
 
-import { Memberbar } from '../../_models/group/memberbar';
+import { Member } from '../../_models/group/memberbar';
 
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import * as _ from 'underscore';
@@ -17,8 +17,9 @@ import * as _ from 'underscore';
 export class GroupMemberbarComponent implements OnInit {
 	
 	public userId;
-	public groupMembers: Memberbar[] = [];
+	public groupMembers: Member[] = [];
 	public online = {};
+	public onlineInterval;
 	
 	public faUser = faUser;
 
@@ -37,12 +38,21 @@ export class GroupMemberbarComponent implements OnInit {
 		// Get data about members
 		this.httpManagerService.get('/json/group/memberbar/' + groupId).subscribe(res => {
 			// Create objects for every member
-			_.each(res, function(member) {
-				this.groupMembers.push(new Memberbar(member));
-			}.bind(this));
+			_.each(res, (member) => {
+				this.groupMembers.push(new Member(member));
+			});
 		});
+		
+		// Call online members every minute
+		this.onlineInterval = setInterval(() => {
+			this.httpManagerService.get('/json/group/membersonline/' + groupId).subscribe(res => {
+				// Update isOnline status of group members
+				_.each(this.groupMembers, (user) => {
+					let member = _.findWhere(this.groupMembers, { 'userId': user.userId })
+					member.isOnline = user.isOnline;
+			});
+		});
+		}, 60000);
 	}
-	
-	// TODO: Who is online?
 
 }

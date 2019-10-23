@@ -25,10 +25,8 @@ const topics = require('./server/routes/topics');
 const groups = require('./server/routes/groups');
 const forums = require('./server/routes/forums');
 const proposals = require('./server/routes/proposals');
-const ratings = require('./server/routes/ratings');
 const tests = require('./server/routes/tests');
 const pads = require('./server/routes/pads');
-const groupvis = require('./server/routes/groupvis');
 const activities = require('./server/routes/activities');
 
 // Set passport strategy
@@ -153,86 +151,95 @@ app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
 // @desc: Get proposal information
 app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
 
-/*** Group ***/
+// ##################
+// ### G R O U P  ###
+// ##################
 
 // @desc: Get detailed information about group pad
-app.get('/json/group/editor/:id', auth(), groups.query);
+app.get('/json/group/editor/:id', auth(), groups.query.editor);
 
 // @desc: Get group information
 app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 
-// ############################
-// ### G R O U P  F O R U M ###
-// ############################
+// @desc: Group main toolbar with topic and group title
+app.get('/json/group/toolbar/:id', auth(), groups.query.toolbar);
+
+// @desc: Group toolbar, showing members and their only state
+app.get('/json/group/memberbar/:id', auth(), groups.query.memberbar);
+
+// @desc: Group online status of members
+app.get('/json/group/membersonline/:id', auth(), groups.query.onlineMembers);
+
+// @desc: Group members, including ratings and previous documents
+app.get('/json/group/members/:id', auth(), groups.query.groupMembers);
+
+/* Forum */
 
 // @desc: Vote for entity (post or comment)
-app.post('/json/group/forum/vote', auth(), forums.vote);
+app.post('/json/group/forum/vote', auth(), forums.misc.vote);
 
 // @desc: Get group forum
-app.get('/json/group/forum/:id', auth(), forums.queryForum);
+app.get('/json/group/forum/:id', auth(), forums.forum.query);
 
 // @desc: Get thread
-app.get('/json/group/forum/thread/:id', auth(), forums.queryThread);
+app.get('/json/group/forum/thread/:id', auth(), forums.thread.query);
 
 // @desc: Create new thread in forum
-app.post('/json/group/forum/thread/create', auth(), forums.createThread);
+app.post('/json/group/forum/thread/create', auth(), forums.thread.create);
 
 // @desc: Edit thread in forum
-app.patch('/json/group/forum/thread/:id', auth(), forums.editThread);
+app.patch('/json/group/forum/thread/:id', auth(), forums.thread.edit);
 
 // @desc: Delete thread in forum
-app.delete('/json/group/forum/thread/:id', auth(), forums.deleteThread);
-
-// @desc: Create new post in forum thread
-app.post('/json/group/forum/post/create', auth(), forums.createPost);
-
-// @desc: Edit post in forum thread
-app.patch('/json/group/forum/post/:id', auth(), forums.editPost);
-
-// @desc: Delete post in forum thread
-app.delete('/json/group/forum/post/:id', auth(), forums.deletePost);
-
-// @desc: Create new comment for post in forum thread
-app.post('/json/group/forum/comment/create', auth(), forums.createComment);
-
-// @desc: Edit comment in forum thread
-app.patch('/json/group/forum/comment/:id', auth(), forums.editComment);
-
-// @desc: Delete comment in forum thread
-app.delete('/json/group/forum/comment/:id', auth(), forums.deleteComment);
+app.delete('/json/group/forum/thread/:id', auth(), forums.thread.delete);
 
 // @desc: Update solved state of thread
-app.post('/json/group/forum/thread/solved', auth(), forums.updateSolved);
+app.post('/json/group/forum/thread/solved', auth(), forums.thread.updateSolved);
 
-// ###################
-// ###   C H A T   ###
-// ###################
+// @desc: Create new post in forum thread
+app.post('/json/group/forum/post/create', auth(), forums.post.create);
+
+// @desc: Edit post in forum thread
+app.patch('/json/group/forum/post/:id', auth(), forums.post.edit);
+
+// @desc: Delete post in forum thread
+app.delete('/json/group/forum/post/:id', auth(), forums.post.delete);
+
+// @desc: Create new comment for post in forum thread
+app.post('/json/group/forum/comment/create', auth(), forums.comment.create);
+
+// @desc: Edit comment in forum thread
+app.patch('/json/group/forum/comment/:id', auth(), forums.comment.edit);
+
+// @desc: Delete comment in forum thread
+app.delete('/json/group/forum/comment/:id', auth(), forums.comment.delete);
+
+/* Chat */
 
 // @desc: Get chat room
-app.get('/json/chat/room/:id', auth(), chats.getChatRoomMessages);
+app.get('/json/chat/room/:id', auth(), chats.queryChatRoomMessages);
 
-// #####################
-// ### R A T I N G S ###
-// #####################
+// @desc: Send mail to all mentioned users
+app.post('/json/chat/mentioned/', auth(), chats.sendMailToMentionedUsers);
 
-app.get('/json/ratings/count', auth(), ratings.count);
-app.get('/json/ratings/:id', auth(), ratings.query);
+/* Ratings */
+
+app.get('/json/ratings/count', auth(), groups.ratings.count);
+app.get('/json/ratings/:id', auth(), groups.ratings.query);
 
 // @desc: Store a new rating value
-app.post('/json/ratings/rate', auth(), ratings.rate);
+app.post('/json/ratings/rate', auth(), groups.ratings.rate);
 
-// #############################
-// ###   G R O U P - V I S   ###
-// #############################
+/* Group vis */
 
 // @desc: Get group vis data to visualize topic hierarchy
-app.get('/json/groupvis/:id', auth(), groupvis.query);
+app.get('/json/groupvis/:id', auth(), groups.groupvis.query);
 
 // @desc: Get details about specific proposal
-app.get('/json/groupvis/proposal/:id', auth(), groupvis.getProposal);
+app.get('/json/groupvis/proposal/:id', auth(), groups.groupvis.getProposal);
 
 // @desc: Get details about specific group
-app.get('/json/groupvis/group/:id', auth(), groupvis.getGroup);
+app.get('/json/groupvis/group/:id', auth(), groups.groupvis.getGroup);
 
 // ###################
 // ###   A U T H   ###
@@ -283,17 +290,11 @@ app.post('/json/user/lang', auth(), users.setLanguage);
 // ###   M I S C   ###
 // ###################
 
-// @desc: Group toolbar
-app.get('/json/group/toolbar/:id', auth(), groups.getToolbar);
-
-// @desc: Group memberbar
-app.get('/json/group/memberbar/:id', auth(), groups.getMemberbar);
-
 // @desc: Config file
 app.get('/json/config', utils.config);
 
 // @desc: Ping server for connection test
-app.get('/json/ping', utils.ping);
+//app.get('/json/ping', utils.ping);
 
 // @desc: User feedback
 app.post('/json/feedback', auth(), users.sendFeedback);
@@ -327,6 +328,11 @@ app.all('/*', function(req, res, next) {
 // ### S E R V E R ###
 // ###################
 
+// Show unhandled rejection error (UnhandledPromiseRejectionWarning)
+process.on('unhandledRejection', (reason, p) => {
+	console.log('UnhandledPromiseRejectionWarning at ', reason);
+});
+
 // Is this necessary?
 app.use(express.static('node_modules/quill/dist'));
 
@@ -340,9 +346,11 @@ httpServer.listen(app.get('port'), function() {
 let wssPad = new WebSocket.Server({ noServer: true });
 let wssChat = new WebSocket.Server({ noServer: true });
 let wssAlive = new WebSocket.Server({ noServer: true });
+let wssBadge = new WebSocket.Server({ noServer: true });
 
 pads.startPadServer(wssPad);
 chats.startChatServer(wssChat);
+groups.badges.startGroupBadgeServer(wssBadge);
 users.startAliveServer(wssAlive, [wssPad, wssChat]);
 
 httpServer.on('upgrade', function upgrade(request, socket, head) {
@@ -356,6 +364,10 @@ httpServer.on('upgrade', function upgrade(request, socket, head) {
 	} else if (connectionType === 'chat') {
 		wssChat.handleUpgrade(request, socket, head, function done(ws) {
 			wssChat.emit('connection', ws, request);
+		});
+	} else if (connectionType === 'badge') {
+		wssBadge.handleUpgrade(request, socket, head, function done(ws) {
+			wssBadge.emit('connection', ws, request);
 		});
 	} else if (connectionType === 'alive') {
 		wssAlive.handleUpgrade(request, socket, head, function done(ws) {

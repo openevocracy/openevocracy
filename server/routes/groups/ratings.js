@@ -1,10 +1,12 @@
 // General libraries
-var _ = require('underscore');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
+const _ = require('underscore');
+const ObjectId = require('mongodb').ObjectID;
 
 // Own references
-var C = require('../../shared/constants').C;
+const C = require('../../../shared/constants').C;
+const db = require('../../database').db;
+const utils = require('../../utils');
+const helper = require('./helper');
 
 // NOTE Currently not in use
 // called if ratings are queried, responds with rating from database
@@ -14,7 +16,7 @@ exports.query = function(req, res) {
 	var userId = ObjectId(req.user._id);
 	var type = parseInt(req.params.type, 10);
 	
-	db.collection('ratings')
+	db.collection('group_ratings')
 		.findOneAsync({ 'groupId': groupId, 'userId': userId, 'ratedUserId': ratedUserId, 'type': type })
 		.then(res.json.bind(res));
 };
@@ -26,7 +28,7 @@ exports.count = function(req, res) {
 	var groupId = ObjectId(req.body.gid);
 	var type = parseInt(req.params.type, 10);
 	
-	db.collection('ratings')
+	db.collection('group_ratings')
 		.countAsync({ 'groupId': groupId, 'ratedUserId': ratedUserId, 'type': type })
 		.then(res.json.bind(res));
 };
@@ -35,25 +37,28 @@ exports.count = function(req, res) {
  * desc: Save rating
  */
 exports.rate = function(req, res) {
-	var ratedUserId = ObjectId(req.body.ratedUserId); // The user who was rated
-	var groupId = ObjectId(req.body.groupId);
-	var userId = ObjectId(req.user._id);
-	console.log(ratedUserId, groupId, userId);
-	var type = parseInt(req.body.type, 10);
-	var score = parseInt(req.body.score, 10);
+	const ratedUserId = ObjectId(req.body.ratedUserId);  // The user who was rated
+	const groupId = ObjectId(req.body.groupId);
+	const userId = ObjectId(req.user._id);
+	const type = parseInt(req.body.type, 10);
+	const score = parseInt(req.body.score, 10);
 	
-	// Return 402: score is not between 1 and 5
-	if(score < 0 || score > 5) {
-		res.sendStatus(402);
-		return;
-	}
-    
-	db.collection('ratings').updateAsync(
-		{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type },
-		{ $set: { 'score': score } }, { upsert: true })
-	.then(function(rating) {
-		return true;
-	}).then(res.json.bind(res));
+	// Check if request is valid and store data
+	helper.getGroupMembersAsync(groupId).then((members) => {
+		// Check if user is member of group, otherwise reject
+		const member = utils.findWhereObjectId(members, { 'userId': userId });
+		if (_.isUndefined(member))
+			return utils.rejectPromiseWithMessage(403, 'FORBIDDEN');
+			
+		// Check if score is between 1 and 5
+		if(score < 1 || score > 5)
+			return utils.rejectPromiseWithMessage(400, 'BAD_REQUEST');
+		
+		// Store rating in database
+		return db.collection('group_ratings').updateAsync(
+				{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type },
+				{ $set: { 'score': score } }, { upsert: true });
+	}).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 /*
@@ -61,7 +66,7 @@ exports.rate = function(req, res) {
  * @param: group id
  */
 exports.getGroupLeaderAsync = function(groupId) {
-	return db.collection('ratings')
+	return db.collection('group_ratings')
 		.find({ 'groupId': groupId }, { 'ratedUserId': true, 'score': true }).toArrayAsync()
 		.then(function(ratings) {
 			if(_.isEmpty(ratings))
@@ -90,10 +95,28 @@ exports.getGroupLeaderAsync = function(groupId) {
 	});
 };
 
+exports.getMemberRatingsAsync = function(ratedUserId, groupId, userId) {
+	return db.collection('group_ratings').find(
+		{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId }, { '_id': false, 'type': true, 'score': true })
+	.toArrayAsync().then(function(ratings) {
+		// Create array with all rating types
+		const types = [C.RATING_KNOWLEDGE, C.RATING_COOPERATION, C.RATING_ENGAGEMENT];
+		// Map through all types
+		return _.map(types, (type) => {
+			// Have a look if rating for current type is present
+			const rating = _.findWhere(ratings, { 'type': type });
+			// If rating is available, set rating to current score, if not, just set it to zero
+			const score = rating ? rating.score : 0;
+			// Return rating
+			return { 'type': type, 'score': score };
+		});
+	});
+};
+
 exports.getMemberRatingAsync = function(ratedUserId, groupId, userId, type) {
-	return db.collection('ratings').findOneAsync(
+	return db.collection('group_ratings').findOneAsync(
 		{'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type}, {'score': true}).
 	then(function(rating) {
 		return rating ? rating.score : 0;
 	});
-}
+};

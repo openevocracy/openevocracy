@@ -10,8 +10,9 @@ header {
 	height: $header-height;
 	color: $white;
 	font-size: 1.2rem;
-	position: fixed;
-	right: 0; left: 0; top: 0;
+	position: relative;
+	/*position: fixed;
+	right: 0; left: 0; top: 0;*/
 	z-index: 500;
 }
 

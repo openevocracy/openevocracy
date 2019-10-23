@@ -1,23 +1,21 @@
-var _ = require('underscore');
-var db = require('../database').db;
-var ObjectId = require('mongodb').ObjectID;
-var Promise = require('bluebird');
-//var requirejs = require('requirejs');
-var fs = Promise.promisifyAll(require('fs'));
-var path = require('path');
-var appRoot = require('app-root-path');
-var AsyncLock = require('async-lock');
-var lock = new AsyncLock();
+// General libraries
+const _ = require('underscore');
+const ObjectId = require('mongodb').ObjectID;
+const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
+const path = require('path');
+const appRoot = require('app-root-path');
+const AsyncLock = require('async-lock');
+const lock = new AsyncLock();
 
-var C = require('../../shared/constants').C;
-//var cfg = requirejs('public/js/setup/configs');
-var cfg = require('../../shared/config').cfg;
-var groups = require('./groups');
-var pads = require('./pads');
-var utils = require('../utils');
-var mail = require('../mail');
-
-var activities = require('./activities');
+// Own references
+const C = require('../../shared/constants').C;
+const cfg = require('../../shared/config').cfg;
+const db = require('../database').db;
+const utils = require('../utils');
+const groups = require('./groups');
+const pads = require('./pads');
+const activities = require('./activities');
 
 function calculateDeadline(nextStage, prevDeadline, levelDuration) {
     // define standard parameter
@@ -51,7 +49,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
     // it will get a default value in calculateDeadline if not set (for testing purposes)
     var prevDeadline = topic.nextDeadline;
     
-    return groups.remixGroupsAsync(topic).then(function(result) {
+    return groups.manage.remixGroupsAsync(topic).then(function(result) {
         var update_set_promise;
         switch(result.nextStage) {
         case C.STAGE_CONSENSUS:
@@ -66,7 +64,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
 				
 				// get the pad id of final document
 				// e.g. the proposal pad id of the group in the last level
-				var finalDocumentHtmlPromise = db.collection('groups')
+				const finalDocumentHtml_promise = db.collection('groups')
 					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
 					.then(function(group) {
 						return db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
@@ -75,7 +73,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
 				    });
             
             // Get pad PDF and save it in file system
-            finalDocumentHtmlPromise.then(pads.getPadPDFAsync).then(function(data) {
+            finalDocumentHtml_promise.then(pads.getPadPDFAsync).then(function(data) {
                 var filename = path.join(appRoot.path, 'files/documents', topicId+'.pdf');
                 return fs.writeFileAsync(filename,data);
             });
@@ -85,32 +83,21 @@ function manageConsensusStageAsync(topic, levelDuration) {
                 'stage': (topic.stage = C.STAGE_PASSED),
                 'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_PASSED,prevDeadline)),
                 'stagePassedStarted': Date.now(),
-                'finalDocument': finalDocumentHtmlPromise
+                'finalDocument': finalDocumentHtml_promise
             };
                         
-            // Add activity for creator
-            var actPromise = activities.actcreate(topic.owner, C.ACT_TOPIC_COMPLETE, topicId);
+            // Add activity for author
+            const authorActivity_promise = activities.storeActivity(topic.owner, C.ACT_TOPIC_COMPLETE, topicId);
             
-            // Add activities for participants
-				var actPromise2 = db.collection('topic_votes')
+            // Add activities for interested persons (persons who voted for the respective topics)
+				const interestedActivity_promise = db.collection('topic_votes')
 					.find({'topicId': topicId}, {'userId': true}).toArrayAsync()
 					.then(function(userVotes) {
-							console.log("userVotes", userVotes);
-							_.each(userVotes, function(userId) {
-								activities.actcreate(userId, C.ACT_TOPIC_COMPLETE, topicId);
+							_.each(userVotes, function(el) {
+									if (!utils.equalId(el.userId, topic.owner)) // if activity has not yet been added
+										activities.storeActivity(el.userId, C.ACT_TOPIC_COMPLETE, topicId);
 								});
 						});
-		
-		
-				// Final document
-				var finalDocumentHtmlPromise = db.collection('groups')
-					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
-					.then(function(group) {
-						return db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
-				    }).then(function(docId) {
-				    	return pads.getPadHTMLAsync('group', docId);
-				    });
-		
 		
             break;
         case C.STAGE_REJECTED:
@@ -203,7 +190,7 @@ function manageTopicStateAsync(topic) {
 			// Set the next deadline here, so we can use it in createGroupsAsync.
 			topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
 			
-			return groups.createGroupsAsync(topic).then(function(groups) {
+			return groups.manage.createGroupsAsync(topic).then(function(groups) {
 				var stageStartedEntryName;
 				
 				if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {
@@ -392,7 +379,7 @@ exports.getTopiclist = function(req, res) {
 	manageAndListTopicsAsync().then(function(topics) {
 		// Promise.map does not work above
 		Promise.map(topics, _.partial(appendTopicInfoAsync, _, userId, false)).then(res.json.bind(res));
-	});
+	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 /*

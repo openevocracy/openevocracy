@@ -2,14 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogConfig } from "@angular/material";
 
+import { ShareDialogComponent } from '../dialogs/share/share.component';
+
 import { AlertService } from '../_services/alert.service';
 import { UserService } from '../_services/user.service';
 import { LanguageService } from '../_services/language.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 
-import { faCommentAlt } from '@fortawesome/free-solid-svg-icons';
-import { faGlobe } from '@fortawesome/free-solid-svg-icons';
-import { faCogs } from '@fortawesome/free-solid-svg-icons';
+import { faCommentAlt, faGlobe, faCogs, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 
 import { FeedbackDialogComponent } from '../dialogs/feedback/feedback.component';
 
@@ -23,11 +23,12 @@ import * as _ from 'underscore';
 
 export class HeaderComponent implements OnInit {
 	
-	public uid: string;
+	public userId: string;
 	
 	public faCommentAlt = faCommentAlt;
 	public faGlobe = faGlobe;
 	public faCogs = faCogs;
+	public faShareSquare = faShareSquare;
 	
 	constructor(
 		private dialog: MatDialog,
@@ -35,13 +36,17 @@ export class HeaderComponent implements OnInit {
 		private httpManagerService: HttpManagerService,
 		private translateService: TranslateService,
 		private userService: UserService,
-		private languageService: LanguageService) {
-		
-		this.uid = this.userService.getUserId();
+		private languageService: LanguageService
+	) {
+		// Get user id from current user
+		this.userId = this.userService.getUserId();
 	}
 	
 	ngOnInit() {}
 	
+	/**
+	 * @desc: Open feedback dialog
+	 */
 	public openFeedbackDialog() {
 		const dialogConfig = new MatDialogConfig();
 		
@@ -63,14 +68,27 @@ export class HeaderComponent implements OnInit {
     });
 	}
 
+	/**
+	 * @desc: Change language in client and in database (settings of user)
+	 */
 	public setLanguage(key) {
 		this.languageService.setLanguage(key);
 	}
 	
+	/**
+	 * @desc: Logout from evocracy
+	 */
 	public logout() {
 		let self = this;
 		
 		// Call logout function in user service
 		this.userService.logout();
+	}
+	
+	/**
+	 * @desc: Open share dialog
+	 */
+	public openShareDialog() {
+		this.dialog.open(ShareDialogComponent);
 	}
 }

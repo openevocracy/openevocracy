@@ -11,7 +11,7 @@
 </mat-toolbar>
 
 <div class="threads container">
-	<section class="flex" *ngFor="let thread of threads" [ngClass]="{'closed': thread.closed, 'open': !thread.closed}">
+	<section class="flex" *ngFor="let thread of threads" [ngClass]="{ 'closed': thread.closed, 'open': !thread.closed, 'viewed': thread.wasViewed }">
 		<div>
 			<h2 [routerLink]="['/group', groupId, 'forum', 'thread', thread.threadId]">
 				<fa-icon *ngIf="thread.private" class="private" [icon]="faLock" title="{{ 'FORUM_THREAD_PRIVATE' | translate }}"></fa-icon>

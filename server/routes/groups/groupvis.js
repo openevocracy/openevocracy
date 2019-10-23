@@ -1,12 +1,12 @@
 // General libraries
 var _ = require('underscore');
-var db = require('../database').db;
 var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 
 // Own references
-var utils = require('../utils');
-var pads = require('./pads');
+var db = require('../../database').db;
+var utils = require('../../utils');
+var pads = require('../pads');
 
 /*
  * @desc: get group relations for a specific group as array

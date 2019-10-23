@@ -16,7 +16,7 @@ const publicChildRoutes: Routes = [
 
 const publicRoutes: Routes = [
 	{ path: '', component: PublicComponent, children: publicChildRoutes },
-	{ path: '', loadChildren: './app-routing.module#AppRoutingModule'/*, data: { preload: true }*/ }
+	{ path: '', loadChildren: () => import('./app-routing.module').then(m => m.AppRoutingModule)/*, data: { preload: true }*/ }
 ];
 
 @NgModule({

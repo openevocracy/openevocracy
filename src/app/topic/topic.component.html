@@ -32,7 +32,6 @@
 		</button>
 		<mat-menu #more="matMenu" [overlapTrigger]="false">
 			<button mat-menu-item [routerLink]="['/user/profile', userId]"><fa-icon [icon]="faUser"></fa-icon> {{ 'TOPIC_BUTTON_AUTHOR' | translate }}</button>
-			<button mat-menu-item (click)="openDialog()"><fa-icon [icon]="faShareSquare"></fa-icon> {{ 'TOPIC_BUTTON_SHARE' | translate }}</button>
 		</mat-menu>
 	</div>
 </mat-toolbar>

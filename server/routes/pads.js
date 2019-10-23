@@ -1,30 +1,31 @@
 // General libraries
-var _ = require('underscore');
-var Promise = require('bluebird');
-var ObjectId = require('mongodb').ObjectID;
-var db = require('../database').db;
-var pdf = require('phantom-html2pdf');
+const _ = require('underscore');
+const Promise = require('bluebird');
+const ObjectId = require('mongodb').ObjectID;
+const pdf = require('phantom-html2pdf');
 
 // Collaborative libraries for pad synchronization
-var ShareDB = require('sharedb');
-var richText = require('rich-text');
-var WebSocketJSONStream = require('websocket-json-stream');
-var ShareDBAccess = require('sharedb-access');
-var sharedb = require('../database').sharedb;
-var QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
+const ShareDB = require('sharedb');
+const richText = require('rich-text');
+const WebSocketJSONStream = require('websocket-json-stream');
+const ShareDBAccess = require('sharedb-access');
+const sharedb = require('../database').sharedb;
+const QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
 
 // Own references
-var users = require('./users');
-var utils = require('../utils');
+const db = require('../database').db;
+const utils = require('../utils');
+const groups = require('./groups');
+const users = require('./users');
 
 // ShareDB backend and connection
-var backend;
-var connection;
+let backend;
+let connection;
 
 // Pads cache
-var pads_topic_description = {};
-var pads_proposal = {};
-var pads_group = {};
+let pads_topic_description = {};
+let pads_proposal = {};
+let pads_group = {};
 
 /*
  * @desc: Create shareDB connection and define socket events
@@ -35,7 +36,13 @@ exports.startPadServer = function(wss) {
 	ShareDB.types.register(richText.type);
 	
 	// Create shareDB backend with mongo adapter
-	backend = new ShareDB({'db': sharedb});
+	backend = new ShareDB({
+		'db': sharedb,
+		// The following options serve only to squelch errors.
+		// It should be possible to remove these when ShareDB 1.0 is released.
+		 disableDocAction: true,
+		 disableSpaceDelimitedActions: true
+	});
 	
 	// Register ShareDBAccess middleware
 	ShareDBAccess(backend);
@@ -52,12 +59,6 @@ exports.startPadServer = function(wss) {
 			// Add userId to ws connection
 			ws.userId = userId;
 		});
-		
-		// Set socket alive initially and every time a pong is arriving
-		/*ws.isAlive = true;
-		ws.on('pong', function() {
-			ws.isAlive = true;
-		});*/
 	});
 	
 	// Middleware to hook into connection process
@@ -74,9 +75,6 @@ exports.startPadServer = function(wss) {
 	
 	// Establish connection to shareDB
 	connection = backend.connect();
-	
-	// Initalize ping interval
-	//utils.pingInterval(wss);
 };
 
 /*
@@ -152,25 +150,38 @@ function initializeAccessControl() {
 		return true;
 	});
 	backend.allowUpdate('docs_group', function(docId, oldDoc, newDoc, ops, session) {
+		let currentPad_promise;
 		// If user is member of group and document is not expired
 		if (pads_group[docId]) {
-			// If pad is already in cache, check condition
-			return checkOwnerAndExpirationGroup(session, pads_group[docId]);
+			// If pad is already in cache, just use it
+			currentPad_promise = Promise.resolve(pads_group[docId]);
 		} else {
-			// If pad is not in cache, get it from database, store it in cache and check condition
-			return Promise.resolve(db.collection('pads_group').findOneAsync({'docId': ObjectId(docId)}, { 'groupId': true, 'expiration': true })
+			// If pad is not in cache, get it from database, store it in cache and use it
+			currentPad_promise = db.collection('pads_group').findOneAsync({'docId': ObjectId(docId)}, { 'groupId': true, 'expiration': true })
 				.then(function(pad) {
-					var members_promise = db.collection('group_relations').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
+					const members_promise = db.collection('group_relations').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
 					return Promise.join(pad, members_promise);
 				}).spread(function(pad, members) {
 					// Add owners to pad
 					pad.ownerIds = _.pluck(members, 'userId');
 					// Store pad in cache
 					pads_group[docId] = pad;
-					// Check condition
-					return checkOwnerAndExpirationGroup(session, pad);
-			}));
+					// Return pad
+					return pad;
+			});
 		}
+		
+		return currentPad_promise.then((currentPad) => {
+			// Check if user is owner and doc is not expired, finally return
+			if (checkOwnerAndExpirationGroup(session, currentPad)) {
+				// Inform group toolbar badge about update
+				groups.badges.updateEditorBadge(session.userId, currentPad);
+				// Return true and allow update
+				return true;
+			}
+			
+			return false;
+		});
 	});
 }
 

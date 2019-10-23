@@ -1,0 +1,22 @@
+/* Import variables */
+@import "~styles/variables";
+
+.second-toolbar .container { text-align: center; }
+.second-toolbar button.active { background-color: rgba(255,255,255,0.2); }
+
+.box { background-color: $white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); margin-top: 20px; padding: 0; }
+.box-pad { margin-bottom: 20px; }
+
+.header { height: 44px; padding: 0 25px; border-bottom: 1px solid $grey400; }
+.header h3 { line-height: 44px; font-size: 16px; font-weight: 500; margin: 0; padding: 0; }
+.header button { height: 36px; margin-top: 4px; }
+
+/* Rating */
+
+table { margin: 0 auto; }
+.content.rating { padding: 25px 0; }
+.content.rating td { padding: 10px 25px; text-align: center; }
+
+/* Pad */
+
+.content.pad { padding: 0 25px; min-height: 200px; }

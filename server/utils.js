@@ -1,7 +1,4 @@
 const _ = require('underscore');
-const rp = require('request-promise');
-const db = require('./database').db;
-const ObjectId = require('mongodb').ObjectID;
 const cfg = require('../shared/config').cfg;
 const fs = require('fs');
 
@@ -128,23 +125,6 @@ exports.countHtmlWords = function(html) {
 };
 
 /*
- * @desc: ping all socket clients
- * @params:
- *    - wss: websocket
- */
-/*exports.pingInterval = function(wss) {
-	setInterval(function() {
-		// Send ping to every client
-		wss.clients.forEach(function(ws) {
-			if (ws.isAlive === false) return ws.terminate();
-			
-			ws.isAlive = false;
-			ws.ping(function() {});
-		});
-	}, 30000);
-};*/
-
-/*
  * @desc: Send config file, but omit private configuration information
  *        (e.g. mail credentials)
  */
@@ -155,10 +135,10 @@ exports.config = function(req, res) {
 /*
  * @desc: ping request from client, response with timestamp
  */
-exports.ping = function(req, res) {
+/*exports.ping = function(req, res) {
 	var now = Date.now();
 	res.json({'timestamp': now});
-};
+};*/
 
 
 /**
@@ -210,4 +190,14 @@ exports.withoutObjectId = function(arr, idToRemove) {
 	return arr.filter(function(el) {
 		return !el.equals(idToRemove);
 	});
+};
+
+/**
+ * @desc: Replace all occurencies of 'find' in a string 'str' and replace it by 'replace'
+ */
+exports.replaceAll = function(str, find, replace) {
+	// Make search safe against special characters in regular expressions
+	const findSave = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+	// Replace all
+	return str.replace(new RegExp(findSave, 'g'), replace);
 };

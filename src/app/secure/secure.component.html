@@ -1,4 +1,6 @@
 <div id="lockscreen" *ngIf="offline"></div>
-<app-header></app-header>
-<div id="wrapper"><router-outlet></router-outlet></div>
+<div id="top">
+	<app-header></app-header>
+	<router-outlet></router-outlet>
+</div>
 <app-footer></app-footer>

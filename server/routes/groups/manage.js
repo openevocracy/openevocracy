@@ -1,25 +1,27 @@
 // General libraries
 const _ = require('underscore');
-const db = require('../database').db;
 const ObjectId = require('mongodb').ObjectID;
 const Promise = require('bluebird');
 const Chance = require('chance');
-const Color = require('color');
 
 // Own references
-const C = require('../../shared/constants').C;
-const cfg = require('../../shared/config').cfg;
+const C = require('../../../shared/constants').C;
+const cfg = require('../../../shared/config').cfg;
+const db = require('../../database').db;
+const mail = require('../../mail');
+const utils = require('../../utils');
+const topics = require('../topics');
+const pads = require('../pads');
+const users = require('../users');
+const activities = require('../activities');
 const ratings = require('./ratings');
-const topics = require('./topics');
-const pads = require('./pads');
-const users = require('./users');
-const mail = require('../mail');
-const utils = require('../utils');
+const badges = require('./badges');
+const helper = require('./helper');
 
-function getGroupMembersAsync(groupId) {
-	return db.collection('group_relations').find({'groupId': groupId}).toArrayAsync();
-}
-
+/**
+ * @desc: Calculate number of groups in topic, depending on group size
+ * 		 Important for assigning participants to groups
+ */
 function calculateNumberOfGroups(numTopicParticipants) {
 	
 	// TODO throw error if group size is smaller than 3
@@ -31,6 +33,9 @@ function calculateNumberOfGroups(numTopicParticipants) {
 	return numGroups;
 }
 
+/**
+ * @desc: Randomly assigns participants to groups
+ */
 function assignParticipantsToGroups(participants) {
 	// Shuffle topic participants
 	_.shuffle(participants);
@@ -57,19 +62,6 @@ function assignParticipantsToGroups(participants) {
 	
 	return groups;
 }
-
-/*
- * @desc: Generate username from chance library, using groupId and userId as seed
- */
-function generateUserName(groupId, userId) {
-	// Create new chance object, which seed exists out of groupId and userId
-   const seed = groupId.toString()+userId.toString();
-   const chanceName = new Chance(seed);
-   
-   // Generate name and return
-   return chanceName.first();
-}
-exports.generateUserName = generateUserName;
 
 /*
  * @desc: Store group, group pad and members in database
@@ -124,15 +116,29 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 	const forum = { '_id': forumId, 'groupId': groupId };
 	const createForum_promise = db.collection('forums').insertAsync(forum);
 	
+	// Sample colors for users
+	const userColors = helper.generateMemberColors(groupId, _.pluck(groupRelations, 'userId'));
+	console.log('storeGroupAsync userColors', userColors);
+	
 	// Store group members
-	const members_promise = Promise.map(groupRelations, function(rel) {
+	const members_promise = Promise.map(groupRelations, function(rel, index) {
 		// Enable email notifications of member for the forum
 		const enableNotify_promise = users.enableEmailNotifyAsync(rel.userId, forumId);
 		
 		// Add member to group relations collection
 		const prevGroupId = _.isUndefined(rel.prevGroupId) ? null : rel.prevGroupId;
-		const insert = { 'groupId': groupId, 'userId': rel.userId, 'prevGroupId': prevGroupId, 'prevPadId': rel.prevPadId, 'lastActivity': -1 };
+		const insert = {
+			'groupId': groupId,
+			'userId': rel.userId,
+			'userColor': userColors[index],
+			'prevGroupId': prevGroupId,
+			'prevPadId': rel.prevPadId,
+			'lastActivity': -1
+		};
 		const groupRelations_promise = db.collection('group_relations').insertAsync(insert);
+		
+		// Set members badge
+		badges.updateMembersBadge(rel.userId, groupId);
 		
 		// Return promises
 		return Promise.join(enableNotify_promise, groupRelations_promise);
@@ -141,15 +147,6 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 	return Promise.join(createPadProposal_promise, createGroup_promise, createForum_promise, members_promise);
 }
 
-/**
- * @desc: Check if specific proposal is valid, return true or false
- * @param:
- *     html: text of the proposal as html
- */
-function isProposalValid(html) {
-	// Valid if number of words in html is greater than configured threshold
-	return utils.countHtmlWords(html) >= cfg.MIN_WORDS_PROPOSAL;
-}
 
 /**
  * @desc: initial creation of groups after proposal stage
@@ -164,7 +161,7 @@ exports.createGroupsAsync = function(topic) {
 		.map(function(pad) {
 			// Get html of doc and add valid status to pad object
 			return pads.getPadHTMLAsync('proposal', pad.docId).then(function(html) {
-				return _.extend(pad, {'valid': isProposalValid(html)});
+				return _.extend(pad, {'valid': helper.isProposalValid(html)});
 			});
 		}).then(function(pads) {
 			// Filter by valid status and return id's of users
@@ -223,26 +220,6 @@ exports.createGroupsAsync = function(topic) {
 	return Promise.join(createGroupsPromise, storeValidParticipantsPromise).get(0);
 };
 
-function getGroupsOfSpecificLevelAsync(topicId, level) {
-    return db.collection('groups').find({ 'topicId': topicId, 'level': level }).toArrayAsync();
-}
-exports.getGroupsOfSpecificLevelAsync = getGroupsOfSpecificLevelAsync;
-
-function getValidGroupsOfSpecificLevelAsync(topicId, level) {
-	return getGroupsOfSpecificLevelAsync(topicId, level).filter(function (group) {
-		return db.collection('pads_group').findOneAsync({'groupId': group._id})
-			.then(function(proposal) {
-				// Get HTML from document
-				proposal.body = pads.getPadHTMLAsync('group', proposal.docId);
-				return Promise.props(proposal);
-			}).then(function(proposal) {
-				console.log('html', proposal.body);
-				console.log('isValid', isProposalValid(proposal.body));
-				// Check if proposal is valid
-				return isProposalValid(proposal.body);
-			});
-	});
-}
 
 /**
  * @desc: Create groups after level is finished
@@ -255,7 +232,7 @@ exports.remixGroupsAsync = function(topic) {
     var topicId = topic._id;
     
     // Get groups with highest level
-    var groups_promise = getValidGroupsOfSpecificLevelAsync(topicId, topic.level);
+    var groups_promise = helper.getValidGroupsOfSpecificLevelAsync(topicId, topic.level);
     
 	// Get group leaders
 	var leaders_promise = groups_promise.map(function(group_in) {
@@ -266,19 +243,19 @@ exports.remixGroupsAsync = function(topic) {
 				return Promise.resolve(leader);
 			
 			// If group leader is undefined, pick one randomly
-			return getGroupMembersAsync(groupId).then(function(members) {
+			return helper.getGroupMembersAsync(groupId).then(function(members) {
 				return Promise.resolve(_.sample(members).userId);
 			});
 		});
 	});
+	
     
 	return Promise.join(groups_promise, leaders_promise).spread(function(groups, leaders) {
 		/*
 		 * If there is NO group in the current topic level, there was not only one valid document in the current level
 		 */
-		if(_.size(groups) == 0) {
-			return Promise.reject({'reason': 'REJECTED_NO_VALID_GROUP_PROPOSAL'});
-		}
+		if(_.size(groups) == 0)
+			return Promise.reject({ 'reason': 'REJECTED_NO_VALID_GROUP_PROPOSAL' });
 		
 		/*
 		 * If there is only ONE group in the current topic level, then the topic is finished/passed
@@ -306,6 +283,14 @@ exports.remixGroupsAsync = function(topic) {
        */
 		// Assign members to groups
 		var groupsMemberIds_promise = assignParticipantsToGroups(leaders);
+		
+		// Add activities for all delegates
+		const createActivity_promise = groupsMemberIds_promise.then((leaders) => {
+			_.each(leaders, function(el) {
+				console.log("Leader", el)
+				activities.storeActivity(el, C.ACT_ELECTED_DELEGATE, topicId);
+			});
+		});
 		
 		// Insert all groups into database
 		var nextLevel = topic.level+1;
@@ -355,7 +340,7 @@ exports.remixGroupsAsync = function(topic) {
             
 			return Promise.join(sendMail_promise, storeGroup_promise);
 		}).return({'nextStage': C.STAGE_CONSENSUS});  // We stay in consensus stage
-	}).catch(utils.isOwnError,function(error) {
+	}).catch(function(error) {
 		return {
 			'nextStage': C.STAGE_REJECTED,
 			'rejectedReason': error.reason
@@ -363,188 +348,3 @@ exports.remixGroupsAsync = function(topic) {
 	});
 };
 
-/**
- * @desc: Gets all data necessary for the group toolbar
- */
-exports.getToolbar = function(req, res) {
-	const groupId = ObjectId(req.params.id);
-	const userId = ObjectId(req.user._id);
-	
-	const group_promise = db.collection('groups')
-		.findOneAsync({ '_id': groupId }).then((group) => {
-			return { 'name': group.name, 'topicId': group.topicId };
-	});
-	
-	const topic_promise = group_promise.then((group) => {
-		return db.collection('topics')
-			.findOneAsync({ '_id': group.topicId }).then((topic) => {
-				return { 'title': topic.name };
-		});
-	});
-		
-	Promise.join(group_promise, topic_promise).spread((group, topic) => {
-		return { 'groupName': group.name, 'topicTitle': topic.title };
-	}).then(res.json.bind(res));
-};
-
-/**
- *  @desc: Gets the member bar, which function is to:
- * 		  - show the name and color of every member
- * 		  - highligh which member the current user is
- * 		  - show the online status of every member
- */
- exports.getMemberbar = function(req, res) {
-	const groupId = ObjectId(req.params.id);
-	const userId = ObjectId(req.user._id);
-	
-	// Get group members
-	const groupRelations_promise = getGroupMembersAsync(groupId);
-	
-	// Get number of group members
-	const numGroupMembers_promise = groupRelations_promise.then(function(group_members) {
-		return _.size(group_members);
-	});
-	
-	// Generate group specific color_offset
-	const chanceOffset = new Chance(groupId.toString());
-	const offset = chanceOffset.integer({min: 0, max: 360});
-	
-	// Get group members
-	groupRelations_promise.map(function(relation, index) {
-		
-		// Generate member color
-		const memberColor_promise = numGroupMembers_promise.then(function(numMembers) {
-			const hue = offset + index*(360/numMembers);
-			return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
-		});
-      
-      return Promise.props({
-      	'userId': relation.userId,
-			'name': generateUserName(groupId, relation.userId),
-			'color': memberColor_promise
-      });
-	}).then(res.json.bind(res));
-};
-
-/* @desc: Gets group editor information, necessary information are:
- *        - groupId, topicId, docId (can be found in pad)
- *        - level, name, nextDeadline (can be found in topic)
- *        - chatRoomId (can be found in group)
- *        - isLastGroup
- *        - members (includes: color, name, userId, ratingIntegration, ratingKnowledge)
- */
-exports.query = function(req, res) {
-	const groupId = ObjectId(req.params.id);
-	const userId = ObjectId(req.user._id);
-	
-	// Get docId, groupId and topicId from group pad
-	const pad_promise = db.collection('pads_group').findOneAsync({'groupId': groupId});
-	
-	// Everything else depends on pad
-	pad_promise.then(function(pad) {
-		// Define some variables for simpler and more intuitie use
-		const topicId = pad.topicId;
-		
-		/*
-		 * Simple stuff
-		 */
-		
-		// Get topic name
-		const topic_promise = db.collection('topics').findOneAsync({'_id': topicId}, {'name': true});
-		
-		// Get chatRoomId from group
-		const group_promise = db.collection('groups').findOneAsync({'_id': pad.groupId});
-		
-		// Count number of groups in current level to obtain if we are in last group (last level)
-		const isLastGroup_promise = group_promise.then(function(currentGroup) {
-			return db.collection('groups').countAsync({ 'topicId': currentGroup.topicId, 'level': currentGroup.level })
-				.then(function(numGroupsInCurrentLevel) {
-					return (numGroupsInCurrentLevel == 1) ? true : false;
-			});
-		});
-		
-		/*
-		 * Group Members
-		 */
-		
-		// Get group members
-		const groupRelations_promise = getGroupMembersAsync(groupId);
-		
-		// Get number of group members
-		const num_group_members_promise = groupRelations_promise.then(function(group_members) {
-			return _.size(group_members);
-		});
-		
-		// Generate group specific color_offset
-		const chanceOffset = new Chance(groupId.toString());
-		const offset = chanceOffset.integer({min: 0, max: 360});
-		
-		// Get previous pads
-		const prevPads_promise = Promise.join(group_promise, groupRelations_promise).spread(function(group, groupRelations) {
-			var prevPadIds = _.pluck(groupRelations, 'prevPadId');
-			if (group.level == 0) {
-				return db.collection('pads_proposal')
-					.find({ '_id': {$in: prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
-			} else {
-				return db.collection('pads_group')
-					.find({ '_id': {$in: prevPadIds} }, { 'groupId': true, 'docId': true }).toArrayAsync();
-			}
-		});
-		
-		// Get group members
-		const groupMembersDetails_promise = groupRelations_promise.map(function(relation, index) {
-			
-			// Generate member color
-			const memberColor_promise = num_group_members_promise.then(function(numMembers) {
-				const hue = offset + index*(360/numMembers);
-				return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
-			});
-         
-         // Get proposal html
-         const prevPadHtml_promise = Promise.join(group_promise, prevPads_promise).spread(function(group, prevPads) {
-         	if (group.level == 0) {
-	         	const prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': relation.userId});
-	         	return pads.getPadHTMLAsync('proposal', prevUserPad.docId);
-         	} else {
-         		const prevGroupPad = utils.findWhereObjectId(prevPads, {'groupId': relation.prevGroupId});
-         		return pads.getPadHTMLAsync('group', prevGroupPad.docId);
-         	}
-         });
-			
-			// Get member rating
-			const memberRatingKnowledge_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_KNOWLEDGE);
-			const memberRatingIntegration_promise = ratings.getMemberRatingAsync(relation.userId, groupId, userId, C.RATING_INTEGRATION);
-         
-         return Promise.props({
-         	'userId': relation.userId,
-				'name': generateUserName(groupId, relation.userId),
-				'color': memberColor_promise,
-				'prevPadHtml': prevPadHtml_promise,
-				'ratingKnowledge': memberRatingKnowledge_promise,
-				'ratingIntegration': memberRatingIntegration_promise
-         });
-		});
-		
-		// Finally, set lastActivity for the member querying the group
-		const lastActivity_promise = db.collection('group_relations')
-			.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
-		
-		// Collect all information and return
-		return Promise.join(topic_promise, group_promise, isLastGroup_promise, groupMembersDetails_promise, lastActivity_promise)
-			.spread(function(topic, group, isLastGroup, group_members) {
-				return {
-					'groupId': groupId,
-					'name': group.name,
-					'topicId': topicId,
-					'docId': pad.docId,
-					'level': group.level,
-					'title': topic.name,
-					'deadline': pad.expiration,
-					'chatRoomId': group.chatRoomId,
-					'forumId': group.forumId,
-					'isLastGroup': isLastGroup,
-					'members': group_members
-				};
-		});
-	}).then(res.json.bind(res));
-};

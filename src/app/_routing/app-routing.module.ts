@@ -52,7 +52,10 @@ const appRoutes: Routes = [
 @NgModule({
 	imports: [
 		CommonModule,
-		RouterModule.forChild(appRoutes)
+		RouterModule.forRoot(appRoutes, {
+			scrollPositionRestoration: 'enabled',
+			anchorScrolling: 'enabled'
+		})
 	],
 	exports: [ RouterModule ],
 	declarations: []

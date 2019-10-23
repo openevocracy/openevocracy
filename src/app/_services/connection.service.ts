@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable, EventEmitter, OnDestroy } from '@angular/core';
 
 import { UserService } from './user.service';
 
@@ -6,10 +6,10 @@ import * as parseUrl from 'url-parse';
 import * as origin from 'get-location-origin';
 
 @Injectable()
-export class ConnectionAliveService {
+export class ConnectionAliveService implements OnDestroy {
 	
 	// Define global variables
-	public isAlive:boolean = true;
+	public isConnectionAssumed:boolean = true;
 	public isConnected:boolean = true;
 	public aliveSocket;
 	public pingTimeout;
@@ -27,6 +27,19 @@ export class ConnectionAliveService {
 		// Get user token from user service
 		this.userToken = this.userService.getToken();
 	}
+	
+	/*
+	 * @desc: Lifecylce hook, used to close socket connection properly if depending components are destroyed
+	 */
+	ngOnDestroy() {
+		// Stop ping interval
+		if (this.pingInterval)
+			clearInterval(this.pingInterval);
+		
+		// Close pad socket
+		if (this.aliveSocket)
+			this.aliveSocket.close();
+	}
 
 	/**
 	 * @desc: Initializes socket connection to server, the job is to regularily
@@ -35,42 +48,42 @@ export class ConnectionAliveService {
 	public init() {
 		const parsed = parseUrl(origin);
 		const protocol = parsed.protocol.includes('https') ? 'wss://' : 'ws://';
-		this.aliveSocket = new WebSocket(protocol + parsed.host + '/socket/alive/'+this.userToken);
+		this.aliveSocket = new WebSocket(protocol + parsed.host + '/socket/alive/' + this.userToken);
 		
-		this.aliveSocket.onopen = function(event) {
-			console.log('connected');
-			
+		this.aliveSocket.onopen = (event) => {
 			// If connection was broken before and is reconnected now
-			if (!this.isAlive) {
-				// Set isAlive true again and stop retry interval, since it was successful
-				this.isAlive = true;
-				//clearInterval(this.retryInterval);
+			if (!this.isConnectionAssumed) {
+				// Set isConnectionAssumed and isConnected to true again
+				this.isConnectionAssumed = true;
+				this.isConnected = true;
 				// Emit reconnection event
 				this.connectionReconnected.emit(true);
 			}
 			
 			// Init ping interval
 			this.startPingInterval();
-		}.bind(this);
+		};
 		
 		// A message from the server
-		this.aliveSocket.onmessage = function (e) {
+		this.aliveSocket.onmessage = (event) => {
 			// Parse message from server
-			const msg = e.data
+			const msg = event.data
 			
 			// If pong arrives, connection is still alive
-			if (msg == 'pong') {
-				console.log('pong');
-				this.isAlive = true;
-			}
-		}.bind(this);
+			if (msg == 'pong')
+				this.isConnectionAssumed = true;
+		};
+		
+		this.aliveSocket.onerror = (err) => {
+			//console.log('onerror', err);
+		};
 		
 		// WebSocket connection was closed from server
-		this.aliveSocket.onclose = function(e) {
-			console.log('onclose');
-			// Disable connection, when socket is closed
-			this.disableConnection();
-		}.bind(this);
+		this.aliveSocket.onclose = (event) => {
+			//console.log('onclose', event);
+			// Disable connection and retry
+			this.disconnect({ 'retry': true });
+		};
 	}
 	
 	/**
@@ -78,40 +91,40 @@ export class ConnectionAliveService {
 	 */
 	public startPingInterval() {
 		this.pingInterval = setInterval(() => {
-			if (!this.isAlive) {
-				// If server does not respond anymore, disable connection
-				this.disableConnection();
-				// Close socket
-				this.aliveSocket.close();
+			if (!this.isConnectionAssumed && this.isConnected) {
+				// If server does not respond anymore, disable connection and retry
+				this.disconnect({ 'retry': true });
 			}
 			
-			// Set isAlive to false and ping server again
-			this.isAlive = false;
+			// Assume connection as interrupted until receiving pong
+			this.isConnectionAssumed = false;
+			// Send ping to server, which requests for pong
 			this.aliveSocket.send('ping');
-			// If the server responds within 30 seconds, the isAlive status is reset to true
-		}, 30000);
+		}, 15000);
 	}
 	
 	/**
 	 * @desc: Disables connections, which means that the ping interval is stopped and
 	 *        an event for disconnect is triggert to inform the system about a disconnect.
-	 *        Also try to reconnect to the server.
+	 *		  If params.retry is set to true, try to reconnect.
 	 */
-	public disableConnection() {
+	public disconnect(params) {
 		// Stop interval
 		clearInterval(this.pingInterval);
-		// Trigger offline event if was connected before
-		if (this.isConnected) {
-			// Wait one second to avoid visual effects when just reloading (F5) the tab
-			setTimeout(() => {
-				this.connectionLost.emit(true);
-			}, 1000);
-		}
-		// Set flags to disconnected
-		this.isAlive = false;
-		this.isConnected = false;
-		// Retry connection
-		this.startRetryTimeout();
+		
+		// Wait 500 ms to avoid visual effects when reloading (F5) the tab
+		setTimeout(() => {
+			// Trigger offline event if was connected before
+			if (this.isConnected)
+				this.connectionLost.emit(params.retry);
+			
+			// Set flags to disconnected
+			this.isConnectionAssumed = false;
+			this.isConnected = false;
+			
+			if (params.retry)
+				this.startRetryTimeout();
+		}, 500);
 	}
 	
 	/**
@@ -119,10 +132,12 @@ export class ConnectionAliveService {
 	 *        and initialize the websocket again
 	 */
 	public startRetryTimeout() {
-		// Wait 1 seconds and retry connection
+		// Wait 5 seconds and retry connection
 		this.retryTimeout = setTimeout(() => {
-			this.init();
-		}, 1000);
+			// If is normally not necessary since retry timeout is only called when connection is closed
+			// it's here for safety, in order to really avoid double connections
+			if(!this.isConnected)
+				this.init();
+		}, 5000);
 	}
-
 }

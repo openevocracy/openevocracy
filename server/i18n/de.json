@@ -36,5 +36,8 @@
     "EMAIL_NEW_THREAD_CREATED_BODY": "<p>Hi,<br/><br/>im Forum der Gruppe {1} wurde ein neuer Thread von Benutzer {0} erstellt.</p><p>Schau direkt rein, was es Neues gibt: <a href='{2}'>{2}</a></p><p>-----</p><p>E-Mail-Benachrichtungen für neue Threads in dieser Gruppe kannst du im <a href=\"{3}\">Forum</a> deaktivieren. Dort kannst du den 'Beobachten'-Slider ausschalten.</p>",
     
     "EMAIL_NEW_POST_CREATED_SUBJECT": "Neuer Beitrag",
-    "EMAIL_NEW_POST_CREATED_BODY": "<p>Hi,<br/><br/>in einem Thread der Gruppe {1} wurde ein neuer Beitrag von Benutzer {0} erstellt.</p><p>Schau direkt rein, was es Neues gibt: <a href='{2}'>{2}</a></p><p>-----</p><p>E-Mail-Benachrichtungen für neue Beiträge in dieser Gruppe kannst du im <a href=\"{3}\">Thread</a> deaktivieren. Dort kannst du den 'Beobachten'-Slider ausschalten.</p>"
+    "EMAIL_NEW_POST_CREATED_BODY": "<p>Hi,<br/><br/>in einem Thread der Gruppe {1} wurde ein neuer Beitrag von Benutzer {0} erstellt.</p><p>Schau direkt rein, was es Neues gibt: <a href='{2}'>{2}</a></p><p>-----</p><p>E-Mail-Benachrichtungen für neue Beiträge in dieser Gruppe kannst du im <a href=\"{3}\">Thread</a> deaktivieren. Dort kannst du den 'Beobachten'-Slider ausschalten.</p>",
+    
+    "EMAIL_CHAT_MENTIONED_SUBJECT": "Du wurdest in der Gruppe {0} erwähnt",
+    "EMAIL_CHAT_MENTIONED_MESSAGE": "<p>Hi,<br/><br/>du wurdest in der Gruppe {2} im Chat erwähnt.</p><p>Schau direkt rein, was es Neues gibt: <a href='{0}/group/{1}/chat'>{0}/group/{1}/chat</a></p>"
 }

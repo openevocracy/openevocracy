@@ -24,37 +24,26 @@ export class Topic extends TopicListElement {
 	
 	constructor(res: any) {
 		super(res);
+		
+		// Get utils service instance
+		const utilsService = this.getUtilsInstance();
+		
+		// Define further variables
 		this.group = res.group;
 		this.proposal = res.proposal;
 		this.description = res.description;
 		//this.group_members = res.group_members;
 		
-		this.stageName = this.getStageName();
-		this.creationDate = this.getCreationDate();
+		this.stageName = utilsService.getStageName(this.stage);
+		this.creationDate = utilsService.getTimestampFromObjectId(this._id);
 	}
 	
-	private getStageName() {
-		switch(this.stage) {
-			case C.STAGE_SELECTION:
-				return "TOPIC_STAGE_SELECTION";
-			case C.STAGE_PROPOSAL:
-				return "TOPIC_STAGE_PROPOSAL";
-			case C.STAGE_CONSENSUS:
-				return "TOPIC_STAGE_CONSENSUS";
-			case C.STAGE_PASSED:
-				return "TOPIC_STAGE_PASSED";
-			case C.STAGE_REJECTED:
-				return "TOPIC_STAGE_REJECTED";
-		}
-	}
-	
-	private getCreationDate() {
-		// Instantiate utils service
-		var injector = ReflectiveInjector.resolveAndCreate([UtilsService]);
-		var utilsService = injector.get(UtilsService);
-		
-		// Get Timestamp from ObjectId
-		return utilsService.getTimestampFromObjectId(this._id);
+	/**
+	 * @desc: Instantiate utils service
+	 */
+	private getUtilsInstance() {
+		const injector = ReflectiveInjector.resolveAndCreate([UtilsService]);
+		return injector.get(UtilsService);
 	}
 }
 

@@ -1,0 +1,6 @@
+<fieldset class="starrating">
+	<span *ngFor="let numStar of starsArray">
+		<input type="radio" [id]="inputName+'-'+numStar" [name]="inputName" [value]="numStar" [checked]="rateValue===numStar" />
+		<label [for]="inputName+'-'+numStar" [ngClass]="{'active': numStar <= rateValue, 'hover': numStar <= hoverValue}" (mouseover)="onHover(numStar)" (mouseout)="onLeave()" (click)='onClick(numStar)'><fa-icon [icon]="faStar"></fa-icon></label>
+	</span>
+</fieldset>

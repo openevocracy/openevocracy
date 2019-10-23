@@ -6,8 +6,10 @@ import { MatSnackBar } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AlertService } from '../_services/alert.service';
+import { ConnectionAliveService } from '../_services/connection.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
+import { EditorService } from '../_services/editor.service';
 import { ModalService } from '../_services/modal.service';
 import { CloseeditorModalService } from '../_services/modal.closeeditor.service';
 
@@ -33,17 +35,15 @@ export class EditorComponent implements OnInit, OnDestroy {
 	public title: string;
 	public saved: boolean = true;
 	public placeholder: string;
-	public connectionAlreadyLost: boolean = false;
-	public manualClose: boolean = false;
 	public padId: string;
 	public userId: string;
 	public topicId: string;
+	public classColEditor;
 	public quillModules;
 	public quillEditor;
 	public userToken: string;
 	public type: string;
 	public deadlineInterval;
-	public pingInterval;
 	public padSocket;
 	public modalSubscription: Subscription;
 	
@@ -60,8 +60,10 @@ export class EditorComponent implements OnInit, OnDestroy {
 		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
-		protected translateService: TranslateService) {
-			
+		protected translateService: TranslateService,
+		protected connectionAliveService: ConnectionAliveService,
+		protected editorService: EditorService
+	) {
 		this.userId = this.userService.getUserId();
 		this.userToken = this.userService.getToken();
 		this.type = this.router.url.split('/')[1];
@@ -80,13 +82,26 @@ export class EditorComponent implements OnInit, OnDestroy {
 		}
 		
 		// Modal
-		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe(close => {
+		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe((close) => {
 			// Close modal
 			this.modalService.close();
 			
 			// Navigate to source
 			if (close)
 				this.router.navigate(['/topic', this.topicId]);
+		});
+		
+		// Listen to connection lost event
+		this.connectionAliveService.connectionLost.subscribe((res) => {
+			// If connection is lost, close pad socket connection
+			if (this.padSocket)
+				this.padSocket.close();
+		});
+		
+		// Listen to connection reconnected event
+		this.connectionAliveService.connectionReconnected.subscribe((res) => {
+			// If connection is lost, reconnect pad socket
+			this.initializePadSocket(this.docId);
 		});
 	}
 	
@@ -95,14 +110,9 @@ export class EditorComponent implements OnInit, OnDestroy {
 		let key = (this.type == 'topic') ? "EDITOR_PLACEHOLDER_TOPIC_DESCRIPTION" : "";
 		key = (this.type == 'proposal') ? "EDITOR_PLACEHOLDER_PROPOSAL" : key;
 		this.translatePlaceholder(key);
-		
-		// Initialize ping
-		this.initServerPing();
 	}
 	
 	ngOnDestroy() {
-		this.manualClose = true;
-		
 		// Close pad socket
 		if (this.padSocket)
 			this.padSocket.close();
@@ -113,8 +123,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 		// Stop countdown
 		if (this.deadlineInterval)
 			clearInterval(this.deadlineInterval);
-		if (this.pingInterval)
-			clearInterval(this.pingInterval);
 	}
 	
 	protected translatePlaceholder(key) {
@@ -145,9 +153,11 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.activatedRoute.params.subscribe((params: Params) => {
 			this.padId = params.id;
 			
+			// Register saved status of editor in editor service
+			this.editorService.setIsSaved(this.padId, true);
+			
 			this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
 				this.title = res.title;
-				this.docId = res.docId;
 				this.topicId = res.topicId;
 				
 				// Check if document is expired
@@ -160,12 +170,19 @@ export class EditorComponent implements OnInit, OnDestroy {
 				}
 
 				// Initialize socket
-				this.initalizePadSocket(this.docId);
+				this.initializePadSocket(res.docId);
 			});
 		});
 	}
 	
-	protected initalizePadSocket(docId) {
+	/**
+	 * @desc: Create pad socket and sharedb connection
+	 */
+	protected initializePadSocket(docId) {
+		// Get docId from this or from inheriting component
+		this.docId = docId;
+		
+		// Register sharedb richt text type
 		sharedb.types.register(richText.type);
 
 		// Open WebSocket connection to ShareDB server
@@ -174,20 +191,20 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.padSocket = new WebSocket(protocol + parsed.host + '/socket/pad/'+this.userToken);
 
 		// WebSocket connection was established
-		this.padSocket.onopen = function () {
+		this.padSocket.onopen = (event) => {
 			// Get ShareDB connection
-			var connection = new sharedb.Connection(this.padSocket);
+			const connection = new sharedb.Connection(this.padSocket);
 			
 			// Create local Doc instance
-			var doc = connection.get(this.getCollectionFromURL(), docId);
+			const doc = connection.get(this.getCollectionFromURL(), docId);
 			this.doc = doc;
 			
 			// Subscribe to specific doc
-			doc.subscribe(function(err) {
+			doc.subscribe((err) => {
 				if (err) throw err;
 				
 				// Get quill
-				var quill = this.quillEditor;
+				const quill = this.quillEditor;
 	
 				// Set quill contents from doc
 				quill.setContents(doc.data);
@@ -211,67 +228,29 @@ export class EditorComponent implements OnInit, OnDestroy {
 					// If source is server, apply operation
 					quill.updateContents(op);
 				});
-			}.bind(this));
+			});
 
 			// WebSocket connection was closed from server
-			this.padSocket.onclose = function(e) {
-				// If pad socket was not closed actively (on destroy), inform user that
-				// socket is broken, ask for reload and freeze editor
-				if(!this.manualClose)
-					this.connectionLostMessage();
-			}.bind(this);
+			this.padSocket.onclose = (event) => {
+				//console.log(event);
+			};
 	
 			this.enableEdit();
-		}.bind(this);
-	}
-	
-	/*
-	 * @desc: Send ping to server in specific interval
-	 */
-	protected initServerPing() {
-		// Send ping every 15 seconds
-		this.pingInterval = setInterval(function() {
-			this.httpManagerService.get('/json/ping').subscribe(res => {}, err => {
-				// Connection is lost, show message
-				this.connectionLostMessage();
-			});
-		}.bind(this), 15000);
-	}
-	
-	/*
-	 * @desc: Show message that connection is lost and redirect after some time
-	 */
-	protected connectionLostMessage() {
-		if (this.connectionAlreadyLost)
-			return;
-		
-		forkJoin(
-			this.translateService.get('EDITOR_CONNECTION_LOST'),
-			this.translateService.get('FORM_BUTTON_CLOSE'))
-		.subscribe(([msg, action]) => {
-			// Show message for 10 seconds
-			let snackBarRef = this.snackBar.open(msg, action, {
-				'duration': 10000
-			});
-			// After 10 seconds, redirect to topic
-			snackBarRef.afterDismissed().subscribe(() => {
-				this.router.navigate(['/topic', this.topicId]);
-			});
-		});
-		
-		// Mark connection already lost to avoid that this function is called twice
-		this.connectionAlreadyLost = true
+		};
 	}
 	
 	private getCollectionFromURL() {
-		var key = this.router.url.split("/")[1];
+		let key = this.router.url.split("/")[1];
 		if (key == "topic")
 			key = 'topic_description'
 		return 'docs_'+key;
 	}
 	
+	/**
+	 * @desc: Closes the editor
+	 */
 	public closeEditor() {
-		if (!this.saved) {
+		if (!this.editorService.isSaved(this.padId)) {
 			this.modalService.open({});
 			return;
 		}
@@ -280,17 +259,25 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.router.navigate(['/topic', this.topicId]);
 	}
 	
+	/**
+	 * @desc: Set editor status to saved
+	 */
 	protected setSaved() {
-		this.saved = true;
+		this.saved = true;  // Important for template
+		this.editorService.setIsSaved(this.padId, true);
 	}
 	
+	/**
+	 * @desc: Is called when text has changed in editor
+	 */
 	public contentChanged(e) {
 		// If input source is not user, do not send a change to server
 		if(e.source != 'user')
 			return;
 			
 		// Set unsaved text
-		this.saved = false;
+		this.saved = false;  // Important for template
+		this.editorService.setIsSaved(this.padId, false);
 	}
 	
 	private redirectToView() {

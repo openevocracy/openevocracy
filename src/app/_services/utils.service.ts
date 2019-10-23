@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 
+import { C } from '../../../shared/constants';
+
 @Injectable()
 export class UtilsService {
 	
@@ -61,5 +63,33 @@ export class UtilsService {
 	public countStringWords(str) {
 		// Split and get length
 		return str.split(/\s+\b/).length;
+	}
+	
+	/**
+	 * @desc: Replace all occurencies of 'find' in a string 'str' and replace it by 'replace'
+	 */
+	public replaceAll(str, find, replace) {
+		// Make search safe against special characters in regular expressions
+		const findSave = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+		// Replace all
+		return str.replace(new RegExp(findSave, 'g'), replace);
+	}
+	
+	/**
+	 * @desc: Gets a stage key and returns the name of the stage
+	 */
+	public getStageName(stageKey) {
+		switch(stageKey) {
+			case C.STAGE_SELECTION:
+				return "TOPIC_STAGE_SELECTION";
+			case C.STAGE_PROPOSAL:
+				return "TOPIC_STAGE_PROPOSAL";
+			case C.STAGE_CONSENSUS:
+				return "TOPIC_STAGE_CONSENSUS";
+			case C.STAGE_PASSED:
+				return "TOPIC_STAGE_PASSED";
+			case C.STAGE_REJECTED:
+				return "TOPIC_STAGE_REJECTED";
+		}
 	}
 }
