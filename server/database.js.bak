@@ -1,0 +1,8 @@
+var MongoClient = require('mongodb').MongoClient;
+var cfg = require('../shared/config').cfg;
+
+// Get DB path from 
+var dbpath = cfg.PRIVATE.DATABASE_HOST;
+
+exports.db = (new MongoClient(dbpath)).db('openevocracy');
+exports.sharedb = require('sharedb-mongo')(dbpath);

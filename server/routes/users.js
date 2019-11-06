@@ -42,12 +42,12 @@ exports.getStrategy = function() {
 	return strategy;
 };
 
-function savePasswordInDatabaseAsync(uid, password) {
+async function savePasswordInDatabaseAsync(uid, password) {
     var hash = bcrypt.hashSync(password, 8);
     return db.collection('users').updateAsync({ '_id': uid }, { $set: { 'password': hash } });
 }
 
-function getUserByMailAsync(email) {
+async function getUserByMailAsync(email) {
     return db.collection('users').findOneAsync({'email': email}, {'_id': true, 'email': true, 'lang': true});
 }
 
@@ -61,7 +61,7 @@ exports.isOnline = isOnline;
 
 // POST /api/auth/login
 // @desc: logs in a user
-exports.login = function(req, res) {
+exports.login = async function(req, res) {
 	if(req.body.email && req.body.password) {
 		var email = req.body.email;
 		var password = req.body.password;
@@ -70,62 +70,61 @@ exports.login = function(req, res) {
 		return;
 	}
   
-	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
-		// If user does not exist
-		if(_.isNull(user)) {
-			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', { 'email': email });
-			return;
-		}
-		
-		// If user does exist, but is not verified
-		if(!_.isNull(user) && !user.verified) {
-			utils.sendAlert(res, 401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', { 'email': user.email });
-			return;
-		}
+	const user = await db.collection('users').findOneAsync({ 'email': email});
 	
-		// Check if password is correct
-		if(bcrypt.compareSync(password, user.password)) { // TODO perhaps hash on client side?
-			// From now on we'll identify the user by the id and
-			// the id is the only personalized value that goes into our token
-			var payload = { 'id': user._id, 'salt': bcrypt.genSaltSync(8) };
-			var token = jwt.sign(payload, jwtOptions.secretOrKey);
-			
-			// Set salt
-			db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then(function() {
-				res.json({ 'email': user.email, 'token': token, 'id': user._id });
-			}).catch(function(e) {
-				if(cfg.DEBUG_CONFIG)
-					utils.sendAlert(res, 500, 'danger', JSON.stringify(e));
-				else
-					utils.sendAlert(res, 500, 'danger', 'USER_ACCOUNT_SALT_NOT_UPDATED');
-			});
-		} else {
-			// Passwords did not match
-			utils.sendAlert(res, 401, 'danger', 'USER_PASSWORT_NOT_CORRECT', { 'email': email });
-		}
-	});
+	// If user does not exist
+	if(_.isNull(user)) {
+		utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', { 'email': email });
+		return;
+	}
+	
+	// If user does exist, but is not verified
+	if(!_.isNull(user) && !user.verified) {
+		utils.sendAlert(res, 401, 'warning', 'USER_ACCOUNT_NOT_VERIFIED', { 'email': user.email });
+		return;
+	}
+
+	// Check if password is correct
+	if(bcrypt.compareSync(password, user.password)) { // TODO perhaps hash on client side?
+		// From now on we'll identify the user by the id and
+		// the id is the only personalized value that goes into our token
+		var payload = { 'id': user._id, 'salt': bcrypt.genSaltSync(8) };
+		var token = jwt.sign(payload, jwtOptions.secretOrKey);
+		
+		// Set salt
+		db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then(function() {
+			res.json({ 'email': user.email, 'token': token, 'id': user._id });
+		}).catch(function(e) {
+			if(cfg.DEBUG_CONFIG)
+				utils.sendAlert(res, 500, 'danger', JSON.stringify(e));
+			else
+				utils.sendAlert(res, 500, 'danger', 'USER_ACCOUNT_SALT_NOT_UPDATED');
+		});
+	} else {
+		// Passwords did not match
+		utils.sendAlert(res, 401, 'danger', 'USER_PASSWORT_NOT_CORRECT', { 'email': email });
+	}
 };
 
-exports.sendVerificationMailAgain = function(req, res) {
+exports.sendVerificationMailAgain = async function(req, res) {
 	// Get email from request
-	var email = req.body.email;
+	const email = req.body.email;
 	
 	// Get user id from database
-	getUserByMailAsync(email).then(function(user) {
-		
-		// Break if no user was found
-		if(_.isNull(user)) {
-			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', { 'email': email });
-			return;
-		}
-		
-		// Send verification mail
-		user.email = email;
-		sendVerificationMail(user);
-		
-		// Send alert notification to client
-		utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_VERIFICATION_LINK_SENT'); 
-	});
+	const user = await getUserByMailAsync(email);
+	
+	// Break if no user was found
+	if(_.isNull(user)) {
+		utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', { 'email': email });
+		return;
+	}
+	
+	// Send verification mail
+	user.email = email;
+	sendVerificationMail(user);
+	
+	// Send alert notification to client
+	utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_VERIFICATION_LINK_SENT'); 
 };
 
 function sendVerificationMail(user) {
@@ -135,30 +134,30 @@ function sendVerificationMail(user) {
 }
 
 // @desc: Send a mail containing a new password for the user with the specific email
-exports.sendPassword = function(req, res) {
+exports.sendPassword = async function(req, res) {
 	// Get email from request
-	var email = req.body.email;
+	const email = req.body.email;
 	
-	getUserByMailAsync(email).then(function(user) {
-		// Break if no user was found
-		if(_.isNull(user)) {
-			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', {'email': email});
-			return;
-		}
-		
-		// Generate new password
-		var password = Math.random().toString(36).slice(2);
-		
-		// Send password via email to user
-		mail.sendMailToUser(user,
-			'EMAIL_PASSWORD_RESET_SUBJECT', [],
-			'EMAIL_PASSWORD_RESET_MESSAGE', [password]);
-		
-		// Save new password in database and send response
-		return savePasswordInDatabaseAsync(user._id, password).then(function() {
-			utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_RESET', {'email': email});
-		});
-	});
+	const user = await getUserByMailAsync(email);
+	
+	// Break if no user was found
+	if(_.isNull(user)) {
+		utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', {'email': email});
+		return;
+	}
+	
+	// Generate new password
+	const password = Math.random().toString(36).slice(2);
+	
+	// Send password via email to user
+	mail.sendMailToUser(user,
+		'EMAIL_PASSWORD_RESET_SUBJECT', [],
+		'EMAIL_PASSWORD_RESET_MESSAGE', [password]);
+	
+	// Save new password in database and send response
+	await savePasswordInDatabaseAsync(user._id, password);
+	
+	utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_RESET', {'email': email});
 };
 
 // @desc: Register a new user
@@ -299,19 +298,19 @@ app.post("/api/auth/remove_account", function(req, res) {
 });*/
 
 // GET /json/user/profile/:id
-exports.query = function(req, res) {
-	var userId = ObjectId(req.params.id);
+exports.query = async function(req, res) {
+	const userId = ObjectId(req.params.id);
 	
-	db.collection('users').findOneAsync({'_id': userId},{ 'email':false, 'password':false, 'salt':false })
-		.then(res.send.bind(res));
+	const user = await db.collection('users').findOneAsync({'_id': userId},{ 'email':false, 'password':false, 'salt':false });
+	res.send(user);
 };
 
 // GET /json/user/settings/:id
-exports.settings = function(req, res) {
-    var userId = ObjectId(req.params.id);
+exports.settings = async function(req, res) {
+    const userId = ObjectId(req.params.id);
     
-    db.collection('users').findOneAsync({'_id': userId},{'email': true})
-        .then(res.send.bind(res));
+    const settings = await db.collection('users').findOneAsync({'_id': userId},{'email': true});
+    res.send(settings);
 };
 
 // PATCH /json/user/settings/:id
