@@ -97,7 +97,7 @@ export class GroupForumThreadComponent implements OnInit {
 				// Get fragment and jump to related anchor, if fragment is given
 				const fragment = this.router.url.split('#')[1];
 				if (!_.isUndefined(fragment)) {
-					// (hack) Since the DOM is not finished at that point, setTimout helps to do the anchor jump correctly
+					// Note: setTimout is necessary due to a bug: https://github.com/angular/angular/issues/15634
 					setTimeout(() => { this.navigateToUrlWithFragment(fragment) }, 0);
 				}
 			});

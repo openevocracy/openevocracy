@@ -67,6 +67,11 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	ngOnInit() {
 		// Set and translate placeholder
 		this.translatePlaceholder("EDITOR_PLACEHOLDER_GROUP");
+		
+		// Open welcome model
+		// Note: setTimout is necessary due to a bug: https://github.com/angular/angular/issues/15634
+		// TODO, only if user did not already disable it
+		//setTimeout(() => { this.modalService.open({}); }, 0);
 	}
 	
 	/*

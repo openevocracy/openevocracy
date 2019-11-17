@@ -28,7 +28,6 @@ import { CountdownComponent } from './countdown/countdown.component';
 import { AlertComponent } from './alert/alert.component';
 import { ModalComponent } from './modals/modal.component';
 import { ModalEmailComponent } from './modals/email/email.modal.component';
-import { ModalAddtopicComponent } from './modals/addtopic/addtopic.modal.component';
 import { ModalCloseeditorComponent } from './modals/closeeditor/closeeditor.modal.component';
 
 // Components Public
@@ -50,6 +49,7 @@ import { EditThreadDialogComponent } from './dialogs/editthread/editthread.compo
 import { AskDeleteDialogComponent } from './dialogs/askdelete/askdelete.component';
 import { EditForumPostDialogComponent } from './dialogs/editforumpost/editforumpost.component';
 import { EditForumCommentDialogComponent } from './dialogs/editforumcomment/editforumcomment.component';
+import { GroupWelcomeDialogComponent } from './dialogs/groupwelcome/groupwelcome.component';
 
 // Services
 import { TopicsListService } from './_services/topiclist.service';
@@ -90,6 +90,7 @@ import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { GroupComponent } from './group/group.component';
 import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
 import { StarratingComponent } from './starrating/starrating.component';
+import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -113,7 +114,6 @@ export function loadConfig(configService: ConfigService) {
 		RegisterComponent,
 		ModalComponent,
 		ModalEmailComponent,
-		ModalAddtopicComponent,
 		TopicComponent,
 		CountdownComponent,
 		SettingsComponent,
@@ -134,12 +134,14 @@ export function loadConfig(configService: ConfigService) {
 		AskDeleteDialogComponent,
 		EditForumPostDialogComponent,
 		EditForumCommentDialogComponent,
+		GroupWelcomeDialogComponent,
 		GroupChatComponent,
 		GroupMembersComponent,
 		GroupToolbarComponent,
 		GroupComponent,
 		GroupMemberbarComponent,
-		StarratingComponent
+		StarratingComponent,
+		AddtopicDialogComponent
 	],
 	imports: [
 		BrowserModule,
@@ -193,7 +195,9 @@ export function loadConfig(configService: ConfigService) {
 		EditForumPostDialogComponent,
 		EditForumCommentDialogComponent,
 		EditThreadDialogComponent,
-		ShareDialogComponent
+		ShareDialogComponent,
+		GroupWelcomeDialogComponent,
+		AddtopicDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

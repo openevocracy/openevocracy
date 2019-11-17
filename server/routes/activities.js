@@ -5,32 +5,41 @@ var ObjectId = require('mongodb').ObjectID;
 var Promise = require('bluebird');
 
 // Own references
+const C = require('../../shared/constants').C;
 var utils = require('../utils');
 
 /**
- * gets all activities from database that satisfy the filter
+ * Gets all activities from database that satisfy the filter
  * - filter: a JSON object specifying what is queried
  * 
- * @return {object} topics - all adjusted topics
+ * @return {object} activites
  */
-function manageAndListActivitiesAsync(filter) {
+function getActivitiesAsync(filter) {
 	return db.collection('activities').find(filter).toArrayAsync();
 }
-exports.manageAndListActivitiesAsync = manageAndListActivitiesAsync;
+exports.getActivitiesAsync = getActivitiesAsync;
 
 /*
  * @desc: Get whole activity list of a particular user
  */
 exports.getUserActivityList = function(req, res) {
-   const userId = ObjectId(req.params.id);
-	manageAndListActivitiesAsync({ 'userId': userId }).then(res.json.bind(res));
+	const targetUserId = ObjectId(req.params.id);
+   const requestingUserId = ObjectId(req.user._id);
+   
+   // Get relation level between users (anonymous, follower, mate)
+   // ...
+   
+   //if (targetUserId)
+   
+	getActivitiesAsync({ 'userId': targetUserId }).then(res.json.bind(res));
+	//getActivitiesAsync({ 'userId': targetUserId, 'privacyLevel': <= relationLevel }).then(res.json.bind(res));
 };
 
 /*
- * @desc: Get whole activity list
+ * @desc: Get list of specified activities of specified users
  */
-exports.getActivityList = function(req, res) {
-	manageAndListActivitiesAsync().then(res.json.bind(res));
+exports.getSpecificActivities = function(req, res) {
+	getActivitiesAsync().then(res.json.bind(res)); // up to now returns all activities, TODO
 };
 
 exports.query = function(req, res) { // not tested yet / probably not properly implemented
@@ -51,17 +60,25 @@ exports.query = function(req, res) { // not tested yet / probably not properly i
 /**
  * @desc: Creates an activity in the database
  */
-function storeActivity(_userId, _type, _targetId) {
-   // Define activity object
-   const activity = {
-      _id: ObjectId(),
-      userId: _userId,
-	   type: _type,
-	   targetId: _targetId
-   };
-   
-   // Adds object to database
-   return db.collection('activities').insertAsync(activity);
+function storeActivity(userId, type, targetId) {
+	
+	// Get privacy level for current activity type from user activity settings
+	return db.collection('activity_settings').findOneAsync({ 'userId': userId }).then((privacySettings) => {
+		// Get privacy level of current type, if value is falsy, set privacy level to 0 (all)
+		const privacyLevel = (privacySettings ? privacySettings[type] : C.ACT_PLVL_ALL);
+		
+		// Define activity object
+		const activity = {
+			'_id': ObjectId(),
+			'userId': userId,
+			'type': type,
+			'targetId': targetId,
+			'privacyLevel': privacyLevel
+	   };
+	   
+	   // Adds object to database
+   	return db.collection('activities').insertAsync(activity);
+	});
 }
 exports.storeActivity = storeActivity;
 
@@ -70,13 +87,16 @@ exports.storeActivity = storeActivity;
  * @desc: Creates an activity (to be called from POST)
  */
 exports.create = function(req, res) {
+	const type = req.body.type;
+	const targetId = ObjectId(req.body.targetId);
+	const userId = ObjectId(req.user._id);
 
    // Reject if user id is missing
-   if(_.isEmpty(req.user._id))
+   if(_.isEmpty(userId))
       return utils.rejectPromiseWithMessage(400, 'BAD_REQUEST');
 
    // Stores activity in database
-   storeActivity(req.user._id, req.body.type, req.body.targetId)
+   storeActivity(userId, type, targetId)
       .then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 

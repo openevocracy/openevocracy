@@ -33,8 +33,8 @@ exports.count = function(req, res) {
 		.then(res.json.bind(res));
 };
 
-/*
- * desc: Save rating
+/**
+ * @desc: Save rating
  */
 exports.rate = function(req, res) {
 	const ratedUserId = ObjectId(req.body.ratedUserId);  // The user who was rated
@@ -61,7 +61,7 @@ exports.rate = function(req, res) {
 	}).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
-/*
+/**
  * @desc: Return the user with the highest overall ratings
  * @param: group id
  */

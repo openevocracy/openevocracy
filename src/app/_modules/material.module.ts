@@ -16,7 +16,9 @@ import {
 	MatDialogModule,
 	MatSlideToggleModule,
 	MatSelectModule,
-	MatBadgeModule
+	MatBadgeModule,
+	MatCheckboxModule,
+	MatExpansionModule
 } from '@angular/material';
 
 @NgModule({
@@ -36,7 +38,9 @@ import {
 		MatDialogModule,
 		MatSlideToggleModule,
 		MatSelectModule,
-		MatBadgeModule
+		MatBadgeModule,
+		MatCheckboxModule,
+		MatExpansionModule
 	],
 	exports: [
 		MatButtonModule,
@@ -54,7 +58,9 @@ import {
 		MatDialogModule,
 		MatSlideToggleModule,
 		MatSelectModule,
-		MatBadgeModule
+		MatBadgeModule,
+		MatCheckboxModule,
+		MatExpansionModule
 	],
 	entryComponents: [
 		

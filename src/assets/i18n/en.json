@@ -24,9 +24,6 @@
 	"FORM_LABEL_PASSWORD": "Your password:",
 	"FORM_LABEL_PASSWORD_REP": "Repeat your password",
 	
-	"MODAL_CREATE_NEW_TOPIC": "Create new topic",
-	"MODAL_NEW_TOPIC_NAME": "Name of the new topic (min. {{numChars}} characters)",
-	"MODAL_CREATE": "Create",
 	"MODAL_REQUEST_NEW_PASSWORD": "Request new password",
 	"MODAL_SEND_VERIFICATION_MAIL_AGAIN": "Send verification mail again",
 	"MODAL_SEND_REQUEST": "Submit",
@@ -35,6 +32,10 @@
 	"DIALOG_FEEDBACK_TITLE": "Do you have some feedback for us?",
 	"DIALOG_FEEDBACK_PLACEHOLDER": "Shortly describe your ideas, problems, etc.",
 	"DIALOG_FEEDBACK_SUCESSFULLY_SENT": "Feedback was sent successfully.",
+	"DIALOG_ADDTOPIC_TITLE": "Create new topic",
+	"DIALOG_ADDTOPIC_NAME_PLACEHOLDER": "Name of the new topic (min. {{minLetters}} characters)",
+	"DIALOG_ADDTOPIC_BUTTON_CREATE": "Create",
+	"DIALOG_ADDTOPIC_SNACKBAR_SUCCESS": "The topic was successfully added.",
 	"DIALOG_ASKDELETE_TITLE": "Delete",
 	
 	"LOGIN_FORM_TITLE": "Login",
@@ -156,6 +157,10 @@
 	"GROUP_BUTTON_MEMBERS": "Members",
 	"GROUP_BUTTON_LABEL_PREVIOUS_GROUP": "Previous group",
 	"GROUP_BUTTON_LABEL_PREVIOUS_TITLE": "Open member's previous group",
+	"GROUP_WELCOME_TITLE": "Welcome to group {{groupName}}",
+	"GROUP_WELCOME_NAME": "Your name in this group is <strong>{{memberName}}</strong>.",
+	"GROUP_WELCOME_ADDITIONAL_HEADER": "Additional information",
+	"GROUP_WELCOME_ADDITIONAL_CONTENT": "<p>You are in a group of the topic \"{{topicName}}\".</p><p>Your job is to find a common position together with the other randomly included group members.</p><p>In the tab <em>document</em> you find a collaborative document, where all of you can write together in real time. Every user has a name and color, which is specific to this group.</p><p>In the <em>chat</em> tab you can mention other members by typing '@' into the chat message field and choosig a specific member. You can also mention all members by typing '@all'. All chosen members get a notification when they are mentioned.</p><p>Another communication possibility is the <em>forum</em> tab. Here all members can stimulate discussions. Be aware that the forum is open to all users, also from users outside of this group. You can define a thread as private, such that only group members habe the right to post.</p><p>The last tab, <em>members</em> is very important for the process. Here you can rate all members (including yourself) by three different criteria. The member with the highest overall rating will be chosen as a representative for this group.</p><p>Finally, please remember to be kind and constructive.</p>",
 	
 	"FORUM_BUTTON_TO_GROUP": "To group",
 	"FORUM_BUTTON_NEW_THREAD": "Create thread",

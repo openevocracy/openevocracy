@@ -199,17 +199,22 @@ exports.startChatServer = function(wss) {
 	});
 };
 
-exports.sendMailToMentionedUsers = function(req, res) {
+/**
+ * @desc: Processes mentioned users in chat
+ * 		 - sends mail to all mentioned users
+ *        - stores activity for all mentioned users
+ */
+exports.processMentionedUsers = function(req, res) {
 	const groupId = ObjectId(req.body.groupId);
 	const userIds = _.map(req.body.userIds, (userId) => { return ObjectId(userId) });
-	const userId = ObjectId(req.user._id);
 	
-	// add activities for mentioned users
-	_.each(userIds, function(el) {
-		console.log("User mentioned: ", el)
-		activities.storeActivity(el, C.ACT_MENTIONED, groupId);
+	// Add activities for mentioned users
+	_.each(userIds, (userId) => {
+		console.log("User mentioned: ", userId);
+		activities.storeActivity(userId, C.ACT_MENTIONED, groupId);
 	});
 	
+	// Sends mail to all mentioned users
 	db.collection('groups').findOneAsync({ '_id': groupId }, { 'name': true })
 		.then((group) => {
 			mail.sendMailToUserIds(userIds,

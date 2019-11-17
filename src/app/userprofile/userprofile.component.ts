@@ -12,7 +12,7 @@ import { C } from '../../../shared/constants';
 import { ConfigService } from '../_services/config.service';
 import { Activity } from '../_models/activity';
 import * as _ from 'underscore';
-import { faTrashAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faUserLock, faUserFriends, faUsers, faGlobe } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-userprofile',
@@ -27,9 +27,12 @@ export class UserprofileComponent implements OnInit {
 	public userId: string;
 	public profileId: string;
 	public activityList: Activity[];
-	public faTrashAlt = faTrashAlt;
-	public faPlus = faPlus;
 	public header: string;
+	
+	public faUserLock = faUserLock;
+	public faUserFriends = faUserFriends;
+	public faUsers = faUsers;
+	public faGlobe = faGlobe;
 
 	constructor(
 		private userService: UserService,
@@ -81,10 +84,17 @@ export class UserprofileComponent implements OnInit {
 
 	}
 	
+	/**
+	 * @desc: 
+	 */
+	public setPrivacyLevel(e, privayLevel) {
+		console.log('privayLevel', privayLevel);
+	}
+	
 	/*
 	 * @desc: Removes an activity
 	 */
-	remove(e, actId) {
+	/*remove(e, actId) {
 		e.stopPropagation();
 		
 		this.activityListService.removeActivity(actId).subscribe(res => {
@@ -97,23 +107,5 @@ export class UserprofileComponent implements OnInit {
 					console.log("Deleting not successful");
 				console.log(res);
 			});
-	}
-	
-	
-	/*
-	 * @desc: Adds an activity (for testing only)
-	 *
-	addActivity(e) {
-		e.stopPropagation();
-		this.activityListService.addActivity(C.ACT_MENTIONED, this.userId).subscribe(res => {
-
-				if (res)
-				{
-					this.activityList.push(new Activity(res.ops[0]));
-				}
-		});
-
 	}*/
-
-
 }

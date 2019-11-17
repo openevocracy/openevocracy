@@ -8,7 +8,7 @@ import { SnackbarService } from '../_services/snackbar.service';
 	templateUrl: './secure.component.html',
 	styleUrls: ['./secure.component.scss']
 })
-export class SecureComponent implements OnInit {
+export class SecureComponent implements OnInit, OnDestroy {
 	
 	public startAliveTimeout;
 	public offline: boolean = false;

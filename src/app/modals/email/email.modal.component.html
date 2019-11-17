@@ -2,7 +2,7 @@
 	<div class="modal-dialog">
 		<div class="modal-header">
 			<button class="close" (click)="close()">&times;</button>
-			<h2>{{title | translate }}</h2>
+			<h2>{{ title | translate }}</h2>
 		</div>
 		<form [formGroup]="emailForm" (ngSubmit)="onSubmit()" novalidate>
 			

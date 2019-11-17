@@ -251,7 +251,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 	 */
 	public closeEditor() {
 		if (!this.editorService.isSaved(this.padId)) {
-			this.modalService.open({});
+			this.modalService.open('closeeditor');
 			return;
 		}
 		

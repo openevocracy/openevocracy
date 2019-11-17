@@ -1,8 +1,10 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatDialog } from "@angular/material";
 
 import { CountdownComponent } from '../countdown/countdown.component';
+import { AddtopicDialogComponent } from '../dialogs/addtopic/addtopic.component';
 
 import { TopicListElement } from '../_models/topic/topiclist-element';
 import { C } from '../../../shared/constants';
@@ -11,8 +13,8 @@ import * as _ from 'underscore';
 import { TopicService } from '../_services/topic.service';
 import { UserService } from '../_services/user.service';
 import { TopicsListService } from '../_services/topiclist.service';
-import { ModalService } from '../_services/modal.service';
 import { ActivityListService} from '../_services/activitylist.service';
+import { SnackbarService } from '../_services/snackbar.service';
 
 import { faHandPaper, faPlusSquare, faDownload } from '@fortawesome/free-solid-svg-icons';
 
@@ -32,11 +34,12 @@ export class TopiclistComponent implements OnInit {
 	public faDownload = faDownload;
 
 	constructor(
+		private snackbarService: SnackbarService,
+		private dialog: MatDialog,
 		private topicsListService: TopicsListService,
 		private topicService: TopicService,
 		private userService: UserService,
 		private activityListService: ActivityListService,
-		private modal: ModalService,
 		private router: Router) {}
 	
 	ngOnInit() {
@@ -78,9 +81,7 @@ export class TopiclistComponent implements OnInit {
 			});
 			this.activityListService.addActivity(C.ACT_TOPIC_UNVOTE, tid).subscribe(res => { // add activity
 					if (!res)
-					{
 						console.log("Error: ACT_TOPIC_UNVOTE could not be added.");
-					}
 			});
 		} else {
 			this.topicService.vote(tid, uid).subscribe(res => {
@@ -89,19 +90,37 @@ export class TopiclistComponent implements OnInit {
 			});
 			this.activityListService.addActivity(C.ACT_TOPIC_VOTE, tid).subscribe(res => { // add activity
 					if (!res)
-					{
 						console.log("Error: ACT_TOPIC_VOTE could not be added.");
-					}
 			});
 		}
 	}
 	
 	/*
-	 * @desc: Open modal to add new topic
+	 * @desc: Open dialog to add new topic
 	 */
-	public openAddTopicModal(e) {
-		e.preventDefault();
-		this.modal.open({});
+	public openAddTopicDialog(e) {
+		const options = { 'width': '500px' };
+		const dialogRef = this.dialog.open(AddtopicDialogComponent, options);
+		
+		// After add topic dialog was submitted, create topic and handle stuff
+		dialogRef.componentInstance.onSubmit.subscribe((res) => {
+			const topicName = res.topicName;
+			
+			// Pass topic name to topicService
+			this.topicService.addTopic(topicName).subscribe(topic => {
+				// Save topic id
+				const topicId = topic._id;
+				
+				// Navigate to new topic
+				this.router.navigate(['/topic/'+topicId]);
+				
+				// Add activity
+				this.activityListService.addActivity(C.ACT_TOPIC_CREATE, topicId).subscribe();
+				
+				// Show snackbar
+				this.snackbarService.showSnackbar('DIALOG_ADDTOPIC_SNACKBAR_SUCCESS');
+			});
+		});
 	}
 	
 	/*

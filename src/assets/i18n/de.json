@@ -24,9 +24,6 @@
 	"FORM_LABEL_PASSWORD": "Dein Passwort",
 	"FORM_LABEL_PASSWORD_REP": "Wiederhole Dein Passwort",
 	
-	"MODAL_CREATE_NEW_TOPIC": "Neues Thema erstellen",
-	"MODAL_NEW_TOPIC_NAME": "Name des neuen Themas (mind. {{numChars}} Zeichen)",
-	"MODAL_CREATE": "Erstellen",
 	"MODAL_REQUEST_NEW_PASSWORD": "Neues Passwort anfordern",
 	"MODAL_SEND_VERIFICATION_MAIL_AGAIN": "Verifizierungs-E-Mail erneut senden",
 	"MODAL_SEND_REQUEST": "Absenden",
@@ -35,6 +32,10 @@
 	"DIALOG_FEEDBACK_TITLE": "Hast du Feedback für uns?",
 	"DIALOG_FEEDBACK_PLACEHOLDER": "Beschreibe kurz deine Ideen, Probleme, etc",
 	"DIALOG_FEEDBACK_SUCESSFULLY_SENT": "Das Feedback wurde erfolgreich weitergegeben.",
+	"DIALOG_ADDTOPIC_TITLE": "Neues Thema erstellen",
+	"DIALOG_ADDTOPIC_NAME_PLACEHOLDER": "Name des neuen Themas (mind. {{minLetters}} Zeichen)",
+	"DIALOG_ADDTOPIC_BUTTON_CREATE": "Erstellen",
+	"DIALOG_ADDTOPIC_SNACKBAR_SUCCESS": "Das Thema wurde erfolgreich hinzugefügt.",
 	"DIALOG_ASKDELETE_TITLE": "Löschen",
 
 	"LOGIN_FORM_TITLE": "Login",
@@ -156,7 +157,11 @@
 	"GROUP_BUTTON_MEMBERS": "Mitglieder",
 	"GROUP_BUTTON_LABEL_PREVIOUS_GROUP": "Vorige Gruppe",
 	"GROUP_BUTTON_LABEL_PREVIOUS_TITLE": "Öffne des Mitglieds vorige Gruppe",
-	
+	"GROUP_WELCOME_TITLE": "Willkommen in der Gruppe {{groupName}}",
+	"GROUP_WELCOME_NAME": "Dein Name in dieser Gruppe ist <strong>{{memberName}}</strong>.",
+	"GROUP_WELCOME_ADDITIONAL_HEADER": "Zusätzliche Informationen",
+	"GROUP_WELCOME_ADDITIONAL_CONTENT": "<p>Du bist in einer Gruppe zum Thema \"{{topicName}}\".</p><p>Deine Aufgabe ist es gemeinsam mit den anderen zufällig ausgewählten Mitgliedern eine gemeinsame Position zu finden.</p><p>Im Tab <em>Dokument</em> habt ihr ein kollaboratives Dokument zur Verfügung. In diesem Dokument können alle Mitglieder in Echtzeit schreiben. Zur Identifikation hat jedes Mitglied hat einen zufällig generierten Namen und eine Farbe, die nur innerhalb dieser Gruppe gültig sind.</p><p>Im <em>Chat</em>-Tab kannst du andere Mitglieder erwähnen. Schreibe dafür in das Eingabefeld einfach ein '@' und wähle das entsprechende Mitglied. Mit '@all' kannst du alle Mitglieder erwähnen. Die gewählten Mitglieder bekommen dann eine Benachrichtigung.</p><p>Eine weitere Möglichkeit zur Kommunikation bietet der <em>Forum</em>-Tab. Im Forum können alle Mitglieder Diskusionen anstoßen. Das Forum ist prinzipiell für alle Benutzer offen, d.h. auch für Nicht-Mitglieder der Gruppe. Ein Thread kann aber auf Privat gesetzt werden, wodurch nur Mitglieder das Recht haben etwas Posten zu können.</p><p>Der letzte Tab, <em>Mitglieder</em> ist sehr wichtig für den weiteren Prozess. In diesem Bereich kannst du alle Mitglieder (auch dich selbst) nach 3 verschiedenen Kriterien bewerten. Das jeweilige Mitglieder mit der höchsten Gesamtbewertung wird Repräsentant dieser Gruppe.</p><p>Allgemein, beachte dich freundlich und konstruktiv zu verhalten.</p>",
+
 	"FORUM_BUTTON_TO_GROUP": "Zur Gruppe",
 	"FORUM_BUTTON_NEW_THREAD": "Thread erstellen",
 	"FORUM_DIALOG_NEW_THREAD_HEADING": "Neuen Thread erstellen",

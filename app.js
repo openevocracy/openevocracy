@@ -28,6 +28,7 @@ const proposals = require('./server/routes/proposals');
 const tests = require('./server/routes/tests');
 const pads = require('./server/routes/pads');
 const activities = require('./server/routes/activities');
+const socialnet = require('./server/routes/socialnet');
 
 // Set passport strategy
 const strategy = users.getStrategy();
@@ -119,7 +120,7 @@ app.get('/file/topic/:id', auth(), topics.download);
 /*
  * @desc: Get whole activity list
  */
-app.get('/json/activitylist', auth(), activities.getActivityList);
+//app.get('/json/activitylist', auth(), activities.getActivityList);
 
 /*
  * @desc: Get a user's activity list
@@ -131,7 +132,20 @@ app.get('/json/useractivitylist/:id', auth(), activities.getUserActivityList);
  */
 app.get('/json/activity/:id', auth(), activities.query);
 app.post('/json/activity/create', auth(), activities.create);
-app.delete('/json/activity/:id', auth(), activities.delete);
+//app.delete('/json/activity/:id', auth(), activities.delete); //activities are now only deleted by the server
+
+// #########################
+// ### S O C I A L N E T ### // TODO
+// #########################
+
+/*
+ * Routes:
+ *
+ * /follow - user follows another user
+ * /unfollow - user stops to follows another user
+ * /materequest - user sends a request to be mates with another user
+ * /unmate - user ends mate relation
+
 
 // ###############
 // ### D O C S ###
@@ -220,7 +234,7 @@ app.delete('/json/group/forum/comment/:id', auth(), forums.comment.delete);
 app.get('/json/chat/room/:id', auth(), chats.queryChatRoomMessages);
 
 // @desc: Send mail to all mentioned users
-app.post('/json/chat/mentioned/', auth(), chats.sendMailToMentionedUsers);
+app.post('/json/chat/mentioned/', auth(), chats.processMentionedUsers);
 
 /* Ratings */
 
@@ -240,6 +254,17 @@ app.get('/json/groupvis/proposal/:id', auth(), groups.groupvis.getProposal);
 
 // @desc: Get details about specific group
 app.get('/json/groupvis/group/:id', auth(), groups.groupvis.getGroup);
+
+/* Welcome dialog */
+
+// @desc: Get welcome dialog status (already opened or not)
+app.get('/json/group/welcome/status/:id', auth(), groups.welcome.getWelcomeStatus);
+
+// @desc: Set welcome dialog status (already opened or not)
+app.post('/json/group/welcome/status', auth(), groups.welcome.setWelcomeStatus);
+
+// @desc: Get all information about group welcome dialog
+app.get('/json/group/welcome/:id', auth(), groups.welcome.getWelcomeData);
 
 // ###################
 // ###   A U T H   ###

@@ -4,11 +4,12 @@ import { Injectable } from '@angular/core';
 export class ModalService {
 	private modal: any;
 	
-	add(modal: any) {
+	public add(modal: any) {
+		console.log(modal);
 		this.modal = modal;
 	}
 	
-	remove() {
+	public remove() {
 		this.modal = null;
 	}
 	

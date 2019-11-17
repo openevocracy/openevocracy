@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>{{ 'GROUP_WELCOME_TITLE' | translate:{ 'groupName': data.groupName } }}</h2>
+
+<mat-dialog-content>
+	<p class="member-name" [innerHTML]="'GROUP_WELCOME_NAME' | translate:{ 'memberName': data.memberName }"></p>
+	
+	<mat-accordion>
+		<mat-expansion-panel>
+			<mat-expansion-panel-header>
+				<mat-panel-title>{{ 'GROUP_WELCOME_ADDITIONAL_HEADER' | translate }}</mat-panel-title>
+			</mat-expansion-panel-header>
+		
+			<div [innerHTML]="'GROUP_WELCOME_ADDITIONAL_CONTENT' | translate:{'topicName': data.topicName}"></div>
+		</mat-expansion-panel>
+	</mat-accordion>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+	<button mat-raised-button color="primary" (click)="close()">{{'FORM_BUTTON_CLOSE' | translate }}</button>
+</mat-dialog-actions>
