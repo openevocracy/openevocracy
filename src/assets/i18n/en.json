@@ -37,6 +37,7 @@
 	"DIALOG_ADDTOPIC_BUTTON_CREATE": "Create",
 	"DIALOG_ADDTOPIC_SNACKBAR_SUCCESS": "The topic was successfully added.",
 	"DIALOG_ASKDELETE_TITLE": "Delete",
+	"DIALOG_CLOSEEDITOR_TITLE": "The document is not fully saved yet, close anyway?",
 	
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",
@@ -229,9 +230,6 @@
 	
 	"EDITOR_SAVED_CHANGES": "All changes are saved.",
 	"EDITOR_UNSAVED_CHANGES": "Saving ...",
-	"EDITOR_CLOSE_MODAL_TEXT": "The document is not fully saved yet, close anyway?",
-	"EDITOR_CLOSE_MODAL_STAY": "Cancel",
-	"EDITOR_CLOSE_MODAL_LEAVE": "Close",
 	"EDITOR_PLACEHOLDER_TOPIC_DESCRIPTION": "Describe this topic ...",
 	"EDITOR_PLACEHOLDER_PROPOSAL": "Express what you think about this topic: your proposed solutions, disires and concerns ...",
 	"EDITOR_PLACEHOLDER_GROUP": "Write down your common proposed solutions. Note that the chat, the text comments and the associated forum is intended for discussions. The text shouldn't contain any meta content ...",

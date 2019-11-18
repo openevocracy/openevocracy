@@ -28,7 +28,6 @@ import { CountdownComponent } from './countdown/countdown.component';
 import { AlertComponent } from './alert/alert.component';
 import { ModalComponent } from './modals/modal.component';
 import { ModalEmailComponent } from './modals/email/email.modal.component';
-import { ModalCloseeditorComponent } from './modals/closeeditor/closeeditor.modal.component';
 
 // Components Public
 import { PublicComponent } from './public/public.component';
@@ -60,7 +59,6 @@ import { UserService } from './_services/user.service';
 import { AlertService } from './_services/alert.service';
 import { ModalService } from './_services/modal.service';
 import { EmailModalService } from './_services/modal.email.service';
-import { CloseeditorModalService } from './_services/modal.closeeditor.service';
 import { UtilsService } from './_services/utils.service';
 import { LanguageService } from './_services/language.service';
 import { ConfigService } from './_services/config.service';
@@ -91,6 +89,7 @@ import { GroupComponent } from './group/group.component';
 import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
 import { StarratingComponent } from './starrating/starrating.component';
 import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
+import { CloseEditorDialogComponent } from './dialogs/closeeditor/closeeditor.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -118,7 +117,6 @@ export function loadConfig(configService: ConfigService) {
 		CountdownComponent,
 		SettingsComponent,
 		EditorComponent,
-		ModalCloseeditorComponent,
 		GroupEditorComponent,
 		AddonePipe,
 		TimestampPipe,
@@ -141,7 +139,8 @@ export function loadConfig(configService: ConfigService) {
 		GroupComponent,
 		GroupMemberbarComponent,
 		StarratingComponent,
-		AddtopicDialogComponent
+		AddtopicDialogComponent,
+		CloseEditorDialogComponent
 	],
 	imports: [
 		BrowserModule,
@@ -176,7 +175,6 @@ export function loadConfig(configService: ConfigService) {
 		AlertService,
 		ModalService,
 		EmailModalService,
-		CloseeditorModalService,
 		UtilsService,
 		LanguageService,
 		SnackbarService,
@@ -197,7 +195,8 @@ export function loadConfig(configService: ConfigService) {
 		EditThreadDialogComponent,
 		ShareDialogComponent,
 		GroupWelcomeDialogComponent,
-		AddtopicDialogComponent
+		AddtopicDialogComponent,
+		CloseEditorDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

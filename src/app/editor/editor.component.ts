@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AlertService } from '../_services/alert.service';
@@ -10,8 +10,8 @@ import { ConnectionAliveService } from '../_services/connection.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
 import { EditorService } from '../_services/editor.service';
-import { ModalService } from '../_services/modal.service';
-import { CloseeditorModalService } from '../_services/modal.closeeditor.service';
+
+import { CloseEditorDialogComponent } from '../dialogs/closeeditor/closeeditor.component';
 
 import * as sharedb from 'sharedb/lib/client';
 import * as richText from 'rich-text';
@@ -45,7 +45,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 	public type: string;
 	public deadlineInterval;
 	public padSocket;
-	public modalSubscription: Subscription;
 	
 	private doc;
 	
@@ -56,13 +55,12 @@ export class EditorComponent implements OnInit, OnDestroy {
 		protected alertService: AlertService,
 		protected router: Router,
 		protected activatedRoute: ActivatedRoute,
-		protected modalService: ModalService,
-		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
 		protected translateService: TranslateService,
 		protected connectionAliveService: ConnectionAliveService,
-		protected editorService: EditorService
+		protected editorService: EditorService,
+		protected dialog: MatDialog
 	) {
 		this.userId = this.userService.getUserId();
 		this.userToken = this.userService.getToken();
@@ -80,16 +78,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 				['clean']
 			]
 		}
-		
-		// Modal
-		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe((close) => {
-			// Close modal
-			this.modalService.close();
-			
-			// Navigate to source
-			if (close)
-				this.router.navigate(['/topic', this.topicId]);
-		});
 		
 		// Listen to connection lost event
 		this.connectionAliveService.connectionLost.subscribe((res) => {
@@ -116,9 +104,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 		// Close pad socket
 		if (this.padSocket)
 			this.padSocket.close();
-			
-		// Unsubscribe to avoid memory leak
-		this.modalSubscription.unsubscribe();
 		
 		// Stop countdown
 		if (this.deadlineInterval)
@@ -250,13 +235,21 @@ export class EditorComponent implements OnInit, OnDestroy {
 	 * @desc: Closes the editor
 	 */
 	public closeEditor() {
-		if (!this.editorService.isSaved(this.padId)) {
-			this.modalService.open('closeeditor');
+		// If editor is fully saved, navigate to topic
+		if (this.editorService.isSaved(this.padId)) {
+			this.router.navigate(['/topic', this.topicId]);
 			return;
 		}
 		
-		// Navigate to topic
-		this.router.navigate(['/topic', this.topicId]);
+		// If editor is not fully saved, redirect open dialog and ask if user really wants to close the editor
+		const dialogRef = this.dialog.open(CloseEditorDialogComponent, { 'minWidth': '300px' });
+		
+		// Subscribe to response from dialog
+		dialogRef.componentInstance.onSubmit.subscribe((res) => {
+			// If user really wants to leave, navigate to source
+			if (res.isLeave)
+				this.router.navigate(['/topic', this.topicId]);
+   	});
 	}
 	
 	/**

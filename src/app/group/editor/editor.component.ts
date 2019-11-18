@@ -2,15 +2,13 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AlertService } from '../../_services/alert.service';
 import { ConnectionAliveService } from '../../_services/connection.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
-import { ModalService } from '../../_services/modal.service';
-import { CloseeditorModalService } from '../../_services/modal.closeeditor.service';
 import { EditorService } from '../../_services/editor.service';
 
 import { EditorComponent } from '../../editor/editor.component';
@@ -38,15 +36,14 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		protected alertService: AlertService,
 		protected router: Router,
 		protected activatedRoute: ActivatedRoute,
-		protected modalService: ModalService,
-		protected closeeditorModalService: CloseeditorModalService,
 		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
 		protected translateService: TranslateService,
 		protected connectionAliveService: ConnectionAliveService,
-		protected editorService: EditorService
+		protected editorService: EditorService,
+		protected dialog: MatDialog
 	) {
-		super(snackBar, alertService, router, activatedRoute, modalService, closeeditorModalService, httpManagerService, userService, translateService, connectionAliveService, editorService);
+		super(snackBar, alertService, router, activatedRoute, httpManagerService, userService, translateService, connectionAliveService, editorService, dialog);
 		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
@@ -67,11 +64,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	ngOnInit() {
 		// Set and translate placeholder
 		this.translatePlaceholder("EDITOR_PLACEHOLDER_GROUP");
-		
-		// Open welcome model
-		// Note: setTimout is necessary due to a bug: https://github.com/angular/angular/issues/15634
-		// TODO, only if user did not already disable it
-		//setTimeout(() => { this.modalService.open({}); }, 0);
 	}
 	
 	/*
@@ -81,9 +73,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		// Close pad socket
 		if (this.padSocket)
 			this.padSocket.close();
-		
-		// Unsubscribe to avoid memory leak
-		this.modalSubscription.unsubscribe();
 		
 		// Stop countdown
 		if (this.deadlineInterval)

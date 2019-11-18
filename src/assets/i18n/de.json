@@ -37,6 +37,7 @@
 	"DIALOG_ADDTOPIC_BUTTON_CREATE": "Erstellen",
 	"DIALOG_ADDTOPIC_SNACKBAR_SUCCESS": "Das Thema wurde erfolgreich hinzugefügt.",
 	"DIALOG_ASKDELETE_TITLE": "Löschen",
+	"DIALOG_CLOSEEDITOR_TITLE": "Das Dokument ist noch nicht gespeichert, trotzdem schließen?",
 
 	"LOGIN_FORM_TITLE": "Login",
 	"LOGIN_FORM_SUBMIT": "Login",
@@ -229,9 +230,6 @@
 	
 	"EDITOR_SAVED_CHANGES": "Alle Änderungen sind gespeichert.",
 	"EDITOR_UNSAVED_CHANGES": "Speichert ...",
-	"EDITOR_CLOSE_MODAL_TEXT": "Das Dokument ist noch nicht gespeichert, trotzdem schließen?",
-	"EDITOR_CLOSE_MODAL_STAY": "Abbrechen",
-	"EDITOR_CLOSE_MODAL_LEAVE": "Schließen",
 	"EDITOR_PLACEHOLDER_TOPIC_DESCRIPTION": "Beschreibe das Thema ...",
 	"EDITOR_PLACEHOLDER_PROPOSAL": "Schreibe wie du über das Thema denkst: Formuliere deine Lösungsvorschläge, Wünsche und Bedenken ...",
 	"EDITOR_PLACEHOLDER_GROUP": "Schreibt gemeinsam auf, auf welche Lösungsvorschläge ihr euch einigen konnte. Beachtet, dass Diskussionen über den Text im Chat, in den Textkommentaren und dem zugehörigen Forum geführt werden sollen. Das Dokument selbst soll keine Metainformationen enthalen ...",

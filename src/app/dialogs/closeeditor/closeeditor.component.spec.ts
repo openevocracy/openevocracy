@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ModalCloseeditorComponent } from './closeeditor.modal.component';
+import { CloseEditorDialogComponent } from './closeeditor.component';
 
-describe('ModalCloseeditorComponent', () => {
-  let component: ModalCloseeditorComponent;
-  let fixture: ComponentFixture<ModalCloseeditorComponent>;
+describe('CloseEditorDialogComponent', () => {
+  let component: CloseEditorDialogComponent;
+  let fixture: ComponentFixture<CloseEditorDialogComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ModalCloseeditorComponent ]
+      declarations: [ CloseEditorDialogComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ModalCloseeditorComponent);
+    fixture = TestBed.createComponent(CloseEditorDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

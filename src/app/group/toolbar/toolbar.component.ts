@@ -1,13 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
+import { MatDialog } from '@angular/material';
 
-import { ModalService } from '../../_services/modal.service';
-import { CloseeditorModalService } from '../../_services/modal.closeeditor.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
 import { ConnectionAliveService } from '../../_services/connection.service';
 import { EditorService } from '../../_services/editor.service';
+
+import { CloseEditorDialogComponent } from '../../dialogs/closeeditor/closeeditor.component';
 
 import * as parseUrl from 'url-parse';
 import * as origin from 'get-location-origin';
@@ -30,7 +31,6 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 	public padId: string;
 	public expiration: number;
 	public badgeSocket;
-	public modalSubscription: Subscription;
 	
 	public editorBadge: number;
 	public chatBadge: number;
@@ -49,9 +49,8 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		private activatedRoute: ActivatedRoute,
 		private httpManagerService: HttpManagerService,
 		private connectionAliveService: ConnectionAliveService,
-		private closeeditorModalService: CloseeditorModalService,
-		private modalService: ModalService,
-		private editorService: EditorService
+		private editorService: EditorService,
+		private dialog: MatDialog
 	) {
 		// Get user token and userId from user service
 		this.userToken = this.userService.getToken();
@@ -74,16 +73,6 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 				// Clear badges view
 				this.clearBadgeView();
          }
-		});
-		
-		// If modal response confirms closing, navigate to topic
-		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe((close) => {
-			// Close modal
-			this.modalService.close();
-			
-			// Navigate to source
-			if (close)
-				this.router.navigate(['/topic', this.topicId]);
 		});
 		
 		// Listen to connection lost event
@@ -120,9 +109,6 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 	ngOnDestroy() {
 		// Clear badges database value
 		this.clearBadgeDatabase();
-		
-		// Unsubscribe to avoid memory leak
-		this.modalSubscription.unsubscribe();
 	}
 	
 	/**
@@ -213,14 +199,21 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		// Check if document is saved to avoid loss of data
 		// Note that if isSaved is undefined, just close the group, in that case the editor does not already or not anymore exist
 		const isSaved = this.editorService.isSaved(this.padId)
-		if (!_.isUndefined(isSaved) && !isSaved) {
-			// If it is not saved, open modal with warning
-			this.modalService.open({});
-			return;
+		if (_.isUndefined(isSaved) || isSaved) {
+			// Navigate to topic
+			this.router.navigate(['/topic', this.topicId]);
 		}
 		
-		// Navigate to topic
-		this.router.navigate(['/topic', this.topicId]);
+		// If editor is not fully saved, redirect open dialog and ask if user really wants to close the editor
+		const dialogRef = this.dialog.open(CloseEditorDialogComponent, { 'minWidth': '300px' });
+		
+		// Subscribe to response from dialog
+		dialogRef.componentInstance.onSubmit.subscribe((res) => {
+			// If user really wants to leave, navigate to source
+			if (res.isLeave)
+				this.router.navigate(['/topic', this.topicId]);
+   	});
+		
 	}
 
 }

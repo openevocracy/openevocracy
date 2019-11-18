@@ -21,6 +21,7 @@ import * as $ from 'jquery';
 	styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit, OnDestroy {
+	
 	public loginForm: FormGroup;
 	private modalSubscription: Subscription;
 	public awaitAuthentication: boolean = false;

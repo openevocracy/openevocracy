@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>{{ 'DIALOG_CLOSEEDITOR_TITLE' | translate }}</h2>
+
+<mat-dialog-content></mat-dialog-content>
+
+<mat-dialog-actions>
+	<button mat-raised-button color="primary" (click)="setResponse(false)">
+		<span>{{'FORM_BUTTON_CANCEL' | translate }}</span>
+	</button>
+	<button mat-raised-button color="warn" (click)="setResponse(true)">
+		<span>{{'FORM_BUTTON_CLOSE' | translate }}</span>
+	</button>
+</mat-dialog-actions>
