@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs/Subscription';
 
 import { UserService } from '../_services/user.service';
 import { AlertService } from '../_services/alert.service';
@@ -18,26 +17,27 @@ export class RegisterComponent implements OnInit {
 	private awaitAuthentication: boolean = false;
 	
 	constructor(
-		public user: UserService,
+		public userService: UserService,
 		private fb: FormBuilder,
-		private alert: AlertService,
+		private alertService: AlertService,
 		private utilsService: UtilsService,
-		private translate: TranslateService) {
-		this.createForm();
-	}
-	
-	ngOnInit() {}
-	
-	private createForm() {
+		private translate: TranslateService
+	) {
+		// Create register form
 		this.registerForm = this.fb.group({
 			'email': ['', Validators.email],
 			'passwords': this.fb.group({
 				'password': ['', Validators.required],
 				'passwordrep': ['', Validators.required]
-			}, {validator: this.utilsService.areEqual})
+			}, { validator: this.utilsService.areEqual })
 		});
 	}
 	
+	ngOnInit() {}
+	
+	/**
+	 * @desc: Called when register form is submitted
+	 */
 	public onSubmit() {
 		// If form is not valid, break registration
 		if(!this.registerForm.valid)
@@ -52,18 +52,23 @@ export class RegisterComponent implements OnInit {
 			'password': this.registerForm.value.passwords.password
 		};
 		
-		// Check login server side
-		this.user.register(credentials)
-			.subscribe(res => {
-				// First clear old alerts
-				this.alert.clear();
-				
-				// Alert result
-				this.alert.alertFromServer(res.alert);
-				
-				// Enable button again
-				this.awaitAuthentication = false;
-			});
+		// Check registering server side
+		this.userService.register(credentials).subscribe(res => {
+			console.log(res);
+			// First clear old alerts
+			this.alertService.clear();
+			// Alert result
+			this.alertService.alertFromServer(res.alert);
+			// Enable button again
+			this.awaitAuthentication = false;
+		}, err => {
+			// First clear old alerts
+			this.alertService.clear();
+			// Set alert message
+			this.alertService.alertFromServer(err.error.alert);
+			// Enable button again
+			this.awaitAuthentication = false;
+		});
 	}
 	
 }

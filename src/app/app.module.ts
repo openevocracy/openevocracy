@@ -26,8 +26,6 @@ import { TimestampPipe } from './_pipes/timestamp.pipe';
 import { AppComponent } from './app.component';
 import { CountdownComponent } from './countdown/countdown.component';
 import { AlertComponent } from './alert/alert.component';
-import { ModalComponent } from './modals/modal.component';
-import { ModalEmailComponent } from './modals/email/email.modal.component';
 
 // Components Public
 import { PublicComponent } from './public/public.component';
@@ -57,8 +55,6 @@ import { HttpManagerService } from './_services/http-manager.service';
 import { Guard } from './_services/guard.service';
 import { UserService } from './_services/user.service';
 import { AlertService } from './_services/alert.service';
-import { ModalService } from './_services/modal.service';
-import { EmailModalService } from './_services/modal.email.service';
 import { UtilsService } from './_services/utils.service';
 import { LanguageService } from './_services/language.service';
 import { ConfigService } from './_services/config.service';
@@ -90,6 +86,7 @@ import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
 import { StarratingComponent } from './starrating/starrating.component';
 import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
 import { CloseEditorDialogComponent } from './dialogs/closeeditor/closeeditor.component';
+import { LoginEmailDialogComponent } from './dialogs/loginemail/loginemail.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -111,8 +108,6 @@ export function loadConfig(configService: ConfigService) {
 		SecureComponent,
 		AlertComponent,
 		RegisterComponent,
-		ModalComponent,
-		ModalEmailComponent,
 		TopicComponent,
 		CountdownComponent,
 		SettingsComponent,
@@ -140,7 +135,8 @@ export function loadConfig(configService: ConfigService) {
 		GroupMemberbarComponent,
 		StarratingComponent,
 		AddtopicDialogComponent,
-		CloseEditorDialogComponent
+		CloseEditorDialogComponent,
+		LoginEmailDialogComponent
 	],
 	imports: [
 		BrowserModule,
@@ -173,8 +169,6 @@ export function loadConfig(configService: ConfigService) {
 		Guard,
 		UserService,
 		AlertService,
-		ModalService,
-		EmailModalService,
 		UtilsService,
 		LanguageService,
 		SnackbarService,
@@ -196,7 +190,8 @@ export function loadConfig(configService: ConfigService) {
 		ShareDialogComponent,
 		GroupWelcomeDialogComponent,
 		AddtopicDialogComponent,
-		CloseEditorDialogComponent
+		CloseEditorDialogComponent,
+		LoginEmailDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

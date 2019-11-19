@@ -72,8 +72,8 @@ export class UserService {
 	}
 	
 	public register(credentials) {
-		let langKey = this.utilsService.getBrowserLanguage();
-		let user = _.extend(credentials, {'lang': langKey});
+		const langKey = this.utilsService.getBrowserLanguage();
+		const user = _.extend(credentials, {'lang': langKey});
 		return this.httpManagerService.post('/json/auth/register', user);
 	}
 	

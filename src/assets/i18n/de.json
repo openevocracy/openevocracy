@@ -24,10 +24,8 @@
 	"FORM_LABEL_PASSWORD": "Dein Passwort",
 	"FORM_LABEL_PASSWORD_REP": "Wiederhole Dein Passwort",
 	
-	"MODAL_REQUEST_NEW_PASSWORD": "Neues Passwort anfordern",
-	"MODAL_SEND_VERIFICATION_MAIL_AGAIN": "Verifizierungs-E-Mail erneut senden",
-	"MODAL_SEND_REQUEST": "Absenden",
-	"MODAL_CANCEL": "Abbrechen",
+	"DIALOG_REQUEST_NEW_PASSWORD": "Neues Passwort anfordern",
+	"DIALOG_SEND_VERIFICATION_MAIL_AGAIN": "Verifizierungs-E-Mail erneut senden",
 	"DIALOG_SHARE_TITLE": "Teile diese Seite",
 	"DIALOG_FEEDBACK_TITLE": "Hast du Feedback für uns?",
 	"DIALOG_FEEDBACK_PLACEHOLDER": "Beschreibe kurz deine Ideen, Probleme, etc",

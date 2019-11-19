@@ -59,8 +59,10 @@ function isOnline(userId) {
 }
 exports.isOnline = isOnline;
 
-// POST /api/auth/login
-// @desc: logs in a user
+/**
+ * @desc: logs in a user
+ * @route: POST /api/auth/login
+ */
 exports.login = function(req, res) {
 	if(req.body.email && req.body.password) {
 		var email = req.body.email;
@@ -161,7 +163,10 @@ exports.sendPassword = function(req, res) {
 	});
 };
 
-// @desc: Register a new user
+/**
+ * @desc: Register a new user
+ * @route: POST /json/auth/register
+ */
 exports.register = function(req, res) {
 	var langKey = req.body.lang;
 	

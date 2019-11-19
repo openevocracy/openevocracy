@@ -12,15 +12,13 @@ import { ConfigService } from '../../_services/config.service';
 export class AddtopicDialogComponent implements OnInit {
 	
 	public onSubmit = new EventEmitter();
-	
 	public addTopicForm: FormGroup;
-	
 	public minLetters: number;
 
 	constructor(
 		private dialogRef: MatDialogRef<AddtopicDialogComponent>,
 		private configService: ConfigService
-		) {
+	) {
 		// Get minimum number of letters for topic title from config
 		const cfg = configService.get();
 		this.minLetters = cfg.MIN_LETTERS_TOPIC_NAME;

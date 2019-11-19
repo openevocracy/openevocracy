@@ -24,10 +24,8 @@
 	"FORM_LABEL_PASSWORD": "Your password:",
 	"FORM_LABEL_PASSWORD_REP": "Repeat your password",
 	
-	"MODAL_REQUEST_NEW_PASSWORD": "Request new password",
-	"MODAL_SEND_VERIFICATION_MAIL_AGAIN": "Send verification mail again",
-	"MODAL_SEND_REQUEST": "Submit",
-	"MODAL_CANCEL": "Cancel",
+	"DIALOG_REQUEST_NEW_PASSWORD": "Request new password",
+	"DIALOG_SEND_VERIFICATION_MAIL_AGAIN": "Send verification mail again",
 	"DIALOG_SHARE_TITLE": "Share this page",
 	"DIALOG_FEEDBACK_TITLE": "Do you have some feedback for us?",
 	"DIALOG_FEEDBACK_PLACEHOLDER": "Shortly describe your ideas, problems, etc.",

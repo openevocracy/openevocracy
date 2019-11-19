@@ -24,13 +24,13 @@
     "EMAIL_TOPIC_PASSED_MESSAGE": "Hi,\n\nThe topic {0} you were participating has finished right now.\nHave a look at the final result:\n{2}/file/topic/final/{1}\n\nThank you for your engagement!\n",
     
     "EMAIL_LEVEL_CHANGE_SUBJECT": "{0} reached next level",
-    "EMAIL_LEVEL_CHANGE_MESSAGE": "Hi,\n\nThe consensus stage of the topic {0} has reached a new level and so have you.\nYou have been assigned to the group #{1}. You and four other new team members will be working on a joint proposal again.\n\nYou can find the group's link here:\n{2}/group/{1}\n\nThank you for your engagement!\n",
+    "EMAIL_LEVEL_CHANGE_MESSAGE": "<p>Hi,<br/><br/>The consensus stage of the topic {0} has reached a new level and so have you.</p><p>You have been assigned to the group #{1}. You and four other new team members will be working on a joint proposal again.</p><p>You can find the group's link here:</p><p>{2}/group/{1}</p><p>Thank you for your engagement!</p>",
     
     "EMAIL_REGISTRATION_SUBJECT": "Your registration at Evocracy",
     "EMAIL_REGISTRATION_MESSAGE": "<p>Welcome at Evocracy,<br/><br/>You just created an account at {0}. Please verify your email by visiting:<br/><br/><a href='{0}/login?v={1}&m={2}'>{0}/login?v={1}&m={2}</a></p><p>If you did not register, just ignore this message.</p>",
     
     "EMAIL_PASSWORD_RESET_SUBJECT": "New password",
-    "EMAIL_PASSWORD_RESET_MESSAGE": "Hi,\n\nyou ordered a password reset for evocracy. Your temporary password is:\n\n{0}\n\nWe highly suggest to change the password directly after your next login to a password of your choice.",
+    "EMAIL_PASSWORD_RESET_MESSAGE": "<p>Hi,<br/><br/>you ordered a password reset for evocracy. Your temporary password is:<br/><br/>{0}</p><p>We highly suggest to change the password directly after your next login to a password of your choice.</p>",
     
     "EMAIL_NEW_THREAD_CREATED_SUBJECT": "New thread",
     "EMAIL_NEW_THREAD_CREATED_BODY": "<p>Hi,<br/><br/>user {0} created a new thread in the forum of the group {1}.</p><p>Have a look what's new: <a href='{2}'>{2}</a></p><p>-----</p><p>You can disable e-mail notifications in the <a href=\"{3}\">forum</a>. Just switch off the 'watch'-slider.</p>",

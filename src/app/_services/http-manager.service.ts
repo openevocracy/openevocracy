@@ -27,17 +27,14 @@ export class HttpManagerService {
 		}
 		
 	private getOptions() {
-		var currentUser = window.localStorage.getItem('currentUser');
+		const currentUser = window.localStorage.getItem('currentUser');
 		
 		if (_.isUndefined(currentUser) || _.isNull(currentUser)) {
-			return null;
+			return undefined;
 		} else {
 			const token = JSON.parse(currentUser).token;
 			const headers = new HttpHeaders({ 'Authorization': 'JWT ' + token});
 			return { 'headers': headers };
-			
-			//let options = new HttpRequest({ 'headers': headers });
-			//return options;
 		}
 	}
 	
