@@ -16,6 +16,7 @@
 			<strong>{{ profileId }}</strong>
 		</mat-tab>
 		<mat-tab label="{{ 'PROFILE_TAB_TITLE_ACTIVITIES' | translate }}">
+			<mat-paginator [length]="100" [pageSize]="defaultPageSize" [pageSizeOptions]="[25, defaultPageSize, 100]" (page)="pageEvent($event)"></mat-paginator>
 			<div *ngFor="let act of activityList" [ngClass]="'act'+act.type" class="act">
 				
 				<div class="act-time">

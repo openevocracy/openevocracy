@@ -29,10 +29,14 @@ export class UserprofileComponent implements OnInit {
 	public activityList: Activity[];
 	public header: string;
 	
+	public defaultPageSize: number = 50;
+	
 	public faUserLock = faUserLock;
 	public faUserFriends = faUserFriends;
 	public faUsers = faUsers;
 	public faGlobe = faGlobe;
+	
+	public activityCount: number;
 
 	constructor(
 		private userService: UserService,
@@ -54,26 +58,22 @@ export class UserprofileComponent implements OnInit {
 				// dummy activity list:
 				// this.activityList = [new Activity({_id: "abfa33", user: "USER", type: 3, content: "Blabla", ts: "22.03.19, 17:30"}), new Activity({_id: "abd323", user: "USER2", type: 1, content: "Blabla", ts: "22.03.19, 13:30"})];
 		
-				// get activity list from server
-				this.activityListService.getUserActivityList(this.profileId).subscribe(res => {
-					// Sort activities by timestamp (inversely)
-					const sortedActivityList = _.sortBy(res, 'timestamp').reverse();
-					
-					// Initialize activityList and construct all elements
-					this.activityList = [];
-					_.each(sortedActivityList, function(el) {
-						this.activityList.push(new Activity(el));
-					}.bind(this));
+				// Get the count of the user's activities
+				this.activityListService.getUserActivityListLength(this.profileId).subscribe(len => {
+					this.activityCount = len;
 				});
 				
-				// choose appropriate headline
-				if (this.userId == this.profileId) // headline for viewing own profile
-				{
+				// Load user activity list
+				this.getActivityList(0, this.defaultPageSize);
+				
+				// Choose appropriate headline
+				// Headline for viewing own profile
+				if (this.userId == this.profileId) {
 					this.translate.get("HEADER_MAINMENU_MY_PROFILE").
 							subscribe(str => { this.header = str; });
-				}	
-				else // headline for viewing another user's profile
-				{
+				}
+				// Headline for viewing another user's profile
+				else {
 					this.translate.get("HEADER_MAINMENU_USER_PROFILE").
 							subscribe(str => { this.header = str; });
 				}
@@ -85,10 +85,38 @@ export class UserprofileComponent implements OnInit {
 	}
 	
 	/**
-	 * @desc: 
+	 * @desc: Reset privacy level of specific activity
 	 */
 	public setPrivacyLevel(e, privayLevel) {
 		console.log('privayLevel', privayLevel);
+	}
+	
+	/**
+	 * @desc: Called when paginator arrow (previous/next) is clicked
+	 */
+	public pageEvent(e) {
+		// Get skip and limit from pageinator event
+		const skip = e.pageIndex*e.pageSize;
+		const limit = e.pageSize;
+		
+		// Get new actiity list with skip and limit
+		this.getActivityList(skip, limit);
+	}
+	
+	/**
+	 * @desc: Get activity list from server
+	 */
+	public getActivityList(skip, limit) {
+		this.activityListService.getUserActivityList(this.profileId, skip, limit).subscribe(res => {
+			// Sort activities by timestamp (inversely)
+			const sortedActivityList = _.sortBy(res, 'timestamp').reverse();
+			
+			// Initialize activityList and construct all elements
+			this.activityList = [];
+			_.each(sortedActivityList, function(el) {
+				this.activityList.push(new Activity(el));
+			}.bind(this));
+		});
 	}
 	
 	/*

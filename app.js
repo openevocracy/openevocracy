@@ -128,6 +128,11 @@ app.get('/file/topic/:id', auth(), topics.download);
 app.get('/json/useractivitylist/:id', auth(), activities.getUserActivityList);
 
 /*
+ * @desc: Get the length of a user's activity list
+ */
+app.get('/json/useractivitylistlen/:id', auth(), activities.getUserActivityList);
+
+/*
  * @desc: Get, create and delete activities
  */
 app.get('/json/activity/:id', auth(), activities.query);

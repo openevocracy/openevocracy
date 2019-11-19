@@ -36,6 +36,36 @@ exports.getUserActivityList = function(req, res) {
 };
 
 /*
+ * @desc: Returns the length of the whole activity list of a particular user
+ */
+exports.getUserActivityListLen = function(req, res) {
+	const targetUserId = ObjectId(req.params.id);
+   const requestingUserId = ObjectId(req.user._id);
+   
+   // Get relation level between users (anonymous, follower, mate)
+   // ...
+   
+   //if (targetUserId)
+   
+   
+   
+   const privayLevel = getPrivacyLevel(requestingUserId, targetUserId);
+   
+   return db.collection('activities').find({ 'userId': targetUserId, 'privayLevel': privayLevel })
+   	.countAsync().then(res.json.bind(res));
+};
+
+function getPrivacyLevel(requestingUserId, targetUserId) {
+	//socialRelation = socialnet.getSocialRelationType(requestingUserId, targetUserId)
+	
+	let privayLevel = C.ACT_PLVL_ALL;
+   /*if (socialRelation == C.MATE)
+   	privayLevel = C.ACT_PLVL_MATES;*/
+   	
+   return privayLevel;
+}
+
+/*
  * @desc: Get list of specified activities of specified users
  */
 exports.getSpecificActivities = function(req, res) {

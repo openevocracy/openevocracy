@@ -1,6 +1,7 @@
 /* Import variables */
 @import "~styles/variables";
 
+.mat-paginator { background-color: transparent; }
 .act { border-bottom: 1px solid $grey300; padding: 5px 0; }
 .act-time { color: $grey500; }
 .act-text p { margin: 0; line-height: 40px; }

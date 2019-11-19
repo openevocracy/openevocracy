@@ -9,7 +9,9 @@ import { HttpManagerService } from './http-manager.service';
 
 @Injectable()
 export class TopicService {
-	constructor(private httpManagerService: HttpManagerService) { }
+	constructor(
+		private httpManagerService: HttpManagerService
+	) { }
 	
 	public vote(topicId: string, userId: string) {
 		return this.httpManagerService.post('/json/topic-vote', {'topicId': topicId, 'userId': userId});

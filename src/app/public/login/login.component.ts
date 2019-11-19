@@ -3,12 +3,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from "@angular/material";
 
-import { UserService } from '../_services/user.service';
-import { AlertService } from '../_services/alert.service';
-import { HttpManagerService } from '../_services/http-manager.service';
-import { LanguageService } from '../_services/language.service';
+import { UserService } from '../../_services/user.service';
+import { AlertService } from '../../_services/alert.service';
+import { HttpManagerService } from '../../_services/http-manager.service';
+import { LanguageService } from '../../_services/language.service';
 
-import { LoginEmailDialogComponent } from '../dialogs/loginemail/loginemail.component';
+import { LoginEmailDialogComponent } from '../../dialogs/loginemail/loginemail.component';
 
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 

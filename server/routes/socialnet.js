@@ -47,8 +47,7 @@ function mateRequest(srcUserId, targetUserId) {
      .find({ 'user1': srcUserId, 'user2': targetUserId })
      .toArrayAsync()
      .then((mate) => {
-			if (_.isEmpty(mate)) // if this combination was not found, look the other way around
-	   	{
+			if (_.isEmpty(mate)) { // if this combination was not found, look the other way around
 	   		db.collection('socialnet_mates')
 				   .findOneAsync({ 'user1': targetUserId }, { 'user2': srcUserId })
 				   .then((mate) => {
@@ -84,9 +83,9 @@ exports.mateRequest = mateRequest;
  * - targetUserId: the user who is being followed
  * @return true if the users are mates, false if not
  */
-function getFollowerRelation(srcUserId, targetUserId) {
+function isFollowerRelation(srcUserId, targetUserId) {
 	
-	return db.collection('socialnet_followers')
+	return db.collection('social_relations')
 	         .findOneAsync({ 'targetUserId': targetUserId, 'srcUserId': srcUserId })
 	         .then((follower) => {
 	         	if(_.isEmpty(follower))
@@ -95,7 +94,7 @@ function getFollowerRelation(srcUserId, targetUserId) {
 	         		return true;
 	         });
 }
-exports.getFollowerRelation = getFollowerRelation;
+exports.isFollowerRelation = isFollowerRelation;
 
 
 /**
@@ -104,22 +103,35 @@ exports.getFollowerRelation = getFollowerRelation;
  * - user2: the second user
  * @return returns 3 if the users are mates; 1 if a mate request by user1 is pending; 2 if a mate request by user2 is pending; 0 else
  */
-function getMateRelation(user1, user2) {
+function getMateRelation(userA, userB) {
 	
-	return db.collection('socialnet_mates')
-	         .find({ 'user1': user1, 'user2': user2 })
-	         .toArrayAsync()
-	         .then((mate) => {
-	         	if (!_.isEmpty(mate))
-	         	{
-	         		if (mate.status == 1)
-		         		return 1;
-		         	else if (mate.status == 2)	
-		         		return 2;
-		         	else if (mate.status == 3)	
-		         		return 3;
-	         	}
-	         	return 0;
-	         });
+	return db.collection('social_relations')
+		//.find({ 'user1': user1, 'user1': user2 })
+		.find({ 'userA': $in: [ userA, userB ], 'userB': $in: [ userA, userB ] })
+		.toArrayAsync()
+		.then((mate) => {
+			if (!_.isEmpty(mate))
+			{
+				if (mate.status == 1)
+		   		return 1;
+		   	else if (mate.status == 2)
+		   		return 2;
+		   	else if (mate.status == 3)
+		   		return 3;
+			}
+			return 0;
+	});
 }
 exports.getMateRelation = getMateRelation;
+
+
+/**
+ * @desc: Returns the social relation type between two users
+ * - user1: the first user
+ * - user2: the second user
+ * @return 
+ */
+function getSocialRelationType(user1, user2) {
+	return db.collection('social_relations').find
+}
+exports.getSocialRelationType = getSocialRelationType;

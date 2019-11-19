@@ -29,8 +29,8 @@ import { AlertComponent } from './alert/alert.component';
 
 // Components Public
 import { PublicComponent } from './public/public.component';
-import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
+import { LoginComponent } from './public/login/login.component';
+import { RegisterComponent } from './public/register/register.component';
 
 // Components Secure
 import { SecureComponent } from './secure/secure.component';

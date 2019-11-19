@@ -18,7 +18,8 @@ import {
 	MatSelectModule,
 	MatBadgeModule,
 	MatCheckboxModule,
-	MatExpansionModule
+	MatExpansionModule,
+	MatPaginatorModule
 } from '@angular/material';
 
 @NgModule({
@@ -40,7 +41,8 @@ import {
 		MatSelectModule,
 		MatBadgeModule,
 		MatCheckboxModule,
-		MatExpansionModule
+		MatExpansionModule,
+		MatPaginatorModule
 	],
 	exports: [
 		MatButtonModule,
@@ -60,7 +62,8 @@ import {
 		MatSelectModule,
 		MatBadgeModule,
 		MatCheckboxModule,
-		MatExpansionModule
+		MatExpansionModule,
+		MatPaginatorModule
 	],
 	entryComponents: [
 		
