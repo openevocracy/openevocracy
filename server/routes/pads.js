@@ -108,10 +108,10 @@ function initializeAccessControl() {
 	// Note: allowUpdate is called for every delta
 	
 	// Topic description pad
-	backend.allowRead('docs_topic_description', function(docId, doc, session) {
+	backend.allowRead('docs_topic_description', function(docId, doc, session) { // eslint-disable-line no-unsed-vars
 		return true;
 	});
-	backend.allowUpdate('docs_topic_description', function(docId, oldDoc, newDoc, ops, session) {
+	backend.allowUpdate('docs_topic_description', function(docId, oldDoc, newDoc, ops, session) { // eslint-disable-line no-unsed-vars
 		// If user is owner and document is not expired
 		if (pads_topic_description[docId]) {
 			// If pad is already in cache, check condition
@@ -127,10 +127,10 @@ function initializeAccessControl() {
 	});
 	
 	// Proposal pad
-	backend.allowRead('docs_proposal', function(docId, doc, session) {
+	backend.allowRead('docs_proposal', function(docId, doc, session) { // eslint-disable-line no-unsed-vars
 		return true;
 	});
-	backend.allowUpdate('docs_proposal', function(docId, oldDoc, newDoc, ops, session) {
+	backend.allowUpdate('docs_proposal', function(docId, oldDoc, newDoc, ops, session) { // eslint-disable-line no-unsed-vars
 		// If user is owner and document is not expired
 		if (pads_proposal[docId]) {
 			// If pad is already in cache, check condition
@@ -146,10 +146,10 @@ function initializeAccessControl() {
 	});
 	
 	// Group pad
-	backend.allowRead('docs_group', function(docId, doc, session) {
+	backend.allowRead('docs_group', function(docId, doc, session) { // eslint-disable-line no-unsed-vars
 		return true;
 	});
-	backend.allowUpdate('docs_group', function(docId, oldDoc, newDoc, ops, session) {
+	backend.allowUpdate('docs_group', function(docId, oldDoc, newDoc, ops, session) { // eslint-disable-line no-unsed-vars
 		let currentPad_promise;
 		// If user is member of group and document is not expired
 		if (pads_group[docId]) {
@@ -315,7 +315,7 @@ function getPadHTMLAsync(collection_suffix, docId) {
 			resolve(html);
 		});
 	});
-};
+}
 exports.getPadHTMLAsync = getPadHTMLAsync;
 
 /*

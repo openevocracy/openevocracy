@@ -149,7 +149,7 @@ exports.create_groups = function(req, res) {
 function promiseWhile(condition, action, cond_result) {
     if (!cond_result) return Promise.resolve();
     return action().then(condition).then(_.partial(promiseWhile, condition, action));
-};
+}
 
 /*
 test suite for testing of group remix

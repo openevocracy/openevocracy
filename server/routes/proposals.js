@@ -1,7 +1,6 @@
 // General libraries
 const _ = require('underscore');
 const ObjectId = require('mongodb').ObjectID;
-const Promise = require('bluebird');
 
 // Own references
 const C = require('../../shared/constants').C;
@@ -20,11 +19,11 @@ exports.create = async function(req, res) {
 	
 	// Check if topic is at least in proposal stage to create proposal
 	if(topic && topic.stage < C.STAGE_PROPOSAL) {
-	   return utils.sendAlert(res, 400, 'danger', 'TOPIC_REQUIREMENT_PROPOSAL_STAGE');
+		return utils.sendAlert(res, 400, 'danger', 'TOPIC_REQUIREMENT_PROPOSAL_STAGE');
 	}
 		
 	// Check if pad already exists, if not, create
-	const pad = await db.collection('pads_proposal').findOneAsync({ 'topicId': topicId, 'ownerId': userId });
+	let pad = await db.collection('pads_proposal').findOneAsync({ 'topicId': topicId, 'ownerId': userId });
 	
 	if (_.isNull(pad)) {
 		// If pad was not found, everyhting is correct and pad can be created

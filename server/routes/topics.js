@@ -60,17 +60,17 @@ function manageConsensusStageAsync(topic, levelDuration) {
             };
             break;
         case C.STAGE_PASSED:
-				let topicId = topic._id;
-				
-				// get the pad id of final document
-				// e.g. the proposal pad id of the group in the last level
-				const finalDocumentHtml_promise = db.collection('groups')
-					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
-					.then(function(group) {
-						return db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
-				    }).then(function(docId) {
-				    	return pads.getPadHTMLAsync('group', docId);
-				    });
+			let topicId = topic._id;
+			
+			// get the pad id of final document
+			// e.g. the proposal pad id of the group in the last level
+			const finalDocumentHtml_promise = db.collection('groups')
+				.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
+				.then(function(group) {
+					return db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
+			    }).then(function(docId) {
+			    	return pads.getPadHTMLAsync('group', docId);
+			    });
             
             // Get pad PDF and save it in file system
             finalDocumentHtml_promise.then(pads.getPadPDFAsync).then(function(data) {

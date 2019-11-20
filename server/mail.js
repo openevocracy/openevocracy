@@ -36,7 +36,7 @@ exports.initializeMail = function() {
 			en: { translation: en },
 			de: { translation: de }
 		}
-	}, function(err, t) {
+	}, function(err, t) { // eslint-disable-line no-unsed-vars
 		// If any error happens, log it
 		if(err) console.log(err);
 	});
@@ -135,12 +135,12 @@ exports.sendMail = sendMail;
  */
 function sendMailToUser(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// First change language of i18n
-	i18next.changeLanguage(mailUser.lang, function(err, t) {
+	i18next.changeLanguage(mailUser.lang, function(err, t) { // eslint-disable-line no-unsed-vars
 		// If any error occurs while language change, log it
 		if(err) console.log(err);
 		
 		// Avoid that string is seperated in characters
-		var emailAdress = (_.isString(mailUser.email) ? [mailUser.email] : mailUser.email);
+		const emailAdress = (_.isString(mailUser.email) ? [mailUser.email] : mailUser.email);
 		
 		// Send mail
 		sendMail(emailAdress, formatAndTranslate(mailSubject, mailSubjectParams), formatAndTranslate(mailBody, mailBodyParams));
