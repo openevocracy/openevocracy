@@ -190,7 +190,7 @@ app.get('/json/group/memberbar/:id', auth(), groups.query.memberbar);
 app.get('/json/group/membersonline/:id', auth(), groups.query.onlineMembers);
 
 // @desc: Group members, including ratings and previous documents
-app.get('/json/group/members/:id', auth(), groups.query.groupMembers);
+app.get('/json/group/basic/:id', auth(), groups.query.getBasicGroup);
 
 /* Forum */
 
@@ -243,8 +243,7 @@ app.post('/json/chat/mentioned/', auth(), chats.processMentionedUsers);
 
 /* Ratings */
 
-app.get('/json/ratings/count', auth(), groups.ratings.count);
-app.get('/json/ratings/:id', auth(), groups.ratings.query);
+app.get('/json/group/ratings/:id', auth(), groups.ratings.getMembersRatings);
 
 // @desc: Store a new rating value
 app.post('/json/ratings/rate', auth(), groups.ratings.rate);

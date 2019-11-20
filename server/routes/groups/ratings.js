@@ -8,29 +8,21 @@ const db = require('../../database').db;
 const utils = require('../../utils');
 const helper = require('./helper');
 
-// NOTE Currently not in use
-// called if ratings are queried, responds with rating from database
-exports.query = function(req, res) {
-	var ratedUserId = ObjectId(req.params.id);
-	var groupId = ObjectId(req.params.gid);
+/**
+ * @desc: Called if ratings from all group members are queried
+ * @route: /json/ratings/:id
+ */
+exports.getMembersRatings = function(req, res) {
+	var groupId = ObjectId(req.params.id);
 	var userId = ObjectId(req.user._id);
-	var type = parseInt(req.params.type, 10);
 	
-	db.collection('group_ratings')
-		.findOneAsync({ 'groupId': groupId, 'userId': userId, 'ratedUserId': ratedUserId, 'type': type })
-		.then(res.json.bind(res));
-};
-
-// NOTE Currently not in use
-// @desc: Counts number of given ratings per group for specific type of rating
-exports.count = function(req, res) {
-	var ratedUserId = ObjectId(req.body.id);
-	var groupId = ObjectId(req.body.gid);
-	var type = parseInt(req.params.type, 10);
-	
-	db.collection('group_ratings')
-		.countAsync({ 'groupId': groupId, 'ratedUserId': ratedUserId, 'type': type })
-		.then(res.json.bind(res));
+	// Get user members
+	helper.getGroupMembersAsync(groupId).map((relation) => {
+		// Get ratings for every member and add rated userId for identification of ratings
+		return getMemberRatingsAsync(relation.userId, groupId, userId).then((ratings) => {
+			return { 'ratedUserId': relation.userId, 'ratings': ratings };
+		});
+	}).then(res.json.bind(res));
 };
 
 /**
@@ -95,7 +87,7 @@ exports.getGroupLeaderAsync = function(groupId) {
 	});
 };
 
-exports.getMemberRatingsAsync = function(ratedUserId, groupId, userId) {
+function getMemberRatingsAsync(ratedUserId, groupId, userId) {
 	return db.collection('group_ratings').find(
 		{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId }, { '_id': false, 'type': true, 'score': true })
 	.toArrayAsync().then(function(ratings) {
@@ -111,7 +103,8 @@ exports.getMemberRatingsAsync = function(ratedUserId, groupId, userId) {
 			return { 'type': type, 'score': score };
 		});
 	});
-};
+}
+exports.getMemberRatingsAsync = getMemberRatingsAsync;
 
 exports.getMemberRatingAsync = function(ratedUserId, groupId, userId, type) {
 	return db.collection('group_ratings').findOneAsync(

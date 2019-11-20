@@ -113,14 +113,14 @@ exports.onlineMembers = function(req, res) {
 };
 
 /**
- * @desc: Gets information about group members, mainly for rating and previous documents
+ * @desc: Get basic group information
  */
-exports.groupMembers = function(req, res) {
+exports.getBasicGroup = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 	
-	// Get group
-	const group_promise = db.collection('groups').findOneAsync({'_id': groupId});
+	// Get group name
+	const group_promise = db.collection('groups').findOneAsync({ '_id': groupId });
 	
 	// Get group members
 	const groupRelations_promise = helper.getGroupMembersAsync(groupId);
@@ -158,23 +158,37 @@ exports.groupMembers = function(req, res) {
       		return pads.getPadHTMLAsync('group', prevGroupPad.docId);
       	}
       });
-		
-		// Get member ratings
-		const memberRatings_promise = ratings.getMemberRatingsAsync(relation.userId, groupId, userId);
       
       return Promise.props({
       	'userId': relation.userId,
 			'name': helper.generateMemberName(groupId, relation.userId),
 			'color': relation.userColor,
 			'prevGroupId': relation.prevGroupId,
-			'prevPadHtml': prevPadHtml_promise,
-			'ratings': memberRatings_promise
+			'prevPadHtml': prevPadHtml_promise
       });
 	});
 	
-	Promise.join(groupMembersDetails_promise, isLastGroup_promise)
-		.spread((groupMembers, isLastGroup) => {
-			return { 'members': groupMembers, 'isLastGroup': isLastGroup };
+	// Get topic name
+	const topicName_promise = group_promise.then((group) => {
+		return db.collection('topics')
+			.findOneAsync({ '_id': group.topicId }, { 'name': true }).get('name');	
+	});
+	
+	// Get expiration date
+	const expiration_promise = db.collection('pads_group').findOneAsync({'groupId': groupId}, {'expiration': true}).get('expiration');
+	
+	// Return result
+	Promise.join(group_promise, isLastGroup_promise, groupMembersDetails_promise, topicName_promise, expiration_promise)
+		.spread((group, isLastGroup, groupMembersDetails, topicName, expiration) => {
+		
+		return {
+			'groupId': groupId,
+			'groupName': group.name,
+			'expiration': expiration,
+			'isLastGroup': isLastGroup,
+			'members': groupMembersDetails,
+			'topicName': topicName,
+		};
 	}).then(res.json.bind(res));
 };
 

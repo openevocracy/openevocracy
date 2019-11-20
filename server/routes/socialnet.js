@@ -107,7 +107,7 @@ function getMateRelation(userA, userB) {
 	
 	return db.collection('social_relations')
 		//.find({ 'user1': user1, 'user1': user2 })
-		.find({ 'userA': $in: [ userA, userB ], 'userB': $in: [ userA, userB ] })
+		.find({ 'userA': { $in: [ userA, userB ] }, 'userB': { $in: [ userA, userB ] } })
 		.toArrayAsync()
 		.then((mate) => {
 			if (!_.isEmpty(mate))

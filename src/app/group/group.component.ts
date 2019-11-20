@@ -6,6 +6,9 @@ import { GroupWelcomeDialogComponent } from '../dialogs/groupwelcome/groupwelcom
 
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
+import { GroupService } from '../_services/group.service';
+
+import * as _ from 'underscore';
 
 @Component({
 	selector: 'app-group',
@@ -21,17 +24,31 @@ export class GroupComponent implements OnInit {
 		private dialog: MatDialog,
 		private router: Router,
 		private userService: UserService,
+		private groupService: GroupService,
 		private httpManagerService: HttpManagerService
 	) {
 		// Get current userId and groupId
 		this.userId = this.userService.getUserId();
 		this.groupId = this.router.url.split('/')[2];
+		
+		// Get basic information about group and evaluate user status
+		this.groupService.getBasicGroupAsync(this.groupId).subscribe((group) => {
+			const me = _.findWhere(group.members, { 'userId': this.userId });
+			
+			// If user is member (if me is truthy), check welcome status and possibly show welcome message
+			if (me)
+				this.checkWelcomeStatus();
+		});
 	}
 	
-	ngOnInit() {
+	ngOnInit() {}
+	
+	/**
+	 * @desc: Check if welcome status was not already shown, if not, show it
+	 */
+	private checkWelcomeStatus() {
 		// TODO Check if welcome dialog shall be opened
 		this.httpManagerService.get('/json/group/welcome/status/'+this.groupId).subscribe((res) => {
-			console.log(res);
 			// If welcome dialog was alread shown, stop here
 			if (res.alreadyShown)
 				return;
