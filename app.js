@@ -181,10 +181,7 @@ app.get('/json/group/editor/:id', auth(), groups.query.editor);
 app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 
 // @desc: Group main toolbar with topic and group title
-app.get('/json/group/toolbar/:id', auth(), groups.query.toolbar);
-
-// @desc: Group toolbar, showing members and their only state
-app.get('/json/group/memberbar/:id', auth(), groups.query.memberbar);
+app.get('/json/group/badges/:id', auth(), groups.query.badges);
 
 // @desc: Group online status of members
 app.get('/json/group/membersonline/:id', auth(), groups.query.onlineMembers);

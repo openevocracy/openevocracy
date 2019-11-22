@@ -10,6 +10,7 @@ import { ConnectionAliveService } from '../../_services/connection.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
 import { EditorService } from '../../_services/editor.service';
+import { GroupService } from '../../_services/group.service';
 
 import { EditorComponent } from '../../editor/editor.component';
 
@@ -41,7 +42,8 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		protected translateService: TranslateService,
 		protected connectionAliveService: ConnectionAliveService,
 		protected editorService: EditorService,
-		protected dialog: MatDialog
+		protected dialog: MatDialog,
+		private groupService: GroupService
 	) {
 		super(snackBar, alertService, router, activatedRoute, httpManagerService, userService, translateService, connectionAliveService, editorService, dialog);
 		
@@ -100,30 +102,28 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		// Get current groupId
 		const groupId = this.router.url.split('/')[2];
 		
-		// Get additional information and initalize socket
-		this.httpManagerService.get('/json/group/editor/' + groupId).subscribe((res) => {
-			this.members = res.members;
-			
-			// Add color of current member
-			this.me = _.findWhere(res.members, { 'userId': this.userId });
-			this.quillEditor.getModule('authorship').addAuthor(this.userId, this.me.color);
-			
-			// Add colors of other members
-			_.map(this.members, (member) => {
-				if(member.userId != this.me.userId)
-					this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
-			});
-			
-			// Register saved status of editor in editor service
-			this.padId = res.padId;
-			this.editorService.setIsSaved(this.padId, true);
-			
-			// Initialize countdown
-			this.initCountdown(res.deadline);
-			
-			// Initialize socket
-			this.initializePadSocket(res.docId);
+		// Get group from group service cache
+		const group = this.groupService.getBasicGroupFromCache(groupId);
+		
+		// Store members
+		this.members = group.members;
+		
+		// Add color of current member
+		this.me = _.findWhere(this.members, { 'userId': this.userId });
+		this.quillEditor.getModule('authorship').addAuthor(this.userId, this.me.color);
+		
+		// Add colors of other members
+		_.each(this.members, (member) => {
+			if(member.userId != this.me.userId)
+				this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
 		});
+		
+		// Register saved status of editor in editor service
+		this.padId = group.padId;
+		this.editorService.setIsSaved(this.padId, true);
+		
+		// Initialize socket
+		this.initializePadSocket(group.docId);
 	}
 
 }

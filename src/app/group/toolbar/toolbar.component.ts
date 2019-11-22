@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material';
 
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
+import { GroupService } from '../../_services/group.service';
 import { ConnectionAliveService } from '../../_services/connection.service';
 import { EditorService } from '../../_services/editor.service';
 
@@ -50,6 +51,7 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		private httpManagerService: HttpManagerService,
 		private connectionAliveService: ConnectionAliveService,
 		private editorService: EditorService,
+		private groupService: GroupService,
 		private dialog: MatDialog
 	) {
 		// Get user token and userId from user service
@@ -91,15 +93,19 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 	
 	ngOnInit() {
 		// Get data for toolbar from server
-			this.httpManagerService.get('/json/group/toolbar/' + this.groupId).subscribe(res => {
+			this.httpManagerService.get('/json/group/badges/' + this.groupId).subscribe(badge => {
+			
+			// Get group from group service cache
+			const group = this.groupService.getBasicGroupFromCache(this.groupId);
+			
 			// Define title, id and expiration
-			this.title = '(' + res.groupName + ') ' + res.topicTitle;
-			this.topicId = res.topicId;
-			this.padId = res.padId;
-			this.expiration = res.expiration;
+			this.title = '(' + group.groupName + ') ' + group.topicName;
+			this.topicId = group.topicId;
+			this.padId = group.padId;
+			this.expiration = group.expiration;
 			
 			// Update badges in toolbar
-			this.updateBadge(res.badge);
+			this.updateBadge(badge);
 			
 			// Init badge socket connection
 			this.initBadgeSocket();

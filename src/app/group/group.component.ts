@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from "@angular/material";
+import { ActivatedRoute } from '@angular/router';
 
 import { GroupWelcomeDialogComponent } from '../dialogs/groupwelcome/groupwelcome.component';
 
@@ -25,23 +26,25 @@ export class GroupComponent implements OnInit {
 		private router: Router,
 		private userService: UserService,
 		private groupService: GroupService,
-		private httpManagerService: HttpManagerService
+		private httpManagerService: HttpManagerService,
+		private route: ActivatedRoute
 	) {
 		// Get current userId and groupId
 		this.userId = this.userService.getUserId();
 		this.groupId = this.router.url.split('/')[2];
-		
-		// Get basic information about group and evaluate user status
-		this.groupService.getBasicGroupAsync(this.groupId).subscribe((group) => {
-			const me = _.findWhere(group.members, { 'userId': this.userId });
-			
-			// If user is member (if me is truthy), check welcome status and possibly show welcome message
-			if (me)
-				this.checkWelcomeStatus();
-		});
 	}
 	
-	ngOnInit() {}
+	ngOnInit() {
+		// Get group from resolver
+		const group = this.route.snapshot.data.basicGroup;
+		
+		// Try to find me in members
+		const me = _.findWhere(group.members, { 'userId': this.userId });
+			
+		// If user is member (if me is truthy), check welcome status and possibly show welcome message
+		if (me)
+			this.checkWelcomeStatus();
+	}
 	
 	/**
 	 * @desc: Check if welcome status was not already shown, if not, show it

@@ -4,6 +4,8 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { Guard } from '../_services/guard.service';
 
+import { GroupResolver } from '../_resolver/group.resolver';
+
 import { SecureComponent } from '../secure/secure.component';
 import { TopiclistComponent } from '../topiclist/topiclist.component';
 import { TopicComponent } from '../topic/topic.component';
@@ -29,6 +31,7 @@ const appChildRoutes: Routes = [
 	{
 		path: 'group/:id',
 		component: GroupComponent,
+		resolve: { 'basicGroup': GroupResolver },
 		children: [
 			{ path: '', redirectTo: 'editor', pathMatch: 'full' },
 			{ path: 'editor', component: GroupEditorComponent },
@@ -58,6 +61,7 @@ const appRoutes: Routes = [
 		})
 	],
 	exports: [ RouterModule ],
+	providers: [ GroupResolver ],
 	declarations: []
 })
 export class AppRoutingModule { }

@@ -2,97 +2,24 @@
 const _ = require('underscore');
 const ObjectId = require('mongodb').ObjectID;
 const Promise = require('bluebird');
-const Chance = require('chance');
-const Color = require('color');
 
 // Own references
 const db = require('../../database').db;
 const utils = require('../../utils');
 const pads = require('../pads');
 const users = require('../users');
-const ratings = require('./ratings');
 const helper = require('./helper');
 const badges = require('./badges');
 
 /**
- * @desc: Gets all data necessary for the group toolbar
+ * @desc: Gets badged information, needed in group toolbar
  */
-exports.toolbar = function(req, res) {
+exports.badges = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
-	
-	// Get group name and topic id
-	const group_promise = db.collection('groups')
-		.findOneAsync({ '_id': groupId }).then((group) => {
-			return { 'name': group.name, 'topicId': group.topicId };
-	});
-	
-	// Get topic title
-	const topic_promise = group_promise.then((group) => {
-		return db.collection('topics')
-			.findOneAsync({ '_id': group.topicId }).then((topic) => {
-				return { 'topicId': topic._id, 'title': topic.name };
-		});
-	});
-	
-	// Get expiration of group pad
-	const pad_promise = db.collection('pads_group')
-		.findOneAsync({ 'groupId': groupId }, { 'expiration': true });
-		
-	// Get current badge status
-	const badge_promise = badges.getBadgeStatusAsync(userId, groupId);
-		
-	Promise.join(group_promise, topic_promise, pad_promise, badge_promise)
-		.spread((group, topic, pad, badge) => {
-		return {
-			'groupName': group.name,
-			'topicTitle': topic.title,
-			'topicId': topic.topicId,
-			'padId': pad._id,
-			'expiration': pad.expiration,
-			'badge': badge
-		};
-	}).then(res.json.bind(res));
-};
 
-/**
- *  @desc: Gets the member bar, which function is to:
- * 		  - show the name and color of every member
- * 		  - highligh which member the current user is
- * 		  - show the online status of every member
- */
-exports.memberbar = function(req, res) {
-	const groupId = ObjectId(req.params.id);
-	const userId = ObjectId(req.user._id);
-	
-	// Get group members
-	const groupRelations_promise = helper.getGroupMembersAsync(groupId);
-	
-	// Get number of group members
-	const numGroupMembers_promise = groupRelations_promise.then(function(group_members) {
-		return _.size(group_members);
-	});
-	
-	// Generate group specific color_offset
-	const chanceOffset = new Chance(groupId.toString());
-	const offset = chanceOffset.integer({min: 0, max: 360});
-	
-	// Get group members
-	groupRelations_promise.map((relation, index) => {
-		
-		// Generate member color
-		const memberColor_promise = numGroupMembers_promise.then(function(numMembers) {
-			const hue = offset + index*(360/numMembers);
-			return Promise.resolve(Color({h: hue, s: 20, v: 100}).hex());
-		});
-      
-      return Promise.props({
-      	'userId': relation.userId,
-			'name': helper.generateMemberName(groupId, relation.userId),
-			'color': memberColor_promise,
-			'isOnline': users.isOnline(relation.userId)
-      });
-	}).then(res.json.bind(res));
+	// Get current badge status
+	badges.getBadgeStatusAsync(userId, groupId).then(res.json.bind(res));
 };
 
 /**
@@ -118,6 +45,10 @@ exports.onlineMembers = function(req, res) {
 exports.getBasicGroup = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
+	
+	// Set lastActivity for the member querying the group
+	const lastActivity_promise = db.collection('group_relations')
+		.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
 	
 	// Get group name
 	const group_promise = db.collection('groups').findOneAsync({ '_id': groupId });
@@ -169,58 +100,27 @@ exports.getBasicGroup = function(req, res) {
 	});
 	
 	// Get topic name
-	const topicName_promise = group_promise.then((group) => {
-		return db.collection('topics')
-			.findOneAsync({ '_id': group.topicId }, { 'name': true }).get('name');	
+	const topic_promise = group_promise.then((group) => {
+		return db.collection('topics').findOneAsync({ '_id': group.topicId }, { 'name': true });	
 	});
 	
 	// Get expiration date
-	const expiration_promise = db.collection('pads_group').findOneAsync({'groupId': groupId}, {'expiration': true}).get('expiration');
+	const pad_promise = db.collection('pads_group').findOneAsync({'groupId': groupId}, { 'expiration': true, 'docId': true });
 	
 	// Return result
-	Promise.join(group_promise, isLastGroup_promise, groupMembersDetails_promise, topicName_promise, expiration_promise)
-		.spread((group, isLastGroup, groupMembersDetails, topicName, expiration) => {
+	Promise.join(group_promise, isLastGroup_promise, groupMembersDetails_promise, topic_promise, pad_promise, lastActivity_promise)
+		.spread((group, isLastGroup, groupMembersDetails, topic, pad) => {
 		
 		return {
 			'groupId': groupId,
 			'groupName': group.name,
-			'expiration': expiration,
+			'padId': pad._id,
+			'expiration': pad.expiration,
+			'docId': pad.docId,
 			'isLastGroup': isLastGroup,
 			'members': groupMembersDetails,
-			'topicName': topicName,
+			'topicId': topic._id,
+			'topicName': topic.name
 		};
-	}).then(res.json.bind(res));
-};
-
-/**
- * @desc: Gets group editor information, mainly information about the pad
- */
-exports.editor = function(req, res) {
-	const groupId = ObjectId(req.params.id);
-	const userId = ObjectId(req.user._id);
-	
-	// Set lastActivity for the member querying the group
-	const lastActivity_promise = db.collection('group_relations')
-		.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
-	
-	// Get docId from group pad
-	const pad_promise = db.collection('pads_group').findOneAsync({'groupId': groupId});
-	
-	// Get group members
-	const groupMembers_promise = helper.getGroupMembersAsync(groupId).map((relation) => {
-		return {
-      	'userId': relation.userId,
-			'name': helper.generateMemberName(groupId, relation.userId),
-			'color': relation.userColor
-      };
-	});
-
-	Promise.join(pad_promise, groupMembers_promise, lastActivity_promise)
-		.spread((pad, groupMembers) => {
-			return {
-				'padId': pad._id,
-				'docId': pad.docId,
-				'members': groupMembers
-			};
 	}).then(res.json.bind(res));
 };

@@ -1,6 +1,6 @@
-import { StaticMember } from './staticmember';
+import { BasicMember } from './basic-member';
 
-export class Member extends StaticMember {
+export class Member extends BasicMember {
 	isOnline: boolean;
 	
 	constructor(res: any) {

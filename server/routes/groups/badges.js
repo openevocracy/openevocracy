@@ -229,8 +229,3 @@ function toolbarTabVisited(userId, groupId, badgeToUpdate) {
 	// Store value in database
 	updateBadgeStatusAsync(userId, groupId, { [key]: 0 });
 }
-
-exports.sendUpdate = function() {
-	
-	
-};

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { HttpManagerService } from '../../_services/http-manager.service';
+import { GroupService } from '../../_services/group.service';
 import { UserService } from '../../_services/user.service';
 
 import { Member } from '../../_models/group/memberbar';
@@ -14,11 +15,10 @@ import * as _ from 'underscore';
 	templateUrl: './memberbar.component.html',
 	styleUrls: ['./memberbar.component.scss']
 })
-export class GroupMemberbarComponent implements OnInit {
+export class GroupMemberbarComponent implements OnInit, OnDestroy {
 	
 	public userId;
 	public groupMembers: Member[] = [];
-	public online = {};
 	public onlineInterval;
 	
 	public faUser = faUser;
@@ -26,6 +26,7 @@ export class GroupMemberbarComponent implements OnInit {
 	constructor(
 		private router: Router,
 		private userService: UserService,
+		private groupService: GroupService,
 		private httpManagerService: HttpManagerService
 	) {
 		this.userId = this.userService.getUserId();
@@ -35,24 +36,35 @@ export class GroupMemberbarComponent implements OnInit {
 		// Get current groupId
 		const groupId = this.router.url.split('/')[2];
 		
-		// Get data about members
-		this.httpManagerService.get('/json/group/memberbar/' + groupId).subscribe(res => {
-			// Create objects for every member
-			_.each(res, (member) => {
+		// Get group from group service cache
+		const group = this.groupService.getBasicGroupFromCache(groupId);
+		
+		// Get member online status for the first time
+		this.httpManagerService.get('/json/group/membersonline/' + groupId).subscribe(membersOnlineStatus => {
+			_.each(group.members, (member) => {
+				// Find current member in online status array
+				const foundMember = _.findWhere(membersOnlineStatus, { 'userId': member.userId });
+				// Add online status to member array from groups
+				member.isOnline = foundMember.isOnline;
+				// Create member object and add to group members
 				this.groupMembers.push(new Member(member));
 			});
 		});
 		
 		// Call online members every minute
 		this.onlineInterval = setInterval(() => {
-			this.httpManagerService.get('/json/group/membersonline/' + groupId).subscribe(res => {
+			this.httpManagerService.get('/json/group/membersonline/' + groupId).subscribe(membersOnlineStatus => {
 				// Update isOnline status of group members
-				_.each(this.groupMembers, (user) => {
-					let member = _.findWhere(this.groupMembers, { 'userId': user.userId })
-					member.isOnline = user.isOnline;
+				_.each(this.groupMembers, (member) => {
+					const foundMember = _.findWhere(membersOnlineStatus, { 'userId': member.userId })
+					member.isOnline = foundMember.isOnline;
+				});
 			});
-		});
 		}, 60000);
+	}
+	
+	ngOnDestroy() {
+		clearInterval(this.onlineInterval);
 	}
 
 }

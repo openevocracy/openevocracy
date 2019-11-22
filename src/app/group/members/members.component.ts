@@ -64,21 +64,19 @@ export class GroupMembersComponent implements OnInit {
 		// Get current groupId
 		this.groupId = this.router.url.split('/')[2];
 		
-		const basicgroup_observable = this.groupService.getBasicGroupAsync(this.groupId);
-		const ratings_observable = this.groupService.getMembersRatings(this.groupId);
-		
-		forkJoin({
-			'group': basicgroup_observable,
-			'membersRatings': ratings_observable,
-		}).subscribe((res) => {
+		// Get basic group information and extend by member ratings
+		this.groupService.getMembersRatings(this.groupId).subscribe((membersRatings) => {
+			
+			// Get group from group service cache
+			const group = this.groupService.getBasicGroupFromCache(this.groupId);
 			
 			// Get array of member ids
-			this.memberArray = res.group.members;
+			this.memberArray = group.members;
 			
 			// Define members as object, where keys are userIds and add labels to rating
 			_.each(this.memberArray, (member) => {
 				// Get ratings for current member
-				const memberRatings = _.findWhere(res.membersRatings, { 'ratedUserId': member.userId });
+				const memberRatings = _.findWhere(membersRatings, { 'ratedUserId': member.userId });
 				
 				// Add label and tooltip to ratings array
 				member.ratings = _.map(memberRatings.ratings, (rating) => {
@@ -90,7 +88,7 @@ export class GroupMembersComponent implements OnInit {
 			});
 			
 			// If group is last group, don't show ratings
-			this.isLastGroup = res.group.isLastGroup;
+			this.isLastGroup = group.isLastGroup;
 		});
 	}
 	
