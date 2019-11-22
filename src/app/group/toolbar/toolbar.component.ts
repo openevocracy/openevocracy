@@ -208,6 +208,7 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		if (_.isUndefined(isSaved) || isSaved) {
 			// Navigate to topic
 			this.router.navigate(['/topic', this.topicId]);
+			return;
 		}
 		
 		// If editor is not fully saved, redirect open dialog and ask if user really wants to close the editor
