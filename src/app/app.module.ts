@@ -87,6 +87,7 @@ import { StarratingComponent } from './starrating/starrating.component';
 import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
 import { CloseEditorDialogComponent } from './dialogs/closeeditor/closeeditor.component';
 import { LoginEmailDialogComponent } from './dialogs/loginemail/loginemail.component';
+import { GroupDocumentComponent } from './group/document/document.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -136,7 +137,8 @@ export function loadConfig(configService: ConfigService) {
 		StarratingComponent,
 		AddtopicDialogComponent,
 		CloseEditorDialogComponent,
-		LoginEmailDialogComponent
+		LoginEmailDialogComponent,
+		GroupDocumentComponent
 	],
 	imports: [
 		BrowserModule,

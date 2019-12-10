@@ -28,9 +28,8 @@ import { C } from '../../../../shared/constants';
 export class GroupEditorComponent extends EditorComponent implements OnInit, OnDestroy {
 	
 	public proposalHtml: string = "";
-	public members;
+	public group;
 	public me;
-	public docId;
 
   constructor(
 		protected snackBar: MatSnackBar,
@@ -66,6 +65,16 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	ngOnInit() {
 		// Set and translate placeholder
 		this.translatePlaceholder("EDITOR_PLACEHOLDER_GROUP");
+		
+		// Get current groupId
+		const groupId = this.router.url.split('/')[2];
+		
+		// Get group from group service cache
+		this.group = this.groupService.getBasicGroupFromCache(groupId);
+		
+		// If pad is expired or user is not member, redirect to document
+		if (this.group.isExpired || !this.group.isMember(this.userId))
+			this.router.navigate(['/group', groupId, 'document']);
 	}
 	
 	/*
@@ -99,31 +108,21 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		// Set quill editor
 		this.quillEditor = editor;
 		
-		// Get current groupId
-		const groupId = this.router.url.split('/')[2];
-		
-		// Get group from group service cache
-		const group = this.groupService.getBasicGroupFromCache(groupId);
-		
-		// Store members
-		this.members = group.members;
-		
 		// Add color of current member
-		this.me = _.findWhere(this.members, { 'userId': this.userId });
+		this.me = _.findWhere(this.group.members, { 'userId': this.userId });
 		this.quillEditor.getModule('authorship').addAuthor(this.userId, this.me.color);
 		
 		// Add colors of other members
-		_.each(this.members, (member) => {
+		_.each(this.group.members, (member) => {
 			if(member.userId != this.me.userId)
 				this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
 		});
 		
 		// Register saved status of editor in editor service
-		this.padId = group.padId;
-		this.editorService.setIsSaved(this.padId, true);
+		this.editorService.setIsSaved(this.group.padId, true);
 		
 		// Initialize socket
-		this.initializePadSocket(group.docId);
+		this.initializePadSocket(this.group.docId);
 	}
 
 }

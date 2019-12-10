@@ -137,7 +137,8 @@
 	"GROUPVIS_DETAIL_GROUP_BUTTON_LABEL": "Go to group",
 	"GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL": "Go to proposal",
 	
-	"GROUP_SUBTITLE_1": "The group ends on",
+	"GROUP_SUBTITLE_1_FUTURE": "The group ends on",
+	"GROUP_SUBTITLE_1_PAST": "The group has finished on",
 	"GROUP_SUBTITLE_2": "at",
 	"GROUP_MEMBER_BUTTON_PROPOSAL": "Member proposal",
 	"GROUP_MEMBER_BUTTON_SHOW": "Visit profile",

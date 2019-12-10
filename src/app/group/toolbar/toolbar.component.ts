@@ -24,8 +24,12 @@ import { faTimes, faExpandArrowsAlt, faComments, faUsers, faFile } from '@fortaw
 })
 export class GroupToolbarComponent implements OnInit, OnDestroy {
 	
+	public isMember: boolean = false;
+	public isExpired: boolean = true;
+	
 	public activeTab: string = 'editor';
 	public userToken;
+	public userId: string;
 	public groupId: string;
 	public title: string;
 	public topicId: string;
@@ -56,6 +60,7 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 	) {
 		// Get user token and userId from user service
 		this.userToken = this.userService.getToken();
+		this.userId = this.userService.getUserId();
 		
 		// Get groupId
 		this.groupId = this.router.url.split('/')[2];
@@ -65,7 +70,8 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 			// If navigation starts, contains source route
 			if (event instanceof NavigationStart) {
 				// Clear badges database value
-				this.clearBadgeDatabase();
+				if (this.badgeSocket)
+					this.clearBadgeDatabase();
          }
 			
 			// If navigation has finished, contains target route
@@ -73,7 +79,8 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 				// Get current path and define active tab
 				this.activeTab = this.router.url.split('/')[3];
 				// Clear badges view
-				this.clearBadgeView();
+				if (this.badgeSocket)
+					this.clearBadgeView();
          }
 		});
 		
@@ -87,34 +94,45 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		// Listen to connection reconnected event
 		this.connectionAliveService.connectionReconnected.subscribe((res) => {
 			// If connection is lost, reconnect pad socket
-			this.initBadgeSocket();
+			if(this.isMember && !this.isExpired)
+				this.initBadgeSocket();
 		});
 	}
 	
 	ngOnInit() {
-		// Get data for toolbar from server
-			this.httpManagerService.get('/json/group/badges/' + this.groupId).subscribe(badge => {
-			
-			// Get group from group service cache
-			const group = this.groupService.getBasicGroupFromCache(this.groupId);
-			
-			// Define title, id and expiration
-			this.title = '(' + group.groupName + ') ' + group.topicName;
-			this.topicId = group.topicId;
-			this.padId = group.padId;
-			this.expiration = group.expiration;
-			
-			// Update badges in toolbar
-			this.updateBadge(badge);
-			
-			// Init badge socket connection
-			this.initBadgeSocket();
-		});
+		// Get group from group service cache
+		const group = this.groupService.getBasicGroupFromCache(this.groupId);
+		
+		// Define title, id and expiration
+		this.title = '(' + group.groupName + ') ' + group.topicName;
+		this.topicId = group.topicId;
+		this.padId = group.padId;
+		this.expiration = group.expiration;
+		this.isExpired = group.isExpired;
+		
+		this.isMember = group.isMember(this.userId);
+		
+		if(this.isMember && !this.isExpired)
+			this.getBadgesFromServerAndInitSocket();
 	}
 	
 	ngOnDestroy() {
 		// Clear badges database value
-		this.clearBadgeDatabase();
+		if (this.badgeSocket)
+			this.clearBadgeDatabase();
+	}
+	
+	/**
+	 * @desc: Get badge information from server, finally initialize badge socket
+	 */
+	private getBadgesFromServerAndInitSocket() {
+		// Get data for toolbar from server
+		this.httpManagerService.get('/json/group/badges/' + this.groupId).subscribe(badge => {
+			// Update badges in toolbar
+			this.updateBadge(badge);
+			// Init badge socket connection
+			this.initBadgeSocket();
+		});
 	}
 	
 	/**

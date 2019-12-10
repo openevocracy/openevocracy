@@ -75,7 +75,7 @@
 						</div>
 					</div>
 				</div>
-				<div *ngIf="thread?.isGroupMember">
+				<div *ngIf="isGroupMember && !isExpired">
 					<hr/>
 					<div class="comment-add">
 						<a class="comment-add-link" *ngIf="commentField!=i" (click)="showCommentField(i)" title="{{ 'FORUM_LINK_ADD_COMMENT' | translate }}">
@@ -98,7 +98,7 @@
 		</div>
 	</div>
 	
-	<div *ngIf="!thread?.private || thread?.isGroupMember" id="newpost" class="post">
+	<div *ngIf="(!thread?.private || isGroupMember) && !isExpired" id="newpost" class="post">
 		<h2>{{ 'FORUM_HEADING_NEW_POST' | translate }}</h2>
 		
 		<editor-field (onEditorCreated)="editorCreated($event)"></editor-field>
@@ -108,7 +108,7 @@
 		</button>
 	</div>
 	
-	<div *ngIf="thread?.private && !thread?.isGroupMember" id="newpost_private" class="post">
+	<div *ngIf="(thread?.private && !isGroupMember) && !isExpired" id="newpost_private" class="post">
 		<p>{{ 'FORUM_NEW_POST_PRIVATE_MSG' | translate }}</p>
 	</div>
 </div>

@@ -17,6 +17,30 @@ exports.commentTextareaToHtml = function(str) {
 };
 
 /**
+ * @desc: Check if group is expired (given a forumId)
+ *        An entity can be: thread, post or comment
+ */
+exports.isForumExpiredAsync = function(forumId) {
+	return db.collection('groups').findOneAsync({ 'forumId': forumId }, { '_id': true })
+		.then((group) => { return isGroupExpiredAsync(group._id); });
+};
+
+/**
+ * @desc: Check if group is expired (given a groupId)
+ *        An entity can be: thread, post or comment
+ */
+function isGroupExpiredAsync(groupId) {
+	return db.collection('pads_group').findOneAsync({ 'groupId': groupId }, { 'expiration': true })
+		.then(function(pad) {
+			// Get expiration boolean state
+			const date = new Date();
+			const isExpired = (pad.expiration < date.getTime());
+			return isExpired;
+	});
+}
+exports.isGroupExpiredAsync = isGroupExpiredAsync;
+
+/**
  * @desc: Check if user is authorized to edit or delete a specific entity
  *        An entity can be: thread, post or comment
  */

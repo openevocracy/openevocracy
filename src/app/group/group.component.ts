@@ -9,6 +9,8 @@ import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
 import { GroupService } from '../_services/group.service';
 
+import { BasicGroup } from '../_models/group/basic-group';
+
 import * as _ from 'underscore';
 
 @Component({
@@ -18,7 +20,7 @@ import * as _ from 'underscore';
 })
 export class GroupComponent implements OnInit {
 
-	public userId: string;
+	public meId: string;
 	public groupId: string;
 
 	constructor(
@@ -29,20 +31,17 @@ export class GroupComponent implements OnInit {
 		private httpManagerService: HttpManagerService,
 		private route: ActivatedRoute
 	) {
-		// Get current userId and groupId
-		this.userId = this.userService.getUserId();
+		// Get userId of logged in user and groupId
+		this.meId = this.userService.getUserId();
 		this.groupId = this.router.url.split('/')[2];
 	}
 	
 	ngOnInit() {
 		// Get group from resolver
-		const group = this.route.snapshot.data.basicGroup;
-		
-		// Try to find me in members
-		const me = _.findWhere(group.members, { 'userId': this.userId });
+		const group = new BasicGroup(this.route.snapshot.data.basicGroup);
 			
 		// If user is member (if me is truthy), check welcome status and possibly show welcome message
-		if (me)
+		if (group.isMember(this.meId))
 			this.checkWelcomeStatus();
 	}
 	

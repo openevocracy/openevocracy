@@ -21,7 +21,6 @@ export class Thread {
 	sumMainpostVotes: number;
 	lastResponse: Response;
 	notifyStatus: boolean;
-	isGroupMember: boolean;
 	wasViewed: boolean;
 	
 	/* Calculated values */
@@ -43,7 +42,6 @@ export class Thread {
 		this.sumMainpostVotes = res.sumMainpostVotes || 0;
 		this.createdTimestamp = this.getCreationTimestamp(res._id);
 		this.notifyStatus = _.isNull(res.notifyStatus) ? false : res.notifyStatus;
-		this.isGroupMember = res.isGroupMember;
 		this.wasViewed = res.wasViewed;
 		
 		// If last response is not set, use creation time as last activity (important for sorting)

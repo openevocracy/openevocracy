@@ -175,7 +175,7 @@ app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
 // ##################
 
 // @desc: Get detailed information about group pad
-app.get('/json/group/editor/:id', auth(), groups.query.editor);
+//app.get('/json/group/editor/:id', auth(), groups.query.editor);
 
 // @desc: Get group information
 app.get('/json/group/view/:id', auth(), pads.getPadGroupView);

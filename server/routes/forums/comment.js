@@ -13,31 +13,42 @@ const helper = require('./helper');
 exports.create = function(req, res) {
 	const authorId = ObjectId(req.user._id);
 	const body = req.body;
+	const forumId = ObjectId(body.forumId);
+	const threadId = ObjectId(body.threadId);
 	
-	// Define comment
-	const comment = {
-		'html': helper.commentTextareaToHtml(body.text),
-		'postId': ObjectId(body.postId),
-		'threadId': ObjectId(body.threadId),
-		'forumId': ObjectId(body.forumId),
-		'authorId': authorId
-	};
-	
-	// Check if user is allowed to create a post
-	helper.isUserAuthorizedToCreateAsync(comment.threadId, authorId).then((isAuthorized) => {
-		if(!isAuthorized)
-			return utils.rejectPromiseWithMessage(401, 'NOT_AUTHORIZED');
-	
-		// Store comment in database
-		const createComment_promise = db.collection('forum_comments').insertAsync(comment);
+	helper.isForumExpiredAsync(forumId).then((isExpired) => {
 		
-		// Set last activity
-		const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
-		const thread_promise = db.collection('forum_threads')
-			.updateAsync({ '_id': comment.threadId }, { $set: { 'lastResponse': lastResponse } });
+		// If group is expired, reject promise
+		if (isExpired)
+			return utils.rejectPromiseWithMessage(403, 'GROUP_EXPIRED');
 		
-		Promise.all([createComment_promise, thread_promise]).then(res.json.bind(res));
+		// Check if user is allowed to create a post
+		helper.isUserAuthorizedToCreateAsync(threadId, authorId).then((isAuthorized) => {
+			
+			// If user is not authorized
+			if(!isAuthorized)
+				return utils.rejectPromiseWithMessage(401, 'NOT_AUTHORIZED');
+				
+			// Define comment
+			const comment = {
+				'html': helper.commentTextareaToHtml(body.text),
+				'postId': ObjectId(body.postId),
+				'threadId': threadId,
+				'forumId': forumId,
+				'authorId': authorId
+			};
 		
+			// Store comment in database
+			const createComment_promise = db.collection('forum_comments').insertAsync(comment);
+			
+			// Set last activity
+			const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
+			const thread_promise = db.collection('forum_threads')
+				.updateAsync({ '_id': comment.threadId }, { $set: { 'lastResponse': lastResponse } });
+			
+			Promise.all([createComment_promise, thread_promise]).then(res.json.bind(res));
+			
+		}).catch(utils.isOwnError, utils.handleOwnError(res));
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 

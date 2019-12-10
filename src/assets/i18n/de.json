@@ -137,7 +137,8 @@
 	"GROUPVIS_DETAIL_GROUP_BUTTON_LABEL": "Zur Gruppe",
 	"GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL": "Zum Vorschlag",
 	
-	"GROUP_SUBTITLE_1": "Die Gruppe endet am",
+	"GROUP_SUBTITLE_1_FUTURE": "Die Gruppe endet am",
+	"GROUP_SUBTITLE_1_PAST": "Die Gruppe endete am",
 	"GROUP_SUBTITLE_2": "um",
 	"GROUP_MEMBER_BUTTON_PROPOSAL": "Mitgliedsvorschlag",
 	"GROUP_MEMBER_BUTTON_SHOW": "Zum Profil",

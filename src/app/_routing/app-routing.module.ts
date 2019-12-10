@@ -12,6 +12,7 @@ import { TopicComponent } from '../topic/topic.component';
 import { EditorComponent } from '../editor/editor.component';
 import { GroupComponent } from '../group/group.component';
 import { GroupEditorComponent } from '../group/editor/editor.component';
+import { GroupDocumentComponent } from '../group/document/document.component';
 import { GroupChatComponent } from '../group/chat/chat.component';
 import { GroupMembersComponent } from '../group/members/members.component';
 import { GroupForumThreadComponent } from '../group/forum/thread/thread.component';
@@ -35,6 +36,7 @@ const appChildRoutes: Routes = [
 		children: [
 			{ path: '', redirectTo: 'editor', pathMatch: 'full' },
 			{ path: 'editor', component: GroupEditorComponent },
+			{ path: 'document', component: GroupDocumentComponent },
 			{ path: 'chat', component: GroupChatComponent },
 			{ path: 'forum', component: GroupForumComponent },
 			{ path: 'forum/thread/:id', component: GroupForumThreadComponent },

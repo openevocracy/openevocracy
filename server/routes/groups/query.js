@@ -105,7 +105,12 @@ exports.getBasicGroup = function(req, res) {
 	});
 	
 	// Get expiration date
-	const pad_promise = db.collection('pads_group').findOneAsync({'groupId': groupId}, { 'expiration': true, 'docId': true });
+	const pad_promise = db.collection('pads_group').findOneAsync({'groupId': groupId}, { 'expiration': true, 'docId': true })
+		.then((pad) => {
+			return pads.getPadHTMLAsync('group', pad.docId).then((padHtml) => {
+				return { 'html': padHtml, ...pad };
+			});
+	});
 	
 	// Return result
 	Promise.join(group_promise, isLastGroup_promise, groupMembersDetails_promise, topic_promise, pad_promise, lastActivity_promise)
@@ -117,6 +122,7 @@ exports.getBasicGroup = function(req, res) {
 			'padId': pad._id,
 			'expiration': pad.expiration,
 			'docId': pad.docId,
+			'padHtml': pad.html,
 			'isLastGroup': isLastGroup,
 			'members': groupMembersDetails,
 			'topicId': topic._id,

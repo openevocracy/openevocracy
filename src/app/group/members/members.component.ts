@@ -33,7 +33,8 @@ export class GroupMembersComponent implements OnInit {
 	public chosenMemberId;
 	public memberArray;
 	public members = {};
-	public isLastGroup;
+	public isLastGroup: boolean = false;
+	public isExpired: boolean = false;
 	public animationState = 'show';
 	
 	public faUser = faUser;
@@ -64,16 +65,30 @@ export class GroupMembersComponent implements OnInit {
 		// Get current groupId
 		this.groupId = this.router.url.split('/')[2];
 		
-		// Get basic group information and extend by member ratings
+		// Get group from group service cache
+		const group = this.groupService.getBasicGroupFromCache(this.groupId);
+		
+		// If group is last group or is expired, don't show ratings
+		this.isLastGroup = group.isLastGroup;
+		this.isExpired = group.isExpired;
+		
+		// Get array of member ids
+		this.memberArray = group.members;
+		
+		// Define members as object, where keys are userIds
+		_.each(this.memberArray, (member) => {
+			// Define members as object, key is userId
+			this.members[member.userId] = member;
+		});
+		
+		// If we are in last group or if document is expired, return here
+		if (this.isLastGroup || this.isExpired)
+			return;
+		
+		// Extend by member ratings
 		this.groupService.getMembersRatings(this.groupId).subscribe((membersRatings) => {
 			
-			// Get group from group service cache
-			const group = this.groupService.getBasicGroupFromCache(this.groupId);
-			
-			// Get array of member ids
-			this.memberArray = group.members;
-			
-			// Define members as object, where keys are userIds and add labels to rating
+			// Add labels to rating
 			_.each(this.memberArray, (member) => {
 				// Get ratings for current member
 				const memberRatings = _.findWhere(membersRatings, { 'ratedUserId': member.userId });
@@ -83,12 +98,7 @@ export class GroupMembersComponent implements OnInit {
 					const labels = _.findWhere(this.ratingLabels, { 'type': rating.type });
 					return _.extend(rating, labels);
 				});
-				// Define members as object, key is userId
-				this.members[member.userId] = member;
 			});
-			
-			// If group is last group, don't show ratings
-			this.isLastGroup = group.isLastGroup;
 		});
 	}
 	
