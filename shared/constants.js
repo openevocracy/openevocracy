@@ -40,9 +40,9 @@ exports.C = {
    ACT_FOLLOW: 9, // now follows a user
    ACT_MATE: 10, // is now the mate of a user
    
-   // Actitivity privacy levels
-   ACT_PLVL_ALL: 0, // visible to all
-   ACT_PLVL_FOLLOWERS_MATES: 1, // visible to followers & mates
-   ACT_PLVL_MATES: 2, // visible to mates only
-   ACT_PLVL_SELF: 3 // visible to user themself only
+   // Activity privacy levels
+   ACT_PLVL_ALL: 0, // activity visible to all
+   ACT_PLVL_FOLLOWERS_MATES: 1, // activity visible to followers & mates
+   ACT_PLVL_MATES: 2, // activity visible to mates only
+   ACT_PLVL_SELF: 3 // activity visible to user themself only
 };

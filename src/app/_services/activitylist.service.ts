@@ -14,11 +14,11 @@ export class ActivityListService {
 		private httpManagerService: HttpManagerService) { }
 		
 	public getUserActivityList(profileId : string, skip : number, limit : number): Observable<Activity[]> {
-		return this.httpManagerService.get('/json/useractivitylist/' + profileId);
+		return this.httpManagerService.get('/json/user/activitylist/' + profileId + '/?skip=' + skip + '&limit=' + limit);
 	}
 	
 	public getUserActivityListLength(profileId : string): Observable<number> {
-		return this.httpManagerService.get('/json/useractivitylistlen/' + profileId);
+		return this.httpManagerService.get('/json/user/activitylistlength/' + profileId);
 	}
 	
 	public addActivity(type: number, targetId: string): Observable<any> {

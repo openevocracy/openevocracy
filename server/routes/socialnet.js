@@ -16,7 +16,7 @@ var utils = require('../utils');
  */
 function follow(srcUserId, targetUserId) {
 	
-	db.collection('socialnet_followers').insertAsync( { 'targetUserId': targetUserId, 'followedBy': srcUserId } );
+	db.collection('users_followers').insertAsync( { 'targetUserId': targetUserId, 'followedBy': srcUserId } );
 	
 }
 exports.follow = follow;
@@ -29,8 +29,8 @@ function unfollow(req, res) {
 	const srcUserId = ObjectId(req.user._id); // the user who follows
 	const targetUserId = ObjectId(req.params.id); // the user who is being followed
 
-	db.collection('socialnet_followers').findOneAsync({ 'targetUserId': targetUserId, 'followedBy': srcUserId }).then(function(frelation) {
-		return db.collection('socialnet_followers').removeByIdAsync(frelation._id)
+	db.collection('user_followers').findOneAsync({ 'targetUserId': targetUserId, 'followedBy': srcUserId }).then(function(frelation) {
+		return db.collection('user_followers').removeByIdAsync(frelation._id)
 			.then(res.json.bind(res));
 	});
 };
@@ -43,17 +43,17 @@ exports.unfollow = unfollow;
  * - targetUserId: the user who receives the request
  */
 function mateRequest(srcUserId, targetUserId) {
-	db.collection('socialnet_mates')
+	db.collection('user_mates')
      .find({ 'user1': srcUserId, 'user2': targetUserId })
      .toArrayAsync()
      .then((mate) => {
 			if (_.isEmpty(mate)) { // if this combination was not found, look the other way around
-	   		db.collection('socialnet_mates')
+	   		db.collection('user_mates')
 				   .findOneAsync({ 'user1': targetUserId }, { 'user2': srcUserId })
 				   .then((mate) => {
 				   	if (_.isEmpty(mate)) // if this combination was not found either, create an entry
 				   	{
-				   		db.collection('socialnet_mates').insertAsync( { 'user1': srcUserId, 'user2': targetUserId, 'status': 1 } );
+				   		db.collection('user_mates').insertAsync( { 'user1': srcUserId, 'user2': targetUserId, 'status': 1 } );
 				   	}
 				   	else if (mate.status == 1) // previous request by targetUser found -> being mates accepted by both parties, set status to 3
 				   	{
@@ -85,7 +85,7 @@ exports.mateRequest = mateRequest;
  */
 function isFollowerRelation(srcUserId, targetUserId) {
 	
-	return db.collection('social_relations')
+	return db.collection('user_relations')
 	         .findOneAsync({ 'targetUserId': targetUserId, 'srcUserId': srcUserId })
 	         .then((follower) => {
 	         	if(_.isEmpty(follower))
@@ -105,7 +105,7 @@ exports.isFollowerRelation = isFollowerRelation;
  */
 function getMateRelation(userA, userB) {
 	
-	return db.collection('social_relations')
+	return db.collection('user_relations')
 		//.find({ 'user1': user1, 'user1': user2 })
 		.find({ 'userA': { $in: [ userA, userB ] }, 'userB': { $in: [ userA, userB ] } })
 		.toArrayAsync()
@@ -132,6 +132,6 @@ exports.getMateRelation = getMateRelation;
  * @return 
  */
 function getSocialRelationType(user1, user2) {
-	return db.collection('social_relations').find
+	return db.collection('user_relations').find
 }
 exports.getSocialRelationType = getSocialRelationType;

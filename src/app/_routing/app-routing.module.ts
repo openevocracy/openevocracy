@@ -28,7 +28,6 @@ const appChildRoutes: Routes = [
 	{ path: 'topic/editor/:id', component: EditorComponent },
 	{ path: 'proposal/view/:id', component: PadviewComponent },
 	{ path: 'proposal/editor/:id', component: EditorComponent },
-	{ path: 'group/view/:id', component: PadviewComponent },
 	{
 		path: 'group/:id',
 		component: GroupComponent,
@@ -43,9 +42,6 @@ const appChildRoutes: Routes = [
 			{ path: 'members', component: GroupMembersComponent }
 		]
 	},
-	/*{ path: 'group/editor/:id', component: GroupEditorComponent },
-	{ path: 'group/forum/:id', component: GroupForumComponent },
-	{ path: 'group/forum/thread/:id', component: GroupForumThreadComponent },*/
 	{ path: 'settings/:id', component: SettingsComponent },
 	{ path: 'user/profile/:id', component: UserprofileComponent }
 ];

@@ -15,7 +15,7 @@ var utils = require('../utils');
  * @return {object} activites
  */
 function getActivitiesAsync(filter) {
-	return db.collection('activities').find(filter).toArrayAsync();
+	return db.collection('user_activities').find(filter).toArrayAsync();
 }
 exports.getActivitiesAsync = getActivitiesAsync;
 
@@ -26,43 +26,44 @@ exports.getUserActivityList = function(req, res) {
 	const targetUserId = ObjectId(req.params.id);
    const requestingUserId = ObjectId(req.user._id);
    
-   // Get relation level between users (anonymous, follower, mate)
-   // ...
+   // Get skip and limit from query
+	const skip = parseInt(req.query.skip, 10);
+	const limit = parseInt(req.query.limit, 10);
    
-   //if (targetUserId)
+   // Get privacy level of activity based on social relation between users
+   const privacyLevel = getPrivacyLevel(requestingUserId, targetUserId);
    
-	getActivitiesAsync({ 'userId': targetUserId }).then(res.json.bind(res));
-	//getActivitiesAsync({ 'userId': targetUserId, 'privacyLevel': <= relationLevel }).then(res.json.bind(res));
+   // Get activities from database, filtered by privacy level
+	db.collection('user_activities').find({ 'userId': targetUserId, 'privacyLevel': { '$lte': privacyLevel } })
+		.skip(skip).limit(limit).toArrayAsync()
+		.then(res.json.bind(res));
 };
 
 /*
  * @desc: Returns the length of the whole activity list of a particular user
  */
-exports.getUserActivityListLen = function(req, res) {
+exports.getUserActivityListLength = function(req, res) {
 	const targetUserId = ObjectId(req.params.id);
    const requestingUserId = ObjectId(req.user._id);
    
-   // Get relation level between users (anonymous, follower, mate)
-   // ...
+   // Get privacy level of activity based on social relation between users
+   const privacyLevel = getPrivacyLevel(requestingUserId, targetUserId);
    
-   //if (targetUserId)
-   
-   
-   
-   const privayLevel = getPrivacyLevel(requestingUserId, targetUserId);
-   
-   return db.collection('activities').find({ 'userId': targetUserId, 'privayLevel': privayLevel })
+   return db.collection('user_activities').find({ 'userId': targetUserId, 'privacyLevel': { '$lte': privacyLevel } })
    	.countAsync().then(res.json.bind(res));
 };
 
+/**
+ * @desc: Get privacy level of activity based on social relation between users
+ */
 function getPrivacyLevel(requestingUserId, targetUserId) {
 	//socialRelation = socialnet.getSocialRelationType(requestingUserId, targetUserId)
 	
-	let privayLevel = C.ACT_PLVL_ALL;
+	let privacyLevel = C.ACT_PLVL_ALL;
    /*if (socialRelation == C.MATE)
-   	privayLevel = C.ACT_PLVL_MATES;*/
+   	privacyLevel = C.ACT_PLVL_MATES;*/
    	
-   return privayLevel;
+   return privacyLevel;
 }
 
 /*
@@ -76,7 +77,7 @@ exports.query = function(req, res) { // not tested yet / probably not properly i
    const activityId = ObjectId(req.activityId);
    const userId = ObjectId(req.userId);
    
-   db.collection('activities').findOneAsync({ '_id': activityId })
+   db.collection('user_activities').findOneAsync({ '_id': activityId })
       .then(function(act) {
          if(_.isNull(act))
             return utils.rejectPromiseWithMessage(404, 'NOT_FOUND');
@@ -93,7 +94,7 @@ exports.query = function(req, res) { // not tested yet / probably not properly i
 function storeActivity(userId, type, targetId) {
 	
 	// Get privacy level for current activity type from user activity settings
-	return db.collection('activity_settings').findOneAsync({ 'userId': userId }).then((privacySettings) => {
+	return db.collection('user_activity_settings').findOneAsync({ 'userId': userId }).then((privacySettings) => {
 		// Get privacy level of current type, if value is falsy, set privacy level to 0 (all)
 		const privacyLevel = (privacySettings ? privacySettings[type] : C.ACT_PLVL_ALL);
 		
@@ -107,7 +108,7 @@ function storeActivity(userId, type, targetId) {
 	   };
 	   
 	   // Adds object to database
-   	return db.collection('activities').insertAsync(activity);
+   	return db.collection('user_activities').insertAsync(activity);
 	});
 }
 exports.storeActivity = storeActivity;
@@ -136,8 +137,8 @@ exports.delete = function(req,res) {
 	const userId = ObjectId(req.user._id);
 	
 	// FIXME: Why this? (comment from Carlo)
-	db.collection('activities').findOneAsync({ '_id': actId }).then(function(activity) {
-		return db.collection('activities').removeByIdAsync(activity._id)
+	db.collection('user_activities').findOneAsync({ '_id': actId }).then(function(activity) {
+		return db.collection('user_activities').removeByIdAsync(activity._id)
 			.then(res.json.bind(res));
 	});
 };

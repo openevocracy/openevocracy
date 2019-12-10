@@ -125,12 +125,12 @@ app.get('/file/topic/:id', auth(), topics.download);
 /*
  * @desc: Get a user's activity list
  */
-app.get('/json/useractivitylist/:id', auth(), activities.getUserActivityList);
+app.get('/json/user/activitylist/:id', auth(), activities.getUserActivityList);
 
 /*
  * @desc: Get the length of a user's activity list
  */
-app.get('/json/useractivitylistlen/:id', auth(), activities.getUserActivityList);
+app.get('/json/user/activitylistlength/:id', auth(), activities.getUserActivityListLength);
 
 /*
  * @desc: Get, create and delete activities
