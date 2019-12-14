@@ -9,13 +9,13 @@ const AsyncLock = require('async-lock');
 const lock = new AsyncLock();
 
 // Own references
-const C = require('../../shared/constants').C;
-const cfg = require('../../shared/config').cfg;
-const db = require('../database').db;
-const utils = require('../utils');
-const groups = require('./groups');
-const pads = require('./pads');
-const activities = require('./activities');
+const C = require('../../../shared/constants').C;
+const cfg = require('../../../shared/config').cfg;
+const db = require('../../database').db;
+const utils = require('../../utils');
+const groups = require('../groups');
+const pads = require('../pads');
+const activities = require('../activities');
 
 function calculateDeadline(nextStage, prevDeadline, levelDuration) {
     // define standard parameter
@@ -287,14 +287,14 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 		pad_description_promise = db.collection('pads_topic_description')
 			.findOneAsync({'topicId': topicId}, { 'docId': true, 'ownerId': true })
 			.then(function(pad) {
-				return addHtmlToPad('topic_description', pad);
+				return pads.addHtmlToPad('topic_description', pad);
 		});
 		
 		// Get proposal of user
 		user_proposal_promise = db.collection('pads_proposal')
 			.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { 'docId': true, 'ownerId': true })
 			.then(function(pad) {
-				return _.isNull(pad) ? null : addHtmlToPad('proposal', pad);
+				return _.isNull(pad) ? null : pads.addHtmlToPad('proposal', pad);
 		});
 		
 		// Find the group that the current user is part of (in last level)
@@ -330,7 +330,7 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 				} else {
 					// Add pad id, doc id and html to group
 					var groupAndPad = _.extend(group, { 'padId': pad._id, 'docId': pad.docId });
-					return addHtmlToPad('group', groupAndPad);
+					return pads.addHtmlToPad('group', groupAndPad);
 				}
 			});
 		});
@@ -361,13 +361,6 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 		// Basic topic information for topic list
 		return topic_without_details_promise;
 	}
-}
-
-
-function addHtmlToPad(collection_suffix, pad) {
-	return pads.getPadHTMLAsync(collection_suffix, pad.docId).then(function(html) {
-		return _.extend(pad, {'html': html});
-	});
 }
 
 /*
@@ -427,7 +420,7 @@ function updateTopicStateAsync(topic,stageStartedEntryName) {
         {});
 }
 
-exports.query = function(req, res) {
+/*exports.query = function(req, res) {
    var topicId = ObjectId(req.params.id);
    var userId = ObjectId(req.user._id);
    
@@ -440,7 +433,7 @@ exports.query = function(req, res) {
             return appendTopicInfoAsync(topic, userId, true);
       }).then(res.json.bind(res))
       .catch(utils.isOwnError, utils.handleOwnError(res));
-};
+};*/
 
 exports.create = function(req, res) {
     

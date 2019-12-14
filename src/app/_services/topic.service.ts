@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { Topic } from '../_models/topic/topic';
+import { TopicToolbar } from '../_models/topic/toolbar';
 
 import { HttpManagerService } from './http-manager.service';
 
@@ -25,11 +26,23 @@ export class TopicService {
 		return this.httpManagerService.post('/json/topic/create', {'name': topicName});
 	}
 	
-	public getTopic(tid): Observable<Topic> {
-		return this.httpManagerService.get('/json/topic/' + tid);
+	/*public getTopic(topicId): Observable<Topic> {
+		return this.httpManagerService.get('/json/topic/' + topicId);
+	}*/
+	
+	public manageTopic(topicId: string): Observable<boolean> {
+		return this.httpManagerService.get('/json/topic/manage/' + topicId);
 	}
 	
-	public downloadResultPdf(topicId) {
+	public getTopicToolbar(topicId: string): Observable<TopicToolbar> {
+		return this.httpManagerService.get('/json/topic/toolbar/' + topicId);
+	}
+	
+	public getTopicOverview(topicId: string): Observable<TopicOverview> {
+		return this.httpManagerService.get('/json/topic/overview/' + topicId);
+	}
+	
+	public downloadResultPdf(topicId: string) {
 		this.httpManagerService.getFile('/file/topic/'+topicId);
 	}
 }

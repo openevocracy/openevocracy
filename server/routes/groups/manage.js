@@ -333,7 +333,7 @@ exports.remixGroupsAsync = function(topic) {
          var topicId = topic._id;
          var padId = ObjectId();
          var prevDeadline = topic.nextDeadline;
-         var nextDeadline = topics.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
+         var nextDeadline = topics.manage.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
          
          // Store group in database
          var storeGroup_promise = groupRelations_promise.then(function(groupRelations) {

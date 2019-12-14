@@ -12,16 +12,16 @@
     "EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE": "Hi,\n\nYou are a member of a group in {0}. Currently no one has given any rating in your current group.\nPlease rate the other members to increase the chance that qualified people will represent your group.\n",
     
     "EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT": "Proposal reminder: {0}",
-    "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "Hi,\n\nyou are a participant of topic {0}. The topic will enter consensus stage in {1}.\nWe highly suggest to check your proposal for final corrections.\n",
+    "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "<p>Hi,<br/><br/>you are a participant of topic {0}. The topic will enter consensus stage in {1}.</p><p>We highly suggest to check your proposal for final corrections.</p>",
     
     "EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT": "Proposal reminder: {0}",
-    "EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE": "Hi,\n\nyou are a participant of topic {0}. The topic will enter consensus stage in {1}.\nWe suggest to read your proposal once again at that time, to eliminate last mistakes in your text.\n",
+    "EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE": "<p>Hi,<br/><br/>you are a participant of topic {0}. The topic will enter consensus stage in {1}.</p><p>We suggest to read your proposal once again at that time, to eliminate last mistakes in your text.</p>",
     
     "EMAIL_CONSENSUS_START_SUBJECT": "{0} reached consensus stage",
-    "EMAIL_CONSENSUS_START_MESSAGE": "Hi,\n\nthe consensus stage of the topic {0} has just started and you are part of it. You have been assigned to the group #{1}. You and four other team members will be working on a joint proposal.\n\nYou can find the group's link here:\n{2}/group/{1}\n\nThank you for your engagement!\n",
+    "EMAIL_CONSENSUS_START_MESSAGE": "<p>Hi,<br/><br/>the consensus stage of the topic {0} has just started and you are part of it. You have been assigned to the group #{1}. You and four other team members will be working on a joint proposal.</p><p>You can find the group's link here:<br/>{2}/group/{1}</p><p>Thank you for your engagement!</p>",
     
     "EMAIL_TOPIC_PASSED_SUBJECT": "{0} finished last level",
-    "EMAIL_TOPIC_PASSED_MESSAGE": "Hi,\n\nThe topic {0} you were participating has finished right now.\nHave a look at the final result:\n{2}/file/topic/final/{1}\n\nThank you for your engagement!\n",
+    "EMAIL_TOPIC_PASSED_MESSAGE": "<p>Hi,<br/><br/>The topic {0} you were participating has finished right now.<br/>Have a look at the final result:<br/>{2}/file/topic/final/{1}</p><p>Thank you for your engagement!</p>",
     
     "EMAIL_LEVEL_CHANGE_SUBJECT": "{0} reached next level",
     "EMAIL_LEVEL_CHANGE_MESSAGE": "<p>Hi,<br/><br/>The consensus stage of the topic {0} has reached a new level and so have you.</p><p>You have been assigned to the group #{1}. You and four other new team members will be working on a joint proposal again.</p><p>You can find the group's link here:</p><p>{2}/group/{1}</p><p>Thank you for your engagement!</p>",

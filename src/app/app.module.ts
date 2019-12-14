@@ -67,27 +67,33 @@ import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 
 // Group
+import { GroupComponent } from './group/group.component';
+import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
 import { GroupEditorComponent } from './group/editor/editor.component';
 import { GroupForumComponent } from './group/forum/forum.component';
 import { GroupForumThreadComponent } from './group/forum/thread/thread.component';
 import { GroupChatComponent } from './group/chat/chat.component';
 import { GroupMembersComponent } from './group/members/members.component';
 import { GroupToolbarComponent } from './group/toolbar/toolbar.component';
+import { GroupDocumentComponent } from './group/document/document.component';
+
+// Topic
+import { TopicToolbarComponent } from './topic/toolbar/toolbar.component';
+import { TopicOverviewComponent } from './topic/overview/overview.component';
+import { TopicProposalComponent } from './topic/proposal/proposal.component';
+import { TopicGroupsComponent } from './topic/groups/groups.component';
+import { GroupvisComponent } from './groupvis/groupvis.component';
 
 // New components (not sorted)
-import { GroupvisComponent } from './groupvis/groupvis.component';
 import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
 import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
-import { GroupComponent } from './group/group.component';
-import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
 import { StarratingComponent } from './starrating/starrating.component';
 import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
 import { CloseEditorDialogComponent } from './dialogs/closeeditor/closeeditor.component';
 import { LoginEmailDialogComponent } from './dialogs/loginemail/loginemail.component';
-import { GroupDocumentComponent } from './group/document/document.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -138,7 +144,11 @@ export function loadConfig(configService: ConfigService) {
 		AddtopicDialogComponent,
 		CloseEditorDialogComponent,
 		LoginEmailDialogComponent,
-		GroupDocumentComponent
+		GroupDocumentComponent,
+		TopicToolbarComponent,
+		TopicOverviewComponent,
+		TopicProposalComponent,
+		TopicGroupsComponent
 	],
 	imports: [
 		BrowserModule,

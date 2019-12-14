@@ -1,0 +1,6 @@
+/* Import variables */
+@import "~styles/variables";
+
+#padhtml { min-height: 300px; background-color: $white; padding: 50px; }
+
+button.voted { color: $orange500; }

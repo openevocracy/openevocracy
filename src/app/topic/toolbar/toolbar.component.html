@@ -1,0 +1,21 @@
+<mat-toolbar color="primary">
+	<div class="flex container">
+		<div class="topic-title">
+			<h1>{{topic?.name}}</h1>
+			<p *ngIf="topic?.stage != C.STAGE_REJECTED && topic?.stage != C.STAGE_PASSED">
+				{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_1' | translate }} {{ topic?.nextDeadline | date:'y-MM-dd' }} {{ 'TOPIC_SUBTITLE_2' | translate }} {{ topic?.nextDeadline | date:'HH:mm:ss' }} (<countdown [time]="topic?.nextDeadline"></countdown>)
+			</p>
+			<p *ngIf="topic?.stage == C.STAGE_PASSED">{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_3' | translate }} {{ topic?.stagePassedStarted | date:'y-MM-dd' }}</p>
+			<p *ngIf="topic?.stage == C.STAGE_REJECTED">{{ topic?.stageName | translate }}, {{ topic?.rejectedReason | translate }}</p>
+		</div>
+		
+		<span class="flex-spacer"></span>
+		
+		<button mat-button [ngClass]="{'active': activeTab == 'overview'}" [routerLink]="['/topic', topicId, 'overview']">
+			<span><fa-icon [icon]="faFile"></fa-icon> Übersicht</span>
+		</button>
+		<button mat-button *ngIf="topic?.stage >= C.STAGE_CONSENSUS || topic?.stage == C.STAGE_REJECTED" [ngClass]="{'active': activeTab == 'groups'}" title="{{ 'TOPIC_BUTTON_STRUCTURE' | translate }}" [routerLink]="['/topic', topicId, 'groups']">
+			<span><fa-icon [icon]="faSitemap"></fa-icon> Gruppen</span>
+		</button>
+	</div>
+</mat-toolbar>

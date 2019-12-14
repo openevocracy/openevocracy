@@ -12,16 +12,16 @@
     "EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Bisher hat niemand in der Gruppe eine Bewertung abgegeben.\n Gib den anderen Mitgliedern der Gruppe eine Bewertung, um einen passenden Repräsentanten zu finden.\n",
     
     "EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT": "Erinnerung an deinen Vorschlag: {0}",
-    "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Für dieses Thema wird in drei Tagen die Konsensphase starten.\n Es wird empfohlen, den eingereichten Vorschlag abschließend zu prüfen.",
+    "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "<p>Hi,<br/><br/>du bist Teilnehmer am Thema {0}. Für dieses Thema wird in drei Tagen die Konsensphase starten.</p><p>Wir empfehlen den eingereichten Vorschlag abschließend zu prüfen.</p>",
     
     "EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT": "Erinnerung an deinen Vorschlag: {0}",
-    "EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE": "Hi,\n\ndu bist Teilnehmer am Thema {0}. Das Thema wird die Konsensphase in {1} erreichen.\nWir empfehlen dir deinen Vorschlag nochmal zu lesen um letzte Fehler verbessern zu können, bevor das Dokument geschlossen wird.\n",
+    "EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE": "<p>Hi,<br/><br/>du bist Teilnehmer am Thema {0}. Das Thema wird die Konsensphase in {1} erreichen.</p><p>Wir empfehlen dir deinen Vorschlag nochmal zu lesen um letzte Fehler verbessern zu können, bevor das Dokument geschlossen wird.</p>",
     
     "EMAIL_CONSENSUS_START_SUBJECT": "{0} hat die Konsensphase erreicht",
-    "EMAIL_CONSENSUS_START_MESSAGE": "Hi,\n\ndas Thema {0} hat gerade die Konsensphase erreicht. Du wurdest Gruppe #{1} zugewiesen. Du und deine anderen vier Mitglieder der Gruppe werdet ab sofort gemeinsam an einem kollaborativen Dokument arbeiten.\n\nHier geht es direkt zur Gruppe:\n{2}/group/{1}\n\nDanke für deine Beteiligung!\n",
+    "EMAIL_CONSENSUS_START_MESSAGE": "<p>Hi,<br/><br/>das Thema {0} hat gerade die Konsensphase erreicht. Du wurdest Gruppe #{1} zugewiesen. Du und deine anderen vier Mitglieder der Gruppe werdet ab sofort gemeinsam an einem kollaborativen Dokument arbeiten.</p><p>Hier geht es direkt zur Gruppe:<br/>{2}/group/{1}</p><p>Danke für deine Beteiligung!</p>",
     
     "EMAIL_TOPIC_PASSED_SUBJECT": "{0} ist beendet",
-    "EMAIL_TOPIC_PASSED_MESSAGE": "Hi,\n\ndas Thema {0} ist soeben zum Ende gekommen.\nHier kannst du direkt das Ergebnis anschauen:\n{2}/file/topic/final/{1}\n\nDane für deine Beteiligung!\n",
+    "EMAIL_TOPIC_PASSED_MESSAGE": "<p>Hi,<br/><br/>das Thema {0} ist soeben zu Ende gegangen.<br/>Hier kannst du direkt das Ergebnis anschauen:<br/>{2}/file/topic/final/{1}</p><p>Danke für deine Beteiligung!</p>",
     
     "EMAIL_LEVEL_CHANGE_SUBJECT": "{0} hat das nächste Level erreicht",
     "EMAIL_LEVEL_CHANGE_MESSAGE": "Hi,\n\ndas Thema {0} hat das nächste Lebel erreicht und du wirst wieder dabei sein.\nDu wurdest Gruppe #{1} zugewiesen. Du und deine anderen vier Mitglieder der Gruppe werdet erneut gemeinsam an einem kollaborativen Dokument arbeiten.\n\nHier geht es direkt zur Gruppe:\n{2}/group/{1}\n\nDanke für deine Beteiligung!\n",

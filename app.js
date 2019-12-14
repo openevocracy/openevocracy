@@ -52,7 +52,7 @@ app.use(express.static(distPath));
 const job = new CronJob({
 	cronTime: '*/'+cfg.CRON_INTERVAL+' * * * *',
 	onTick: function() {
-		topics.manageAndListTopicsAsync().then(function(topics) {
+		topics.manage.manageAndListTopicsAsync().then(function(topics) {
 			// FIXME: An error could occur if i18n and mail initialization is not ready when cronjob runs for the first time
 			_.map(topics, mail.sendTopicReminderMessages); // Promise.map does not work above
 		});
@@ -85,23 +85,32 @@ utils.checkConfig();
 /*
  * @desc: Get whole topiclist or specific element from topic list
  */
-app.get('/json/topiclist', auth(), topics.getTopiclist);
-app.get('/json/topiclist/:id', auth(), topics.getTopiclistElement);
+app.get('/json/topiclist', auth(), topics.manage.getTopiclist);
+app.get('/json/topiclist/:id', auth(), topics.manage.getTopiclistElement);
 
 /*
  * @desc: Get, create, update and delete topic
  */
-app.get('/json/topic/:id', auth(), topics.query);
-app.post('/json/topic/create', auth(), topics.create);
-app.patch('/json/topic/:id', auth(), topics.update);
-app.delete('/json/topic/:id', auth(), topics.delete);
+//app.get('/json/topic/:id', auth(), topics.manage.query);
+app.post('/json/topic/create', auth(), topics.manage.create);
+app.patch('/json/topic/:id', auth(), topics.manage.update);
+app.delete('/json/topic/:id', auth(), topics.manage.delete);
+
+// Manage topic before getting any information
+app.get('/json/topic/manage/:id', auth(), topics.query.manage);
+
+// Get topic toolbar data
+app.get('/json/topic/toolbar/:id', auth(), topics.query.toolbar);
+
+// Get topic overview data
+app.get('/json/topic/overview/:id', auth(), topics.query.overview);
 
 // @desc: Vote and unvote for specific topic from specific user
-app.post('/json/topic-vote', auth(), topics.vote);
-app.post('/json/topic-unvote', auth(), topics.unvote);
+app.post('/json/topic-vote', auth(), topics.manage.vote);
+app.post('/json/topic-unvote', auth(), topics.manage.unvote);
 
 // @desc: Download final document as pdf
-app.get('/file/topic/:id', auth(), topics.download);
+app.get('/file/topic/:id', auth(), topics.manage.download);
 
 
 // ###########################
