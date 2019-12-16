@@ -4,10 +4,10 @@ const ObjectId = require('mongodb').ObjectID;
 const Promise = require('bluebird');
 
 // Own references
-const C = require('../../shared/constants').C;
-const db = require('../database').db;
-const utils = require('../utils');
-const pads = require('./pads');
+const C = require('../../../shared/constants').C;
+const db = require('../../database').db;
+const utils = require('../../utils');
+const pads = require('../pads');
 
 /*
  * @desc: Create new proposal

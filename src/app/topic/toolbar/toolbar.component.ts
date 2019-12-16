@@ -3,11 +3,12 @@ import { Router, Event, NavigationEnd } from '@angular/router';
 
 import { TopicService } from '../../_services/topic.service';
 
+import { BasicTopic } from '../../_models/topic/basic';
 import { TopicToolbar } from '../../_models/topic/toolbar';
 
 import { C } from '../../../../shared/constants';
 
-import { faFile, faSitemap } from '@fortawesome/free-solid-svg-icons';
+import { faTh, faFile, faSitemap } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'topic-toolbar',
@@ -19,9 +20,11 @@ export class TopicToolbarComponent implements OnInit {
 	public C;
 	public topicId: string;
 	public topic: TopicToolbar;
+	public basicTopic: BasicTopic;
 	
 	public activeTab: string = 'overview';
 
+	public faTh = faTh;
 	public faFile = faFile;
 	public faSitemap = faSitemap;
 
@@ -33,6 +36,9 @@ export class TopicToolbarComponent implements OnInit {
 		
 		// Get topicId from route
 		this.topicId = this.router.url.split('/')[2];
+		
+		// Get basic topic
+		this.basicTopic = this.topicService.getBasicTopicFromList(this.topicId);
 			
 		// Listen to route changes
 		this.router.events.subscribe((event: Event) => {			

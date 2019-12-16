@@ -24,7 +24,6 @@ const users = require('./server/routes/users');
 const topics = require('./server/routes/topics');
 const groups = require('./server/routes/groups');
 const forums = require('./server/routes/forums');
-const proposals = require('./server/routes/proposals');
 const tests = require('./server/routes/tests');
 const pads = require('./server/routes/pads');
 const activities = require('./server/routes/activities');
@@ -82,22 +81,20 @@ utils.checkConfig();
  * /topic:id - Single topic with extended information
  */
 
-/*
- * @desc: Get whole topiclist or specific element from topic list
- */
+/* Topic List */
+ 
 app.get('/json/topiclist', auth(), topics.manage.getTopiclist);
 app.get('/json/topiclist/:id', auth(), topics.manage.getTopiclistElement);
 
-/*
- * @desc: Get, create, update and delete topic
- */
+/* Topic */
+ 
 //app.get('/json/topic/:id', auth(), topics.manage.query);
 app.post('/json/topic/create', auth(), topics.manage.create);
 app.patch('/json/topic/:id', auth(), topics.manage.update);
 app.delete('/json/topic/:id', auth(), topics.manage.delete);
 
-// Manage topic before getting any information
-app.get('/json/topic/manage/:id', auth(), topics.query.manage);
+// Manage topic before getting any information and return basic topic data
+app.get('/json/topic/basic/:id', auth(), topics.query.basic);
 
 // Get topic toolbar data
 app.get('/json/topic/toolbar/:id', auth(), topics.query.toolbar);
@@ -112,6 +109,16 @@ app.post('/json/topic-unvote', auth(), topics.manage.unvote);
 // @desc: Download final document as pdf
 app.get('/file/topic/:id', auth(), topics.manage.download);
 
+/* Proposal */
+
+// @desc: Create new proposal
+app.post('/json/topic/proposal/create', auth(), topics.proposals.create);
+
+// @desc: Get detailed information about proposal pad
+app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
+
+// @desc: Get proposal information
+app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
 
 // ###########################
 // ### A C T I V I T I E S ###
@@ -167,17 +174,6 @@ app.post('/json/activity/create', auth(), activities.create);
 
 // @desc: Get detailed information about topic description pad
 app.get('/json/topic/editor/:id', auth(), pads.getPadTopicDetails);
-
-/*** Proposal ***/
-
-// @desc: Create new proposal
-app.post('/json/proposal/create', auth(), proposals.create);
-
-// @desc: Get detailed information about proposal pad
-app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
-
-// @desc: Get proposal information
-app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
 
 // ##################
 // ### G R O U P  ###

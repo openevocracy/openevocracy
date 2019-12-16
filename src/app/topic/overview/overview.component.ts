@@ -3,17 +3,18 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar, MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
+import { BasicTopic } from '../../_models/topic/basic';
 import { TopicOverview } from '../../_models/topic/overview';
 
 import { GroupvisComponent } from '../../groupvis/groupvis.component';
 import { EditorComponent } from '../../editor/editor.component';
 
-import { AlertService } from '../../_services/alert.service';
 import { ConnectionAliveService } from '../../_services/connection.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { EditorService } from '../../_services/editor.service';
 import { TopicService } from '../../_services/topic.service';
 import { UserService } from '../../_services/user.service';
+import { SnackbarService } from '../../_services/snackbar.service';
 import { ActivityListService} from '../../_services/activitylist.service';
 
 import * as $ from 'jquery';
@@ -35,6 +36,7 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 	public C;
 	public topicId: string;
 	public userId: string;
+	public basicTopic: BasicTopic;
 	public topic: TopicOverview;
 	public isEditor: boolean = false;
 	
@@ -47,7 +49,6 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 
 	constructor(
 		protected snackBar: MatSnackBar,
-		protected alertService: AlertService,
 		protected router: Router,
 		protected activatedRoute: ActivatedRoute,
 		protected httpManagerService: HttpManagerService,
@@ -56,10 +57,11 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 		protected connectionAliveService: ConnectionAliveService,
 		protected editorService: EditorService,
 		protected dialog: MatDialog,
+		private snackbarService: SnackbarService,
 		private topicService: TopicService,
 		private activityListService: ActivityListService
 	) {
-		super(snackBar, alertService, router, activatedRoute, httpManagerService, userService, translateService, connectionAliveService, editorService, dialog);
+		super(snackBar, router, activatedRoute, httpManagerService, userService, translateService, connectionAliveService, editorService, dialog);
 		
 		this.C = C;
 		
@@ -68,6 +70,9 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 		
 		// Get userId from user service
 		this.userId = this.userService.getUserId();
+		
+		// Get basic topic
+		this.basicTopic = this.topicService.getBasicTopicFromList(this.topicId);
 		
 		// Get topic overview data from server
 		this.topicService.getTopicOverview(this.topicId).subscribe(res => {
@@ -119,18 +124,25 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 		}
 	}
 	
-	/*private createProposal() {
-		this.httpManagerService.post('/json/proposal/create', {'topicId': this.topicId, 'userId': this.userId}).subscribe(res => {
-			// Show alert
-			//this.alertService.alertFromServer(res.alert);
+	/**
+	 * @desc: If not proposal exists for the current user, it can be created using this function
+	 * 		 After creation, the user is redirected to the proposal tab (editor)
+	 */
+	private createProposal() {
+		this.topicService.addProposal(this.topicId, this.userId).subscribe((res) => {
+			// Change hasProposal value in listed basic topic
+			this.topicService.setTopicHasProposal(this.topicId, true);
 			
-			// Reload topic data
-			//this.loadTopic(this.topicId);
+			// Show snackbar
+			this.snackbarService.showSnackbar('TOPIC_SNACKBAR_PROPOSAL_CREATED');
+			
+			// Redirect to proposal editor tab
+			this.router.navigate(['/topic', this.topicId, 'proposal']);
 			
 			// Add activity
 			this.activityListService.addActivity(C.ACT_PROPOSAL_CREATED, this.topicId).subscribe();
 		});
-	}*/
+	}
 	
 	/*
 	 * @desc: Open graph to visualize topic hierarchy

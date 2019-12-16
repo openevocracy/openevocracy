@@ -125,7 +125,7 @@
 	"TOPIC_TAB_LABEL_RESULT": "Final result",
 	"TOPIC_BUTTON_CREATE_PROPOSAL": "Create proposal",
 	"TOPIC_BUTTON_EDIT_PROPOSAL": "Edit proposal",
-	"TOPIC_PROPOSAL_ALERT_CREATED": "Your proposal was created. A new tab was created, where you can view and edit your proposal.",
+	"TOPIC_SNACKBAR_PROPOSAL_CREATED": "A document for your proposal was successfully created.",
 	"TOPIC_BUTTON_EDIT_CURRENT_GROUP": "Edit group proposal",
 	"TOPIC_BUTTON_GOTO_CURRENT_GROUP": "Group",
 	

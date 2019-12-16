@@ -5,7 +5,6 @@ import { forkJoin } from 'rxjs/observable/forkJoin';
 import { MatSnackBar, MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
-import { AlertService } from '../_services/alert.service';
 import { ConnectionAliveService } from '../_services/connection.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
@@ -52,7 +51,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 
 	constructor(
 		protected snackBar: MatSnackBar,
-		protected alertService: AlertService,
 		protected router: Router,
 		protected activatedRoute: ActivatedRoute,
 		protected httpManagerService: HttpManagerService,

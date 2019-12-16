@@ -12,11 +12,12 @@ const manage = require('./manage');
 /**
  * @desc: Manage topic state async, before calling topic view
  */
-exports.manage = function(req, res) {
+exports.basic = function(req, res) {
 	var topicId = ObjectId(req.params.id);
+	var userId = ObjectId(req.user._id);
 	
 	// Try to find topic and manage state
-	db.collection('topics').findOneAsync({ '_id': topicId })
+	const manageTopic_promise = db.collection('topics').findOneAsync({ '_id': topicId })
       .then(manage.manageTopicStateAsync)
       .then(function(topic) {
       	// If no topic was found, reject, otherwise return true
@@ -24,8 +25,33 @@ exports.manage = function(req, res) {
             return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
          else
             return true;
-      }).then(res.json.bind(res))
-      .catch(utils.isOwnError, utils.handleOwnError(res));
+   }).catch(utils.isOwnError, utils.handleOwnError(res));
+   
+   manageTopic_promise.then((wasManaged) => {
+		if (!wasManaged)
+			return;
+		
+		// Try to find proposal of user
+		const hasProposal_promise = db.collection('pads_proposal')
+			.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { '_id': true })
+			.then((proposal) => {
+				return !_.isNull(proposal);
+		});
+      
+		// Get stage from topic
+		const topic_promise = db.collection('topics')
+			.findOneAsync({ '_id': topicId }, { 'stage': true });
+      	
+      
+		return Promise.join(hasProposal_promise, topic_promise)
+			.spread((hasProposal, topic) => {
+				return {
+					'topicId': topicId,
+					'hasProposal': hasProposal,
+					'stage': topic.stage
+				};
+			});
+		}).then(res.json.bind(res));
 };
 
 /**
@@ -38,8 +64,7 @@ exports.toolbar = function(req, res) {
    	return {
    		'_id': topic._id,
    		'name': topic.name,
-   		'nextDeadline': topic.nextDeadline,
-   		'stage': topic.stage
+   		'nextDeadline': topic.nextDeadline
    	};
    }).then(res.json.bind(res));
 };
@@ -58,14 +83,14 @@ exports.overview = function(req, res) {
    		// Add topic descrption html to pad
 			return pads.addHtmlToPad('topic_description', pad);
 	});
-   
-   // Get voted status of current user
+	
+	// Get voted status of current user
    const voted_promise = db.collection('topic_votes')
    	.findOneAsync({ 'topicId': topicId, 'userId': userId });
    	
    // Get some things from topic
    const topic_promise = db.collection('topics')
-   	.findOneAsync({ '_id': topicId }, { 'level': true, 'stage': true })
+   	.findOneAsync({ '_id': topicId }, { 'level': true });
    
    // Get groupId for group where user is currently in
    const myGroup_promise = topic_promise.then((topic) => {
@@ -88,9 +113,8 @@ exports.overview = function(req, res) {
    			'authorId': descritpionPad.ownerId,
    			'descHtml': descritpionPad.html,
    			'descDocId': descritpionPad.docId,
-   			'descPadId': descritpionPad.padId,
+   			'descPadId': descritpionPad._id,
    			'voted': !_.isNull(voted),
-   			'stage': topic.stage,
    			'myGroupId': (_.isNull(myGroup) ? false : myGroup.groupId)
    		};
    }).then(res.json.bind(res));

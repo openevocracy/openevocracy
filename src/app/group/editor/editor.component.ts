@@ -5,7 +5,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
-import { AlertService } from '../../_services/alert.service';
 import { ConnectionAliveService } from '../../_services/connection.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
@@ -33,7 +32,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 
   constructor(
 		protected snackBar: MatSnackBar,
-		protected alertService: AlertService,
 		protected router: Router,
 		protected activatedRoute: ActivatedRoute,
 		protected httpManagerService: HttpManagerService,
@@ -44,7 +42,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		protected dialog: MatDialog,
 		private groupService: GroupService
 	) {
-		super(snackBar, alertService, router, activatedRoute, httpManagerService, userService, translateService, connectionAliveService, editorService, dialog);
+		super(snackBar, router, activatedRoute, httpManagerService, userService, translateService, connectionAliveService, editorService, dialog);
 		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{

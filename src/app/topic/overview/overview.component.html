@@ -16,16 +16,16 @@
 		
 		<span class="flex-spacer"></span>
 		
-		<button mat-button *ngIf="topic?.stage == C.STAGE_SELECTION" [ngClass]="{'voted': topic.voted}" title="{{ 'TOPIC_BUTTON_MARK_RELEVANT' | translate }}" (click)="toggleVote()">
+		<button mat-button *ngIf="basicTopic?.stage == C.STAGE_SELECTION" [ngClass]="{'voted': topic.voted}" title="{{ 'TOPIC_BUTTON_MARK_RELEVANT' | translate }}" (click)="toggleVote()">
 			<span><fa-icon [icon]="faHandPaper"></fa-icon> {{ 'TOPIC_BUTTON_MARK_RELEVANT' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="topic?.stage == C.STAGE_PROPOSAL && !topic?.proposal" title="{{ 'TOPIC_BUTTON_CREATE_PROPOSAL' | translate }}" (click)="createProposal()">
+		<button mat-button *ngIf="basicTopic?.stage == C.STAGE_PROPOSAL && !basicTopic?.hasProposal" title="{{ 'TOPIC_BUTTON_CREATE_PROPOSAL' | translate }}" (click)="createProposal()">
 			<span><fa-icon [icon]="faFile"></fa-icon> {{ 'TOPIC_BUTTON_CREATE_PROPOSAL' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="topic?.stage == C.STAGE_CONSENSUS && topic?.myGroupId" title="{{ 'TOPIC_BUTTON_GOTO_CURRENT_GROUP' | translate }}" [routerLink]="['/group', topic?.myGroupId]">
+		<button mat-button *ngIf="basicTopic?.stage == C.STAGE_CONSENSUS && topic?.myGroupId" title="{{ 'TOPIC_BUTTON_GOTO_CURRENT_GROUP' | translate }}" [routerLink]="['/group', topic?.myGroupId]">
 			<span><fa-icon [icon]="faUsers"></fa-icon> {{ 'TOPIC_BUTTON_GOTO_CURRENT_GROUP' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="topic?.stage == C.STAGE_PASSED" [ngClass]="{'active': activeTab == 'download'}" title="{{ 'TOPIC_BUTTON_RESULT_DOWNLOAD' | translate }}" (click)="downloadPdf()">
+		<button mat-button *ngIf="basicTopic?.stage == C.STAGE_PASSED" [ngClass]="{'active': activeTab == 'download'}" title="{{ 'TOPIC_BUTTON_RESULT_DOWNLOAD' | translate }}" (click)="downloadPdf()">
 			<span><fa-icon [icon]="faDownload"></fa-icon> Ergebnis</span>
 		</button>
 	</div>
