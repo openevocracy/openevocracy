@@ -161,7 +161,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 	/**
 	 * @desc: Create pad socket and sharedb connection
 	 */
-	protected initializePadSocket(docId) {
+	protected initializePadSocket(connectionType, docId) {
 		// Get docId from this or from inheriting component
 		this.docId = docId;
 		
@@ -179,7 +179,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 			const connection = new sharedb.Connection(this.padSocket);
 			
 			// Create local Doc instance
-			const doc = connection.get(this.getCollectionFromURL(), docId);
+			const doc = connection.get(connectionType, docId);
 			this.doc = doc;
 			
 			// Subscribe to specific doc

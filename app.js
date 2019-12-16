@@ -114,11 +114,14 @@ app.get('/file/topic/:id', auth(), topics.manage.download);
 // @desc: Create new proposal
 app.post('/json/topic/proposal/create', auth(), topics.proposals.create);
 
+// @desc: Get proposal doc for editor and html snapshot
+app.get('/json/topic/proposal/:id', auth(), topics.query.proposal);
+
 // @desc: Get detailed information about proposal pad
-app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
+//app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
 
 // @desc: Get proposal information
-app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
+//app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
 
 // ###########################
 // ### A C T I V I T I E S ###

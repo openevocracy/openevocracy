@@ -6,7 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { BasicTopic } from '../../_models/topic/basic';
 import { TopicOverview } from '../../_models/topic/overview';
 
-import { GroupvisComponent } from '../../groupvis/groupvis.component';
+//import { GroupvisComponent } from '../../groupvis/groupvis.component';
 import { EditorComponent } from '../../editor/editor.component';
 
 import { ConnectionAliveService } from '../../_services/connection.service';
@@ -78,8 +78,8 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 		this.topicService.getTopicOverview(this.topicId).subscribe(res => {
 			this.topic = new TopicOverview(res);
 			
-			// If current user is author and current stage is selection stage
-			if (this.topic.authorId == this.userId && this.topic.stage == C.STAGE_SELECTION)
+			// Show editor if current user is author and current stage is selection stage
+			if (this.topic.authorId == this.userId && this.basicTopic.stage == C.STAGE_SELECTION)
 				this.isEditor = true;
 		});
 	}
@@ -181,7 +181,7 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 		this.editorService.setIsSaved(this.topic.descPadId, true);
 		
 		// Initialize socket
-		this.initializePadSocket(this.topic.descDocId);
+		this.initializePadSocket('docs_topic_description', this.topic.descDocId);
 	}
 
 }

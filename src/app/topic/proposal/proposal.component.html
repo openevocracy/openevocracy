@@ -1,3 +1,21 @@
-<div class="container">
-	Proposal
+<mat-toolbar *ngIf="isEditor" class="second-toolbar" color="primary">
+	<div class="flex container">
+		<div id="toolbar"></div>
+		<span class="saved-text">
+			<span *ngIf="saved">{{ 'EDITOR_SAVED_CHANGES' | translate }}</span>
+			<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
+		</span>
+	</div>
+</mat-toolbar>
+
+<div *ngIf="isEditor" class="editor-wrapper container">
+	<div class="row">
+		<div class="editor-center">
+			<quill-editor class="col" [ngClass]="classColEditor" [modules]="quillModules" [styles]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>
+		</div>
+	</div>
+</div>
+
+<div *ngIf="!isEditor" class="container">
+	<div id="padhtml" [innerHtml]="proposal?.html"></div>
 </div>

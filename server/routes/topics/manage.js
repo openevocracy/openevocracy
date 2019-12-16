@@ -287,14 +287,14 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 		pad_description_promise = db.collection('pads_topic_description')
 			.findOneAsync({'topicId': topicId}, { 'docId': true, 'ownerId': true })
 			.then(function(pad) {
-				return pads.addHtmlToPad('topic_description', pad);
+				return pads.addHtmlToPadAsync('topic_description', pad);
 		});
 		
 		// Get proposal of user
 		user_proposal_promise = db.collection('pads_proposal')
 			.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { 'docId': true, 'ownerId': true })
 			.then(function(pad) {
-				return _.isNull(pad) ? null : pads.addHtmlToPad('proposal', pad);
+				return _.isNull(pad) ? null : pads.addHtmlToPadAsync('proposal', pad);
 		});
 		
 		// Find the group that the current user is part of (in last level)
@@ -330,7 +330,7 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 				} else {
 					// Add pad id, doc id and html to group
 					var groupAndPad = _.extend(group, { 'padId': pad._id, 'docId': pad.docId });
-					return pads.addHtmlToPad('group', groupAndPad);
+					return pads.addHtmlToPadAsync('group', groupAndPad);
 				}
 			});
 		});

@@ -81,7 +81,7 @@ exports.overview = function(req, res) {
    	.findOneAsync({ 'topicId': topicId }, { 'ownerId': true, 'docId': true })
    	.then(function(pad) {
    		// Add topic descrption html to pad
-			return pads.addHtmlToPad('topic_description', pad);
+			return pads.addHtmlToPadAsync('topic_description', pad);
 	});
 	
 	// Get voted status of current user
@@ -118,4 +118,22 @@ exports.overview = function(req, res) {
    			'myGroupId': (_.isNull(myGroup) ? false : myGroup.groupId)
    		};
    }).then(res.json.bind(res));
+};
+
+/**
+ * @desc: Get topic proposal document information and html snapshot
+ */
+exports.proposal = function(req, res) {
+	var topicId = ObjectId(req.params.id);
+   var userId = ObjectId(req.user._id);
+   
+   // Get proposal pad data
+   db.collection('pads_proposal')
+   	.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { '_id': true, 'docId': true, 'ownerId': true })
+   	.then((pad) => {
+   		if (_.isNull(pad))
+   			return utils.rejectPromiseWithAlert(404, 'danger', 'PAD_NOT_FOUND');
+   		// Extend pad by html snapshot and return whole pad
+   		return pads.addHtmlToPadAsync('proposal', pad);
+   }).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
 };

@@ -1,7 +1,7 @@
 export class BasicTopic {
 	topicId: string;
 	stage: number;
-	hasProposal: string;
+	hasProposal: boolean;
 	
 	constructor(res: any) {
 		this.topicId = res.topicId;
