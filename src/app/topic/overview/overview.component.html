@@ -1,8 +1,18 @@
 <mat-toolbar class="second-toolbar" color="primary">
 	<div class="flex container">
-		<button mat-button [routerLink]="['/user/profile', userId]">
-			<span><fa-icon [icon]="faUser"></fa-icon> {{ 'TOPIC_BUTTON_AUTHOR' | translate }}</span>
-		</button>
+		<div *ngIf="isEditor">
+			<div id="toolbar"></div>
+			<span class="saved-text">
+				<span *ngIf="saved">{{ 'EDITOR_SAVED_CHANGES' | translate }}</span>
+				<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
+			</span>
+		</div>
+		
+		<div *ngIf="!isEditor">
+			<button mat-button [routerLink]="['/user/profile', userId]">
+				<span><fa-icon [icon]="faUser"></fa-icon> {{ 'TOPIC_BUTTON_AUTHOR' | translate }}</span>
+			</button>
+		</div>
 		
 		<span class="flex-spacer"></span>
 		
@@ -21,6 +31,14 @@
 	</div>
 </mat-toolbar>
 
-<div class="container">
-	<div id="padhtml" [innerHtml]="padHtml"></div>
+<div *ngIf="isEditor" class="editor-wrapper container">
+	<div class="row">
+		<div class="editor-center">
+			<quill-editor class="col" [ngClass]="classColEditor" [modules]="quillModules" [styles]="{'min-height': '300px'}" [placeholder]="placeholder" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)"></quill-editor>
+		</div>
+	</div>
+</div>
+
+<div *ngIf="!isEditor" class="container">
+	<div id="padhtml" [innerHtml]="topic?.descHtml"></div>
 </div>

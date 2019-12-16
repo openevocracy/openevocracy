@@ -88,6 +88,7 @@ exports.overview = function(req, res) {
    			'authorId': descritpionPad.ownerId,
    			'descHtml': descritpionPad.html,
    			'descDocId': descritpionPad.docId,
+   			'descPadId': descritpionPad.padId,
    			'voted': !_.isNull(voted),
    			'stage': topic.stage,
    			'myGroupId': (_.isNull(myGroup) ? false : myGroup.groupId)

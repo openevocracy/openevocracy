@@ -3,6 +3,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { Topic } from '../_models/topic/topic';
 import { TopicToolbar } from '../_models/topic/toolbar';
+import { TopicOverview } from '../_models/topic/overview';
 
 import { HttpManagerService } from './http-manager.service';
 
