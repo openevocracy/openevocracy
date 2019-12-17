@@ -60,9 +60,7 @@ export class TopicProposalComponent extends EditorComponent {
 	}
 	
 	/*
-	 * @desc: Overwrites editorCreated in editor component.
-	 *        Mainly gets further information about group from server.
-	 *        The function is called from editor component.
+	 * @desc: Extends the editor and initializes pad socket connection
 	 *
 	 * @params:
 	 *    editor: quill editor object

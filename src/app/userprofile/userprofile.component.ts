@@ -29,7 +29,7 @@ export class UserprofileComponent implements OnInit {
 	public activityList: Activity[];
 	public header: string;
 	
-	public defaultPageSize: number = 5; //50;
+	public defaultPageSize: number = 50;
 	
 	public faUserLock = faUserLock;
 	public faUserFriends = faUserFriends;
@@ -59,8 +59,8 @@ export class UserprofileComponent implements OnInit {
 				// this.activityList = [new Activity({_id: "abfa33", user: "USER", type: 3, content: "Blabla", ts: "22.03.19, 17:30"}), new Activity({_id: "abd323", user: "USER2", type: 1, content: "Blabla", ts: "22.03.19, 13:30"})];
 		
 				// Add dummy activities to the database
-				//this.activityListService.addActivity(1, "<nn>").subscribe(res => {});
-				//this.activityListService.addActivity(2, "<nn>).subscribe(res => {});
+				//this.activityListService.addActivity(1, "<nnnnnnnnnn>").subscribe(res => {});
+				//this.activityListService.addActivity(2, "<nnnnnnnnnn>").subscribe(res => {});
 				
 				// Get the count of the user's activities
 				this.activityListService.getUserActivityListLength(this.profileId).subscribe(len => {

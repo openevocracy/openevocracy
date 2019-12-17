@@ -12,7 +12,6 @@ import { MaterialModule } from './_modules/material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { QuillModule } from 'ngx-quill';
 import { MentionModule } from 'angular-mentions';
-//import { StarRatingModule } from 'angular-star-rating';
 
 // Routing
 import { AppRoutingModule } from './_routing/app-routing.module';
@@ -94,6 +93,7 @@ import { StarratingComponent } from './starrating/starrating.component';
 import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
 import { CloseEditorDialogComponent } from './dialogs/closeeditor/closeeditor.component';
 import { LoginEmailDialogComponent } from './dialogs/loginemail/loginemail.component';
+import { TopicStagebarComponent } from './topic/stagebar/stagebar.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -148,7 +148,8 @@ export function loadConfig(configService: ConfigService) {
 		TopicToolbarComponent,
 		TopicOverviewComponent,
 		TopicProposalComponent,
-		TopicGroupsComponent
+		TopicGroupsComponent,
+		TopicStagebarComponent
 	],
 	imports: [
 		BrowserModule,
@@ -162,7 +163,6 @@ export function loadConfig(configService: ConfigService) {
 		ReactiveFormsModule,
 		QuillModule.forRoot(),
 		MentionModule,
-		//StarRatingModule.forRoot(),
 		TranslateModule.forRoot({
 			loader: {
 				provide: TranslateLoader,
@@ -174,7 +174,6 @@ export function loadConfig(configService: ConfigService) {
 	providers: [
 		HttpManagerService,
 		ConfigService,
-		//{ provide: ConfigService, useValue: ConfigService, deps: [HttpManagerService] },
 		{ provide: APP_INITIALIZER, useFactory: loadConfig, deps: [ConfigService], multi: true },
 		TopicsListService,
 		TopicService,
@@ -186,11 +185,6 @@ export function loadConfig(configService: ConfigService) {
 		SnackbarService,
 		ActivityListService,
 		ConnectionAliveService,
-		//{ provide: 'cfg', useValue: cfg },
-		/*{ provide: 'cfg',
-		  useFactory: (configService: ConfigService) => () => Promise.resolve(configService.get()),
-		  deps: [ConfigService]
-		},*/
 		{ provide: 'C', useValue: C }
 	],
 	entryComponents: [

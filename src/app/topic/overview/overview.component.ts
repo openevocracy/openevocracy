@@ -62,10 +62,6 @@ export class TopicOverviewComponent extends EditorComponent {
 		
 		this.C = C;
 		
-		this.loadData();
-	}
-	
-	private loadData() {
 		// Get topicId from route
 		this.topicId = this.router.url.split('/')[2];
 		
@@ -134,9 +130,7 @@ export class TopicOverviewComponent extends EditorComponent {
 	}*/
 	
 	/*
-	 * @desc: Overwrites editorCreated in editor component.
-	 *        Mainly gets further information about group from server.
-	 *        The function is called from editor component.
+	 * @desc: Extends the editor and initializes pad socket connection
 	 *
 	 * @params:
 	 *    editor: quill editor object

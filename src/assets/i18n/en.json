@@ -255,5 +255,13 @@
    "ACT_MENTIONED_STR2": "",
    "ACT_TOPIC_VOTE_STR": "Voted for topic",
 	"ACT_TOPIC_UNVOTE_STR": "Withdrew vote for topic",
-	"ACT_TOPIC_UNVOTE_STR2": ""
+	"ACT_TOPIC_UNVOTE_STR2": "",
+	
+   "PAGINATOR_ITEMS_PER_PAGE_LABEL": "Items per page:",
+   "PAGINATOR_NEXT_PAGE_LABEL": "Next page",
+   "PAGINATOR_PREVIOUS_PAGE_LABEL": "Previous page",
+   "PAGINATOR_FIRST_PAGE_LABEL": "First page",
+   "PAGINATOR_LAST_PAGE_LABEL": "Last page",
+   "PAGINATOR_RANGE_PAGE_LABEL_1": "0 of {{length}}",
+   "PAGINATOR_RANGE_PAGE_LABEL_2": "{{startIndex}} - {{endIndex}} of {{length}}"
 }

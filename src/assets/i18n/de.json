@@ -255,5 +255,13 @@
    "ACT_MENTIONED_STR2": " erwähnt",
    "ACT_TOPIC_VOTE_STR": "Stimmte für Thema",
 	"ACT_TOPIC_UNVOTE_STR": "Hat die Stimme für Thema",
-	"ACT_TOPIC_UNVOTE_STR2": " zurückgezogen"
+	"ACT_TOPIC_UNVOTE_STR2": " zurückgezogen",
+	
+   "PAGINATOR_ITEMS_PER_PAGE_LABEL": "Elemente pro Seite:",
+   "PAGINATOR_NEXT_PAGE_LABEL": "Nächste Seite",
+   "PAGINATOR_PREVIOUS_PAGE_LABEL": "Vorherige Seite",
+   "PAGINATOR_FIRST_PAGE_LABEL": "Erste Seite",
+   "PAGINATOR_LAST_PAGE_LABEL": "Letzte Seite",
+   "PAGINATOR_RANGE_PAGE_LABEL_1": "0 von {{length}}",
+   "PAGINATOR_RANGE_PAGE_LABEL_2": "{{startIndex}} - {{endIndex}} von {{length}}"
 }

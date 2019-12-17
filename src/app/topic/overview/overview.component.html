@@ -1,4 +1,4 @@
-<mat-toolbar class="second-toolbar" color="primary">
+<stagebar>
 	<div class="flex container">
 		<div *ngIf="isEditor">
 			<div id="toolbar"></div>
@@ -9,7 +9,7 @@
 		</div>
 		
 		<div *ngIf="!isEditor">
-			<button mat-button [routerLink]="['/user/profile', userId]">
+			<button mat-button [routerLink]="['/user/profile', topic?.authorId]">
 				<span><fa-icon [icon]="faUser"></fa-icon> {{ 'TOPIC_BUTTON_AUTHOR' | translate }}</span>
 			</button>
 		</div>
@@ -29,7 +29,7 @@
 			<span><fa-icon [icon]="faDownload"></fa-icon> Ergebnis</span>
 		</button>
 	</div>
-</mat-toolbar>
+</stagebar>
 
 <div *ngIf="isEditor" class="editor-wrapper container">
 	<div class="row">

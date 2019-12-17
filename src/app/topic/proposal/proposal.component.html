@@ -1,12 +1,14 @@
-<mat-toolbar *ngIf="isEditor" class="second-toolbar" color="primary">
+<stagebar>
 	<div class="flex container">
-		<div id="toolbar"></div>
-		<span class="saved-text">
-			<span *ngIf="saved">{{ 'EDITOR_SAVED_CHANGES' | translate }}</span>
-			<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
-		</span>
+		<div *ngIf="isEditor">
+			<div id="toolbar"></div>
+			<span class="saved-text">
+				<span *ngIf="saved">{{ 'EDITOR_SAVED_CHANGES' | translate }}</span>
+				<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
+			</span>
+		</div>
 	</div>
-</mat-toolbar>
+</stagebar>
 
 <div *ngIf="isEditor" class="editor-wrapper container">
 	<div class="row">
