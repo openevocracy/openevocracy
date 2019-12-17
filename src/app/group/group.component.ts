@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { MatDialog } from "@angular/material";
 import { ActivatedRoute } from '@angular/router';
 
@@ -18,10 +18,12 @@ import * as _ from 'underscore';
 	templateUrl: './group.component.html',
 	styleUrls: ['./group.component.scss']
 })
-export class GroupComponent implements OnInit {
+export class GroupComponent implements OnInit, OnDestroy {
 
 	public meId: string;
 	public groupId: string;
+	
+	public routerSubscription: any;
 
 	constructor(
 		private dialog: MatDialog,
@@ -43,6 +45,24 @@ export class GroupComponent implements OnInit {
 		// If user is member (if me is truthy), check welcome status and possibly show welcome message
 		if (group.isMember(this.meId))
 			this.checkWelcomeStatus();
+		
+		// Allow reload of the whole component
+		this.router.routeReuseStrategy.shouldReuseRoute = function () {
+			return false;
+		};
+		
+		this.routerSubscription = this.router.events.subscribe((event) => {
+			if (event instanceof NavigationEnd) {
+				// Trick the Router into believing it's last link wasn't previously loaded
+				this.router.navigated = false;
+			}
+		});
+	}
+	
+	ngOnDestroy() {
+   	// Unsubscribe from subscription to avoid memory leak
+		if (this.routerSubscription)
+			this.routerSubscription.unsubscribe();
 	}
 	
 	/**

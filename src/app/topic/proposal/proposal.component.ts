@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatSnackBar, MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -9,12 +9,13 @@ import { TopicProposal } from '../../_models/topic/proposal';
 import { EditorComponent } from '../../editor/editor.component';
 
 import { ConnectionAliveService } from '../../_services/connection.service';
-import { HttpManagerService } from '../../_services/http-manager.service';
 import { EditorService } from '../../_services/editor.service';
 import { UserService } from '../../_services/user.service';
 import { TopicService } from '../../_services/topic.service';
+import { SnackbarService } from '../../_services/snackbar.service';
 
 import * as $ from 'jquery';
+import * as _ from 'underscore';
 
 import { C } from '../../../../shared/constants';
 
@@ -23,11 +24,10 @@ import { C } from '../../../../shared/constants';
 	templateUrl: './proposal.component.html',
 	styleUrls: ['./proposal.component.scss']
 })
-export class TopicProposalComponent extends EditorComponent implements OnInit {
+export class TopicProposalComponent extends EditorComponent {
 	
 	public C;
 	public topicId: string;
-	public userId: string;
 	public proposal: TopicProposal;
 	public isEditor: boolean = false;
 	public basicTopic: BasicTopic;
@@ -35,8 +35,6 @@ export class TopicProposalComponent extends EditorComponent implements OnInit {
 	constructor(
 		protected snackBar: MatSnackBar,
 		protected router: Router,
-		protected activatedRoute: ActivatedRoute,
-		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
 		protected translateService: TranslateService,
 		protected connectionAliveService: ConnectionAliveService,
@@ -44,13 +42,10 @@ export class TopicProposalComponent extends EditorComponent implements OnInit {
 		protected dialog: MatDialog,
 		private topicService: TopicService
 	) {
-		super(snackBar, router, activatedRoute, httpManagerService, userService, translateService, connectionAliveService, editorService, dialog);
+		super(snackBar, router, userService, translateService, connectionAliveService, editorService, dialog);
 		
 		// Get topicId from route
 		this.topicId = this.router.url.split('/')[2];
-		
-		// Get userId from user service
-		this.userId = this.userService.getUserId();
 		
 		// Get basic topic
 		this.basicTopic = this.topicService.getBasicTopicFromList(this.topicId);
@@ -62,9 +57,6 @@ export class TopicProposalComponent extends EditorComponent implements OnInit {
 			if (this.userId == this.proposal.authorId && this.basicTopic.stage == C.STAGE_PROPOSAL)
 				this.isEditor = true;
 		});
-	}
-	
-	ngOnInit() {
 	}
 	
 	/*
@@ -79,24 +71,26 @@ export class TopicProposalComponent extends EditorComponent implements OnInit {
 		// Only go on if editor shall be shown
 		if (!this.isEditor)
 			return;
+			
+		// Bind all necessary information to editor
+		const quillEditor = _.extend(editor, {
+			'docId': this.proposal.docId,
+			'padId': this.proposal.padId,
+			'type': 'docs_proposal',
+			'placeholder': 'EDITOR_PLACEHOLDER_PROPOSAL',
+			'deadline': this.basicTopic.nextDeadline
+		});
 		
-		// Set and translate placeholder
-		this.translatePlaceholder("EDITOR_PLACEHOLDER_PROPOSAL");
-		
-		// Disable editor body
-		this.disableEdit();
-		
-		// Bring toolbar to mat-toolbar
-		$(".ql-toolbar").prependTo("#toolbar");
-		
-		// Set quill editor
-		this.quillEditor = editor;
-		
-		// Register saved status of editor in editor service
-		this.editorService.setIsSaved(this.proposal.padId, true);
-		
-		// Initialize socket
-		this.initializePadSocket('docs_proposal', this.proposal.docId);
+		// Init editor
+		this.initializeEditor(quillEditor);
+	}
+	
+	/**
+	 * @desc: Updates the component view, when countdown has finished and stage is over
+	 */
+	public updateView() {
+		// Reload basic topic
+		this.router.navigate(['/topic', this.topicId]);
 	}
 
 }

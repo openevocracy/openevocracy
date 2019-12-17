@@ -1,15 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ConnectionAliveService } from '../../_services/connection.service';
-import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
 import { EditorService } from '../../_services/editor.service';
 import { GroupService } from '../../_services/group.service';
+import { SnackbarService } from '../../_services/snackbar.service';
 
 import { EditorComponent } from '../../editor/editor.component';
 
@@ -24,7 +24,7 @@ import { C } from '../../../../shared/constants';
 	templateUrl: './editor.component.html',
 	styleUrls: ['../../editor/editor.component.scss', './editor.component.scss']
 })
-export class GroupEditorComponent extends EditorComponent implements OnInit, OnDestroy {
+export class GroupEditorComponent extends EditorComponent implements OnInit {
 	
 	public proposalHtml: string = "";
 	public group;
@@ -33,8 +33,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
   constructor(
 		protected snackBar: MatSnackBar,
 		protected router: Router,
-		protected activatedRoute: ActivatedRoute,
-		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
 		protected translateService: TranslateService,
 		protected connectionAliveService: ConnectionAliveService,
@@ -42,7 +40,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 		protected dialog: MatDialog,
 		private groupService: GroupService
 	) {
-		super(snackBar, router, activatedRoute, httpManagerService, userService, translateService, connectionAliveService, editorService, dialog);
+		super(snackBar, router, userService, translateService, connectionAliveService, editorService, dialog);
 		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
@@ -61,9 +59,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	 * @desc: Lifecylce hook, used to set constants initially
 	 */
 	ngOnInit() {
-		// Set and translate placeholder
-		this.translatePlaceholder("EDITOR_PLACEHOLDER_GROUP");
-		
 		// Get current groupId
 		const groupId = this.router.url.split('/')[2];
 		
@@ -76,19 +71,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	}
 	
 	/*
-	 * @desc: Lifecylce hook, used to close socket connection properly if view is destroyed
-	 */
-	ngOnDestroy() {
-		// Close pad socket
-		if (this.padSocket)
-			this.padSocket.close();
-		
-		// Stop countdown
-		if (this.deadlineInterval)
-			clearInterval(this.deadlineInterval);
-	}
-	
-	/*
 	 * @desc: Overwrites editorCreated in editor component.
 	 *        Mainly gets further information about group from server.
 	 *        The function is called from editor component.
@@ -97,30 +79,36 @@ export class GroupEditorComponent extends EditorComponent implements OnInit, OnD
 	 *    editor: quill editor object
 	 */
 	public editorCreated(editor) {
-		// Disable editor body
-		this.disableEdit();
 		
-		// Bring toolbar to mat-toolbar
-		$(".ql-toolbar").prependTo("#toolbar");
-		
-		// Set quill editor
-		this.quillEditor = editor;
+		// Bind all necessary information to editor
+		const quillEditor = _.extend(editor, {
+			'docId': this.group.docId,
+			'padId': this.group.padId,
+			'type': 'docs_group',
+			'placeholder': 'EDITOR_PLACEHOLDER_GROUP',
+			'deadline': this.group.expiration
+		});
 		
 		// Add color of current member
 		this.me = _.findWhere(this.group.members, { 'userId': this.userId });
-		this.quillEditor.getModule('authorship').addAuthor(this.userId, this.me.color);
+		quillEditor.getModule('authorship').addAuthor(this.userId, this.me.color);
 		
 		// Add colors of other members
 		_.each(this.group.members, (member) => {
 			if(member.userId != this.me.userId)
-				this.quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
+				quillEditor.getModule('authorship').addAuthor(member.userId, member.color);
 		});
 		
-		// Register saved status of editor in editor service
-		this.editorService.setIsSaved(this.group.padId, true);
-		
 		// Initialize socket
-		this.initializePadSocket(this.group.docId);
+		this.initializeEditor(quillEditor);
+	}
+	
+	/**
+	 * @desc: Updates the component view, when countdown has finished and stage is over
+	 */
+	public updateView() {
+		// When group is finished, navigate to group again
+		this.router.navigate(['/group', this.group.groupId]);
 	}
 
 }

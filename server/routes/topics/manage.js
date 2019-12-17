@@ -154,7 +154,7 @@ exports.manageAndListTopicsAsync = manageAndListTopicsAsync;
  * @return {object} topic - adjusted topic
  */
 function manageTopicStateAsync(topic) {
-    
+   
 	// Exit this function if stage transition is not due yet
 	if(Date.now() < topic.nextDeadline)
 		return Promise.resolve(topic);
@@ -214,6 +214,7 @@ function manageTopicStateAsync(topic) {
 	
 	return Promise.resolve(topic);
 }
+exports.manageTopicStateAsync = manageTopicStateAsync;
 
 function appendTopicInfoAsync(topic, userId, with_details) {
 	var topicId = topic._id;

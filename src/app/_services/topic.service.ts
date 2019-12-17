@@ -88,14 +88,15 @@ export class TopicService {
 			return this.httpManagerService.get('/json/topic/basic/' + topicId).subscribe((topic) => {
 				
 				// Try to get topic from list
-				let topicFromList = this.getBasicTopicFromList(topicId);
+				const idx = this.topics.findIndex(x => x.topicId == topicId);
 				
-				if (topicFromList) {
-					// If topic is already in list, update it
-					topicFromList = new BasicTopic(topic);
-				} else {
+				if (idx == -1) {
 					// If topic is not in list, add it
 					this.topics.push(new BasicTopic(topic));
+				} else {
+					// If topic is already in list, update it
+					//topicFromList = new BasicTopic(topic);
+					this.topics[idx] = new BasicTopic(topic);
 				}
 				
 				// Hand over to next subscription

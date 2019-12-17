@@ -17,7 +17,7 @@ import { TopicProposalComponent } from '../topic/proposal/proposal.component';
 import { TopicGroupsComponent } from '../topic/groups/groups.component';
 
 import { EditorComponent } from '../editor/editor.component';
-import { PadviewComponent } from '../padview/padview.component';
+//import { PadviewComponent } from '../padview/padview.component';
 
 // Group
 import { GroupComponent } from '../group/group.component';
@@ -38,6 +38,7 @@ const appChildRoutes: Routes = [
 		path: 'topic/:id',
 		component: TopicComponent,
 		resolve: { 'manageTopic': TopicResolver },
+		runGuardsAndResolvers: 'always',
 		children: [
 			{ path: '', redirectTo: 'overview', pathMatch: 'full' },
 			{ path: 'overview', component: TopicOverviewComponent },
@@ -45,13 +46,14 @@ const appChildRoutes: Routes = [
 			{ path: 'groups', component: TopicGroupsComponent }
 		]
 	},
-	{ path: 'topic/editor/:id', component: EditorComponent },  // TODO implement into topic
-	{ path: 'proposal/view/:id', component: PadviewComponent },  // TODO implement into topic
-	{ path: 'proposal/editor/:id', component: EditorComponent },  // TODO implement into topic
+	//{ path: 'topic/editor/:id', component: EditorComponent },  // TODO implement into topic
+	//{ path: 'proposal/view/:id', component: PadviewComponent },  // TODO implement into topic
+	//{ path: 'proposal/editor/:id', component: EditorComponent },  // TODO implement into topic
 	{
 		path: 'group/:id',
 		component: GroupComponent,
 		resolve: { 'basicGroup': GroupResolver },
+		runGuardsAndResolvers: 'always',
 		children: [
 			{ path: '', redirectTo: 'editor', pathMatch: 'full' },
 			{ path: 'editor', component: GroupEditorComponent },
@@ -75,7 +77,8 @@ const appRoutes: Routes = [
 		CommonModule,
 		RouterModule.forRoot(appRoutes, {
 			scrollPositionRestoration: 'enabled',
-			anchorScrolling: 'enabled'
+			anchorScrolling: 'enabled',
+			onSameUrlNavigation: 'reload'
 		})
 	],
 	exports: [ RouterModule ],

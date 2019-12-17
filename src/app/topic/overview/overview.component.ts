@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatSnackBar, MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -10,7 +10,6 @@ import { TopicOverview } from '../../_models/topic/overview';
 import { EditorComponent } from '../../editor/editor.component';
 
 import { ConnectionAliveService } from '../../_services/connection.service';
-import { HttpManagerService } from '../../_services/http-manager.service';
 import { EditorService } from '../../_services/editor.service';
 import { TopicService } from '../../_services/topic.service';
 import { UserService } from '../../_services/user.service';
@@ -18,6 +17,7 @@ import { SnackbarService } from '../../_services/snackbar.service';
 import { ActivityListService} from '../../_services/activitylist.service';
 
 import * as $ from 'jquery';
+import * as _ from 'underscore';
 
 import { C } from '../../../../shared/constants';
 
@@ -28,14 +28,13 @@ import { faUser, faUsers, faFile, faHandPaper } from '@fortawesome/free-solid-sv
 	templateUrl: './overview.component.html',
 	styleUrls: ['./overview.component.scss']
 })
-export class TopicOverviewComponent extends EditorComponent implements OnInit {
+export class TopicOverviewComponent extends EditorComponent {
 	
 	//@ViewChild(GroupvisComponent)
 	//private groupvis: GroupvisComponent;
 	
 	public C;
 	public topicId: string;
-	public userId: string;
 	public basicTopic: BasicTopic;
 	public topic: TopicOverview;
 	public isEditor: boolean = false;
@@ -50,8 +49,6 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 	constructor(
 		protected snackBar: MatSnackBar,
 		protected router: Router,
-		protected activatedRoute: ActivatedRoute,
-		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
 		protected translateService: TranslateService,
 		protected connectionAliveService: ConnectionAliveService,
@@ -61,15 +58,16 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 		private topicService: TopicService,
 		private activityListService: ActivityListService
 	) {
-		super(snackBar, router, activatedRoute, httpManagerService, userService, translateService, connectionAliveService, editorService, dialog);
+		super(snackBar, router, userService, translateService, connectionAliveService, editorService, dialog);
 		
 		this.C = C;
 		
+		this.loadData();
+	}
+	
+	private loadData() {
 		// Get topicId from route
 		this.topicId = this.router.url.split('/')[2];
-		
-		// Get userId from user service
-		this.userId = this.userService.getUserId();
 		
 		// Get basic topic
 		this.basicTopic = this.topicService.getBasicTopicFromList(this.topicId);
@@ -82,23 +80,6 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 			if (this.topic.authorId == this.userId && this.basicTopic.stage == C.STAGE_SELECTION)
 				this.isEditor = true;
 		});
-	}
-	
-	ngOnInit() {
-		
-	}
-	
-	/*
-	 * @desc: Lifecylce hook, used to close socket connection properly if view is destroyed
-	 */
-	ngOnDestroy() {
-		// Close pad socket
-		if (this.padSocket)
-			this.padSocket.close();
-			
-		// Stop countdown
-		if (this.deadlineInterval)
-			clearInterval(this.deadlineInterval);
 	}
 	
 	/*
@@ -164,24 +145,26 @@ export class TopicOverviewComponent extends EditorComponent implements OnInit {
 		// Only go on if editor shall be shown
 		if (!this.isEditor)
 			return;
+			
+		// Bind all necessary information to editor
+		const quillEditor = _.extend(editor, {
+			'docId': this.topic.descDocId,
+			'padId': this.topic.descPadId,
+			'type': 'docs_topic_description',
+			'placeholder': 'EDITOR_PLACEHOLDER_TOPIC_DESCRIPTION',
+			'deadline': this.basicTopic.nextDeadline
+		});
 		
-		// Set and translate placeholder
-		this.translatePlaceholder("EDITOR_PLACEHOLDER_TOPIC_DESCRIPTION");
-		
-		// Disable editor body
-		this.disableEdit();
-		
-		// Bring toolbar to mat-toolbar
-		$(".ql-toolbar").prependTo("#toolbar");
-		
-		// Set quill editor
-		this.quillEditor = editor;
-		
-		// Register saved status of editor in editor service
-		this.editorService.setIsSaved(this.topic.descPadId, true);
-		
-		// Initialize socket
-		this.initializePadSocket('docs_topic_description', this.topic.descDocId);
+		// Init editor
+		this.initializeEditor(quillEditor);
+	}
+	
+	/**
+	 * @desc: Updates the component view, when countdown has finished and stage is over
+	 */
+	public updateView() {
+		// Reload basic topic
+		this.router.navigate(['/topic', this.topicId]);
 	}
 
 }

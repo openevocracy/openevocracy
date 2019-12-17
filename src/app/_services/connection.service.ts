@@ -9,6 +9,7 @@ import * as origin from 'get-location-origin';
 export class ConnectionAliveService implements OnDestroy {
 	
 	// Define global variables
+	public isInitialized:boolean = false;
 	public isConnectionAssumed:boolean = true;
 	public isConnected:boolean = true;
 	public aliveSocket;
@@ -46,6 +47,8 @@ export class ConnectionAliveService implements OnDestroy {
 	 *        do ping pong and check if connection is still available
 	 */
 	public init() {
+		this.isInitialized = true;
+		
 		const parsed = parseUrl(origin);
 		const protocol = parsed.protocol.includes('https') ? 'wss://' : 'ws://';
 		this.aliveSocket = new WebSocket(protocol + parsed.host + '/socket/alive/' + this.userToken);
@@ -68,6 +71,8 @@ export class ConnectionAliveService implements OnDestroy {
 		this.aliveSocket.onmessage = (event) => {
 			// Parse message from server
 			const msg = event.data
+			
+			//console.log('onmessage', msg);
 			
 			// If pong arrives, connection is still alive
 			if (msg == 'pong')
@@ -112,6 +117,10 @@ export class ConnectionAliveService implements OnDestroy {
 		// Stop interval
 		clearInterval(this.pingInterval);
 		
+		// Close socket
+		if (this.aliveSocket)
+			this.aliveSocket.close();
+		
 		// Wait 500 ms to avoid visual effects when reloading (F5) the tab
 		setTimeout(() => {
 			// Trigger offline event if was connected before
@@ -134,7 +143,7 @@ export class ConnectionAliveService implements OnDestroy {
 	public startRetryTimeout() {
 		// Wait 5 seconds and retry connection
 		this.retryTimeout = setTimeout(() => {
-			// If is normally not necessary since retry timeout is only called when connection is closed
+			// It is normally not necessary to check isConnected since retry timeout is only called when connection is closed
 			// it's here for safety, in order to really avoid double connections
 			if(!this.isConnected)
 				this.init();

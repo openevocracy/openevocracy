@@ -169,7 +169,7 @@ app.post('/json/activity/create', auth(), activities.create);
  * /unfollow - user stops to follows another user
  * /materequest - user sends a request to be mates with another user
  * /unmate - user ends mate relation
-
+*/
 
 // ###############
 // ### D O C S ###

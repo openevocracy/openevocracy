@@ -17,41 +17,29 @@ exports.basic = function(req, res) {
 	var userId = ObjectId(req.user._id);
 	
 	// Try to find topic and manage state
-	const manageTopic_promise = db.collection('topics').findOneAsync({ '_id': topicId })
-      .then(manage.manageTopicStateAsync)
-      .then(function(topic) {
-      	// If no topic was found, reject, otherwise return true
-         if(_.isNull(topic))
-            return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
-         else
-            return true;
-   }).catch(utils.isOwnError, utils.handleOwnError(res));
-   
-   manageTopic_promise.then((wasManaged) => {
-		if (!wasManaged)
-			return;
-		
+	db.collection('topics').findOneAsync({ '_id': topicId }).then((topic) => {
+      return manage.manageTopicStateAsync(topic);
+	}).then(function(topic) {
+		// If no topic was found, reject, otherwise return topic
+		if(_.isNull(topic))
+			return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
+		else
+			return topic;
+   }).then((topic) => {
 		// Try to find proposal of user
-		const hasProposal_promise = db.collection('pads_proposal')
+		return db.collection('pads_proposal')
 			.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { '_id': true })
 			.then((proposal) => {
 				return !_.isNull(proposal);
+		}).then((hasProposal) => {
+			return {
+				'topicId': topic._id,
+				'hasProposal': hasProposal,
+				'stage': topic.stage,
+				'nextDeadline': topic.nextDeadline
+			};
 		});
-      
-		// Get stage from topic
-		const topic_promise = db.collection('topics')
-			.findOneAsync({ '_id': topicId }, { 'stage': true });
-      	
-      
-		return Promise.join(hasProposal_promise, topic_promise)
-			.spread((hasProposal, topic) => {
-				return {
-					'topicId': topicId,
-					'hasProposal': hasProposal,
-					'stage': topic.stage
-				};
-			});
-		}).then(res.json.bind(res));
+	}).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
 /**

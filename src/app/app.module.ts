@@ -87,7 +87,7 @@ import { GroupvisComponent } from './groupvis/groupvis.component';
 // New components (not sorted)
 import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
-import { PadviewComponent } from './padview/padview.component';
+//import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { StarratingComponent } from './starrating/starrating.component';
@@ -123,7 +123,7 @@ export function loadConfig(configService: ConfigService) {
 		AddonePipe,
 		TimestampPipe,
 		GroupvisComponent,
-		PadviewComponent,
+		//PadviewComponent,
 		UserprofileComponent,
 		ShareDialogComponent,
 		FeedbackDialogComponent,
