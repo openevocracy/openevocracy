@@ -6,7 +6,7 @@ import { forkJoin } from 'rxjs/observable/forkJoin';
 import { UtilsService } from '../_services/utils.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 
-import { Network } from 'vis';
+//import { Network } from 'vis';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 
@@ -91,7 +91,7 @@ export class GroupvisComponent implements OnInit {
 			
 			// Create network graph
 			let data = { 'nodes': this.nodes, 'edges': res.edges };
-      	this.network = new Network(container, data, options);
+      	//this.network = new Network(container, data, options);
       	
       	this.addGraphEvents();
 		});

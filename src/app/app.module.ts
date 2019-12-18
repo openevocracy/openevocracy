@@ -12,6 +12,7 @@ import { MaterialModule } from './_modules/material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { QuillModule } from 'ngx-quill';
 import { MentionModule } from 'angular-mentions';
+import { VisModule } from 'ngx-vis';
 
 // Routing
 import { AppRoutingModule } from './_routing/app-routing.module';
@@ -163,6 +164,7 @@ export function loadConfig(configService: ConfigService) {
 		ReactiveFormsModule,
 		QuillModule.forRoot(),
 		MentionModule,
+		VisModule,
 		TranslateModule.forRoot({
 			loader: {
 				provide: TranslateLoader,

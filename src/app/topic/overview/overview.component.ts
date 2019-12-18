@@ -30,16 +30,11 @@ import { faUser, faUsers, faFile, faHandPaper } from '@fortawesome/free-solid-sv
 })
 export class TopicOverviewComponent extends EditorComponent {
 	
-	//@ViewChild(GroupvisComponent)
-	//private groupvis: GroupvisComponent;
-	
 	public C;
 	public topicId: string;
 	public basicTopic: BasicTopic;
 	public topic: TopicOverview;
 	public isEditor: boolean = false;
-	
-	//public showGraph: boolean = false;
 	
 	public faUser = faUser;
 	public faUsers = faUsers;
@@ -120,14 +115,6 @@ export class TopicOverviewComponent extends EditorComponent {
 			this.activityListService.addActivity(C.ACT_PROPOSAL_CREATED, this.topicId).subscribe();
 		});
 	}
-	
-	/*
-	 * @desc: Open graph to visualize topic hierarchy
-	 */
-	/*public openGraph() {
-		this.showGraph = true;
-		//this.groupvis.initGraph(this.topicId);
-	}*/
 	
 	/*
 	 * @desc: Extends the editor and initializes pad socket connection
