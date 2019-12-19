@@ -19,44 +19,44 @@ function getGroupRelationsAsync(groupId) {
  * @desc: prepares nodes and edges for topic hierarchy visualiaisation graph
  */
 exports.query = function(req, res) {
-	var topicId = ObjectId(req.params.id);
-	var userId = ObjectId(req.user._id);
+	const topicId = ObjectId(req.params.id);
+	const userId = ObjectId(req.user._id);
 	
 	// Get proposal padId's and (virtual) level's
-	var proposal_promise = db.collection('pads_proposal').find({'topicId': topicId}, {'ownerId': true}).toArrayAsync()
+	const proposal_promise = db.collection('pads_proposal').find({'topicId': topicId}, {'ownerId': true}).toArrayAsync()
 		.map(function(pad) {
 			// me is true if both are equal, false otherwise
-			var me = utils.equalId(pad.ownerId, userId);
+			const me = utils.equalId(pad.ownerId, userId);
 			return { 'id': pad._id, 'level': -1, 'me': me };
 	});
 	
 	// Get groupPads
-	var groupPads_promise = db.collection('pads_group').find({'topicId': topicId}, {'groupId': true}).toArrayAsync();
+	const groupPads_promise = db.collection('pads_group').find({'topicId': topicId}, {'groupId': true}).toArrayAsync();
 	
 	// Get group padId's and level's
-	var group_promise = groupPads_promise.map(function(groupPad) {
+	const group_promise = groupPads_promise.map(function(groupPad) {
 		// Add level to group pad
-		return db.collection('groups').findOneAsync({'_id': groupPad.groupId}, {'level': true})
+		return db.collection('groups').findOneAsync({'_id': groupPad.groupId}, { 'level': true, 'name': true })
 			.then(function(group) {
 				// Flag groups where is user is/was part of
 				return getGroupRelationsAsync(group._id).then(function(rels) {
 					// Get ownerIds as array
-					var members = _.pluck(rels, 'userId');
+					const members = _.pluck(rels, 'userId');
 					// me is true if user is in that group, false otherwise
-					var me = utils.containsObjectId(members, userId);
-					return { 'id': groupPad._id, 'level': group.level, 'me': me };
+					const me = utils.containsObjectId(members, userId);
+					return { 'id': groupPad._id, 'level': group.level, 'name': group.name, 'me': me };
 				});
 			});
 	});
 	
 	// Merge proposals and groups to nodes
-	var nodes_promise = Promise.join(proposal_promise, group_promise).spread(function(proposals, groups) {
+	const nodes_promise = Promise.join(proposal_promise, group_promise).spread(function(proposals, groups) {
 		return proposals.concat(groups);
 	});
 	
 	// Get edges
-	var edges_promise = groupPads_promise.map(function(groupPad) {
-		var sink = groupPad._id;
+	const edges_promise = groupPads_promise.map(function(groupPad) {
+		const sink = groupPad._id;
 		return getGroupRelationsAsync(groupPad.groupId).map(function(rel) {
 			return { 'from': rel.prevPadId, 'to': sink };
 		});
@@ -80,12 +80,13 @@ exports.query = function(req, res) {
 exports.getProposal = function(req, res) {
 	var padId = ObjectId(req.params.id);
 	
-	db.collection('pads_proposal').findOneAsync({'_id': padId}, {'docId': true, 'expiration': true}).then(function(pad) {
-		// Get html with docId
-		return pads.getPadHTMLAsync('proposal', pad.docId).then(function(html) {
-			// Return number of words and expiration timestamp
-			return { 'padId': pad._id, 'numWords': utils.countHtmlWords(html), 'expiration': pad.expiration };
-		});
+	db.collection('pads_proposal')
+		.findOneAsync({'_id': padId}, { 'docId': true, 'expiration': true, 'ownerId': true }).then(function(pad) {
+			// Get html with docId
+			return pads.getPadHTMLAsync('proposal', pad.docId).then(function(html) {
+				// Return number of words and expiration timestamp
+				return { 'padId': pad._id, 'numWords': utils.countHtmlWords(html), 'expiration': pad.expiration, 'authorId': pad.ownerId };
+			});
 	}).then(res.json.bind(res));
 };
 
@@ -97,14 +98,25 @@ exports.getGroup = function(req, res) {
 	
 	db.collection('pads_group').findOneAsync({'_id': padId}, {'docId': true, 'groupId': true, 'expiration': true}).then(function(pad) {
 		// Get number of words in group pad
-		var numWords_promise = pads.getPadHTMLAsync('group', pad.docId).then(utils.countHtmlWords);
+		const numWords_promise = pads.getPadHTMLAsync('group', pad.docId).then(utils.countHtmlWords);
 		
 		// Get amount of members in group
-		var numMembers_promise = db.collection('group_relations').countAsync({'groupId': pad.groupId});
+		const numMembers_promise = db.collection('group_relations').countAsync({'groupId': pad.groupId});
+		
+		// Get name of group
+		const group_promise = db.collection('groups').findOneAsync({ '_id': pad.groupId }, { 'name': true });
 		
 		// Join all information and send response
-		return Promise.join(numWords_promise, numMembers_promise).spread(function(numWords, numMembers) {
-			return { 'padId': pad._id, 'numWords': numWords, 'numMembers': numMembers, 'expiration': pad.expiration };
+		return Promise.join(numWords_promise, numMembers_promise, group_promise)
+			.spread(function(numWords, numMembers, group) {
+				console.log(numWords, numMembers, group);
+				return {
+					'padId': pad._id,
+					'numWords': numWords,
+					'numMembers': numMembers,
+					'expiration': pad.expiration,
+					'name': group.name
+				};
 		});
 	}).then(res.json.bind(res));
 };

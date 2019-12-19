@@ -21,7 +21,7 @@ import * as _ from 'underscore';
 
 import { C } from '../../../../shared/constants';
 
-import { faUser, faUsers, faFile, faHandPaper } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faPlay, faFile, faHandPaper } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-overview',
@@ -37,7 +37,7 @@ export class TopicOverviewComponent extends EditorComponent {
 	public isEditor: boolean = false;
 	
 	public faUser = faUser;
-	public faUsers = faUsers;
+	public faPlay = faPlay;
 	public faFile = faFile;
 	public faHandPaper = faHandPaper;
 

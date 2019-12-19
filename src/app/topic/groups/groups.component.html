@@ -1,23 +1,31 @@
-<stagebar></stagebar>
+<stagebar>
+	<div class="container">
+		<p class="default-text" *ngIf="!detail">Wähle eine Element ...</p>
+		<div [@slideInOut]="detailStatus" class="flex">
+			<div>
+				<h2>
+					<span *ngIf="detail?.type == 'proposal'">{{ 'GROUPVIS_PROPOSAL_LABEL' | translate }} {{ detail?.name }} von <a [routerLink]="['/user/profile', detail?.authorId]">{{ detail?.authorId }}</a></span>
+					<span *ngIf="detail?.type == 'group'">{{ 'GROUPVIS_GROUP_LABEL' | translate }} {{ detail?.name }}</span>
+					
+				</h2>
+				<p *ngIf="detail?.type == 'proposal'">Dieser Proposal enthält {{ detail?.numWords }} Wörter und endete am {{ detail?.expiration | date:'y-MM-dd' }}</p>
+				<p *ngIf="detail?.type == 'group'">Diese Gruppe hat {{ detail?.numMembers }} Mitglieder, diese schrieben bisher {{ detail?.numWords }} Wörter und sie endet am {{ detail?.expiration | date:'y-MM-dd' }}</p>
+			</div>
+			
+			<span class="flex-spacer"></span>
+			
+			<button mat-raised-button color="warn" *ngIf="detail?.type == 'proposal'">
+				<span><fa-icon [icon]="faPlay"></fa-icon> {{ 'GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL' | translate }}</span>
+			</button>
+			<button mat-raised-button color="warn" *ngIf="detail?.type == 'group'">
+				<span><fa-icon [icon]="faPlay"></fa-icon> {{ 'GROUPVIS_DETAIL_GROUP_BUTTON_LABEL' | translate }}</span>
+			</button>
+		</div>
+	</div>
+</stagebar>
 
 <div class="container">
 	<div *ngIf="visNetworkData">
 		<div class="network-canvas" [visNetwork]="visNetwork" [visNetworkData]="visNetworkData" [visNetworkOptions]="visNetworkOptions" (initialized)="networkInitialized()"></div>
-	</div>
-	<div id="info" [@slideInOut]="detailStatus">
-		<h1>
-			<span *ngIf="detail?.type == 'proposal'">{{ 'GROUPVIS_PROPOSAL_LABEL' | translate }}</span>
-			<span *ngIf="detail?.type == 'group'">{{ 'GROUPVIS_GROUP_LABEL' | translate }}</span>
-			{{ detail?.shortPadId }}
-		</h1>
-		<p>
-			<span>{{ 'GROUPVIS_DETAIL_EXPIRATION' | translate }}: {{ detail?.expiration | date:'y-MM-dd' }}</span><br/>
-			<span>{{ 'GROUPVIS_DETAIL_NUMWORDS' | translate }}: {{ detail?.numWords }}</span><br/>
-			<span *ngIf="detail?.type == 'group'">{{ 'GROUPVIS_DETAIL_NUMMEMBERS' | translate }}: {{ detail?.numMembers }}</span>
-		</p>
-		<button mat-raised-button color="primary" [routerLink]="['/'+detail?.type+'/view', detail?.padId]">
-			<span *ngIf="detail?.type == 'proposal'">{{ 'GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL' | translate }}</span>
-			<span *ngIf="detail?.type == 'group'">{{ 'GROUPVIS_DETAIL_GROUP_BUTTON_LABEL' | translate }}</span>
-		</button>
 	</div>
 </div>

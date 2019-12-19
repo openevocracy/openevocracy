@@ -1,1 +1,10 @@
-.network-canvas { width: 100%; height: 400px; }
+/* Import variables */
+@import "~styles/variables";
+
+stagebar h2 { font-size: 20px; font-weight: normal; }
+stagebar p { margin: 0; font-size: 12px; font-weight: 300; line-height: 16px; padding-bottom: 8px; }
+stagebar p.default-text { font-weight: 300; font-size: 16px; padding-top: 20px; text-align: center; }
+stagebar button { height: 38px; margin-top: 12px; }
+stagebar a { color: inherit; }
+
+.network-canvas { background-color: $white; width: 100%; height: 600px; }
