@@ -19,11 +19,11 @@ import * as _ from 'underscore';
 	templateUrl: './groups.component.html',
 	styleUrls: ['./groups.component.scss'],
 	animations: [
-		trigger('slideInOut', [
-			state('in', style({})),
-			state('out', style({ opacity: '0' })),
-			transition('in => out', animate('300ms')),
-			transition('out => in', animate('300ms'))
+		trigger('fadeInOut', [
+			state('1', style({ display: 'block', opacity: '1' })),
+			state('0', style({ display: 'none', opacity: '0' })),
+			transition('1 => 0', animate('200ms')),
+			transition('0 => 1', animate('200ms'))
 		])
 	]
 })
@@ -33,17 +33,23 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 	
 	public faPlay = faPlay;
 	
-	public detail;
-	public detailStatus: string = 'out';
+	public proposal;
+	public group;
 	
-	public meColor = { 'background': '#E91E63', 'border': '#E91E63', 'hover': '#F06292', 'highlight': '#AD1457'};
-	public proposalColor = { 'background': '#9C27B0', 'border': '#9C27B0', 'hover': '#BA68C8', 'highlight': '#6A1B9A'};
+	public detailStatus: boolean = false;
+	public descStatus: boolean = true;
+	
+	public nextDetails;
+	public isNodeSelected: boolean = false;
+	
+	public meColor = { 'background': '#E91E63', 'border': '#E91E63', 'hover': '#F06292', 'highlight': '#AD1457' };
+	public proposalColor = { 'background': '#9C27B0', 'border': '#9C27B0', 'hover': '#BA68C8', 'highlight': '#6A1B9A' };
 	public groupColor = { 'background': '#3F51B5', 'border': '#3F51B5', 'hover': '#7986CB', 'highlight': '#283593' };
 	
 	public visNetwork: string = 'groupvis';
 	public visNetworkData: Data;
-	public nodes; //: DataSet<Node>;
-	public edges; //: DataSet<Edge>;
+	public nodes: DataSet<Node>;
+	public edges: DataSet<Edge>;
 	public visNetworkOptions: Options;
 
 	constructor(
@@ -66,89 +72,21 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 		// De-register events
 		this.visNetworkService.off(this.visNetwork, 'hoverNode');
 		this.visNetworkService.off(this.visNetwork, 'blurNode');
-		this.visNetworkService.off(this.visNetwork, 'selectNode');
-		this.visNetworkService.off(this.visNetwork, 'deselectNode');
+		this.visNetworkService.off(this.visNetwork, 'click');
 	}
 	
-	public networkInitialized(): void {
-		//this.addGraphEvents();
-		
-		// Register events
-		this.visNetworkService.on(this.visNetwork, 'hoverNode');
-		this.visNetworkService.on(this.visNetwork, 'blurNode');
-		this.visNetworkService.on(this.visNetwork, 'selectNode');
-		this.visNetworkService.on(this.visNetwork, 'deselectNode');
-		
-		// Set cursor to pointer on hovering a node
-		this.visNetworkService.hoverNode.subscribe((eventData: any[]) => {
-			// If event comes not from groupvis figure, stop here
-			if (eventData[0] != this.visNetwork)
-				return;
-			
-			eventData[1].event.target.style.cursor = 'pointer';
-		});
-		
-		// Reset cursor to default on bluring a node
-		this.visNetworkService.blurNode.subscribe((eventData: any[]) => {
-			// If event comes not from groupvis figure, stop here
-			if (eventData[0] != this.visNetwork)
-				return;
-			
-			eventData[1].event.target.style.cursor = 'default';
-		});
-		
-		// When clicking on a node
-		this.visNetworkService.selectNode.subscribe((eventData: any[]) => {
-			// If event comes not from groupvis figure, stop here
-			if (eventData[0] != this.visNetwork)
-				return;
-			
-			// Animate box out
-			this.detailStatus = 'out';
-		
-			const id = eventData[1].nodes[0];
-			const node = this.nodes.get(id);
-			
-			let httpObservable;
-			if(node.level == -1) {
-				// We have a proposal
-				httpObservable = this.httpManagerService.get('/json/groupvis/proposal/'+id);
-			} else {
-				// We have a group
-				httpObservable = this.httpManagerService.get('/json/groupvis/group/'+id);
-			}
-			
-			// Get data from http observable
-			httpObservable.subscribe(res => {
-				const type = (node.level == -1 ? 'proposal' : 'group');
-				this.detail = { ...res, 'type': type };
-			});
-			
-			// Animate box in
-			setTimeout(() => {
-				this.detailStatus = 'in';
-			}, 300);
-		});
-		
-		this.visNetworkService.deselectNode.subscribe((eventData: any[]) => {
-			// If event comes not from groupvis figure, stop here
-			if (eventData[0] != this.visNetwork)
-				return;
-			
-			// Remove detail information
-			this.detail = undefined;
-			
-			// Animate box out
-			this.detailStatus = 'out';
-		});
-  }
+	/**
+	 * @desc: Called when network is successfully initialized
+	 */
+	private networkInitialized(): void {
+		this.addGraphEvents();	
+	}
 	
 	/**
 	 * @desc: Initially draw graph
 	 */
 	private drawGraph(res): void {
-		// Define container and options
-		//let container = document.getElementById('graph');
+		// Get options
       const options = this.getGraphOptions();
       
       // Get labels, finally extend data and finally draw graph
@@ -157,10 +95,10 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 			this.translateService.get("GROUPVIS_GROUP_LABEL"))
 		.subscribe(([labelProposal, labelGroup]) => {
 			// Extend data
-			const nodes = _.map(res.nodes, function(node) {
+			const nodes = _.map(res.nodes, (node, idx) => {
 				if(node.level == -1) {
 					return _.extend(node, {
-						'label': labelProposal+' '+this.utilsService.getShortId(node.id),
+						'label': labelProposal+' '+(idx+1),
 						'color': node.me ? this.meColor : this.proposalColor
 					});
 				} else {
@@ -169,18 +107,16 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 						'color': node.me ? this.meColor : this.groupColor
 					});
 				}
-			}.bind(this));
-			
-			// Create network graph
-			//let data = { 'nodes': this.nodes, 'edges': res.edges };
-      	//this.network = new Network(container, data, options);
+			});
       	
+      	// Create nodes and edges instances from objects
       	this.nodes = new DataSet<Node>(nodes);
-			
 			this.edges = new DataSet<Edge>(res.edges);
 			
+			// Define data of network graph
 			this.visNetworkData = { 'nodes': this.nodes, 'edges': this.edges };
 			
+			// Define options for network graph
 			this.visNetworkOptions = options;
 		});
 	}
@@ -189,7 +125,140 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 	 * @desc: Adds events to graph
 	 */
 	private addGraphEvents(): void {
+		// Register events
+		this.visNetworkService.on(this.visNetwork, 'hoverNode');
+		this.visNetworkService.on(this.visNetwork, 'blurNode');
+		this.visNetworkService.on(this.visNetwork, 'click');
 		
+		// Set cursor to pointer on hovering a node
+		this.visNetworkService.hoverNode.subscribe((eventData: any[]) => {
+			// If event does not come from groupvis graph, stop here
+			if (eventData[0] != this.visNetwork)
+				return;
+			
+			eventData[1].event.target.style.cursor = 'pointer';
+		});
+		
+		// Reset cursor to default on bluring a node
+		this.visNetworkService.blurNode.subscribe((eventData: any[]) => {
+			// If event does not come from groupvis graph, stop here
+			if (eventData[0] != this.visNetwork)
+				return;
+			
+			eventData[1].event.target.style.cursor = 'default';
+		});
+		
+		this.visNetworkService.click.subscribe((eventData: any[]) => {
+			// If event does not come from groupvis graph, stop here
+			if (eventData[0] != this.visNetwork)
+				return;
+			
+			// If background was clicked
+			if (eventData[1].nodes.length == 0) {
+				// Clear nextDetails and isNodeSelected
+				this.nextDetails = undefined;
+				this.isNodeSelected = false;
+				// Animate box out
+				this.detailStatus = false;
+			}
+			
+			// If node was clicked
+			if (eventData[1].nodes.length > 0) {
+				// Get node
+				const id = eventData[1].nodes[0];
+				const node = this.nodes.get(id);
+				
+				// Store next node to show
+				this.nextDetails = node;
+				
+				// If no node is currently selected, fade description out, details will be shown afterwards
+				if (!this.isNodeSelected) {
+					// Animate description out
+					this.descStatus = false;
+				}
+				
+				// If a node is currenly active, fade details out, new details will be shown afterwards
+				if (this.isNodeSelected) {
+					// Animate details out
+					this.detailStatus = false;
+				}
+			}
+		});
+	}
+	
+	/**
+	 * @desc: Is called when the description animation has finished
+	 */
+	private descAnimationDone(e) {
+		// If default faded in
+		if (e.toState) {}
+		
+		// If default faded out
+		if (!e.toState) {
+			// If detail information shall be shown and no node was selected before, load and show that following node
+			if (this.nextDetails && !this.isNodeSelected) {
+				this.loadAndFadeInDetails(this.nextDetails);
+			}
+		}
+	}
+	
+	/**
+	 * @desc: Is called when the detail animation has finished
+	 */
+	private detailAnimationDone(e) {
+		// If details faded in
+		if (e.toState) {
+			// Hide default text
+			//this.descStatus = false;
+			this.isNodeSelected = true;
+			
+			// If detail information shall be shown in the next step, hide description
+			if (this.nextDetails) {
+				// Animate description out
+				this.descStatus = false;
+			}
+		}
+		
+		// If details faded out
+		if (!e.toState) {
+			// Reset proposal and group information
+			this.proposal = undefined;
+			this.group = undefined;
+			
+			// If no next detail information is intendent to be shown, just show description again
+			if (!this.nextDetails) {
+				this.descStatus = true;
+			}
+			
+			// If detail information shall be shown and a node was selected before, load and show that following node
+			if (this.nextDetails && this.isNodeSelected) {
+				this.loadAndFadeInDetails(this.nextDetails);
+			}
+		}
+	}
+	
+	/**
+	 * @desc: Loads and fades in detail information about group or proposal
+	 */
+	private loadAndFadeInDetails(node) {
+		let httpObservable;
+		if(node.level == -1) {
+			// We have a proposal
+			httpObservable = this.httpManagerService.get('/json/groupvis/proposal/'+node.id).subscribe((proposal) => {
+				// Show chosen proposal details
+				this.proposal = proposal;
+				// Animate details in
+				this.detailStatus = true;
+			});
+		} else {
+			// We have a group
+			httpObservable = this.httpManagerService.get('/json/groupvis/group/'+node.id).subscribe((group) => {
+				// Show chosen group details
+				this.group = group;
+				// Animate details in
+				this.detailStatus = true;
+			});
+		}
 	}
 	
 	/**

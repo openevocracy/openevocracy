@@ -46,9 +46,9 @@ export class UtilsService {
 	 * @desc: Get only the last 4 digits of an id
 	 *        The goal is to get a human readable identifier
 	 */
-	public getShortId(id) {
+	/*public getShortId(id) {
 		return id.slice(20,24);
-	}
+	}*/
 	
 	/**
 	 * @desc: Strip html from given string

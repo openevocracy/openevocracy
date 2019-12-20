@@ -109,9 +109,8 @@ exports.getGroup = function(req, res) {
 		// Join all information and send response
 		return Promise.join(numWords_promise, numMembers_promise, group_promise)
 			.spread(function(numWords, numMembers, group) {
-				console.log(numWords, numMembers, group);
 				return {
-					'padId': pad._id,
+					'groupId': pad.groupId,
 					'numWords': numWords,
 					'numMembers': numMembers,
 					'expiration': pad.expiration,
