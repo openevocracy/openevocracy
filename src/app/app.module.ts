@@ -47,6 +47,9 @@ import { AskDeleteDialogComponent } from './dialogs/askdelete/askdelete.componen
 import { EditForumPostDialogComponent } from './dialogs/editforumpost/editforumpost.component';
 import { EditForumCommentDialogComponent } from './dialogs/editforumcomment/editforumcomment.component';
 import { GroupWelcomeDialogComponent } from './dialogs/groupwelcome/groupwelcome.component';
+import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
+import { CloseEditorDialogComponent } from './dialogs/closeeditor/closeeditor.component';
+import { ProposalDialogComponent } from './dialogs/proposal/proposal.component';
 
 // Services
 import { TopicsListService } from './_services/topiclist.service';
@@ -82,7 +85,6 @@ import { TopicToolbarComponent } from './topic/toolbar/toolbar.component';
 import { TopicOverviewComponent } from './topic/overview/overview.component';
 import { TopicProposalComponent } from './topic/proposal/proposal.component';
 import { TopicGroupsComponent } from './topic/groups/groups.component';
-import { GroupvisComponent } from './groupvis/groupvis.component';
 
 // New components (not sorted)
 import { SettingsComponent } from './settings/settings.component';
@@ -91,8 +93,6 @@ import { EditorComponent } from './editor/editor.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { StarratingComponent } from './starrating/starrating.component';
-import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
-import { CloseEditorDialogComponent } from './dialogs/closeeditor/closeeditor.component';
 import { LoginEmailDialogComponent } from './dialogs/loginemail/loginemail.component';
 import { TopicStagebarComponent } from './topic/stagebar/stagebar.component';
 
@@ -123,7 +123,6 @@ export function loadConfig(configService: ConfigService) {
 		GroupEditorComponent,
 		AddonePipe,
 		TimestampPipe,
-		GroupvisComponent,
 		//PadviewComponent,
 		UserprofileComponent,
 		ShareDialogComponent,
@@ -150,7 +149,8 @@ export function loadConfig(configService: ConfigService) {
 		TopicOverviewComponent,
 		TopicProposalComponent,
 		TopicGroupsComponent,
-		TopicStagebarComponent
+		TopicStagebarComponent,
+		ProposalDialogComponent
 	],
 	imports: [
 		BrowserModule,
@@ -199,7 +199,8 @@ export function loadConfig(configService: ConfigService) {
 		GroupWelcomeDialogComponent,
 		AddtopicDialogComponent,
 		CloseEditorDialogComponent,
-		LoginEmailDialogComponent
+		LoginEmailDialogComponent,
+		ProposalDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

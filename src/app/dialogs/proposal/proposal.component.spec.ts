@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GroupvisComponent } from './groupvis.component';
+import { ProposalDialogComponent } from './proposal.component';
 
-describe('GroupvisComponent', () => {
-  let component: GroupvisComponent;
-  let fixture: ComponentFixture<GroupvisComponent>;
+describe('ProposalDialogComponent', () => {
+  let component: ProposalDialogComponent;
+  let fixture: ComponentFixture<ProposalDialogComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GroupvisComponent ]
+      declarations: [ ProposalDialogComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(GroupvisComponent);
+    fixture = TestBed.createComponent(ProposalDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

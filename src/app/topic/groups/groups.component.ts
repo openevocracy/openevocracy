@@ -1,8 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { MatDialog } from "@angular/material";
 import { trigger, transition, group, animate, style, state } from '@angular/animations'
 import { forkJoin } from 'rxjs/observable/forkJoin';
+
+import { ProposalDialogComponent } from '../../dialogs/proposal/proposal.component';
 
 import { VisNetworkService, Data, DataSet, Node, Options, Edge } from 'ngx-vis';
 
@@ -54,6 +57,7 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private router: Router,
+		private dialog: MatDialog,
 		private utilsService: UtilsService,
 		private httpManagerService: HttpManagerService,
 		private translateService: TranslateService,
@@ -73,6 +77,17 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 		this.visNetworkService.off(this.visNetwork, 'hoverNode');
 		this.visNetworkService.off(this.visNetwork, 'blurNode');
 		this.visNetworkService.off(this.visNetwork, 'click');
+	}
+	
+	/**
+	 * @desc: Opens proposal dialog with currently selected proposal in hierachical structure
+	 */
+	private openProposalDialog(html: string): void {
+		// Get html from currently selected proposal
+		const options = { 'data': html, 'width': '90%' };
+		
+		// Open dialog
+		this.dialog.open(ProposalDialogComponent, options);
 	}
 	
 	/**

@@ -171,12 +171,23 @@ app.post('/json/activity/create', auth(), activities.create);
  * /unmate - user ends mate relation
 */
 
-// ###############
-// ### D O C S ###
-// ###############
+// #################
+// ### T O P I C ###
+// #################
 
 // @desc: Get detailed information about topic description pad
 app.get('/json/topic/editor/:id', auth(), pads.getPadTopicDetails);
+
+/* Group vis */
+
+// @desc: Get group vis data to visualize topic hierarchy
+app.get('/json/groupvis/:id', auth(), topics.groupvis.query);
+
+// @desc: Get details about specific proposal
+app.get('/json/groupvis/proposal/:id', auth(), topics.groupvis.getProposal);
+
+// @desc: Get details about specific group
+app.get('/json/groupvis/group/:id', auth(), topics.groupvis.getGroup);
 
 // ##################
 // ### G R O U P  ###
@@ -252,17 +263,6 @@ app.get('/json/group/ratings/:id', auth(), groups.ratings.getMembersRatings);
 
 // @desc: Store a new rating value
 app.post('/json/ratings/rate', auth(), groups.ratings.rate);
-
-/* Group vis */
-
-// @desc: Get group vis data to visualize topic hierarchy
-app.get('/json/groupvis/:id', auth(), groups.groupvis.query);
-
-// @desc: Get details about specific proposal
-app.get('/json/groupvis/proposal/:id', auth(), groups.groupvis.getProposal);
-
-// @desc: Get details about specific group
-app.get('/json/groupvis/group/:id', auth(), groups.groupvis.getGroup);
 
 /* Welcome dialog */
 

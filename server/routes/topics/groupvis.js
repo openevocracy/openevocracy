@@ -85,7 +85,7 @@ exports.getProposal = function(req, res) {
 			// Get html with docId
 			return pads.getPadHTMLAsync('proposal', pad.docId).then(function(html) {
 				// Return number of words and expiration timestamp
-				return { 'padId': pad._id, 'numWords': utils.countHtmlWords(html), 'expiration': pad.expiration, 'authorId': pad.ownerId };
+				return { 'padId': pad._id, 'html': html, 'numWords': utils.countHtmlWords(html), 'expiration': pad.expiration, 'authorId': pad.ownerId };
 			});
 	}).then(res.json.bind(res));
 };

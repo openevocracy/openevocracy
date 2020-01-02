@@ -15,7 +15,7 @@
 				
 				<span class="flex-spacer"></span>
 				
-				<button mat-raised-button color="warn" *ngIf="proposal">
+				<button mat-raised-button color="warn" *ngIf="proposal" (click)="openProposalDialog(proposal?.html)">
 					<span><fa-icon [icon]="faPlay"></fa-icon> {{ 'GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL' | translate }}</span>
 				</button>
 				<button mat-raised-button color="warn" *ngIf="group" [routerLink]="['/group', group.groupId]">
