@@ -26,7 +26,7 @@
 			<span><fa-icon [icon]="faPlay"></fa-icon> {{ 'TOPIC_BUTTON_GOTO_CURRENT_GROUP' | translate }}</span>
 		</button>
 		<button mat-button *ngIf="basicTopic?.stage == C.STAGE_PASSED" [ngClass]="{'active': activeTab == 'download'}" title="{{ 'TOPIC_BUTTON_RESULT_DOWNLOAD' | translate }}" (click)="downloadPdf()">
-			<span><fa-icon [icon]="faDownload"></fa-icon> Ergebnis</span>
+			<span><fa-icon [icon]="faDownload"></fa-icon> {{ 'TOPIC_BUTTON_RESULT_DOWNLOAD' | translate }}</span>
 		</button>
 	</div>
 </stagebar>

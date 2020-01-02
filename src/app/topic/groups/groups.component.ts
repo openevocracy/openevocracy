@@ -9,6 +9,8 @@ import { ProposalDialogComponent } from '../../dialogs/proposal/proposal.compone
 
 import { VisNetworkService, Data, DataSet, Node, Options, Edge } from 'ngx-vis';
 
+import { Group, Proposal } from '../../_models/topic/groupvis';
+
 import { UtilsService } from '../../_services/utils.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 
@@ -261,7 +263,7 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 			// We have a proposal
 			httpObservable = this.httpManagerService.get('/json/groupvis/proposal/'+node.id).subscribe((proposal) => {
 				// Show chosen proposal details
-				this.proposal = proposal;
+				this.proposal = new Proposal(proposal);
 				// Animate details in
 				this.detailStatus = true;
 			});
@@ -269,7 +271,7 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 			// We have a group
 			httpObservable = this.httpManagerService.get('/json/groupvis/group/'+node.id).subscribe((group) => {
 				// Show chosen group details
-				this.group = group;
+				this.group = new Group(group);
 				// Animate details in
 				this.detailStatus = true;
 			});

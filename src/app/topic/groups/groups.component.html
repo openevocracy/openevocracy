@@ -1,6 +1,6 @@
 <stagebar>
 	<div class="container">
-		<p class="default-text" [@fadeInOut]="descStatus" (@fadeInOut.done)="descAnimationDone($event)">Wähle ein Element ...</p>
+		<p class="default-text" [@fadeInOut]="descStatus" (@fadeInOut.done)="descAnimationDone($event)">{{ 'GROUPVIS_DETAIL_LABEL_CHOOSE' | translate }}</p>
 		<div [@fadeInOut]="detailStatus" (@fadeInOut.done)="detailAnimationDone($event)">
 			<div class="flex">
 				<div>
@@ -9,8 +9,12 @@
 						<span *ngIf="group">{{ 'GROUPVIS_GROUP_LABEL' | translate }} {{ group?.name }}</span>
 						
 					</h2>
-					<p *ngIf="proposal">Dieser Proposal enthält {{ proposal?.numWords }} Wörter, wurde von <a [routerLink]="['/user/profile', proposal?.authorId]">{{ proposal?.authorId }}</a> geschrieben und endete am {{ proposal?.expiration | date:'y-MM-dd' }}</p>
-					<p *ngIf="group">Diese Gruppe hat {{ group?.numMembers }} Mitglieder, diese schrieben bisher {{ group?.numWords }} Wörter und sie endet am {{ group?.expiration | date:'y-MM-dd' }}</p>
+					<p *ngIf="proposal">
+						{{ 'GROUPVIS_PROPOSAL_DETAIL_PREFIX' | translate:{ 'numWords': proposal?.numWords } }}
+						<a [routerLink]="['/user/profile', proposal?.authorId]">{{ proposal?.authorId }}</a>
+						{{ proposal?.textDetailSuffix | translate:{ 'expiration': proposal?.expiration | date:'y-MM-dd' } }}
+					</p>
+					<p *ngIf="group">{{ group?.textDetail | translate:{ 'numMembers': group?.numMembers, 'numWords': group?.numWords, 'expiration': group?.expiration | date:'y-MM-dd' } }}</p>
 				</div>
 				
 				<span class="flex-spacer"></span>
@@ -31,8 +35,8 @@
 		<div class="network-canvas" [visNetwork]="visNetwork" [visNetworkData]="visNetworkData" [visNetworkOptions]="visNetworkOptions" (initialized)="networkInitialized()"></div>
 	</div>
 	<div class="legend">
-		<p><span class="legend-color" [style.background-color]="meColor.background"></span> Meine Vorschläge/Gruppen</p>
-		<p><span class="legend-color" [style.background-color]="groupColor.background"></span> Andere Gruppen</p>
-		<p><span class="legend-color" [style.background-color]="proposalColor.background"></span> Andere Vorschläge</p>
+		<p><span class="legend-color" [style.background-color]="meColor.background"></span> {{ 'GROUPVIS_LEGEND_ME' | translate }}</p>
+		<p><span class="legend-color" [style.background-color]="groupColor.background"></span> {{ 'GROUPVIS_LEGEND_GROUPS' | translate }}</p>
+		<p><span class="legend-color" [style.background-color]="proposalColor.background"></span> {{ 'GROUPVIS_LEGEND_PROPOSALS' | translate }}</p>
 	</div>
 </div>

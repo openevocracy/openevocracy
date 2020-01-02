@@ -12,13 +12,13 @@
 		<span class="flex-spacer"></span>
 		
 		<button mat-button [ngClass]="{'active': activeTab == 'overview'}" [routerLink]="['/topic', topicId, 'overview']">
-			<span><fa-icon [icon]="faTh"></fa-icon> Übersicht</span>
+			<span><fa-icon [icon]="faTh"></fa-icon> {{ 'TOPIC_TOOLBAR_BUTTON_OVERVIEW' | translate }}</span>
 		</button>
 		<button mat-button *ngIf="(basicTopic?.stage >= C.STAGE_PROPOSAL || basicTopic?.stage == C.STAGE_REJECTED) && basicTopic?.hasProposal" [ngClass]="{'active': activeTab == 'proposal'}" [routerLink]="['/topic', topicId, 'proposal']">
-			<span><fa-icon [icon]="faFile"></fa-icon> Vorschlag</span>
+			<span><fa-icon [icon]="faFile"></fa-icon> {{ 'TOPIC_TOOLBAR_BUTTON_PROPOSAL' | translate }}</span>
 		</button>
 		<button mat-button *ngIf="basicTopic?.stage >= C.STAGE_CONSENSUS || basicTopic?.stage == C.STAGE_REJECTED" [ngClass]="{'active': activeTab == 'groups'}" title="{{ 'TOPIC_BUTTON_STRUCTURE' | translate }}" [routerLink]="['/topic', topicId, 'groups']">
-			<span><fa-icon [icon]="faSitemap"></fa-icon> Gruppen</span>
+			<span><fa-icon [icon]="faSitemap"></fa-icon> {{ 'TOPIC_TOOLBAR_BUTTON_GROUPS' | translate }}</span>
 		</button>
 	</div>
 </mat-toolbar>
