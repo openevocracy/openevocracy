@@ -18,7 +18,7 @@ const pads = require('../pads');
 const activities = require('../activities');
 
 function calculateDeadline(nextStage, prevDeadline, levelDuration) {
-    // define standard parameter
+    // Define standard parameter
     if(_.isUndefined(levelDuration))
         levelDuration = cfg.DURATION_LEVEL;
     
@@ -363,56 +363,7 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 		return topic_without_details_promise;
 	}
 }
-
-/*
- * @desc: Get whole topiclist
- */
-exports.getTopiclist = function(req, res) {
-	var userId = ObjectId(req.user._id);
-	
-	manageAndListTopicsAsync().then(function(topics) {
-		// Promise.map does not work above
-		Promise.map(topics, _.partial(appendTopicInfoAsync, _, userId, false)).then(res.json.bind(res));
-	}).catch(utils.isOwnError, utils.handleOwnError(res));
-};
-
-/*
- * @desc: Get a specific topiclist element
- */
-exports.getTopiclistElement = function(req, res) {
-	var topicId = ObjectId(req.params.id);
-	var userId = ObjectId(req.user._id);
-	
-	db.collection('topics').findOneAsync({'_id': topicId})
-		.then(manageTopicStateAsync).then(function(topic) {
-			return appendTopicInfoAsync(topic, userId, false);
-	}).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
-};
-
-exports.update = function(req, res) {
-    var tid = ObjectId(req.params.id);
-    var uid = ObjectId(req.user._id);
-    var topicNew = req.body;
-    
-    db.collection('topics').findOneAsync({ '_id': tid }).then(function(topic) {
-        // only the owner can update the topic
-        if(!topic)
-            return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
-        else if(!_.isEqual(topic.owner,uid))
-            return utils.rejectPromiseWithAlert(403, 'danger', 'TOPIC_NOT_AUTHORIZED_FOR_UPDATE');
-        else if(topic.stage != C.STAGE_SELECTION)
-            return utils.rejectPromiseWithAlert(403, 'danger', 'TOPIC_UPDATE_ONLY_IN_SELECTION_STAGE');
-        
-        return topic;
-    }).then(function(topic) {
-        topic.name = topicNew.name;
-        return db.collection('topics').updateAsync(
-                { '_id': tid }, { $set: _.pick(topic,'name') }, {}).return(topic);
-    }).then(manageTopicStateAsync)
-      .then(_.partial(appendTopicInfoAsync, _, uid, true))
-      .then(res.json.bind(res))
-      .catch(utils.isOwnError, utils.handleOwnError(res));
-};
+exports.appendTopicInfoAsync = appendTopicInfoAsync;
 
 function updateTopicStateAsync(topic,stageStartedEntryName) {
     return db.collection('topics').updateAsync(
@@ -421,129 +372,6 @@ function updateTopicStateAsync(topic,stageStartedEntryName) {
         {});
 }
 
-/*exports.query = function(req, res) {
-   var topicId = ObjectId(req.params.id);
-   var userId = ObjectId(req.user._id);
-   
-   db.collection('topics').findOneAsync({ '_id': topicId })
-      .then(manageTopicStateAsync)
-      .then(function(topic) {
-         if(_.isNull(topic))
-            return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
-         else
-            return appendTopicInfoAsync(topic, userId, true);
-      }).then(res.json.bind(res))
-      .catch(utils.isOwnError, utils.handleOwnError(res));
-};*/
-
-exports.create = function(req, res) {
-    
-   // Topic name is the only necessary request variable
-   var data = req.body;
-   var userId = ObjectId(req.user._id);
-   var topic = {};
-   topic.name = data.name;
-   
-   // reject empty topic names
-   if(_.isEmpty(topic.name)) {
-      utils.sendAlert(res, 400, 'danger', 'TOPIC_NAME_EMPTY');
-      return;
-   }
-   
-   // Only allow new topics if they do not exist yet
-   db.collection('topics').countAsync({'name': topic.name}).then(function(count) {
-      // Topic already exists
-      if(count > 0)
-         return utils.rejectPromiseWithAlert(409, 'danger', 'TOPIC_NAME_ALREADY_EXISTS');
-      
-      // Create topic
-      topic._id = ObjectId();
-      topic.owner = ObjectId(req.user._id);
-      topic.stage = C.STAGE_SELECTION; // start in selection stage
-      topic.level = 0;
-      topic.nextDeadline = calculateDeadline(topic.stage);
-      var create_topic_promise = db.collection('topics').insertAsync(topic);
-      
-      // Create description
-      /*var dpid = ObjectId(); // Create random pad id
-      var description = { 'pid': dpid, 'tid': topic._id };
-      var createTopicDescriptionPromise = db.collection('topic_descriptions').insertAsync(description);*/
-      
-      // Create pad
-      var pad = { 'topicId': topic._id, 'ownerId': userId, 'expiration': topic.nextDeadline };
-      var create_pad_promise = pads.createPadAsync(pad, 'topic_description');
-      
-      return Promise.join(create_topic_promise, create_pad_promise).return(topic);
-   }).then(function(topic) {
-      topic.votes = 0;
-      res.json(topic);
-   }).catch(utils.isOwnError,utils.handleOwnError(res));
-};
-
-exports.delete = function(req,res) {
-    var topicId = ObjectId(req.params.id);
-    var uid = ObjectId(req.user._id);
-    
-    db.collection('topics').findOneAsync({ '_id': topicId }, { 'owner': true, 'stage': true })
-    .then(function(topic) {
-        // only the owner can delete the topic
-        // and if the selection stage has passed, nobody can
-        if(!_.isEqual(topic.owner,uid) || topic.stage > C.STAGE_SELECTION)
-            return utils.rejectPromiseWithAlert(401, 'danger', 'TOPIC_NOT_AUTHORISIZED_FOR_DELETION');
-        
-        return Promise.join(
-            db.collection('topics').removeByIdAsync(topicId),
-            db.collection('topic_votes').removeAsync({'topicId': topicId}),
-            db.collection('groups').removeAsync({'tid': topicId}));
-    }).then(res.sendStatus.bind(res,200))
-      .catch(utils.isOwnError,utils.handleOwnError(res));
-};
-
-function countVotes(topicId) {
+/*function countVotes(topicId) {
     return db.collection('topic_votes').countAsync( {'topicId': topicId} );
-}
-
-/*
- * @desc: User votes for specific topic
- */
-exports.vote = function(req, res) {
-	// Transmitted topic vote
-	var topic_vote = {
-		'topicId': ObjectId(req.body.topicId),
-		'userId': ObjectId(req.body.userId)
-	};
-	
-	// Update the particular topic vote
-	// If it already exists: Just update to the same (= do nothing)
-	// If it does'nt exist: Insert
-	db.collection('topic_votes')
-		.updateAsync(topic_vote, topic_vote, {'upsert': true})
-		.then(function(update_result) { return { 'voted': true }; })
-		.then(res.json.bind(res));
-};
-
-/*
- * @desc: User unvotes for specific topic
- */
-exports.unvote = function(req, res) {
-	// Trasmitted topic vote
-	var topic_vote = {
-		'topicId': ObjectId(req.body.topicId),
-		'userId': ObjectId(req.body.userId)
-	};
-    
-	// Remove vote from database
-	db.collection('topic_votes').removeAsync(topic_vote)
-		.then(function(remove_result) { return {'voted': false}; })
-		.then(res.json.bind(res));
-};
-
-/*
- * @desc: Download finished topic document
- */
-exports.download = function(req, res) {
-	var topicId = req.params.id;
-	var filename = path.join(appRoot.path, 'files/documents', topicId+'.pdf');
-	//res.sendFile(filename);
-	res.download(filename);
-};
+}*/

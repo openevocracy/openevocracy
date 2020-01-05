@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
 
 import { BasicTopic } from '../_models/topic/basic';
-import { Topic } from '../_models/topic/topic';
 import { TopicToolbar } from '../_models/topic/toolbar';
 import { TopicOverview } from '../_models/topic/overview';
 import { TopicProposal } from '../_models/topic/proposal';
@@ -31,14 +30,6 @@ export class TopicService {
 	public addTopic(topicName: string) {
 		return this.httpManagerService.post('/json/topic/create', {'name': topicName});
 	}
-	
-	/*public getTopic(topicId): Observable<Topic> {
-		return this.httpManagerService.get('/json/topic/' + topicId);
-	}*/
-	
-	/*public getBasicTopicAsync(topicId: string): Observable<BasicTopic> {
-		return this.httpManagerService.get('/json/topic/manage/' + topicId);
-	}*/
 	
 	public getTopicToolbar(topicId: string):Observable<TopicToolbar> {
 		return this.httpManagerService.get('/json/topic/toolbar/' + topicId);

@@ -71,27 +71,16 @@ utils.checkConfig();
 // ### T O P I C S ###
 // ###################
 
-/*
- * Routes:
- *
- * /topiclist - Collection of topics with extended information
- * /topiclist/:id - Single topic list element with sparse information (currently not used)
- *
- * /topic - Collection of topics with extended information (currently not used)
- * /topic:id - Single topic with extended information
- */
-
 /* Topic List */
- 
-app.get('/json/topiclist', auth(), topics.manage.getTopiclist);
-app.get('/json/topiclist/:id', auth(), topics.manage.getTopiclistElement);
+
+app.get('/json/topiclist', auth(), topics.query.getTopiclist);
+//app.get('/json/topiclist/:id', auth(), topics.query.getTopiclistElement);
 
 /* Topic */
- 
-//app.get('/json/topic/:id', auth(), topics.manage.query);
-app.post('/json/topic/create', auth(), topics.manage.create);
-app.patch('/json/topic/:id', auth(), topics.manage.update);
-app.delete('/json/topic/:id', auth(), topics.manage.delete);
+
+app.post('/json/topic/create', auth(), topics.query.create);
+app.patch('/json/topic/:id', auth(), topics.query.update);
+app.delete('/json/topic/:id', auth(), topics.query.delete);
 
 // Manage topic before getting any information and return basic topic data
 app.get('/json/topic/basic/:id', auth(), topics.query.basic);
@@ -103,11 +92,11 @@ app.get('/json/topic/toolbar/:id', auth(), topics.query.toolbar);
 app.get('/json/topic/overview/:id', auth(), topics.query.overview);
 
 // @desc: Vote and unvote for specific topic from specific user
-app.post('/json/topic-vote', auth(), topics.manage.vote);
-app.post('/json/topic-unvote', auth(), topics.manage.unvote);
+app.post('/json/topic-vote', auth(), topics.query.vote);
+app.post('/json/topic-unvote', auth(), topics.query.unvote);
 
 // @desc: Download final document as pdf
-app.get('/file/topic/:id', auth(), topics.manage.download);
+app.get('/file/topic/:id', auth(), topics.query.download);
 
 /* Proposal */
 
