@@ -205,48 +205,45 @@ exports.update = function(req, res) {
 /**
  * @desc: Creates new topic
  */
-exports.create = function(req, res) {
-	
-	// Topic name is the only necessary request variable
-	var data = req.body;
-	var userId = ObjectId(req.user._id);
-	var topic = {};
-	topic.name = data.name;
-	
-	// Reject empty topic names
-	if(_.isEmpty(topic.name)) {
-		utils.sendAlert(res, 400, 'danger', 'TOPIC_NAME_EMPTY');
-		return;
-	}
+exports.create = async function(req, res) {
+   // Topic name is the only necessary request letiable
+   const data = req.body;
+   const userId = ObjectId(req.user._id);
+   const topic = {name: data.name};
 
-	// Only allow new topics if they do not exist yet
-	db.collection('topics').countAsync({'name': topic.name}).then(function(count) {
-		// Topic already exists
-		if(count > 0)
-		   return utils.rejectPromiseWithAlert(409, 'danger', 'TOPIC_NAME_ALREADY_EXISTS');
-		
-		// Create topic
-		topic._id = ObjectId();
-		topic.owner = ObjectId(req.user._id);
-		topic.stage = C.STAGE_SELECTION; // start in selection stage
-		topic.level = 0;
-		topic.nextDeadline = manage.calculateDeadline(topic.stage);
-		var create_topic_promise = db.collection('topics').insertAsync(topic);
-
-		// Create description
-		/*var dpid = ObjectId(); // Create random pad id
-		var description = { 'pid': dpid, 'tid': topic._id };
-		var createTopicDescriptionPromise = db.collection('topic_descriptions').insertAsync(description);*/
-		
-		// Create pad
-		var pad = { 'topicId': topic._id, 'ownerId': userId, 'expiration': topic.nextDeadline };
-		var create_pad_promise = pads.createPadAsync(pad, 'topic_description');
-		
-		return Promise.join(create_topic_promise, create_pad_promise).return(topic);
-	}).then(function(topic) {
-		topic.votes = 0;
-		res.json(topic);
-	}).catch(utils.isOwnError,utils.handleOwnError(res));
+   // reject empty topic names
+   if(_.isEmpty(topic.name)) {
+      return utils.sendAlert(res, 400, 'danger', 'TOPIC_NAME_EMPTY');
+   }
+   
+   // Only allow new topics if they do not exist yet
+   const count = await db.collection('topics').countAsync({'name': topic.name});
+   
+   // Topic already exists
+   if(count > 0) {
+      return utils.sendAlert(res, 409, 'danger', 'TOPIC_NAME_ALREADY_EXISTS');
+   }
+      
+   // Create topic
+   topic._id = ObjectId();
+   topic.owner = ObjectId(req.user._id);
+   topic.stage = C.STAGE_SELECTION; // start in selection stage
+   topic.level = 0;
+   topic.nextDeadline = manage.calculateDeadline(topic.stage);
+   await db.collection('topics').insertAsync(topic);
+   
+   // Create description
+   /*let dpid = ObjectId(); // Create random pad id
+   let description = { 'pid': dpid, 'tid': topic._id };
+   let createTopicDescriptionPromise = db.collection('topic_descriptions').insertAsync(description);*/
+   
+   // Create pad
+   const pad = { 'topicId': topic._id, 'ownerId': userId, 'expiration': topic.nextDeadline };
+   await pads.createPadAsync(pad, 'topic_description');
+   
+   topic.votes = 0;
+   
+   return res.json(topic);
 };
 
 /**
