@@ -84,8 +84,8 @@ exports.startPadServer = function(wss) {
  *    pad: contains meta information about the pad (i.e. owner and expiration date)
  */
 function checkOwnerAndExpiration(session, pad) {
-	var isOwner = (session.userId.toString() == pad.ownerId.toString());
-	var isExpired = (pad.expiration <= Date.now());
+	const isOwner = (session.userId.toString() == pad.ownerId.toString());
+	const isExpired = (pad.expiration <= Date.now());
 	return isOwner && !isExpired;
 }
 
@@ -96,8 +96,8 @@ function checkOwnerAndExpiration(session, pad) {
  *    pad: contains meta information about the pad (i.e. group members and expiration date)
  */
 function checkOwnerAndExpirationGroup(session, pad) {
-	var isOwner = utils.containsObjectId(pad.ownerIds, session.userId);
-	var isExpired = (pad.expiration <= Date.now());
+	const isOwner = utils.containsObjectId(pad.ownerIds, session.userId);
+	const isExpired = (pad.expiration <= Date.now());
 	return isOwner && !isExpired;
 }
 
@@ -192,23 +192,22 @@ function initializeAccessControl() {
  *    pad: meta information of the particular pad
  *    collection: suffix of collection to store pad in
  */
-function createPadAsync(pad, collection_suffix) {
+function createPadAsync(padData, collection_suffix) {
 	// Create new pad id and get define doc
-	var docId = ObjectId();
-	var doc = connection.get('docs_' + collection_suffix, docId);
+	const docId = ObjectId();
+	const doc = connection.get('docs_' + collection_suffix, docId);
 	
 	// Create doc and add meta information afterwards (in callback)
-	return new Promise( (resolve, reject) => {
-		doc.create([], richText.type.name, function(err) {
-			if (err) reject(err);
+	return new Promise((resolve, reject) => {
+		doc.create([], richText.type.name, async function(err) {
+			if (err) {
+				return reject(err);
+			}
 			// After doc was created, add meta information in pads collection
 			
 			// FIXME why is _id of document stored as string in mongo?
-			db.collection('pads_' + collection_suffix).insertAsync(_.extend(pad, { 'docId': docId }))
-			.then(function(pad) {
-				// Return pad
-				resolve(pad);
-			});
+			const pad = await db.collection('pads_' + collection_suffix).insertAsync(_.extend(padData, { 'docId': docId }));
+			resolve(pad);
 		});
 	});
 }
@@ -221,39 +220,36 @@ exports.createPadAsync = createPadAsync;
  *    collection: pad meta collection
  *    padId: pad id of specific pad
  */
-function getPadDetails(collection, padId) {
+async function getPadDetails(collection, padId) {
 	// Get pad meta information
-	var pad_promise = db.collection(collection).findOneAsync({ '_id': padId });
-	
+	const pad = await db.collection(collection).findOneAsync({ '_id': padId });
 	// Get topic id as source (for "back" button) and topic name
-	var topic_name_promise = pad_promise.then(function(pad) {
-		return db.collection('topics').findOneAsync({'_id': pad.topicId}, { 'name': true });
-	});
-	
+	const topic = await db.collection('topics').findOneAsync({'_id': pad.topicId}, { 'name': true });
+
 	// Return pad meta information including topic name
-	return Promise.join(pad_promise, topic_name_promise).spread(function(pad, topic) {
-		return { 'docId': pad.docId, 'title': topic.name, 'topicId': pad.topicId, 'deadline': pad.expiration };
-	});
+	return { 'docId': pad.docId, 'title': topic.name, 'topicId': pad.topicId, 'deadline': pad.expiration };
 }
 
 /*
  * @desc: Gets more information for topic description pad
  */
-exports.getPadTopicDetails = function(req, res) {
-	var padId = ObjectId(req.params.id);
-	var collection = 'pads_topic_description';
+exports.getPadTopicDetails = async function(req, res) {
+	const padId = ObjectId(req.params.id);
+	const collection = 'pads_topic_description';
 	
-	getPadDetails(collection, padId).then(res.send.bind(res));
+	const pad = await getPadDetails(collection, padId);
+	res.send(pad);
 };
 
 /*
  * @desc: Gets more information for proposal pad
  */
-exports.getPadProposalDetails = function(req, res) {
-	var padId = ObjectId(req.params.id);
-	var collection = 'pads_proposal';
+exports.getPadProposalDetails = async function(req, res) {
+	const padId = ObjectId(req.params.id);
+	const collection = 'pads_proposal';
 	
-	getPadDetails(collection, padId).then(res.send.bind(res));
+	const pad = await getPadDetails(collection, padId);
+	res.send(pad);
 };
 
 /*
@@ -277,17 +273,21 @@ function queryViewAsync(collection_suffix, padId) {
 /*
  * @desc: Query information about proposal for simple view
  */
-exports.getPadProposalView = function(req, res) {
-	var padId = ObjectId(req.params.id);
-	queryViewAsync('proposal', padId).then(res.json.bind(res));
+exports.getPadProposalView = async function(req, res) {
+	const padId = ObjectId(req.params.id);
+	
+	const view = await queryViewAsync('proposal', padId);
+	res.json(view);
 };
 
 /*
  * @desc: Query information about group for simple view
  */
-exports.getPadGroupView = function(req, res) {
-	var padId = ObjectId(req.params.id);
-	queryViewAsync('group', padId).then(res.json.bind(res));
+exports.getPadGroupView = async function(req, res) {
+	const padId = ObjectId(req.params.id);
+	
+	const view = await queryViewAsync('group', padId);
+	res.json(view);
 };
 
 /*
@@ -301,17 +301,19 @@ function getPadHTMLAsync(collection_suffix, docId) {
 	// TODO: Do not call this function anytime when opening a topic. Instead, if connection is disconnected, store html in pad meta. Always just read html meta data from pad to show contents in topic.
 	
 	// Connect to the particular pad
-	var doc = connection.get('docs_'+collection_suffix, docId);
+	const doc = connection.get('docs_'+collection_suffix, docId);
 	
 	// Fetch document as promise and assemble html
 	return new Promise( (resolve, reject) => {
 		doc.fetch(function(err) {
-			if (err) reject(err);
+			if (err) {
+				return reject(err);
+			}
 			
 			// Use quill delta converter to get html from deltas
-			var cfg = {};
-			var converter = new QuillDeltaToHtmlConverter(doc.data.ops, cfg);
-			var html = converter.convert();
+			const cfg = {};
+			const converter = new QuillDeltaToHtmlConverter(doc.data.ops, cfg);
+			const html = converter.convert();
 			resolve(html);
 		});
 	});
@@ -326,7 +328,7 @@ exports.getPadHTMLAsync = getPadHTMLAsync;
  */
 exports.getPadPDFAsync = function(html) {
 	console.log('getPadPDFAsync', html);
-	var pdfConvertAsync = Promise.promisify(pdf.convert);
+	const pdfConvertAsync = Promise.promisify(pdf.convert);
 	
 	return pdfConvertAsync({'html': html})
 		.then(function(result) {
@@ -336,7 +338,7 @@ exports.getPadPDFAsync = function(html) {
 		   result.toBuffer(_.partial(bluebirdCallback,undefined));
 		}
 		
-		var toBufferAsync = Promise.promisify(toBufferWrapper);
+		const toBufferAsync = Promise.promisify(toBufferWrapper);
 		return toBufferAsync();
 	});
 };

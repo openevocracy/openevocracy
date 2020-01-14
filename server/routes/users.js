@@ -503,9 +503,7 @@ function getEmailNotifyStatusAsync(userId, entityId) {
 
 	// Get status (null if not exists, true if notify is enabled, false if disabled)
 	return db.collection('mail_notify').findOneAsync(query)
-		.then(function(notify) {
-			return (_.isNull(notify) ? null : notify.status);
-		});
+		.then(notify => (_.isNull(notify) ? null : notify.status));
 }
 exports.getEmailNotifyStatusAsync = getEmailNotifyStatusAsync;
 
