@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { trigger, style, animate, transition, state } from '@angular/animations';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
 import { UserService } from '../../_services/user.service';
+import { GroupService } from '../../_services/group.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 
 import * as _ from 'underscore';
@@ -31,7 +33,8 @@ export class GroupMembersComponent implements OnInit {
 	public chosenMemberId;
 	public memberArray;
 	public members = {};
-	public isLastGroup;
+	public isLastGroup: boolean = false;
+	public isExpired: boolean = false;
 	public animationState = 'show';
 	
 	public faUser = faUser;
@@ -48,6 +51,7 @@ export class GroupMembersComponent implements OnInit {
 	constructor(
 		private router: Router,
 		private userService: UserService,
+		private groupService: GroupService,
 		private httpManagerService: HttpManagerService
 	) {
 		// Get user id from user service
@@ -61,25 +65,40 @@ export class GroupMembersComponent implements OnInit {
 		// Get current groupId
 		this.groupId = this.router.url.split('/')[2];
 		
-		// Get members
-		this.httpManagerService.get('/json/group/members/' + this.groupId).subscribe((res) => {
+		// Get group from group service cache
+		const group = this.groupService.getBasicGroupFromCache(this.groupId);
+		
+		// If group is last group or is expired, don't show ratings
+		this.isLastGroup = group.isLastGroup;
+		this.isExpired = group.isExpired;
+		
+		// Get array of member ids
+		this.memberArray = group.members;
+		
+		// Define members as object, where keys are userIds
+		_.each(this.memberArray, (member) => {
+			// Define members as object, key is userId
+			this.members[member.userId] = member;
+		});
+		
+		// If we are in last group or if document is expired, return here
+		if (this.isLastGroup || this.isExpired)
+			return;
+		
+		// Extend by member ratings
+		this.groupService.getMembersRatings(this.groupId).subscribe((membersRatings) => {
 			
-			// Get array of member ids
-			this.memberArray = res.members;
-			
-			// Define members as object, where keys are userIds and add labels to rating
+			// Add labels to rating
 			_.each(this.memberArray, (member) => {
+				// Get ratings for current member
+				const memberRatings = _.findWhere(membersRatings, { 'ratedUserId': member.userId });
+				
 				// Add label and tooltip to ratings array
-				member.ratings = _.map(member.ratings, (rating) => {
+				member.ratings = _.map(memberRatings.ratings, (rating) => {
 					const labels = _.findWhere(this.ratingLabels, { 'type': rating.type });
 					return _.extend(rating, labels);
 				});
-				// Define members as object, key is userId
-				this.members[member.userId] = member;
 			});
-			
-			// If group is last group, don't show ratings
-			this.isLastGroup = res.isLastGroup;
 		});
 	}
 	

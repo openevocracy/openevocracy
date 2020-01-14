@@ -1,17 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
-import { AlertService } from '../_services/alert.service';
 import { ConnectionAliveService } from '../_services/connection.service';
-import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
 import { EditorService } from '../_services/editor.service';
-import { ModalService } from '../_services/modal.service';
-import { CloseeditorModalService } from '../_services/modal.closeeditor.service';
+
+import { CloseEditorDialogComponent } from '../dialogs/closeeditor/closeeditor.component';
 
 import * as sharedb from 'sharedb/lib/client';
 import * as richText from 'rich-text';
@@ -31,21 +29,20 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 	styleUrls: ['./editor.component.scss']
 })
 export class EditorComponent implements OnInit, OnDestroy {
-	public docId: string;
 	public title: string;
 	public saved: boolean = true;
 	public placeholder: string;
-	public padId: string;
 	public userId: string;
 	public topicId: string;
 	public classColEditor;
 	public quillModules;
-	public quillEditor;
+	public editor;
 	public userToken: string;
-	public type: string;
 	public deadlineInterval;
 	public padSocket;
-	public modalSubscription: Subscription;
+	
+	public connectionLostSubscription;
+	public connectionReconnectedSubscription;
 	
 	private doc;
 	
@@ -53,20 +50,15 @@ export class EditorComponent implements OnInit, OnDestroy {
 
 	constructor(
 		protected snackBar: MatSnackBar,
-		protected alertService: AlertService,
 		protected router: Router,
-		protected activatedRoute: ActivatedRoute,
-		protected modalService: ModalService,
-		protected closeeditorModalService: CloseeditorModalService,
-		protected httpManagerService: HttpManagerService,
 		protected userService: UserService,
 		protected translateService: TranslateService,
 		protected connectionAliveService: ConnectionAliveService,
-		protected editorService: EditorService
+		protected editorService: EditorService,
+		protected dialog: MatDialog
 	) {
 		this.userId = this.userService.getUserId();
 		this.userToken = this.userService.getToken();
-		this.type = this.router.url.split('/')[1];
 		
 		// Set quill editor options
 		this.quillModules = {
@@ -81,48 +73,36 @@ export class EditorComponent implements OnInit, OnDestroy {
 			]
 		}
 		
-		// Modal
-		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe((close) => {
-			// Close modal
-			this.modalService.close();
-			
-			// Navigate to source
-			if (close)
-				this.router.navigate(['/topic', this.topicId]);
-		});
-		
 		// Listen to connection lost event
-		this.connectionAliveService.connectionLost.subscribe((res) => {
+		this.connectionLostSubscription = this.connectionAliveService.connectionLost.subscribe((res) => {
+			console.log('diconnect editor');
 			// If connection is lost, close pad socket connection
 			if (this.padSocket)
 				this.padSocket.close();
 		});
 		
 		// Listen to connection reconnected event
-		this.connectionAliveService.connectionReconnected.subscribe((res) => {
+		this.connectionReconnectedSubscription = this.connectionAliveService.connectionReconnected.subscribe((res) => {
+			console.log('reconnect editor');
 			// If connection is lost, reconnect pad socket
-			this.initializePadSocket(this.docId);
+			this.initializePadSocket();
 		});
 	}
 	
-	ngOnInit() {
-		// Set and translate placeholder
-		let key = (this.type == 'topic') ? "EDITOR_PLACEHOLDER_TOPIC_DESCRIPTION" : "";
-		key = (this.type == 'proposal') ? "EDITOR_PLACEHOLDER_PROPOSAL" : key;
-		this.translatePlaceholder(key);
-	}
+	ngOnInit() { }
 	
 	ngOnDestroy() {
 		// Close pad socket
 		if (this.padSocket)
 			this.padSocket.close();
-			
-		// Unsubscribe to avoid memory leak
-		this.modalSubscription.unsubscribe();
 		
 		// Stop countdown
 		if (this.deadlineInterval)
 			clearInterval(this.deadlineInterval);
+			
+		// Unsubscribe from event emitter
+		this.connectionLostSubscription.unsubscribe();
+		this.connectionReconnectedSubscription.unsubscribe();
 	}
 	
 	protected translatePlaceholder(key) {
@@ -139,49 +119,37 @@ export class EditorComponent implements OnInit, OnDestroy {
 		$('.ql-editor').attr('contenteditable', 'false').hide();
 	}
 	
-	public editorCreated(editor) {
+	/**
+	 * @desc: Initializes basic stuff for quill editor
+	 */
+	public initializeEditor(editor) {
+		
 		// Disable editor body
 		this.disableEdit();
+		
+		// Set and translate placeholder
+		this.translatePlaceholder(editor.placeholder);
 		
 		// Bring toolbar to mat-toolbar
 		$(".ql-toolbar").prependTo("#toolbar");
 		
 		// Set quill editor
-		this.quillEditor = editor;
+		this.editor = editor;
 		
-		// Get additional information and initalize socket
-		this.activatedRoute.params.subscribe((params: Params) => {
-			this.padId = params.id;
-			
-			// Register saved status of editor in editor service
-			this.editorService.setIsSaved(this.padId, true);
-			
-			this.httpManagerService.get('/json' + this.router.url).subscribe(res => {
-				this.title = res.title;
-				this.topicId = res.topicId;
-				
-				// Check if document is expired
-				if (Date.now() <= res.deadline) {
-					// If not, initialize countdown
-					this.initCountdown(res.deadline);
-				} else {
-					// If it is expired, switch to view
-					this.redirectToView();
-				}
-
-				// Initialize socket
-				this.initializePadSocket(res.docId);
-			});
-		});
+		// Register saved status of editor in editor service
+		this.editorService.setIsSaved(editor.padId, true);
+		
+		// Initialize socket
+		this.initializePadSocket();
+		
+		// Initialize countdown
+		this.initCountdown(this.editor.deadline);
 	}
 	
 	/**
 	 * @desc: Create pad socket and sharedb connection
 	 */
-	protected initializePadSocket(docId) {
-		// Get docId from this or from inheriting component
-		this.docId = docId;
-		
+	private initializePadSocket() {
 		// Register sharedb richt text type
 		sharedb.types.register(richText.type);
 
@@ -196,37 +164,34 @@ export class EditorComponent implements OnInit, OnDestroy {
 			const connection = new sharedb.Connection(this.padSocket);
 			
 			// Create local Doc instance
-			const doc = connection.get(this.getCollectionFromURL(), docId);
+			const doc = connection.get(this.editor.type, this.editor.docId);
 			this.doc = doc;
 			
 			// Subscribe to specific doc
 			doc.subscribe((err) => {
 				if (err) throw err;
-				
-				// Get quill
-				const quill = this.quillEditor;
 	
 				// Set quill contents from doc
-				quill.setContents(doc.data);
+				this.editor.setContents(doc.data);
 	
 				// On text change, send changes to ShareDB
-				quill.on('text-change', function(delta, oldDelta, source) {
+				this.editor.on('text-change', (delta, oldDelta, source) => {
 					if (source !== 'user') return;
-					doc.submitOp(delta, {source: quill});
+					doc.submitOp(delta, { 'source': this.editor });
 				});
 				
 				// Define a debounced version of setSaved function
 				var lazySetSaved = _.debounce(this.setSaved.bind(this), 1000);
 	
 				// Is called when a operation was applied
-				doc.on('op', function(op, source) {
+				doc.on('op', (op, source) => {
 					// If source is me, set saved and return
-					if (source === quill) {
+					if (source === this.editor) {
 						lazySetSaved();
 						return;
 					}
 					// If source is server, apply operation
-					quill.updateContents(op);
+					this.editor.updateContents(op);
 				});
 			});
 
@@ -235,28 +200,30 @@ export class EditorComponent implements OnInit, OnDestroy {
 				//console.log(event);
 			};
 	
+			// Enable edit again
 			this.enableEdit();
 		};
-	}
-	
-	private getCollectionFromURL() {
-		let key = this.router.url.split("/")[1];
-		if (key == "topic")
-			key = 'topic_description'
-		return 'docs_'+key;
 	}
 	
 	/**
 	 * @desc: Closes the editor
 	 */
 	public closeEditor() {
-		if (!this.editorService.isSaved(this.padId)) {
-			this.modalService.open({});
+		// If editor is fully saved, navigate to topic
+		if (this.editorService.isSaved(this.editor.padId)) {
+			this.router.navigate(['/topic', this.topicId]);
 			return;
 		}
 		
-		// Navigate to topic
-		this.router.navigate(['/topic', this.topicId]);
+		// If editor is not fully saved, redirect open dialog and ask if user really wants to close the editor
+		const dialogRef = this.dialog.open(CloseEditorDialogComponent, { 'minWidth': '300px' });
+		
+		// Subscribe to response from dialog
+		dialogRef.componentInstance.onSubmit.subscribe((res) => {
+			// If user really wants to leave, navigate to source
+			if (res.isLeave)
+				this.router.navigate(['/topic', this.topicId]);
+   	});
 	}
 	
 	/**
@@ -264,7 +231,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 	 */
 	protected setSaved() {
 		this.saved = true;  // Important for template
-		this.editorService.setIsSaved(this.padId, true);
+		this.editorService.setIsSaved(this.editor.padId, true);
 	}
 	
 	/**
@@ -277,26 +244,23 @@ export class EditorComponent implements OnInit, OnDestroy {
 			
 		// Set unsaved text
 		this.saved = false;  // Important for template
-		this.editorService.setIsSaved(this.padId, false);
-	}
-	
-	private redirectToView() {
-		if(this.type == 'topic')
-			this.router.navigate(['/topic', this.topicId]);
-		else if (this.type == 'proposal' || this.type == 'group')
-			this.router.navigate(['/'+this.type+'/view', this.padId]);
+		this.editorService.setIsSaved(this.editor.padId, false);
 	}
 	
 	/*
 	 * @desc: Initialize timer and redirect from editor to view if deadline is over
 	 */
-	protected initCountdown(deadline) {
-		var seconds = 0;
+	private initCountdown(deadline) {
+		let delta = deadline - Date.now();
+		
+		// Safely exit here, when deadline is over
+		if (delta <= 0)
+			return;
 		
 		// Run callback every second
 		this.deadlineInterval = setInterval(function() {
-			seconds++;
-			let delta = deadline - Date.now();
+			delta = deadline - Date.now();
+			const seconds = Math.floor(delta/1000);
 			
 			// If less than 2 minutes (120000ms) left, show time remaining in snackbar every 10 seconds
 			if (delta > 0 && delta <= 120000 && seconds % 10 == 0) {
@@ -324,10 +288,11 @@ export class EditorComponent implements OnInit, OnDestroy {
 				});
 			}
 			
-			// If countdown has finished, stop interval and redirect to view
+			// If countdown has finished, stop interval and update view
 			if (delta <= 0) {
 				clearInterval(this.deadlineInterval);
-				this.redirectToView();
+				// Update view, this functions needs to be implemented in all child components
+				this.updateView();
 			}
 		}.bind(this), 1000);
 	}

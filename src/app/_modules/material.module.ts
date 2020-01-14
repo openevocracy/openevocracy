@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 
+import { MatPaginatorI18nService } from '../_services/mat-paginator-i18n.service';
+
 import {
 	MatButtonModule,
 	MatFormFieldModule,
@@ -16,7 +18,11 @@ import {
 	MatDialogModule,
 	MatSlideToggleModule,
 	MatSelectModule,
-	MatBadgeModule
+	MatBadgeModule,
+	MatCheckboxModule,
+	MatExpansionModule,
+	MatPaginatorModule,
+	MatPaginatorIntl
 } from '@angular/material';
 
 @NgModule({
@@ -36,7 +42,10 @@ import {
 		MatDialogModule,
 		MatSlideToggleModule,
 		MatSelectModule,
-		MatBadgeModule
+		MatBadgeModule,
+		MatCheckboxModule,
+		MatExpansionModule,
+		MatPaginatorModule
 	],
 	exports: [
 		MatButtonModule,
@@ -54,7 +63,13 @@ import {
 		MatDialogModule,
 		MatSlideToggleModule,
 		MatSelectModule,
-		MatBadgeModule
+		MatBadgeModule,
+		MatCheckboxModule,
+		MatExpansionModule,
+		MatPaginatorModule
+	],
+	providers: [
+		{ provide: MatPaginatorIntl, useClass: MatPaginatorI18nService }
 	],
 	entryComponents: [
 		

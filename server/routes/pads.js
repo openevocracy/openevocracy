@@ -342,3 +342,12 @@ exports.getPadPDFAsync = function(html) {
 		return toBufferAsync();
 	});
 };
+
+/**
+ * @desc: 
+ */
+exports.addHtmlToPadAsync = function(collection_suffix, pad) {
+	return getPadHTMLAsync(collection_suffix, pad.docId).then(function(html) {
+		return _.extend(pad, {'html': html});
+	});
+}

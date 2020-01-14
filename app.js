@@ -24,10 +24,10 @@ const users = require('./server/routes/users');
 const topics = require('./server/routes/topics');
 const groups = require('./server/routes/groups');
 const forums = require('./server/routes/forums');
-const proposals = require('./server/routes/proposals');
 const tests = require('./server/routes/tests');
 const pads = require('./server/routes/pads');
 const activities = require('./server/routes/activities');
+const socialnet = require('./server/routes/socialnet');
 
 // Set passport strategy
 const strategy = users.getStrategy();
@@ -51,7 +51,7 @@ app.use(express.static(distPath));
 const job = new CronJob({
 	cronTime: '*/'+cfg.CRON_INTERVAL+' * * * *',
 	onTick: function() {
-		topics.manageAndListTopicsAsync().then(function(topics) {
+		topics.manage.manageAndListTopicsAsync().then(function(topics) {
 			// FIXME: An error could occur if i18n and mail initialization is not ready when cronjob runs for the first time
 			_.map(topics, mail.sendTopicReminderMessages); // Promise.map does not work above
 		});
@@ -71,37 +71,46 @@ utils.checkConfig();
 // ### T O P I C S ###
 // ###################
 
-/*
- * Routes:
- *
- * /topiclist - Collection of topics with extended information
- * /topiclist/:id - Single topic list element with sparse information (currently not used)
- *
- * /topic - Collection of topics with extended information (currently not used)
- * /topic:id - Single topic with extended information
- */
+/* Topic List */
 
-/*
- * @desc: Get whole topiclist or specific element from topic list
- */
-app.get('/json/topiclist', auth(), topics.getTopiclist);
-app.get('/json/topiclist/:id', auth(), topics.getTopiclistElement);
+app.get('/json/topiclist', auth(), topics.query.getTopiclist);
+//app.get('/json/topiclist/:id', auth(), topics.query.getTopiclistElement);
 
-/*
- * @desc: Get, create, update and delete topic
- */
-app.get('/json/topic/:id', auth(), topics.query);
-app.post('/json/topic/create', auth(), topics.create);
-app.patch('/json/topic/:id', auth(), topics.update);
-app.delete('/json/topic/:id', auth(), topics.delete);
+/* Topic */
+
+app.post('/json/topic/create', auth(), topics.query.create);
+app.patch('/json/topic/:id', auth(), topics.query.update);
+app.delete('/json/topic/:id', auth(), topics.query.delete);
+
+// Manage topic before getting any information and return basic topic data
+app.get('/json/topic/basic/:id', auth(), topics.query.basic);
+
+// Get topic toolbar data
+app.get('/json/topic/toolbar/:id', auth(), topics.query.toolbar);
+
+// Get topic overview data
+app.get('/json/topic/overview/:id', auth(), topics.query.overview);
 
 // @desc: Vote and unvote for specific topic from specific user
-app.post('/json/topic-vote', auth(), topics.vote);
-app.post('/json/topic-unvote', auth(), topics.unvote);
+app.post('/json/topic-vote', auth(), topics.query.vote);
+app.post('/json/topic-unvote', auth(), topics.query.unvote);
 
 // @desc: Download final document as pdf
-app.get('/file/topic/:id', auth(), topics.download);
+app.get('/file/topic/:id', auth(), topics.query.download);
 
+/* Proposal */
+
+// @desc: Create new proposal
+app.post('/json/topic/proposal/create', auth(), topics.proposals.create);
+
+// @desc: Get proposal doc for editor and html snapshot
+app.get('/json/topic/proposal/:id', auth(), topics.query.proposal);
+
+// @desc: Get detailed information about proposal pad
+//app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
+
+// @desc: Get proposal information
+//app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
 
 // ###########################
 // ### A C T I V I T I E S ###
@@ -119,59 +128,74 @@ app.get('/file/topic/:id', auth(), topics.download);
 /*
  * @desc: Get whole activity list
  */
-app.get('/json/activitylist', auth(), activities.getActivityList);
+//app.get('/json/activitylist', auth(), activities.getActivityList);
 
 /*
  * @desc: Get a user's activity list
  */
-app.get('/json/useractivitylist/:id', auth(), activities.getUserActivityList);
+app.get('/json/user/activitylist/:id', auth(), activities.getUserActivityList);
+
+/*
+ * @desc: Get the length of a user's activity list
+ */
+app.get('/json/user/activitylistlength/:id', auth(), activities.getUserActivityListLength);
 
 /*
  * @desc: Get, create and delete activities
  */
 app.get('/json/activity/:id', auth(), activities.query);
 app.post('/json/activity/create', auth(), activities.create);
-app.delete('/json/activity/:id', auth(), activities.delete);
+//app.delete('/json/activity/:id', auth(), activities.delete); //activities are now only deleted by the server
 
-// ###############
-// ### D O C S ###
-// ###############
+// #########################
+// ### S O C I A L N E T ### // TODO
+// #########################
+
+/*
+ * Routes:
+ *
+ * /follow - user follows another user
+ * /unfollow - user stops to follows another user
+ * /materequest - user sends a request to be mates with another user
+ * /unmate - user ends mate relation
+*/
+
+// #################
+// ### T O P I C ###
+// #################
 
 // @desc: Get detailed information about topic description pad
 app.get('/json/topic/editor/:id', auth(), pads.getPadTopicDetails);
 
-/*** Proposal ***/
+/* Group vis */
 
-// @desc: Create new proposal
-app.post('/json/proposal/create', auth(), proposals.create);
+// @desc: Get group vis data to visualize topic hierarchy
+app.get('/json/groupvis/:id', auth(), topics.groupvis.query);
 
-// @desc: Get detailed information about proposal pad
-app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
+// @desc: Get details about specific proposal
+app.get('/json/groupvis/proposal/:id', auth(), topics.groupvis.getProposal);
 
-// @desc: Get proposal information
-app.get('/json/proposal/view/:id', auth(), pads.getPadProposalView);
+// @desc: Get details about specific group
+app.get('/json/groupvis/group/:id', auth(), topics.groupvis.getGroup);
 
 // ##################
 // ### G R O U P  ###
 // ##################
 
 // @desc: Get detailed information about group pad
-app.get('/json/group/editor/:id', auth(), groups.query.editor);
+//app.get('/json/group/editor/:id', auth(), groups.query.editor);
 
 // @desc: Get group information
 app.get('/json/group/view/:id', auth(), pads.getPadGroupView);
 
 // @desc: Group main toolbar with topic and group title
-app.get('/json/group/toolbar/:id', auth(), groups.query.toolbar);
-
-// @desc: Group toolbar, showing members and their only state
-app.get('/json/group/memberbar/:id', auth(), groups.query.memberbar);
+app.get('/json/group/badges/:id', auth(), groups.query.badges);
 
 // @desc: Group online status of members
 app.get('/json/group/membersonline/:id', auth(), groups.query.onlineMembers);
 
 // @desc: Group members, including ratings and previous documents
-app.get('/json/group/members/:id', auth(), groups.query.groupMembers);
+app.get('/json/group/basic/:id', auth(), groups.query.getBasicGroup);
 
 /* Forum */
 
@@ -220,26 +244,25 @@ app.delete('/json/group/forum/comment/:id', auth(), forums.comment.delete);
 app.get('/json/chat/room/:id', auth(), chats.queryChatRoomMessages);
 
 // @desc: Send mail to all mentioned users
-app.post('/json/chat/mentioned/', auth(), chats.sendMailToMentionedUsers);
+app.post('/json/chat/mentioned/', auth(), chats.processMentionedUsers);
 
 /* Ratings */
 
-app.get('/json/ratings/count', auth(), groups.ratings.count);
-app.get('/json/ratings/:id', auth(), groups.ratings.query);
+app.get('/json/group/ratings/:id', auth(), groups.ratings.getMembersRatings);
 
 // @desc: Store a new rating value
 app.post('/json/ratings/rate', auth(), groups.ratings.rate);
 
-/* Group vis */
+/* Welcome dialog */
 
-// @desc: Get group vis data to visualize topic hierarchy
-app.get('/json/groupvis/:id', auth(), groups.groupvis.query);
+// @desc: Get welcome dialog status (already opened or not)
+app.get('/json/group/welcome/status/:id', auth(), groups.welcome.getWelcomeStatus);
 
-// @desc: Get details about specific proposal
-app.get('/json/groupvis/proposal/:id', auth(), groups.groupvis.getProposal);
+// @desc: Set welcome dialog status (already opened or not)
+app.post('/json/group/welcome/status', auth(), groups.welcome.setWelcomeStatus);
 
-// @desc: Get details about specific group
-app.get('/json/groupvis/group/:id', auth(), groups.groupvis.getGroup);
+// @desc: Get all information about group welcome dialog
+app.get('/json/group/welcome/:id', auth(), groups.welcome.getWelcomeData);
 
 // ###################
 // ###   A U T H   ###

@@ -63,9 +63,10 @@ exports.isOnline = isOnline;
 // POST /api/auth/login
 // @desc: logs in a user
 exports.login = async function(req, res) {
+	let email, password;
 	if (req.body.email && req.body.password) {
-		var email = req.body.email;
-		var password = req.body.password;
+		email = req.body.email;
+		password = req.body.password;
 	}
 	else {
 		utils.sendAlert(res, 400, 'danger', 'USER_FORM_NOT_FILLED');
@@ -163,7 +164,10 @@ exports.sendPassword = async function(req, res) {
 	utils.sendAlert(res, 200, 'info', 'USER_ACCOUNT_PASSWORD_RESET', { 'email': email });
 };
 
-// @desc: Register a new user
+/**
+ * @desc: Register a new user
+ * @route: POST /json/auth/register
+ */
 exports.register = function(req, res) {
 	var langKey = req.body.lang;
 

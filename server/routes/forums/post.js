@@ -21,65 +21,79 @@ exports.create = function(req, res) {
 	const threadId = ObjectId(body.threadId);
 	const forumId = ObjectId(body.forumId);
 	
-	// Define post
-	const postId = ObjectId();
-	const post = {
-		'_id': postId,
-		'html': body.html,
-		'threadId': threadId,
-		'forumId': forumId,
-		'authorId': authorId
-	};
-	
-	// Check if user is allowed to create a post
-	helper.isUserAuthorizedToCreateAsync(threadId, authorId).then((isAuthorized) => {
-		if(!isAuthorized)
-			return utils.rejectPromiseWithMessage(401, 'NOT_AUTHORIZED');
+	// Get group from forumId
+	db.collection('groups').findOneAsync({ 'forumId': forumId }).then((group) => {
+		
+		// If group is expired, promise is rejected
+		helper.isGroupExpiredAsync(group._id).then((isExpired) => {
 			
-		// Store post in database
-		const createPost_promise = db.collection('forum_posts').insertAsync(post);
-		
-		// Reopen thread if it was closed (just open it in any case) and set last activity
-		const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
-		const thread_promise = db.collection('forum_threads')
-			.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
-		
-		// Perform a lot of tasks, where group is necessary
-		const group_promise = db.collection('groups')
-			.findOneAsync({ 'forumId': forumId }).then((group) => {
-				
-				// Build link to thread
-				const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
-				
-				// Define parameter for email body
-				const bodyParams = [ groups.helper.generateMemberName(group._id, authorId), group.name, urlToThread+'#'+postId, urlToThread ];
-				
-				// Define email translation strings
-				const mail = {
-					'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
-					'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
-				};
-				
-				// Finally, send email to watching users, exept the author
-				const sendMail_promise = helper.sendMailToWatchingUsersAsync(threadId, authorId, mail);
-				
-				// Store visited status in database (badge and thread viewed)
-				const threadViewed = misc.threadVisited(group._id, threadId, authorId);
-				
-				return Promise.all([sendMail_promise, threadViewed]);
-		});
-		
-		// Add author to email notification for the related post
-		const notifyAddUser_promise = users.getEmailNotifyStatusAsync(authorId, threadId).then(function(status) {
-			// only if entry does not already exists (is null), otherwise the user has actively
-			// turned off notifications (and should not be bothered) or notifications are already enabled
-			return _.isNull(status) ? users.enableEmailNotifyAsync(authorId, threadId) : null;
-		});
-		
-		return Promise.all([createPost_promise, thread_promise, group_promise, notifyAddUser_promise])
-			.then(res.json.bind(res));
+			// If group is expired, reject promise
+			if (isExpired)
+				return utils.rejectPromiseWithMessage(403, 'GROUP_EXPIRED');
 	
-	}).catch(utils.isOwnError, utils.handleOwnError(res));
+			// Check if user is allowed to create a post
+			helper.isUserAuthorizedToCreateAsync(threadId, authorId).then((isAuthorized) => {
+				
+				// If user is not authorized
+				if(!isAuthorized)
+					return utils.rejectPromiseWithMessage(401, 'NOT_AUTHORIZED');
+					
+				// Define post
+				const postId = ObjectId();
+				const post = {
+					'_id': postId,
+					'html': body.html,
+					'threadId': threadId,
+					'forumId': forumId,
+					'authorId': authorId
+				};
+					
+				// Store post in database
+				const createPost_promise = db.collection('forum_posts').insertAsync(post);
+				
+				// Reopen thread if it was closed (just open it in any case) and set last activity
+				const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
+				const thread_promise = db.collection('forum_threads')
+					.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
+				
+				// Perform a lot of tasks, where group is necessary
+				const group_promise = db.collection('groups')
+					.findOneAsync({ 'forumId': forumId }).then((group) => {
+						
+						// Build link to thread
+						const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
+						
+						// Define parameter for email body
+						const bodyParams = [ groups.helper.generateMemberName(group._id, authorId), group.name, urlToThread+'#'+postId, urlToThread ];
+						
+						// Define email translation strings
+						const mail = {
+							'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
+							'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
+						};
+						
+						// Finally, send email to watching users, exept the author
+						const sendMail_promise = helper.sendMailToWatchingUsersAsync(threadId, authorId, mail);
+						
+						// Store visited status in database (badge and thread viewed)
+						const threadViewed = misc.threadVisited(group._id, threadId, authorId);
+						
+						return Promise.all([sendMail_promise, threadViewed]);
+				});
+				
+				// Add author to email notification for the related post
+				const notifyAddUser_promise = users.getEmailNotifyStatusAsync(authorId, threadId).then(function(status) {
+					// only if entry does not already exists (is null), otherwise the user has actively
+					// turned off notifications (and should not be bothered) or notifications are already enabled
+					return _.isNull(status) ? users.enableEmailNotifyAsync(authorId, threadId) : null;
+				});
+				
+				return Promise.all([createPost_promise, thread_promise, group_promise, notifyAddUser_promise])
+					.then(res.json.bind(res));
+			
+			}).catch(utils.isOwnError, utils.handleOwnError(res));
+		}).catch(utils.isOwnError, utils.handleOwnError(res));
+	});
 };
 
 /**

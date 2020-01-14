@@ -1,0 +1,10 @@
+/* Import variables */
+@import "~styles/variables";
+
+.mat-toolbar { border-bottom: 5px solid $grey400; height: 69px; }
+
+.mat-toolbar.stage-1 { /* Default */ }
+.mat-toolbar.stage0 { border-color: $blue400; }
+.mat-toolbar.stage1 { border-color: $orange400; }
+.mat-toolbar.stage2 { border-color: $red400; }
+.mat-toolbar.stage3 { border-color: $green400; }

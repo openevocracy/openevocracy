@@ -1,25 +1,28 @@
-<modal-closeeditor></modal-closeeditor>
-
 <mat-toolbar class="first-toolbar" color="primary">
 	<div class="flex container">
 		<div class="group-title">
 			<h1>{{ title }}</h1>
-			<p>{{ 'GROUP_SUBTITLE_1' | translate }} {{ expiration | date:'y-MM-dd' }} {{ 'GROUP_SUBTITLE_2' | translate }} {{ expiration | date:'HH:mm:ss' }} (<countdown [time]="expiration"></countdown>)</p>
+			<p><span *ngIf="!isExpired">{{ 'GROUP_SUBTITLE_1_FUTURE' | translate }}</span><span *ngIf="isExpired">{{ 'GROUP_SUBTITLE_1_PAST' | translate }}</span> {{ expiration | date:'y-MM-dd' }} {{ 'GROUP_SUBTITLE_2' | translate }} {{ expiration | date:'HH:mm:ss' }} <span *ngIf="!isExpired">(<countdown [time]="expiration"></countdown>)</span></p>
 		</div>
 		<span class="flex-spacer"></span>
 		
-		<button mat-button [matBadge]="editorBadge" matBadgeColor="warn" class="badge-transparent" [ngClass]="{'active': activeTab == 'editor'}" title="{{ 'GROUP_BUTTON_DOCUMENT' | translate }}" [routerLink]="['/group', groupId, 'editor']">
+		<button mat-button *ngIf="isMember && !isExpired" [matBadge]="editorBadge" matBadgeColor="warn" class="badge-transparent" [ngClass]="{'active': activeTab == 'editor'}" title="{{ 'GROUP_BUTTON_DOCUMENT' | translate }}" [routerLink]="['/group', groupId, 'editor']">
 			<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_BUTTON_DOCUMENT' | translate }}</span>
 		</button>
-		<button mat-button [matBadge]="chatBadge" matBadgeColor="warn" [ngClass]="{'active': activeTab == 'chat'}" title="{{ 'GROUP_BUTTON_CHAT' | translate }}" [routerLink]="['/group', groupId, 'chat']">
+		<button mat-button *ngIf="isExpired" [ngClass]="{'active': activeTab == 'document'}" title="{{ 'GROUP_BUTTON_DOCUMENT' | translate }}" [routerLink]="['/group', groupId, 'document']">
+			<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_BUTTON_DOCUMENT' | translate }}</span>
+		</button>
+		
+		<button mat-button *ngIf="isMember && !isExpired" [matBadge]="chatBadge" matBadgeColor="warn" [ngClass]="{'active': activeTab == 'chat'}" title="{{ 'GROUP_BUTTON_CHAT' | translate }}" [routerLink]="['/group', groupId, 'chat']">
 			<span><fa-icon [icon]="faComments"></fa-icon> {{ 'GROUP_BUTTON_CHAT' | translate }}</span>
 		</button>
 		<button mat-button [matBadge]="forumBadge" matBadgeColor="warn" [ngClass]="{'active': activeTab == 'forum'}" title="{{ 'GROUP_BUTTON_FORUM' | translate }}" [routerLink]="['/group', groupId, 'forum']">
 			<span><fa-icon [icon]="faComments"></fa-icon> {{ 'GROUP_BUTTON_FORUM' | translate }}</span>
 		</button>
-		<button mat-button [matBadge]="membersBadge" matBadgeColor="warn" class="badge-transparent" [ngClass]="{'active': activeTab == 'members'}" title="{{ 'GROUP_BUTTON_MEMBERS' | translate }}" [routerLink]="['/group', groupId, 'members']">
+		<button mat-button *ngIf="isMember" [matBadge]="membersBadge" matBadgeColor="warn" class="badge-transparent" [ngClass]="{'active': activeTab == 'members'}" title="{{ 'GROUP_BUTTON_MEMBERS' | translate }}" [routerLink]="['/group', groupId, 'members']">
 			<span><fa-icon [icon]="faUsers"></fa-icon> {{ 'GROUP_BUTTON_MEMBERS' | translate }}</span>
 		</button>
+		
 		<button mat-button title="{{ 'FORM_BUTTON_CLOSE' | translate }}" (click)="closeGroup()">
 			<span><fa-icon [icon]="faTimes"></fa-icon></span>
 		</button>

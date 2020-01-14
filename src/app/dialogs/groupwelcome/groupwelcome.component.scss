@@ -1,0 +1,6 @@
+/* Import variables */
+@import "~styles/variables";
+
+mat-dialog-content { padding-bottom: 1rem; }
+mat-expansion-panel-header { background-color: $grey300; }
+p.member-name { margin-top: 0; margin-bottom: 2rem; }

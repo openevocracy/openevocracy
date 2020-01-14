@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>{{ 'DIALOG_ADDTOPIC_TITLE' | translate }}</h2>
+
+<mat-dialog-content>
+	<form [formGroup]="addTopicForm" novalidate>
+		<mat-form-field>
+			<input matInput formControlName="topicName" type="text" [placeholder]="'DIALOG_ADDTOPIC_NAME_PLACEHOLDER' | translate:{ 'minLetters': minLetters }" required>
+		</mat-form-field>
+	</form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+	<button mat-raised-button color="primary" (click)="submit()" [disabled]="addTopicForm.invalid">
+			<span>{{ 'DIALOG_ADDTOPIC_BUTTON_CREATE' | translate }}</span>
+		</button>
+	<button mat-raised-button color="warn" (click)="close()">{{ 'FORM_BUTTON_CLOSE' | translate }}</button>
+</mat-dialog-actions>

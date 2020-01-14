@@ -16,58 +16,45 @@
 			<strong>{{ profileId }}</strong>
 		</mat-tab>
 		<mat-tab label="{{ 'PROFILE_TAB_TITLE_ACTIVITIES' | translate }}">
-			<!--div class="container">
-				<button mat-icon-button color="primary" (click)="addActivity($event)">
-					<fa-icon [icon]="faPlus"></fa-icon>
-				</button>
-			</div-->
-			<!--div class="container"-->
-				<mat-card *ngFor="let act of activityList" [ngClass]="'act'+act.type">
-					<mat-card-content>
-						<mat-card-title>{{act.timestamp | date: cfg.DATEFORMAT_DATETIME}}</mat-card-title>
-						
-						<div *ngIf="act.type == C.ACT_TOPIC_CREATE">
-							<p>{{'ACT_TOPIC_CREATE_STR' | translate}} {{act.targetId}}</p>
-						</div>
-						
-						<div *ngIf="act.type == C.ACT_PROPOSAL_CREATED">
-							<p>{{'ACT_PROPOSAL_CREATED_STR' | translate}} {{act.targetId}}</p>
-						</div>
-						
-						<div *ngIf="act.type == C.ACT_ELECTED_DELEGATE">
-							<p>{{'ACT_ELECTED_DELEGATE_STR' | translate}} {{act.targetId}}</p>
-						</div>
-						
-						<div *ngIf="act.type == C.ACT_DROP_OUT">
-							<p>{{'ACT_DROP_OUT_STR' | translate}} {{act.targetId}}</p>
-						</div>
-						
-						<div *ngIf="act.type == C.ACT_TOPIC_COMPLETE">
-							<p>{{'ACT_TOPIC_COMPLETE_STR' | translate}} {{act.targetId}}{{'ACT_TOPIC_COMPLETE_STR2' | translate}}</p>
-						</div>
-						
-						<div *ngIf="act.type == C.ACT_MENTIONED">
-							<p>{{'ACT_MENTIONED_STR' | translate}} {{act.targetId}}{{'ACT_MENTIONED_STR2' | translate}}</p>
-						</div>
-						
-						<div *ngIf="act.type == C.ACT_TOPIC_VOTE">
-							<p>{{'ACT_TOPIC_VOTE_STR' | translate}} {{act.targetId}}</p>
-						</div>
-						
-						<div *ngIf="act.type == C.ACT_TOPIC_UNVOTE">
-							<p>{{'ACT_TOPIC_UNVOTE_STR' | translate}} {{act.targetId}}{{'ACT_TOPIC_UNVOTE_STR2' | translate}}</p>
-						</div>
-					</mat-card-content>
+			<mat-paginator [length]="activityCount" [pageSize]="defaultPageSize" [pageSizeOptions]="[25, defaultPageSize, 100]" (page)="pageEvent($event)"></mat-paginator>
+			<div *ngFor="let act of activityList" [ngClass]="'act'+act.type" class="act">
+				
+				<div class="act-time">
+					<small>{{act.timestamp | date: cfg.DATEFORMAT_DATETIME}}</small>
+				</div>
+				
+				<div class="flex">
 					
-					<mat-card-footer>
-						<div>
-							<button mat-icon-button color="primary" (click)="remove($event, act._id)">
-								<fa-icon [icon]="faTrashAlt"></fa-icon>
-							</button>
-						</div>
-					</mat-card-footer>
-				</mat-card>
-			<!--/div-->
+					<div class="act-text">
+						<p *ngIf="act.type == C.ACT_TOPIC_CREATE">{{'ACT_TOPIC_CREATE_STR' | translate}} {{act.targetId}}</p>
+						<p *ngIf="act.type == C.ACT_PROPOSAL_CREATED">{{'ACT_PROPOSAL_CREATED_STR' | translate}} {{act.targetId}}</p>
+						<p *ngIf="act.type == C.ACT_ELECTED_DELEGATE">{{'ACT_ELECTED_DELEGATE_STR' | translate}} {{act.targetId}}</p>
+						<p *ngIf="act.type == C.ACT_DROP_OUT">>{{'ACT_DROP_OUT_STR' | translate}} {{act.targetId}}</p>
+						<p *ngIf="act.type == C.ACT_TOPIC_COMPLETE">{{'ACT_TOPIC_COMPLETE_STR' | translate}} {{act.targetId}}{{'ACT_TOPIC_COMPLETE_STR2' | translate}}</p>
+						<p *ngIf="act.type == C.ACT_MENTIONED">{{'ACT_MENTIONED_STR' | translate}} {{act.targetId}}{{'ACT_MENTIONED_STR2' | translate}}</p>
+						<p *ngIf="act.type == C.ACT_TOPIC_VOTE">{{'ACT_TOPIC_VOTE_STR' | translate}} {{act.targetId}}</p>
+						<p *ngIf="act.type == C.ACT_TOPIC_UNVOTE">{{'ACT_TOPIC_UNVOTE_STR' | translate}} {{act.targetId}}{{'ACT_TOPIC_UNVOTE_STR2' | translate}}</p>
+					</div>
+					
+					<span class="flex-spacer"></span>
+					
+					<!--<div>
+						<button mat-icon-button color="primary" (click)="setPrivacyLevel($event, C.ACT_PLVL_SELF)">
+							<fa-icon [icon]="faUserLock"></fa-icon>
+						</button>
+						<button mat-icon-button color="primary" (click)="setPrivacyLevel($event, C.ACT_PLVL_MATES)">
+							<fa-icon [icon]="faUserFriends"></fa-icon>
+						</button>
+						<button mat-icon-button color="primary" (click)="setPrivacyLevel($event, C.ACT_PLVL_FOLLOWERS_MATES)">
+							<fa-icon [icon]="faUsers"></fa-icon>
+						</button>
+						<button mat-icon-button color="primary" (click)="setPrivacyLevel($event, C.ACT_PLVL_ALL)">
+							<fa-icon [icon]="faGlobe"></fa-icon>
+						</button>
+					</div>-->
+					
+				</div>
+			</div>
 		</mat-tab>
 	</mat-tab-group>
 </div>

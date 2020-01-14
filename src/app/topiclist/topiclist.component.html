@@ -1,10 +1,8 @@
-<modal-addtopic></modal-addtopic>
-
 <mat-toolbar color="primary">
 	<div class="flex container">
 		<h1>Topics</h1>
 		<span class="flex-spacer"></span>
-		<button mat-button title="{{'TOPICLIST_BUTTON_ADD' | translate}}" (click)="openAddTopicModal($event)"><fa-icon [icon]="faPlusSquare"></fa-icon> {{"TOPICLIST_BUTTON_ADD" | translate}}</button>
+		<button mat-button title="{{ 'TOPICLIST_BUTTON_ADD' | translate }}" (click)="openAddTopicDialog($event)"><fa-icon [icon]="faPlusSquare"></fa-icon> {{ 'TOPICLIST_BUTTON_ADD' | translate}}</button>
 	</div>
 </mat-toolbar>
 

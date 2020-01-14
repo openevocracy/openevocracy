@@ -7,7 +7,7 @@
 </mat-toolbar>
 
 <div class="container" [@animation]="animationState">
-	<div *ngIf="isLastGroup" class="box box-rating">
+	<div *ngIf="!isLastGroup && !isExpired" class="box box-rating">
 		<div class="header">
 			<h3>{{ 'GROUP_MEMBERS_RATING_HEADING' | translate }}</h3>
 		</div>

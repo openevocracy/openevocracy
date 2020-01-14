@@ -8,7 +8,7 @@ import { SnackbarService } from '../_services/snackbar.service';
 	templateUrl: './secure.component.html',
 	styleUrls: ['./secure.component.scss']
 })
-export class SecureComponent implements OnInit {
+export class SecureComponent implements OnInit, OnDestroy {
 	
 	public startAliveTimeout;
 	public offline: boolean = false;
@@ -19,18 +19,19 @@ export class SecureComponent implements OnInit {
 	) {
 		// Start connection alive monitor after 10 seconds
 		this.startAliveTimeout = setTimeout(function() {
-			this.connectionAliveService.init();
+			if (!this.connectionAliveService.isInitialized)
+				this.connectionAliveService.init();
 		}.bind(this), 10000);
 	}
 	
 	ngOnInit() {
 		// Listen to connection lost event
-		this.connectionAliveService.connectionLost.subscribe((res) => {
+		this.connectionAliveService.connectionLost.subscribe((retry) => {
 			// If the user logs in in another browser before the timeout has finished, things go wrong
 			// therefore clear timeout to be safe
 			clearTimeout(this.startAliveTimeout);
 			// Only show visual stuff if reconnect is intended
-			if(res.retry) {
+			if(retry) {
 				// If connection is lost, lock screen and show snackbar message
 				this.offline = true;
 				this.snackbarService.showSnackbar('SERVER_CONNECTION_LOST', undefined, 3600*1000);
@@ -47,7 +48,7 @@ export class SecureComponent implements OnInit {
 	
 	ngOnDestroy() {
 		// Close socket connection when leaving the component
-		this.connectionAliveService.disconnect({ 'retry': false });
+		//this.connectionAliveService.disconnect({ 'retry': false });
 	}
 
 }

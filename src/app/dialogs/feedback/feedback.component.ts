@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material';
 
 @Component({
-	selector: 'app-feedback',
+	selector: 'dialog-feedback',
 	templateUrl: './feedback.component.html',
 	styleUrls: ['./feedback.component.scss']
 })

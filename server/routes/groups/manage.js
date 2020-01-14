@@ -17,6 +17,7 @@ const activities = require('../activities');
 const ratings = require('./ratings');
 const badges = require('./badges');
 const helper = require('./helper');
+const query = require('./query');
 
 /**
  * @desc: Calculate number of groups in topic, depending on group size
@@ -284,13 +285,22 @@ exports.remixGroupsAsync = function(topic) {
 		// Assign members to groups
 		var groupsMemberIds_promise = assignParticipantsToGroups(leaders);
 		
-		// Add activities for all delegates
+		// Add activities for all delegates // TODO CHECK
 		const createActivity_promise = groupsMemberIds_promise.then((leaders) => {
 			_.each(leaders, function(el) {
-				console.log("Leader", el)
+				console.log("Leader", el);
 				activities.storeActivity(el, C.ACT_ELECTED_DELEGATE, topicId);
 			});
 		});
+		// Add activities for all members who were not selected as delegates // TODO CHECK
+		const createActivity_promise2 = createActivity_promise.then((par) => {
+			res = query.groupMembers(groupId);
+			_.each(res.members, function(el) {
+				console.log("Non-leader", el.userId);
+				activities.storeActivity(el.userId, C.ACT_DROP_OUT, topicId);
+			});
+		});
+		
 		
 		// Insert all groups into database
 		var nextLevel = topic.level+1;
@@ -323,7 +333,7 @@ exports.remixGroupsAsync = function(topic) {
          var topicId = topic._id;
          var padId = ObjectId();
          var prevDeadline = topic.nextDeadline;
-         var nextDeadline = topics.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
+         var nextDeadline = topics.manage.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
          
          // Store group in database
          var storeGroup_promise = groupRelations_promise.then(function(groupRelations) {

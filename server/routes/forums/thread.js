@@ -24,38 +24,44 @@ exports.create = function(req, res) {
 	const threadId = ObjectId();
 	const mainPostId = ObjectId();
 	
-	// Define thread
-	const thread = {
-		'_id': threadId,
-		'mainPostId': mainPostId,
-		'forumId': forumId,
-		'authorId': authorId,
-		'title': body.title,
-		'private': body.private,
-		'closed': false,
-		'citationId': null,
-		'views': 0
-	};
-	
-	// Store thread in database
-	const thread_promise = db.collection('forum_threads').insertAsync(thread);
-	
-	// Define main post
-	const post = {
-		'_id': mainPostId,
-		'threadId': threadId,
-		'forumId': forumId,
-		'authorId': authorId,
-		'html': body.html
-	};
-	
-	// Store main post in database
-	const post_promise = db.collection('forum_posts').insertAsync(post);
-	
-	// Perform a lot of tasks, where group is necessary
-	const group_promise = db.collection('groups')
-		.findOneAsync({ 'forumId': forumId }).then((group) => {
+	// Get group from forumId
+	db.collection('groups').findOneAsync({ 'forumId': forumId }).then((group) => {
+		
+		// If group is expired, promise is rejected
+		helper.isGroupExpiredAsync(group._id).then((isExpired) => {
 			
+			// If group is expired, reject promise
+			if (isExpired)
+				return utils.rejectPromiseWithMessage(403, 'GROUP_EXPIRED');
+			
+			// Define thread
+			const thread = {
+				'_id': threadId,
+				'mainPostId': mainPostId,
+				'forumId': forumId,
+				'authorId': authorId,
+				'title': body.title,
+				'private': body.private,
+				'closed': false,
+				'citationId': null,
+				'views': 0
+			};
+			
+			// Store thread in database
+			const thread_promise = db.collection('forum_threads').insertAsync(thread);
+			
+			// Define main post
+			const post = {
+				'_id': mainPostId,
+				'threadId': threadId,
+				'forumId': forumId,
+				'authorId': authorId,
+				'html': body.html
+			};
+			
+			// Store main post in database
+			const post_promise = db.collection('forum_posts').insertAsync(post);
+					
 			// Build link to forum and thread
 			const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
 			const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
@@ -76,16 +82,17 @@ exports.create = function(req, res) {
 			const threadViewed = misc.threadVisited(group._id, threadId, authorId);
 				
 			return Promise.all([sendMail_promise, threadViewed]);
+			
+			// Add author to email notification for this thread
+			const notifyAddAuthor_promise = users.enableEmailNotifyAsync(authorId, threadId);
+			
+			// Wait for promises and send response
+			Promise.join(thread_promise, post_promise, notifyAddAuthor_promise)
+				.spread(function(thread, post) {
+					return { 'thread': thread, 'post': post };
+			}).then(res.json.bind(res));
+		}).catch(utils.isOwnError, utils.handleOwnError(res));
 	});
-	
-	// Add author to email notification for this thread
-	const notifyAddAuthor_promise = users.enableEmailNotifyAsync(authorId, threadId);
-	
-	// Wait for promises and send response
-	Promise.join(thread_promise, post_promise, group_promise, notifyAddAuthor_promise)
-		.spread(function(thread, post) {
-			return { 'thread': thread, 'post': post };
-	}).then(res.json.bind(res));
 };
 
 /**
@@ -110,11 +117,6 @@ exports.query = function(req, res) {
 	// Get group
 	const group_promise = thread_promise.then((thread) => {
 		return db.collection('groups').findOneAsync({'forumId': thread.forumId});
-	});
-	
-	// Check if current user is member of group and return boolean (important for functionality of private threads)
-	const isGroupMember_promise = group_promise.then((group) => {
-		return helper.isGroupMemberAsync(group._id, userId);
 	});
 	
 	// Get posts
@@ -185,10 +187,10 @@ exports.query = function(req, res) {
 			.updateAsync({ 'userId': userId }, { $addToSet: { 'viewed': threadId } }, { 'upsert': true });
 
 	// Send result
-	Promise.join(thread_promise, isGroupMember_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise, threadViewedByUser_promise)
-		.spread(function(thread, isGroupMember, posts, viewsUpdate) {
+	Promise.join(thread_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise, threadViewedByUser_promise)
+		.spread(function(thread, posts, viewsUpdate) {
 		return {
-			'thread': _.extend(thread, {'isGroupMember': isGroupMember}),
+			'thread': thread,
 			'posts': posts
 		};
 	}).then(res.json.bind(res));

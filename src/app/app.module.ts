@@ -12,7 +12,7 @@ import { MaterialModule } from './_modules/material.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { QuillModule } from 'ngx-quill';
 import { MentionModule } from 'angular-mentions';
-//import { StarRatingModule } from 'angular-star-rating';
+import { VisModule } from 'ngx-vis';
 
 // Routing
 import { AppRoutingModule } from './_routing/app-routing.module';
@@ -26,15 +26,11 @@ import { TimestampPipe } from './_pipes/timestamp.pipe';
 import { AppComponent } from './app.component';
 import { CountdownComponent } from './countdown/countdown.component';
 import { AlertComponent } from './alert/alert.component';
-import { ModalComponent } from './modals/modal.component';
-import { ModalEmailComponent } from './modals/email/email.modal.component';
-import { ModalAddtopicComponent } from './modals/addtopic/addtopic.modal.component';
-import { ModalCloseeditorComponent } from './modals/closeeditor/closeeditor.modal.component';
 
 // Components Public
 import { PublicComponent } from './public/public.component';
-import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
+import { LoginComponent } from './public/login/login.component';
+import { RegisterComponent } from './public/register/register.component';
 
 // Components Secure
 import { SecureComponent } from './secure/secure.component';
@@ -50,6 +46,10 @@ import { EditThreadDialogComponent } from './dialogs/editthread/editthread.compo
 import { AskDeleteDialogComponent } from './dialogs/askdelete/askdelete.component';
 import { EditForumPostDialogComponent } from './dialogs/editforumpost/editforumpost.component';
 import { EditForumCommentDialogComponent } from './dialogs/editforumcomment/editforumcomment.component';
+import { GroupWelcomeDialogComponent } from './dialogs/groupwelcome/groupwelcome.component';
+import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
+import { CloseEditorDialogComponent } from './dialogs/closeeditor/closeeditor.component';
+import { ProposalDialogComponent } from './dialogs/proposal/proposal.component';
 
 // Services
 import { TopicsListService } from './_services/topiclist.service';
@@ -58,9 +58,6 @@ import { HttpManagerService } from './_services/http-manager.service';
 import { Guard } from './_services/guard.service';
 import { UserService } from './_services/user.service';
 import { AlertService } from './_services/alert.service';
-import { ModalService } from './_services/modal.service';
-import { EmailModalService } from './_services/modal.email.service';
-import { CloseeditorModalService } from './_services/modal.closeeditor.service';
 import { UtilsService } from './_services/utils.service';
 import { LanguageService } from './_services/language.service';
 import { ConfigService } from './_services/config.service';
@@ -73,23 +70,31 @@ import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 
 // Group
+import { GroupComponent } from './group/group.component';
+import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
 import { GroupEditorComponent } from './group/editor/editor.component';
 import { GroupForumComponent } from './group/forum/forum.component';
 import { GroupForumThreadComponent } from './group/forum/thread/thread.component';
 import { GroupChatComponent } from './group/chat/chat.component';
 import { GroupMembersComponent } from './group/members/members.component';
 import { GroupToolbarComponent } from './group/toolbar/toolbar.component';
+import { GroupDocumentComponent } from './group/document/document.component';
+
+// Topic
+import { TopicToolbarComponent } from './topic/toolbar/toolbar.component';
+import { TopicOverviewComponent } from './topic/overview/overview.component';
+import { TopicProposalComponent } from './topic/proposal/proposal.component';
+import { TopicGroupsComponent } from './topic/groups/groups.component';
 
 // New components (not sorted)
-import { GroupvisComponent } from './groupvis/groupvis.component';
 import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
-import { PadviewComponent } from './padview/padview.component';
+//import { PadviewComponent } from './padview/padview.component';
 import { UserprofileComponent } from './userprofile/userprofile.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
-import { GroupComponent } from './group/group.component';
-import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
 import { StarratingComponent } from './starrating/starrating.component';
+import { LoginEmailDialogComponent } from './dialogs/loginemail/loginemail.component';
+import { TopicStagebarComponent } from './topic/stagebar/stagebar.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -111,19 +116,14 @@ export function loadConfig(configService: ConfigService) {
 		SecureComponent,
 		AlertComponent,
 		RegisterComponent,
-		ModalComponent,
-		ModalEmailComponent,
-		ModalAddtopicComponent,
 		TopicComponent,
 		CountdownComponent,
 		SettingsComponent,
 		EditorComponent,
-		ModalCloseeditorComponent,
 		GroupEditorComponent,
 		AddonePipe,
 		TimestampPipe,
-		GroupvisComponent,
-		PadviewComponent,
+		//PadviewComponent,
 		UserprofileComponent,
 		ShareDialogComponent,
 		FeedbackDialogComponent,
@@ -134,12 +134,23 @@ export function loadConfig(configService: ConfigService) {
 		AskDeleteDialogComponent,
 		EditForumPostDialogComponent,
 		EditForumCommentDialogComponent,
+		GroupWelcomeDialogComponent,
 		GroupChatComponent,
 		GroupMembersComponent,
 		GroupToolbarComponent,
 		GroupComponent,
 		GroupMemberbarComponent,
-		StarratingComponent
+		StarratingComponent,
+		AddtopicDialogComponent,
+		CloseEditorDialogComponent,
+		LoginEmailDialogComponent,
+		GroupDocumentComponent,
+		TopicToolbarComponent,
+		TopicOverviewComponent,
+		TopicProposalComponent,
+		TopicGroupsComponent,
+		TopicStagebarComponent,
+		ProposalDialogComponent
 	],
 	imports: [
 		BrowserModule,
@@ -153,7 +164,7 @@ export function loadConfig(configService: ConfigService) {
 		ReactiveFormsModule,
 		QuillModule.forRoot(),
 		MentionModule,
-		//StarRatingModule.forRoot(),
+		VisModule,
 		TranslateModule.forRoot({
 			loader: {
 				provide: TranslateLoader,
@@ -165,26 +176,17 @@ export function loadConfig(configService: ConfigService) {
 	providers: [
 		HttpManagerService,
 		ConfigService,
-		//{ provide: ConfigService, useValue: ConfigService, deps: [HttpManagerService] },
 		{ provide: APP_INITIALIZER, useFactory: loadConfig, deps: [ConfigService], multi: true },
 		TopicsListService,
 		TopicService,
 		Guard,
 		UserService,
 		AlertService,
-		ModalService,
-		EmailModalService,
-		CloseeditorModalService,
 		UtilsService,
 		LanguageService,
 		SnackbarService,
 		ActivityListService,
 		ConnectionAliveService,
-		//{ provide: 'cfg', useValue: cfg },
-		/*{ provide: 'cfg',
-		  useFactory: (configService: ConfigService) => () => Promise.resolve(configService.get()),
-		  deps: [ConfigService]
-		},*/
 		{ provide: 'C', useValue: C }
 	],
 	entryComponents: [
@@ -193,7 +195,12 @@ export function loadConfig(configService: ConfigService) {
 		EditForumPostDialogComponent,
 		EditForumCommentDialogComponent,
 		EditThreadDialogComponent,
-		ShareDialogComponent
+		ShareDialogComponent,
+		GroupWelcomeDialogComponent,
+		AddtopicDialogComponent,
+		CloseEditorDialogComponent,
+		LoginEmailDialogComponent,
+		ProposalDialogComponent
 	],
 	bootstrap: [AppComponent]
 })

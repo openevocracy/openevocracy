@@ -1,0 +1,10 @@
+<h2 mat-dialog-title>{{ 'GROUPVIS_PROPOSAL_LABEL' | translate }}</h2>
+
+<mat-dialog-content>
+	<div [innerHTML]="data"></div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="flex">
+	<span class="flex-spacer"></span>
+	<button mat-raised-button color="primary" (click)="close()">{{'FORM_BUTTON_CLOSE' | translate }}</button>
+</mat-dialog-actions>

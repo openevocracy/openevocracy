@@ -1,23 +1,6 @@
 /* Import variables */
 @import "~styles/variables";
 
-.voted { color: $orange500; }
-
-/* Toolbar */
-
-.mat-toolbar { border-bottom: 5px solid $grey400; height: 69px; }
-
-.mat-toolbar.stage-1 { /* Default */ }
-.mat-toolbar.stage0 { border-color: $blue400; }
-.mat-toolbar.stage1 { border-color: $orange400; }
-.mat-toolbar.stage2 { border-color: $red400; }
-.mat-toolbar.stage3 { border-color: $green400; }
-
-.topic-title h1 { line-height: 30px; padding-top: 10px; font-size: 20px; font-weight: normal; }
-.topic-title p { margin: 0; font-size: 12px; font-weight: 300; line-height: 16px; padding-bottom: 8px; }
-
-.mat-icon-button { margin-top: 12px; }
-
 /* Tab content */
 
 .mat-tab-group { margin-top: 30px; }

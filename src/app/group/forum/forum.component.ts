@@ -11,6 +11,7 @@ import { UtilsService } from '../../_services/utils.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
 import { SnackbarService } from '../../_services/snackbar.service';
+import { GroupService } from '../../_services/group.service';
 
 import { faPlusSquare, faUsers, faLock } from '@fortawesome/free-solid-svg-icons';
 
@@ -27,6 +28,7 @@ export class GroupForumComponent implements OnInit {
 	public userId: string;
 	public forumId: string;
 	public groupId: string;
+	public isExpired: boolean = true;
 	public notifyStatus: boolean = false;
 	public threads: Thread[];
 	
@@ -43,6 +45,7 @@ export class GroupForumComponent implements OnInit {
 		private translateService: TranslateService,
 		private matDialog: MatDialog,
 		private userService: UserService,
+		private groupService: GroupService,
 		private snackbarService: SnackbarService) {
 			
 		// Store user id of current user
@@ -52,6 +55,10 @@ export class GroupForumComponent implements OnInit {
 	ngOnInit() {
 		// Get current groupId
 		this.groupId = this.router.url.split('/')[2];
+		
+		// Get group from group service cache
+		const group = this.groupService.getBasicGroupFromCache(this.groupId);
+		this.isExpired = group.isExpired;
 		
 		// Get current forum information
 		this.httpManagerService.get('/json/group/forum/' + this.groupId).subscribe(res => {
@@ -63,8 +70,6 @@ export class GroupForumComponent implements OnInit {
 			_.each(res.threads, function(thread) {
 				this.threads.push(new Thread(thread));
 			}.bind(this));
-			
-			console.log(this.threads);
 			
 			// Sort threads by last activity (either last response or creation time)
 			this.threads = _.sortBy(this.threads, 'lastActivityTimestamp').reverse();

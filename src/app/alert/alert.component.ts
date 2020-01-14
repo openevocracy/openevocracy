@@ -33,9 +33,13 @@ export class AlertComponent implements OnInit {
 			this.alerts.push(alert);
 			
 			// Remove alert automatically after some time
-			setTimeout(function(){
+			// FIXME this functionality is buggy
+			// If an alert was manually removed, this function removes the next (new) alert after a short time
+			// Every alert should have an expiration, if the expiration is acceeded, this particular alert is removed
+			// But: maybe not timeout is necessary at all
+			/*setTimeout(function(){
 				this.alerts.shift();
-			}.bind(this), this.cfg.ALERT_REMOVAL_TIME);
+			}.bind(this), this.cfg.ALERT_REMOVAL_TIME);*/
 		});
 	}
 	

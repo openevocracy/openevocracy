@@ -1,13 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params, Router, Event, NavigationStart, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
+import { MatDialog } from '@angular/material';
 
-import { ModalService } from '../../_services/modal.service';
-import { CloseeditorModalService } from '../../_services/modal.closeeditor.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
+import { GroupService } from '../../_services/group.service';
 import { ConnectionAliveService } from '../../_services/connection.service';
 import { EditorService } from '../../_services/editor.service';
+
+import { CloseEditorDialogComponent } from '../../dialogs/closeeditor/closeeditor.component';
 
 import * as parseUrl from 'url-parse';
 import * as origin from 'get-location-origin';
@@ -22,15 +24,18 @@ import { faTimes, faExpandArrowsAlt, faComments, faUsers, faFile } from '@fortaw
 })
 export class GroupToolbarComponent implements OnInit, OnDestroy {
 	
+	public isMember: boolean = false;
+	public isExpired: boolean = true;
+	
 	public activeTab: string = 'editor';
 	public userToken;
+	public userId: string;
 	public groupId: string;
 	public title: string;
 	public topicId: string;
 	public padId: string;
 	public expiration: number;
 	public badgeSocket;
-	public modalSubscription: Subscription;
 	
 	public editorBadge: number;
 	public chatBadge: number;
@@ -49,12 +54,13 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		private activatedRoute: ActivatedRoute,
 		private httpManagerService: HttpManagerService,
 		private connectionAliveService: ConnectionAliveService,
-		private closeeditorModalService: CloseeditorModalService,
-		private modalService: ModalService,
-		private editorService: EditorService
+		private editorService: EditorService,
+		private groupService: GroupService,
+		private dialog: MatDialog
 	) {
 		// Get user token and userId from user service
 		this.userToken = this.userService.getToken();
+		this.userId = this.userService.getUserId();
 		
 		// Get groupId
 		this.groupId = this.router.url.split('/')[2];
@@ -64,7 +70,8 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 			// If navigation starts, contains source route
 			if (event instanceof NavigationStart) {
 				// Clear badges database value
-				this.clearBadgeDatabase();
+				if (this.badgeSocket)
+					this.clearBadgeDatabase();
          }
 			
 			// If navigation has finished, contains target route
@@ -72,18 +79,9 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 				// Get current path and define active tab
 				this.activeTab = this.router.url.split('/')[3];
 				// Clear badges view
-				this.clearBadgeView();
+				if (this.badgeSocket)
+					this.clearBadgeView();
          }
-		});
-		
-		// If modal response confirms closing, navigate to topic
-		this.modalSubscription = this.closeeditorModalService.getResponse().subscribe((close) => {
-			// Close modal
-			this.modalService.close();
-			
-			// Navigate to source
-			if (close)
-				this.router.navigate(['/topic', this.topicId]);
 		});
 		
 		// Listen to connection lost event
@@ -96,33 +94,45 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		// Listen to connection reconnected event
 		this.connectionAliveService.connectionReconnected.subscribe((res) => {
 			// If connection is lost, reconnect pad socket
-			this.initBadgeSocket();
+			if(this.isMember && !this.isExpired)
+				this.initBadgeSocket();
 		});
 	}
 	
 	ngOnInit() {
-		// Get data for toolbar from server
-			this.httpManagerService.get('/json/group/toolbar/' + this.groupId).subscribe(res => {
-			// Define title, id and expiration
-			this.title = '(' + res.groupName + ') ' + res.topicTitle;
-			this.topicId = res.topicId;
-			this.padId = res.padId;
-			this.expiration = res.expiration;
-			
-			// Update badges in toolbar
-			this.updateBadge(res.badge);
-			
-			// Init badge socket connection
-			this.initBadgeSocket();
-		});
+		// Get group from group service cache
+		const group = this.groupService.getBasicGroupFromCache(this.groupId);
+		
+		// Define title, id and expiration
+		this.title = '(' + group.groupName + ') ' + group.topicName;
+		this.topicId = group.topicId;
+		this.padId = group.padId;
+		this.expiration = group.expiration;
+		this.isExpired = group.isExpired;
+		
+		this.isMember = group.isMember(this.userId);
+		
+		if(this.isMember && !this.isExpired)
+			this.getBadgesFromServerAndInitSocket();
 	}
 	
 	ngOnDestroy() {
 		// Clear badges database value
-		this.clearBadgeDatabase();
-		
-		// Unsubscribe to avoid memory leak
-		this.modalSubscription.unsubscribe();
+		if (this.badgeSocket)
+			this.clearBadgeDatabase();
+	}
+	
+	/**
+	 * @desc: Get badge information from server, finally initialize badge socket
+	 */
+	private getBadgesFromServerAndInitSocket() {
+		// Get data for toolbar from server
+		this.httpManagerService.get('/json/group/badges/' + this.groupId).subscribe(badge => {
+			// Update badges in toolbar
+			this.updateBadge(badge);
+			// Init badge socket connection
+			this.initBadgeSocket();
+		});
 	}
 	
 	/**
@@ -213,14 +223,22 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		// Check if document is saved to avoid loss of data
 		// Note that if isSaved is undefined, just close the group, in that case the editor does not already or not anymore exist
 		const isSaved = this.editorService.isSaved(this.padId)
-		if (!_.isUndefined(isSaved) && !isSaved) {
-			// If it is not saved, open modal with warning
-			this.modalService.open({});
+		if (_.isUndefined(isSaved) || isSaved) {
+			// Navigate to topic
+			this.router.navigate(['/topic', this.topicId]);
 			return;
 		}
 		
-		// Navigate to topic
-		this.router.navigate(['/topic', this.topicId]);
+		// If editor is not fully saved, redirect open dialog and ask if user really wants to close the editor
+		const dialogRef = this.dialog.open(CloseEditorDialogComponent, { 'minWidth': '300px' });
+		
+		// Subscribe to response from dialog
+		dialogRef.componentInstance.onSubmit.subscribe((res) => {
+			// If user really wants to leave, navigate to source
+			if (res.isLeave)
+				this.router.navigate(['/topic', this.topicId]);
+   	});
+		
 	}
 
 }

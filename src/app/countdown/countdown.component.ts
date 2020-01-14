@@ -40,13 +40,13 @@ export class CountdownComponent implements OnDestroy {
 	
 	public get delta() {
 		// Get current datetime as timestamp
-		let date = new Date();
+		const date = new Date();
 		
 		// Return difference between current datetime and given timestamp 
 		return Math.max(0, Math.floor((this.timestamp - date.getTime()) / 1000));
 	}
 	
-	 public get displayTime() {
+	public get displayTime() {
 		let days, hours, minutes, seconds, delta = this.delta;
 		let time = ""; //this.format;
 		
@@ -106,7 +106,7 @@ export class CountdownComponent implements OnDestroy {
 
 	private _startTimer() {
 		// If time is already over, do nothing
-		if(this.delta <= 0) return;
+		if (this.delta <= 0) return;
 		
 		// Stop timer (for the case it is still running ?)
 		this._stopTimer();

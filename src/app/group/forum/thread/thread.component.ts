@@ -18,6 +18,7 @@ import { UtilsService } from '../../../_services/utils.service';
 import { ConfigService } from '../../../_services/config.service';
 import { UserService } from '../../../_services/user.service';
 import { SnackbarService } from '../../../_services/snackbar.service';
+import { GroupService } from '../../../_services/group.service';
 
 import { Thread } from "../../../_models/forum/thread";
 import { Post } from "../../../_models/forum/post";
@@ -44,6 +45,8 @@ export class GroupForumThreadComponent implements OnInit {
 	public groupId: string;
 	public thread: Thread;
 	public posts: Post[];
+	public isGroupMember: boolean = false;
+	public isExpired: boolean = true;
 	public solvedButtonTitle: string;
 	public sortedBy: string = "";
 	public missingWordsComments: boolean[] = [];
@@ -74,6 +77,7 @@ export class GroupForumThreadComponent implements OnInit {
 		private userService: UserService,
 		private snackbarService: SnackbarService,
 		private translateService: TranslateService,
+		private groupService: GroupService,
 		private viewportScroller: ViewportScroller) {
 			// Store config
 			this.cfg = configService.get();
@@ -83,8 +87,14 @@ export class GroupForumThreadComponent implements OnInit {
 	}
 	
 	ngOnInit() {
+		// Get group id, isExpired status and isGroupMember status
 		this.activatedRoute.parent.params.subscribe((params: Params) => {
 			this.groupId = params.id;
+			
+			// Get group from group service cache
+			const group = this.groupService.getBasicGroupFromCache(this.groupId);
+			this.isGroupMember = group.isMember(this.userId);
+			this.isExpired = group.isExpired;
 		});
 		
 		// Get forum id from url
@@ -97,7 +107,7 @@ export class GroupForumThreadComponent implements OnInit {
 				// Get fragment and jump to related anchor, if fragment is given
 				const fragment = this.router.url.split('#')[1];
 				if (!_.isUndefined(fragment)) {
-					// (hack) Since the DOM is not finished at that point, setTimout helps to do the anchor jump correctly
+					// Note: setTimout is necessary due to a bug: https://github.com/angular/angular/issues/15634
 					setTimeout(() => { this.navigateToUrlWithFragment(fragment) }, 0);
 				}
 			});
@@ -486,7 +496,7 @@ export class GroupForumThreadComponent implements OnInit {
 			this.httpManagerService.delete('/json/group/forum/thread/'+this.thread.threadId).subscribe(res => {
 				// After everything is finished, show snackbar notification and redirect to forum list
 				this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_DELETED', function() {
-					this.router.navigate(['/group/forum/', this.thread.forumId])
+					this.router.navigate(['/group', this.groupId, 'forum'])
 				}.bind(this));
 			});
 		});

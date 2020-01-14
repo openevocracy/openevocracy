@@ -13,12 +13,16 @@ export class ActivityListService {
 	constructor(
 		private httpManagerService: HttpManagerService) { }
 		
-	public getUserActivityList(profileId : string): Observable<Activity[]> {
-		return this.httpManagerService.get('/json/useractivitylist/' + profileId);
+	public getUserActivityList(profileId : string, skip : number, limit : number): Observable<Activity[]> {
+		return this.httpManagerService.get('/json/user/activitylist/' + profileId + '/?skip=' + skip + '&limit=' + limit);
+	}
+	
+	public getUserActivityListLength(profileId : string): Observable<number> {
+		return this.httpManagerService.get('/json/user/activitylistlength/' + profileId);
 	}
 	
 	public addActivity(type: number, targetId: string): Observable<any> {
-		return this.httpManagerService.post('/json/activity/create', {'type': type, 'targetId': targetId});
+		return this.httpManagerService.post('/json/activity/create', { 'type': type, 'targetId': targetId });
 	}
 	
 	public removeActivity(actId: string): Observable<boolean> {

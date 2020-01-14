@@ -1,13 +1,11 @@
-export class Member {
-	userId: string;
-	name: string;
-	color: string;
+import { BasicMember } from './basic-member';
+
+export class Member extends BasicMember {
 	isOnline: boolean;
 	
 	constructor(res: any) {
-		this.userId = res.userId;
-		this.name = res.name;
-		this.color = res.color;
+		super(res);
+		
 		this.isOnline = res.isOnline;
 	}
 }

@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>{{ data.title | translate }}</h2>
+
+<mat-dialog-content>
+	<form [formGroup]="emailForm" (ngSubmit)="submit()" novalidate>
+		<mat-form-field>
+			<input matInput formControlName="email" type="email" placeholder="{{ 'FORM_LABEL_MAIL' | translate }}" required>
+		</mat-form-field>
+	</form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+	<button mat-raised-button color="primary" (click)="submit()" [disabled]="emailForm.invalid">
+		<span>{{'MODAL_SEND_REQUEST' | translate }}</span>
+	</button>
+	<button mat-raised-button color="warn" (click)="close()">{{'FORM_BUTTON_CANCEL' | translate }}</button>
+</mat-dialog-actions>

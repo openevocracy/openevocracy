@@ -25,10 +25,10 @@ export class GroupChatComponent implements OnInit {
 	
 	public C = C;
 	
-	public userId;
-	public userToken;
+	public userId: string;
+	public userToken: string;
 	
-	public groupId;
+	public groupId: string;
 	public chatSocket;
 	public chatForm: FormGroup;
 	public messages;

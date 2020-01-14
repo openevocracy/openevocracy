@@ -1,0 +1,37 @@
+<h1>{{ 'LOGIN_FORM_TITLE' | translate }}</h1>
+
+<p>{{ 'LOGIN_FORM_WELCOME' | translate }}</p>
+
+<alert></alert>
+
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+	<p>
+		<mat-form-field>
+			<input matInput formControlName="email" type="email" placeholder="{{ 'FORM_LABEL_MAIL' | translate }}" required>
+		</mat-form-field>
+	</p>
+	
+	<p>
+		<mat-form-field>
+			<input matInput formControlName="password" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD' | translate }}" required>
+		</mat-form-field>
+	</p>
+	
+	<button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid || awaitAuthentication">
+		<fa-icon *ngIf="awaitAuthentication" [icon]="faSpinner" [spin]="true"></fa-icon>
+		<span>{{ 'LOGIN_FORM_SUBMIT' | translate }}</span>
+	</button>
+</form>
+
+<hr/>
+
+<p>
+	<span>
+		{{'LOGIN_FORM_NEW_ACCOUNT_PREFIX' | translate}}
+		<a routerLink="/register">{{'LOGIN_FORM_NEW_ACCOUNT_LINK' | translate}}</a>{{'LOGIN_FORM_NEW_ACCOUNT_SUFFIX' | translate}}
+	</span><br>
+	<span>
+		{{'LOGIN_FORM_PASSWORD_FORGET_PREFIX' | translate}}
+		<a (click)="passwordForget($event)" href="">{{'LOGIN_FORM_PASSWORD_FORGET_LINK' | translate}}</a>{{'LOGIN_FORM_PASSWORD_FORGET_SUFFIX' | translate}}
+	</span>
+</p>

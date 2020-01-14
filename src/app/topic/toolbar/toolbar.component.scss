@@ -1,0 +1,13 @@
+/* Import variables */
+@import "~styles/variables";
+
+.voted { color: $orange500; }
+
+button { height: 38px; margin-top: 12px; }
+button.active { background-color: rgba(255,255,255,0.2); }
+button.badge-transparent .mat-badge-content { color: transparent; }
+
+.topic-title h1 { line-height: 30px; padding-top: 10px; font-size: 20px; font-weight: normal; }
+.topic-title p { margin: 0; font-size: 12px; font-weight: 300; line-height: 16px; padding-bottom: 8px; }
+
+.mat-icon-button { margin-top: 12px; }

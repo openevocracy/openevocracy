@@ -2,11 +2,11 @@
 	<div class="flex container">
 		<span class="flex-spacer"></span>
 		
-		<button mat-button title="{{ 'FORUM_BUTTON_NEW_THREAD' | translate }}" (click)="openNewThreadDialog()">
+		<button *ngIf="!isExpired" mat-button title="{{ 'FORUM_BUTTON_NEW_THREAD' | translate }}" (click)="openNewThreadDialog()">
 			<span><fa-icon [icon]="faPlusSquare"></fa-icon> {{ 'FORUM_BUTTON_NEW_THREAD' | translate }}</span>
 		</button>
 		
-		<mat-slide-toggle id="watch-forum" [checked]="notifyStatus" (change)="changeNotifyStatus($event)">{{ 'FORUM_BUTTON_WATCH' | translate }}</mat-slide-toggle>
+		<mat-slide-toggle id="watch-forum" [ngClass]="{'alone': isExpired}" [checked]="notifyStatus" (change)="changeNotifyStatus($event)">{{ 'FORUM_BUTTON_WATCH' | translate }}</mat-slide-toggle>
 	</div>
 </mat-toolbar>
 

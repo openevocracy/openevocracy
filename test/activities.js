@@ -58,7 +58,7 @@ describe('activities', () => {
   expect(res.body[0]._id).to.equal(activityId);
  })
  
- it('should delete user activity', async () => {
+ /*it('should delete user activity', async () => {
   let res;
   res = await chai.request(app).delete('/json/activity/'+activityId).
   set('Authorization', 'JWT ' + token).send({
@@ -72,6 +72,6 @@ describe('activities', () => {
   console.log(res.body);
   expect(res.status).to.equal(200);
   expect(res.body.length).to.equal(0);
- })
+ })*/
 
 })

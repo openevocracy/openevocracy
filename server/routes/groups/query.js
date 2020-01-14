@@ -2,22 +2,19 @@
 const _ = require('underscore');
 const ObjectId = require('mongodb').ObjectID;
 const Promise = require('bluebird');
-const Chance = require('chance');
-const Color = require('color');
 
 // Own references
 const db = require('../../database').db;
 const utils = require('../../utils');
 const pads = require('../pads');
 const users = require('../users');
-const ratings = require('./ratings');
 const helper = require('./helper');
 const badges = require('./badges');
 
 /**
- * @desc: Gets all data necessary for the group toolbar
+ * @desc: Gets badged information, needed in group toolbar
  */
-exports.toolbar = function(req, res) {
+exports.badges = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 
@@ -113,9 +110,9 @@ exports.onlineMembers = function(req, res) {
 };
 
 /**
- * @desc: Gets information about group members, mainly for rating and previous documents
+ * @desc: Get basic group information
  */
-exports.groupMembers = function(req, res) {
+exports.getBasicGroup = function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 
