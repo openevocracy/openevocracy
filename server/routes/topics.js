@@ -160,37 +160,40 @@ async function manageTopicStateAsync(topic) {
 		return Promise.resolve(topic);
 			
 	// Move to next stage
-	let prevDeadline = topic.nextDeadline;
+	var prevDeadline = topic.nextDeadline;
 	switch (topic.stage) {
 		case C.STAGE_SELECTION: // we are currently in selection stage
-			let stageStartedEntryName;
-			if(await isAccepted(topic)) {
-				// Topic does meet the minimum requirements for the next stage, move to next stage
-				topic.stage = C.STAGE_PROPOSAL;
-				topic.nextDeadline = calculateDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
-				stageStartedEntryName = 'stageProposalStarted';
-				topic[stageStartedEntryName] = Date.now();
-			} else {
-				// Topic has been rejected, move to rejection stage
-				topic.stage = C.STAGE_REJECTED;
-				topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VOTES';
-				stageStartedEntryName = 'stageRejectedStarted';
-				topic[stageStartedEntryName] = Date.now();
-			}
-			const updateTopicStatePromise = updateTopicStateAsync(topic,stageStartedEntryName);
-			const updatePadExpirationPromise = db.collection('pads_topic_description').updateAsync(
-				{ '_id': topic.pid }, { $set: { 'expiration': Date.now() }}
-			);
-			
-			await Promise.join(updateTopicStatePromise, updatePadExpirationPromise);
-			return topic;
-		case C.STAGE_PROPOSAL: // we are currently in proposal stage
-			// Set the next deadline here, so we can use it in createGroupsAsync.
-			topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
-			
-			return groups.manage.createGroupsAsync(topic).then(function(groups) {
+			{
 				let stageStartedEntryName;
+				if(await isAccepted(topic)) {
+					// Topic does meet the minimum requirements for the next stage, move to next stage
+					topic.stage = C.STAGE_PROPOSAL;
+					topic.nextDeadline = calculateDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
+					stageStartedEntryName = 'stageProposalStarted';
+					topic[stageStartedEntryName] = Date.now();
+				} else {
+					// Topic has been rejected, move to rejection stage
+					topic.stage = C.STAGE_REJECTED;
+					topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VOTES';
+					stageStartedEntryName = 'stageRejectedStarted';
+					topic[stageStartedEntryName] = Date.now();
+				}
+				const updateTopicStatePromise = updateTopicStateAsync(topic,stageStartedEntryName);
+				const updatePadExpirationPromise = db.collection('pads_topic_description').updateAsync(
+					{ '_id': topic.pid }, { $set: { 'expiration': Date.now() }}
+				);
 				
+				await Promise.join(updateTopicStatePromise, updatePadExpirationPromise);
+				return topic;
+			}
+		case C.STAGE_PROPOSAL: // we are currently in proposal stage
+			{
+				// Set the next deadline here, so we can use it in createGroupsAsync.
+				topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
+				
+				const groups = await groups.manage.createGroupsAsync(topic);
+					
+				let stageStartedEntryName;
 				if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {
 					topic.stage = C.STAGE_CONSENSUS;
 					stageStartedEntryName = 'stageConsensusStarted';
@@ -202,32 +205,10 @@ async function manageTopicStateAsync(topic) {
 				}
 				
 				topic[stageStartedEntryName] = Date.now();
-				return Promise.join(topic, stageStartedEntryName);
-			}).spread(function(topic, stageStartedEntryName) {
-				return updateTopicStateAsync(topic, stageStartedEntryName).return(topic);
-			});
-
-			// ------------------------------------
-			/*// Set the next deadline here, so we can use it in createGroupsAsync.
-			topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
-			
-			const groups = await groups.manage.createGroupsAsync(topic);
 				
-			let stageStartedEntryName;
-			if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {
-				topic.stage = C.STAGE_CONSENSUS;
-				stageStartedEntryName = 'stageConsensusStarted';
-			} else {
-				topic.stage = C.STAGE_REJECTED;
-				topic.nextDeadline = cfg.DURATION_NONE;
-				topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS';
-				stageStartedEntryName = 'stageRejectedStarted';
+				await updateTopicStateAsync(topic, stageStartedEntryName);
+				return topic;
 			}
-			
-			topic[stageStartedEntryName] = Date.now();
-			
-			await updateTopicStateAsync(topic, stageStartedEntryName);
-			return topic;*/
 		case C.STAGE_CONSENSUS: // we are currently in consensus stage
 			return manageConsensusStageAsync(topic);
 	}
@@ -278,6 +259,8 @@ async function appendTopicInfoAsync(topic, userId, with_details) {
 	const levels = _.toArray(levels_object);
 
 	// Detailed data (not used in topic list, only in details)
+	let pad_description;
+	let user_proposal;
 	let user_group;
 	if(with_details) {
 		// Get topic description
@@ -300,7 +283,7 @@ async function appendTopicInfoAsync(topic, userId, with_details) {
 			.findOneAsync({'groupId': { $in: _.pluck(highest_level_groups, '_id') }, 'userId': userId});
 		
 		// Get group pad information
-		if (group_member) {
+		if(group_member) {
 			const group = utils.findWhereObjectId(highest_level_groups, {'_id': group_member.groupId});
 			const pad = await db.collection('pads_group').findOneAsync({'groupId': group._id}, {'docId': true});
 			
@@ -342,7 +325,7 @@ async function addHtmlToPad(collection_suffix, pad) {
 /*
  * @desc: Get whole topiclist
  */
-exports.getTopiclist = function(req, res) {
+exports.getTopiclist = async function(req, res) {
 	const userId = ObjectId(req.user._id);
 	
 	manageAndListTopicsAsync().then(function(topics) {
@@ -454,10 +437,10 @@ exports.create = async function(req, res) {
 };
 
 exports.delete = async function(req,res) {
-    const topicId = ObjectId(req.params.id);
+    const tid = ObjectId(req.params.id);
     const uid = ObjectId(req.user._id);
     
-    const topic = await db.collection('topics').findOneAsync({ '_id': topicId }, { 'owner': true, 'stage': true });
+    const topic = await db.collection('topics').findOneAsync({ '_id': tid }, { 'owner': true, 'stage': true });
     // only the owner can delete the topic
     // and if the selection stage has passed, nobody can
     if(!_.isEqual(topic.owner,uid) || topic.stage > C.STAGE_SELECTION) {
@@ -465,9 +448,9 @@ exports.delete = async function(req,res) {
     }
     
     await Promise.join(
-	    db.collection('topics').removeByIdAsync(topicId),
-	    db.collection('topic_votes').removeAsync({'topicId': topicId}),
-	    db.collection('groups').removeAsync({'tid': topicId})
+	    db.collection('topics').removeByIdAsync(tid),
+	    db.collection('topic_votes').removeAsync({'topicId': tid}),
+	    db.collection('groups').removeAsync({'tid': tid})
     );
     
     res.sendStatus(200);
