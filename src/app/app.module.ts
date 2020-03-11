@@ -64,6 +64,7 @@ import { ConfigService } from './_services/config.service';
 import { SnackbarService } from './_services/snackbar.service';
 import { ActivityListService } from './_services/activitylist.service';
 import { ConnectionAliveService } from './_services/connection.service';
+import { LineNumbersService } from './_editor/linenumbers.service';
 
 // Shared
 import { cfg } from '../../shared/config';
@@ -95,6 +96,8 @@ import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { StarratingComponent } from './starrating/starrating.component';
 import { LoginEmailDialogComponent } from './dialogs/loginemail/loginemail.component';
 import { TopicStagebarComponent } from './topic/stagebar/stagebar.component';
+import { UserprofileOverviewComponent } from './userprofile/overview/overview.component';
+import { UserprofileActivityComponent } from './userprofile/activity/activity.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -150,7 +153,9 @@ export function loadConfig(configService: ConfigService) {
 		TopicProposalComponent,
 		TopicGroupsComponent,
 		TopicStagebarComponent,
-		ProposalDialogComponent
+		ProposalDialogComponent,
+		UserprofileOverviewComponent,
+		UserprofileActivityComponent
 	],
 	imports: [
 		BrowserModule,
@@ -187,6 +192,7 @@ export function loadConfig(configService: ConfigService) {
 		SnackbarService,
 		ActivityListService,
 		ConnectionAliveService,
+		LineNumbersService,
 		{ provide: 'C', useValue: C }
 	],
 	entryComponents: [

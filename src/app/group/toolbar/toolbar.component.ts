@@ -7,7 +7,7 @@ import { HttpManagerService } from '../../_services/http-manager.service';
 import { UserService } from '../../_services/user.service';
 import { GroupService } from '../../_services/group.service';
 import { ConnectionAliveService } from '../../_services/connection.service';
-import { EditorService } from '../../_services/editor.service';
+import { EditorService } from '../../_editor/editor.service';
 
 import { CloseEditorDialogComponent } from '../../dialogs/closeeditor/closeeditor.component';
 

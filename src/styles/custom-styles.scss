@@ -71,6 +71,10 @@ mention-list ul li a:active {
 	text-decoration: none;
 }
 
+/* Editor line numbering */
+.ql-numbering span { position: absolute; font-size: 10px; font-family: monospace; cursor: pointer; color: $grey500; padding: 2px 10px; }
+.ql-numbering span:hover, .ql-numbering span:focus, .ql-numbering span:active { color: $black; }
+
 /* Group vis */
 /*.vis-navigation .vis-button { width: 30px; font-size: 30px; line-height: 30px; cursor: pointer; }
 .vis-navigation .vis-button:before { font-family: 'FontAwesome'; position: absolute; bottom: 0; }

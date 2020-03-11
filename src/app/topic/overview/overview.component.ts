@@ -10,11 +10,12 @@ import { TopicOverview } from '../../_models/topic/overview';
 import { EditorComponent } from '../../editor/editor.component';
 
 import { ConnectionAliveService } from '../../_services/connection.service';
-import { EditorService } from '../../_services/editor.service';
 import { TopicService } from '../../_services/topic.service';
 import { UserService } from '../../_services/user.service';
 import { SnackbarService } from '../../_services/snackbar.service';
 import { ActivityListService} from '../../_services/activitylist.service';
+
+import { EditorService } from '../../_editor/editor.service';
 
 import * as $ from 'jquery';
 import * as _ from 'underscore';

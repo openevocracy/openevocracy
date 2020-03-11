@@ -57,7 +57,7 @@ export class MatPaginatorI18nService extends MatPaginatorIntl {
 	 * @source: https://medium.com/front-dev/translate-your-matpaginator-with-ngx-translate-and-stay-reactive-4c7b145cae9
 	 */
 	getRangeLabel = (page: number, pageSize: number, length: number) => {
-		
+		this.getAndInitTranslations();
 		if (length === 0 || pageSize === 0)
 			return this.translateParser.interpolate(this.rangeLabel1, { length });
 		

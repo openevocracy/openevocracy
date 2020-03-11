@@ -107,6 +107,7 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
       const options = this.getGraphOptions();
       
       // Get labels, finally extend data and finally draw graph
+      // FIXME if language is changed, graph needs to be redrawn
 		forkJoin(
 			this.translateService.get("GROUPVIS_PROPOSAL_LABEL"),
 			this.translateService.get("GROUPVIS_GROUP_LABEL"))

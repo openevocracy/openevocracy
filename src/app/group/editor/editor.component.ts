@@ -7,9 +7,11 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { ConnectionAliveService } from '../../_services/connection.service';
 import { UserService } from '../../_services/user.service';
-import { EditorService } from '../../_services/editor.service';
 import { GroupService } from '../../_services/group.service';
 import { SnackbarService } from '../../_services/snackbar.service';
+
+import { EditorService } from '../../_editor/editor.service';
+import { LineNumbersService } from '../../_editor/linenumbers.service';
 
 import { EditorComponent } from '../../editor/editor.component';
 
@@ -38,6 +40,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 		protected connectionAliveService: ConnectionAliveService,
 		protected editorService: EditorService,
 		protected dialog: MatDialog,
+		private lineNumbersService: LineNumbersService,
 		private groupService: GroupService
 	) {
 		super(snackBar, router, userService, translateService, connectionAliveService, editorService, dialog);
@@ -102,11 +105,28 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 	}
 	
 	/**
+	 * @desc: After editor and content was initialized
+	 */
+	public afterContentInit() {
+		// Calculate and add line numbers to editor
+      this.lineNumbersService.getLineNumbers();
+	}
+	
+	/**
+	 * @desc: After some content in the editor was changed
+	 */
+	public afterContentChanged() {
+		// Update numbering after every change
+		const numbering = document.getElementsByClassName("ql-numbering")[0];
+		numbering.remove();  // Remove
+		this.lineNumbersService.getLineNumbers();  // Add
+	}
+	
+	/**
 	 * @desc: Updates the component view, when countdown has finished and stage is over
 	 */
 	public updateView() {
 		// When group is finished, navigate to group again
 		this.router.navigate(['/group', this.group.groupId]);
 	}
-
 }

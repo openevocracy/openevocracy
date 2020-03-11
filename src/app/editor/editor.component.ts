@@ -7,7 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { ConnectionAliveService } from '../_services/connection.service';
 import { UserService } from '../_services/user.service';
-import { EditorService } from '../_services/editor.service';
+import { EditorService } from '../_editor/editor.service';
 
 import { CloseEditorDialogComponent } from '../dialogs/closeeditor/closeeditor.component';
 
@@ -63,13 +63,13 @@ export class EditorComponent implements OnInit, OnDestroy {
 		// Set quill editor options
 		this.quillModules = {
 			toolbar: [
-				['bold', 'italic', 'underline', 'strike'],
+				['bold', 'italic'], //, 'underline', 'strike'],
 				[{ 'header': 1 }, { 'header': 2 }],
 				[{ 'list': 'ordered'}, { 'list': 'bullet' }],
-				[{ 'script': 'sub'}, { 'script': 'super' }],
-				[{ 'indent': '-1'}, { 'indent': '+1' }],
-				['link'],
-				['clean']
+				//[{ 'script': 'sub'}, { 'script': 'super' }],
+				//[{ 'indent': '-1'}, { 'indent': '+1' }],
+				//['link'],
+				//['clean']
 			]
 		}
 		
@@ -147,6 +147,24 @@ export class EditorComponent implements OnInit, OnDestroy {
 	}
 	
 	/**
+	 * @desc: Switch track changes mode on/off
+	 */
+	private toggleTrackChanges() {
+		
+	}
+	
+	/**
+	 * @desc: Accept a specific text change
+	 */
+	private acceptChange(cssClass) {
+		// If deleted, submit finally delete text
+		
+		
+		// If inserted, submit remove "inserted" class
+		
+	}
+	
+	/**
 	 * @desc: Create pad socket and sharedb connection
 	 */
 	private initializePadSocket() {
@@ -170,13 +188,40 @@ export class EditorComponent implements OnInit, OnDestroy {
 			// Subscribe to specific doc
 			doc.subscribe((err) => {
 				if (err) throw err;
-	
 				// Set quill contents from doc
 				this.editor.setContents(doc.data);
-	
+				
+				// Call after content initialized
+				this.afterContentInit();
+				
 				// On text change, send changes to ShareDB
 				this.editor.on('text-change', (delta, oldDelta, source) => {
 					if (source !== 'user') return;
+					
+					console.log('delta', delta);
+					
+					delta.ops.forEach((op) => {
+						// Check if any operation contains an insert
+						if (op.insert) {
+							console.log('insert');
+							// Add class to inserted letter
+							
+							
+							// Submit op + new class
+							
+						}
+						
+						// Check if any operation contains a delete
+						if (op.delete) {
+							console.log('delete');
+							// Add class to deleted letter
+							
+							
+							// Only submit class change, not delete operation
+							
+						}
+					});
+					
 					doc.submitOp(delta, { 'source': this.editor });
 				});
 				
@@ -204,6 +249,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 			this.enableEdit();
 		};
 	}
+	
+	public afterContentInit() {}
 	
 	/**
 	 * @desc: Closes the editor
@@ -245,7 +292,12 @@ export class EditorComponent implements OnInit, OnDestroy {
 		// Set unsaved text
 		this.saved = false;  // Important for template
 		this.editorService.setIsSaved(this.editor.padId, false);
+		
+		// Call after content changed
+		this.afterContentChanged();
 	}
+	
+	public afterContentChanged() {}
 	
 	/*
 	 * @desc: Initialize timer and redirect from editor to view if deadline is over

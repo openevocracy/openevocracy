@@ -28,8 +28,11 @@ import { GroupMembersComponent } from '../group/members/members.component';
 import { GroupForumThreadComponent } from '../group/forum/thread/thread.component';
 import { GroupForumComponent } from '../group/forum/forum.component';
 
-import { SettingsComponent } from '../settings/settings.component';
 import { UserprofileComponent } from '../userprofile/userprofile.component';
+import { UserprofileOverviewComponent } from '../userprofile/overview/overview.component';
+import { UserprofileActivityComponent } from '../userprofile/activity/activity.component';
+
+import { SettingsComponent } from '../settings/settings.component';
 
 const appChildRoutes: Routes = [
 	{ path: '', redirectTo: 'topiclist', pathMatch: 'full' },
@@ -64,8 +67,17 @@ const appChildRoutes: Routes = [
 			{ path: 'members', component: GroupMembersComponent }
 		]
 	},
-	{ path: 'settings/:id', component: SettingsComponent },
-	{ path: 'user/profile/:id', component: UserprofileComponent }
+	{
+		path: 'user/profile/:id',
+		component: UserprofileComponent,
+		runGuardsAndResolvers: 'always',
+		children: [
+			{ path: '', redirectTo: 'overview', pathMatch: 'full' },
+			{ path: 'overview', component: UserprofileOverviewComponent },
+			{ path: 'activity', component: UserprofileActivityComponent }
+		]
+	},
+	{ path: 'settings/:id', component: SettingsComponent }
 ];
 
 const appRoutes: Routes = [

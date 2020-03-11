@@ -9,10 +9,11 @@ import { TopicProposal } from '../../_models/topic/proposal';
 import { EditorComponent } from '../../editor/editor.component';
 
 import { ConnectionAliveService } from '../../_services/connection.service';
-import { EditorService } from '../../_services/editor.service';
 import { UserService } from '../../_services/user.service';
 import { TopicService } from '../../_services/topic.service';
 import { SnackbarService } from '../../_services/snackbar.service';
+
+import { EditorService } from '../../_editor/editor.service';
 
 import * as $ from 'jquery';
 import * as _ from 'underscore';
