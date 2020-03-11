@@ -44,20 +44,15 @@ export class HttpManagerService {
 			.catch(error => { return this.handleError(error); });
 	}
 	
-	public getFile(url) {
+	public getPdfFile(url) {
+		// Get options
 		let options = this.getOptions();
-		options = _.extend(options, { 'responseType': 'blob' });
-		return this.http.get(url, options)
-			.map(res => {
-				var body = res['_body'];
-				var blob = new Blob([body], {type: 'application/pdf'});
-				return blob;
-			})
-			.catch(error => { return this.handleError(error); })
-			.subscribe(blob => {
-				var url = window.URL.createObjectURL(blob);
-				window.open(url);
-			});
+	
+		// Call http get and return file as blob
+		return this.http.get(url, {
+			responseType: "blob",
+			headers: options.headers.append("Content-Type", "application/json")
+		});
 	}
 	
 	public post(url, body) {

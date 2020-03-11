@@ -22,7 +22,7 @@ import * as _ from 'underscore';
 
 import { C } from '../../../../shared/constants';
 
-import { faUser, faPlay, faFile, faHandPaper } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faPlay, faFile, faHandPaper, faDownload } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-overview',
@@ -41,6 +41,7 @@ export class TopicOverviewComponent extends EditorComponent {
 	public faPlay = faPlay;
 	public faFile = faFile;
 	public faHandPaper = faHandPaper;
+	public faDownload = faDownload;
 
 	constructor(
 		protected snackBar: MatSnackBar,
@@ -78,7 +79,7 @@ export class TopicOverviewComponent extends EditorComponent {
 	 * @desc: Download final document as pdf (open in new tab)
 	 */
 	private downloadPdf() {
-		//this.topicService.downloadResultPdf(this.topicId);
+		this.topicService.downloadResultPdf(this.topicId);
 	}
 	
 	/**

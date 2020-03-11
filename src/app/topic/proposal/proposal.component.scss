@@ -18,3 +18,8 @@ button.voted { color: $orange500; }
 	font-size: 1.3rem;
 	color: $grey100;
 }
+
+.validity { cursor: default; padding: 0 10px; background-color: rgba(0,0,0,0.2); border-radius: 5px; }
+.valid-label { font-weight: normal; font-size: 12px; margin-right: 5px; }
+.validity-valid fa-icon { color: $green500; }
+.validity-not-valid fa-icon { color: $red500; }

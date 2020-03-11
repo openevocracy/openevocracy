@@ -47,13 +47,22 @@ app.use(methodOverride());
 const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
 
-// Setup cronjob to run every minute
+// Setup cronjob to run regulary
 const job = new CronJob({
 	cronTime: '*/'+cfg.CRON_INTERVAL+' * * * *',
 	onTick: function() {
+		// Manage topics
 		topics.manage.manageAndListTopicsAsync().then(function(topics) {
 			// FIXME: An error could occur if i18n and mail initialization is not ready when cronjob runs for the first time
-			_.map(topics, mail.sendTopicReminderMessages); // Promise.map does not work above
+			_.map(topics, mail.sendTopicReminderMessages); // NOTE Promise.map does not work above
+		});
+		
+		// Regularily check for chatroom orphans
+		const now = new Date().getTime();
+		_.each(chats.rooms, (room, id) => {
+			// If room was not used for a longer time, remove it from cache
+			if (room.cacheUpdate + cfg.CHATROOM_CACHE_TIMEOUT < now)
+				delete chats.rooms[id];
 		});
 	},
 	start: true

@@ -326,9 +326,12 @@ exports.getPadHTMLAsync = getPadHTMLAsync;
  */
 exports.getPadPDFAsync = function(html) {
 	console.log('getPadPDFAsync', html);
-	var pdfConvertAsync = Promise.promisify(pdf.convert);
+	const pdfConvertAsync = Promise.promisify(pdf.convert);
 	
-	return pdfConvertAsync({'html': html})
+	const css = "body { font-family: 'CMU Sans Serif'; font-size: 8pt; }";
+	const paperSize = { 'format': 'A4', 'orientation': 'portrait' };
+	
+	return pdfConvertAsync({'html': html, 'paperSize': paperSize, 'css': css})
 		.then(function(result) {
 		// This is required to convert the callback into a format
 		// suitable for promises, e.g. error is first parameter

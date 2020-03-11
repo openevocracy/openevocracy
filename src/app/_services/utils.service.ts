@@ -53,16 +53,23 @@ export class UtilsService {
 	/**
 	 * @desc: Strip html from given string
 	 */
-	public stripHtml(htmlString) {
+	public stripHtml(htmlString): string {
 		return htmlString.replace(/<(?:.|\n)*?>/gm, '');
 	}
 	
 	/**
 	 * @desc: Count number of words in string
 	 */
-	public countStringWords(str) {
+	public countStringWords(str): number {
 		// Split and get length
 		return str.split(/\s+\b/).length;
+	}
+	
+	/**
+	 * @desc: Strip html tags and count words
+	 */
+	public countHtmlWords(htmlString): number {
+		return this.countStringWords(this.stripHtml(htmlString));
 	}
 	
 	/**

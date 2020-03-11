@@ -12,6 +12,8 @@ import { ConnectionAliveService } from '../../_services/connection.service';
 import { UserService } from '../../_services/user.service';
 import { TopicService } from '../../_services/topic.service';
 import { SnackbarService } from '../../_services/snackbar.service';
+import { UtilsService } from '../../_services/utils.service';
+import { ConfigService } from '../../_services/config.service';
 
 import { EditorService } from '../../_editor/editor.service';
 
@@ -19,6 +21,8 @@ import * as $ from 'jquery';
 import * as _ from 'underscore';
 
 import { C } from '../../../../shared/constants';
+
+import { faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
 	selector: 'app-proposal',
@@ -28,10 +32,16 @@ import { C } from '../../../../shared/constants';
 export class TopicProposalComponent extends EditorComponent {
 	
 	public C;
+	public cfg;
 	public topicId: string;
 	public proposal: TopicProposal;
+	public editor;
 	public isEditor: boolean = false;
 	public basicTopic: BasicTopic;
+	public isValid: boolean = false;
+	
+	public faCheckCircle = faCheckCircle;
+	public faTimesCircle = faTimesCircle;
 
 	constructor(
 		protected snackBar: MatSnackBar,
@@ -41,9 +51,14 @@ export class TopicProposalComponent extends EditorComponent {
 		protected connectionAliveService: ConnectionAliveService,
 		protected editorService: EditorService,
 		protected dialog: MatDialog,
-		private topicService: TopicService
+		private topicService: TopicService,
+		private utilsService: UtilsService,
+		private configService: ConfigService
 	) {
 		super(snackBar, router, userService, translateService, connectionAliveService, editorService, dialog);
+		
+		this.C = C;
+		this.cfg = configService.get();
 		
 		// Get topicId from route
 		this.topicId = this.router.url.split('/')[2];
@@ -72,7 +87,7 @@ export class TopicProposalComponent extends EditorComponent {
 			return;
 			
 		// Bind all necessary information to editor
-		const quillEditor = _.extend(editor, {
+		this.editor = _.extend(editor, {
 			'docId': this.proposal.docId,
 			'padId': this.proposal.padId,
 			'type': 'docs_proposal',
@@ -80,8 +95,25 @@ export class TopicProposalComponent extends EditorComponent {
 			'deadline': this.basicTopic.nextDeadline
 		});
 		
+		// On every text change, check if document is valid
+		this.editor.on('text-change', (delta, oldDelta, source) => {
+			this.isValid = this.isProposalValid();
+		});
+		
 		// Init editor
-		this.initializeEditor(quillEditor);
+		this.initializeEditor(this.editor);
+	}
+	
+	/**
+	 * @desc: Checks if a proposal is valid
+	 */
+	public isProposalValid(): boolean {
+		// Get raw text from editor
+		const text = this.editor.getText();
+		// Count number of containing words
+		const numWords = this.utilsService.countStringWords(text);
+		// Return if proposal is valid or not
+		return (numWords >= this.cfg.MIN_WORDS_PROPOSAL);
 	}
 	
 	/**

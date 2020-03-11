@@ -198,12 +198,12 @@ export class EditorComponent implements OnInit, OnDestroy {
 				this.editor.on('text-change', (delta, oldDelta, source) => {
 					if (source !== 'user') return;
 					
-					console.log('delta', delta);
+					//console.log('delta', delta);
 					
 					delta.ops.forEach((op) => {
 						// Check if any operation contains an insert
 						if (op.insert) {
-							console.log('insert');
+							//console.log('insert');
 							// Add class to inserted letter
 							
 							
@@ -213,7 +213,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 						
 						// Check if any operation contains a delete
 						if (op.delete) {
-							console.log('delete');
+							//console.log('delete');
 							// Add class to deleted letter
 							
 							

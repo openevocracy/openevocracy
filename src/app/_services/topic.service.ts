@@ -8,6 +8,8 @@ import { TopicProposal } from '../_models/topic/proposal';
 
 import { HttpManagerService } from './http-manager.service';
 
+import { saveAs } from 'file-saver';
+
 import * as _ from 'underscore';
 
 @Injectable()
@@ -40,7 +42,10 @@ export class TopicService {
 	}
 	
 	public downloadResultPdf(topicId: string) {
-		this.httpManagerService.getFile('/file/topic/'+topicId);
+		this.httpManagerService.getPdfFile('/file/topic/'+topicId).subscribe(
+			data => { saveAs(data, topicId); },
+			err => { console.error(err); }
+		);
 	}
 	
 	public addProposal(topicId: string, userId: string) {

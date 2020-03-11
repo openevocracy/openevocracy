@@ -53,8 +53,7 @@ exports.unvote = function(req, res) {
 exports.download = function(req, res) {
 	var topicId = req.params.id;
 	var filename = path.join(appRoot.path, 'files/documents', topicId+'.pdf');
-	//res.sendFile(filename);
-	res.download(filename);
+	res.sendFile(filename);
 };
 
 /**

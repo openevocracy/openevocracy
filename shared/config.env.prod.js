@@ -5,8 +5,9 @@ const C = require("./constants").C;
 exports.cfg = {
 	DEBUG : false,
 	MAIL_ENABLED:  true,
-	CRON_INTERVAL: 1, // run cron every x minute(s)
+	CRON_INTERVAL: 5, // run cron every x minute(s)
 	ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
+	CHATROOM_CACHE_TIMEOUT: 1*C.DAY,  // Chat room is removed from cache when it was not called for more than x hours/days
 	
 	MIN_VOTES_PER_TOPIC : 1,
 	MIN_GROUPS_PER_TOPIC: 1,

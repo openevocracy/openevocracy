@@ -161,11 +161,11 @@ exports.updateChatBadge = function(userId, chatRoomId) {
 			const badgeStatus = getFromCache(memberId, groupId);
 			
 			// Add 1 to forumUnseen, if badgeStatus is available
-			if (!_.isUndefined(badgeStatus))
+			if (badgeStatus)
 				badgeStatus.chatUnseen += 1;
 			
 			// If socket is available, send message through socket
-			if (!_.isUndefined(badgeStatus.socket)) {
+			if (badgeStatus && badgeStatus.socket) {
 				// Send socket message to each member of the group
 				badgeStatus.socket.send(JSON.stringify({ 'chatUnseen': badgeStatus.chatUnseen }));
 			}

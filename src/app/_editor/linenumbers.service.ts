@@ -33,7 +33,7 @@ export class LineNumbersService {
 			// If child is of allowed type, add line number
 			//if (['P','H1','H2','UL','OL'].indexOf(child.nodeName) !== -1) {
 				// Define some shift options for a better look
-				const shiftTop = 2;
+				const shiftTop = 0;
 				const shiftLeft = (i < 10) ? 30 : (i < 100) ? 35 : 0;
 				
 				// Create span element, define styles and add it to numbering container

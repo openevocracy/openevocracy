@@ -16,6 +16,7 @@ body.modal-open { overflow: hidden; }
 .flex-spacer { flex: 1 1 auto; }
 .text-muted { color: $grey700; }
 .mat-form-field { width: 100%; }
+/*.mat-badge-content { width: 16px; height: 16px; right: 3px; top: 3px; line-height: 16px; font-size: 10px; box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15); }*/
 
 /* Alert and Modal close button */
 button.close { padding: 0; background: transparent; border: 0; }

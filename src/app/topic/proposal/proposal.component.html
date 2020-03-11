@@ -7,6 +7,19 @@
 				<span *ngIf="!saved">{{ 'EDITOR_UNSAVED_CHANGES' | translate }}</span>
 			</span>
 		</div>
+		
+		<span class="flex-spacer"></span>
+		
+		<div class="validity">
+			<span *ngIf="isValid" class="validity-valid">
+				<span class="valid-label">{{ 'EDITOR_DOCUMENT_VALID' | translate }}</span>
+				<fa-icon [icon]="faCheckCircle"></fa-icon>
+			</span>
+			<span *ngIf="!isValid" class="validity-not-valid" title="{{ 'EDITOR_DOCUMENT_NONVALID_HELPTEXT' | translate }}">
+				<span class="valid-label">{{ 'EDITOR_DOCUMENT_NONVALID' | translate }}</span>
+				<fa-icon [icon]="faTimesCircle"></fa-icon>
+			</span>
+		</div>
 	</div>
 </stagebar>
 

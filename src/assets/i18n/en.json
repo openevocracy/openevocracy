@@ -232,6 +232,9 @@
 	"EDITOR_SNACKBAR_CLOSE_SECONDS": "The document closes in {{s}} seconds.",
 	"EDITOR_SNACKBAR_CLOSE_MINUTES": "The document closes in {{m}} minutes",
 	"EDITOR_CONNECTION_LOST": "Connection lost, changes will not be saved.",
+	"EDITOR_DOCUMENT_VALID": "Valid",
+	"EDITOR_DOCUMENT_NONVALID": "Not valid",
+	"EDITOR_DOCUMENT_NONVALID_HELPTEXT": "The document becomes valid when you write more words.",
 	
 	"PADVIEW_EXPIRATION_LABEL": "Expiration date",
 	"PADVIEW_SUBTITLE_DATE": "at",

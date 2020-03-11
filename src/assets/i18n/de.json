@@ -232,6 +232,9 @@
 	"EDITOR_SNACKBAR_CLOSE_SECONDS": "Das Dokument schließt in {{s}} Sekunden.",
 	"EDITOR_SNACKBAR_CLOSE_MINUTES": "Das Dokument schließt in {{m}} Minuten.",
 	"EDITOR_CONNECTION_LOST": "Verbindung verloren, Änderungen werden nicht gespeichert.",
+	"EDITOR_DOCUMENT_VALID": "Gültig",
+	"EDITOR_DOCUMENT_NONVALID": "Nicht gültig",
+	"EDITOR_DOCUMENT_NONVALID_HELPTEXT": "Das Dokument wird gültig, wenn du mehr Worte schreibst.",
 	
 	"PADVIEW_EXPIRATION_LABEL": "Ablaufdatum",
 	"PADVIEW_SUBTITLE_DATE": "um",

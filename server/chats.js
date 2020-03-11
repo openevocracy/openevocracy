@@ -15,6 +15,7 @@ const activities = require('./routes/activities');
 
 // Rooms cache
 let rooms = {};
+exports.rooms = rooms;
 
 /*
  * @desc: Function called via route from client in order to get information
@@ -76,8 +77,10 @@ exports.queryChatRoomMessages = function(req, res) {
 				'chatRoomId': chatRoomId,
 				'messages': room.messages,
 				'users': extendedUsers
-			});
+			});	
 		}
+		
+		
 	}).then(res.send.bind(res));
 };
 
