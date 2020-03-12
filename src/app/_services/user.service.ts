@@ -89,7 +89,7 @@ export class UserService {
 		var self = this;
 		
 		// Post logout, authentication needed
-		this.httpManagerService.post('/json/auth/logout', {'uid': this.getUserId()}).subscribe(res => {
+		this.httpManagerService.post('/json/auth/logout', {'userId': this.getUserId()}).subscribe(res => {
 			// Remove token from local storage
 			self.removeUser();
 			

@@ -12,7 +12,7 @@
     "EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE": "Hi,\n\n du bist Teilnehmer am Thema {0}. Bisher hat niemand in der Gruppe eine Bewertung abgegeben.\n Gib den anderen Mitgliedern der Gruppe eine Bewertung, um einen passenden Repräsentanten zu finden.\n",
     
     "EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT": "Erinnerung an deinen Vorschlag: {0}",
-    "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "<p>Hi,<br/><br/>du bist Teilnehmer am Thema {0}. Für dieses Thema wird in drei Tagen die Konsensphase starten.</p><p>Wir empfehlen den eingereichten Vorschlag abschließend zu prüfen.</p>",
+    "EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE": "<p>Hi,<br/><br/>du bist Teilnehmer am Thema {0}. Das Thema wird die Konsensphase in {1} erreichen.</p><p>Wir empfehlen den eingereichten Vorschlag abschließend zu prüfen.</p>",
     
     "EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT": "Erinnerung an deinen Vorschlag: {0}",
     "EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE": "<p>Hi,<br/><br/>du bist Teilnehmer am Thema {0}. Das Thema wird die Konsensphase in {1} erreichen.</p><p>Wir empfehlen dir deinen Vorschlag nochmal zu lesen um letzte Fehler verbessern zu können, bevor das Dokument geschlossen wird.</p>",

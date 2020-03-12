@@ -221,19 +221,28 @@ exports.register = function(req, res) {
 	}).catch(utils.isOwnError,utils.handleOwnError(res));  // Handle errors
 };
 
-// POST /json/auth/logout
-// @desc: logs out a user, deleting the salt for the user's token
+/**
+ * @desc: Resets the salt of the user
+ */
+function logoutAsync(userId) {
+	return db.collection('users').updateAsync({ '_id': userId }, { $set: { 'salt': null } });
+}
+
+/**
+ * @desc: logs out a user, deleting the salt for the user's token
+ * @req: POST /json/auth/logout
+ */
 exports.logout = function(req, res) {
-	var uid = req.body.uid;
+	const userId = ObjectId(req.body.userId);
 	
 	// Check if user id was transmitted correctly
-	if(_.isUndefined(uid)) {
+	if(_.isUndefined(userId)) {
 		utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_LOGOUT_ID_MISSING');
 		return;
 	}
 	
 	// Get user from user id
-	db.collection('users').updateAsync({ '_id': ObjectId(uid) }, { $set: { 'salt': null } }).then(function(user) {
+	logoutAsync(userId).then(function(user) {
 		// Show error if id was wrong and no user was found
 		if(_.isNull(user))
 			utils.sendAlert(res, 400, 'success', 'USER_ACCOUNT_NOT_EXIST');
@@ -462,7 +471,9 @@ function socketAuthentication(ws, userToken, cb) {
 			// If salt is not correct, close connection and return
 			if (dbUser.salt != userSalt) {
 				console.log('Connection rejected, users salt not correct');  // TODO Add to logfile later
+				// Close socket connection and log out user
 				ws.close();
+				logoutAsync(userId);
 				return;
 			}
 			

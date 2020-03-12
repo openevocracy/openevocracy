@@ -40,30 +40,6 @@ exports.initializeMail = function() {
 		// If any error happens, log it
 		if(err) console.log(err);
 	});
-		
-	// TODO Delete after 31.12.2018
-	// Get smtp credentials from databse and create transporter
-	/*db.collection('configs').findOneAsync({'type': 'mailauth'},{'user': true, 'password': true})
-		.then(function(credentials) {
-			var smtpConfig = {
-				'host': 'smtp.openevocracy.org',
-				'port': 587, //2587,
-				'secure': false,
-				//'logger': true,
-				//'debug': true,
-			tls: {
-				'rejectUnauthorized': false // allow self signed certificate
-			},
-			auth: {
-				'user': credentials.user,
-				'pass': credentials.password
-			}
-		};
-		
-		Promise.props(smtpConfig).then(function(smtpConfig) {
-			transporter = nodemailer.createTransport(smtpConfig);
-		}); 
-	});*/
 	
 	// Get smtp credentials from config and create transporter
 	const smtpConfig = {
@@ -212,9 +188,33 @@ function sendMailOnce(mailUser, mailSubject, mailSubjectParams, mailBody, mailBo
 }
 exports.sendMailOnce = sendMailOnce;
 
+/**
+ * @desc: Remind participants that the deadline of proposal stage is coming
+ */
 function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
-	// Remind participants that the deadline of proposal stage is coming
-	// In proposal stage, all sources in proposals table are users
+	
+	return db.collection('pads_proposal').find({'topicId': topic._id}, {'ownerId': true, 'expiration': true})
+		.toArrayAsync().map(function(proposal) {
+			// Find user information for every proposal owner
+			return db.collection('users')
+				.findOneAsync({ '_id': proposal.ownerId }, {'email': true, 'lang': true})
+				.then((user) => {
+					// Get timestamp, when proposal was created
+					const created = proposal._id.getTimestamp();
+					// Get shift according to reminder type (first or second)
+					const shift = (mailSubject == 'EMAIL_REMINDER_PROPOSAL_FIRST') ? cfg.REMINDER_PROPOSAL_FIRST : cfg.REMINDER_PROPOSAL_SECOND;
+					// Only send mail if document created before the reminder time
+					if (created < proposal.expiration-shift) {
+						sendMailOnce(user,
+							mailSubject, mailSubjectParams, mailBody, mailBodyParams,
+							mailHash(mailType, topic._id, user._id));
+					}
+					return Promise.resolve();
+				});
+	});
+	
+	// Delete after 31.05.2020
+	/*// In proposal stage, all sources in proposal tables are users
 	return db.collection('pads_proposal').find({'topicId': topic._id}, {'ownerId': true})
 		.toArrayAsync().then(function(participants) {
 			return db.collection('users')
@@ -225,7 +225,7 @@ function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubje
 				mailSubject, mailSubjectParams, mailBody, mailBodyParams,
 				mailHash(mailType, topic._id, user._id));
 			return Promise.resolve();
-		});
+		});*/
 }
 exports.sendEmailToAllTopicParticipants = sendEmailToAllTopicParticipants;
 
@@ -313,18 +313,28 @@ function sendEmailRatingReminderToGroupMembers(mailType, topic, mailSubject, mai
 }
 exports.sendEmailRatingReminderToGroupMembers = sendEmailRatingReminderToGroupMembers;
 
+/**
+ * @desc: Deadline reminders in every stage
+ */
 exports.sendTopicReminderMessages = function(topic) {
 	switch (topic.stage) {
 		case C.STAGE_PROPOSAL: // we are currently in proposal stage
 		
-			if (Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_SECOND) {
-				return sendEmailToAllTopicParticipants('EMAIL_REMINDER_PROPOSAL_SECOND', topic,
-					'EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT', [topic.name],
-					'EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE', [topic.name, getTimeString(cfg.REMINDER_PROPOSAL_SECOND)]);
-			} else if (Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_FIRST) {
-				return sendEmailToAllTopicParticipants('EMAIL_REMINDER_PROPOSAL_FIRST', topic,
+			if (!topic.isReminderProposalFirst && Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_FIRST) {
+				sendEmailToAllTopicParticipants('EMAIL_REMINDER_PROPOSAL_FIRST', topic,
 					'EMAIL_REMINDER_PROPOSAL_FIRST_SUBJECT', [topic.name],
-					'EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE', [topic.name, getTimeString(cfg.REMINDER_PROPOSAL_FIRST)]);
+					'EMAIL_REMINDER_PROPOSAL_FIRST_MESSAGE', [topic.name, getTimeString(cfg.REMINDER_PROPOSAL_FIRST)])
+				.then(() => {
+					db.collection('topics').update({'_id': topic._id}, { $set: {'isReminderProposalFirst': true} });
+				});
+			}
+			if (topic.isReminderProposalFirst && !topic.isReminderProposalSecond && Date.now() >= topic.nextDeadline-cfg.REMINDER_PROPOSAL_SECOND) {
+				sendEmailToAllTopicParticipants('EMAIL_REMINDER_PROPOSAL_SECOND', topic,
+					'EMAIL_REMINDER_PROPOSAL_SECOND_SUBJECT', [topic.name],
+					'EMAIL_REMINDER_PROPOSAL_SECOND_MESSAGE', [topic.name, getTimeString(cfg.REMINDER_PROPOSAL_SECOND)])
+				.then(() => {
+					db.collection('topics').update({'_id': topic._id}, { $set: {'isReminderProposalSecond': true } });
+				});
 			}
 			break;
 		case C.STAGE_CONSENSUS: // we are currently in consensus stage
@@ -336,20 +346,27 @@ exports.sendTopicReminderMessages = function(topic) {
 			
 			// Group rating reminder, if no ratings where made in that group
 			if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_RATING) {
-				return sendEmailRatingReminderToGroupMembers('EMAIL_RATING_REMINDER_GROUP_MEMBERS', topic,
+				sendEmailRatingReminderToGroupMembers('EMAIL_RATING_REMINDER_GROUP_MEMBERS', topic,
 					'EMAIL_RATING_REMINDER_GROUP_MEMBERS_SUBJECT', [topic.name],
 					'EMAIL_RATING_REMINDER_GROUP_MEMBERS_MESSAGE', [topic.name]);
 			}
 			
 			// Group reminder
-			if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_SECOND) {
-				return sendEmailToAllActiveGroupMembers('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST', topic,
-					'EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_SUBJECT', [topic.name],
-					'EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_MESSAGE', [topic.name, getTimeString(cfg.REMINDER_GROUP_SECOND)]);
-			} else if(Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_FIRST) {
-				return sendEmailToAllActiveGroupMembers('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND', topic,
+			if(!topic.isReminderGroupFirst && Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_FIRST) {
+				sendEmailToAllActiveGroupMembers('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND', topic,
 					'EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_SUBJECT', [topic.name],
-					'EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_MESSAGE', [topic.name, getTimeString(cfg.REMINDER_GROUP_FIRST)]);
+					'EMAIL_ALL_ACTIVE_GROUP_MEMBERS_SECOND_MESSAGE', [topic.name, getTimeString(cfg.REMINDER_GROUP_FIRST)])
+				.then(() => {
+					db.collection('topics').update({'_id': topic._id}, { $set: {'isReminderGroupFirst': true} });
+				});
+			}
+			if(topic.isReminderGroupFirst && !topic.isReminderGroupSecond && Date.now() >= topic.nextDeadline-cfg.REMINDER_GROUP_SECOND) {
+				sendEmailToAllActiveGroupMembers('EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST', topic,
+					'EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_SUBJECT', [topic.name],
+					'EMAIL_ALL_ACTIVE_GROUP_MEMBERS_FIRST_MESSAGE', [topic.name, getTimeString(cfg.REMINDER_GROUP_SECOND)])
+				.then(() => {
+					db.collection('topics').update({'_id': topic._id}, { $set: {'isReminderGroupSecond': true} });
+				});
 			}
 			break;
 	}
