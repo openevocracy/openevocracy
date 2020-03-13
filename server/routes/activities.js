@@ -9,10 +9,9 @@ const C = require('../../shared/constants').C;
 var utils = require('../utils');
 
 /**
- * Gets all activities from database that satisfy the filter
- * - filter: a JSON object specifying what is queried
- * 
- * @return {object} activites
+ * @desc: Gets all activities from database that satisfy the filter
+ * @params: filter: a JSON object specifying what is queried
+ * @return: {object} activites
  */
 function getActivitiesAsync(filter) {
 	return db.collection('user_activities').find(filter).toArrayAsync();
@@ -35,7 +34,7 @@ exports.getUserActivityList = function(req, res) {
    
    // Get activities from database, filtered by privacy level
 	db.collection('user_activities').find({ 'userId': targetUserId, 'privacyLevel': { '$lte': privacyLevel } })
-		.skip(skip).limit(limit).toArrayAsync()
+		.sort( [['_id', -1]] ).skip(skip).limit(limit).toArrayAsync()
 		.then(res.json.bind(res));
 };
 
@@ -66,13 +65,16 @@ function getPrivacyLevel(requestingUserId, targetUserId) {
    return privacyLevel;
 }
 
-/*
+/**
  * @desc: Get list of specified activities of specified users
  */
 exports.getSpecificActivities = function(req, res) {
 	getActivitiesAsync().then(res.json.bind(res)); // up to now returns all activities, TODO
 };
 
+/**
+ * @desc: Query a specific activity
+ */
 exports.query = function(req, res) { // not tested yet / probably not properly implemented
    const activityId = ObjectId(req.activityId);
    const userId = ObjectId(req.userId);
@@ -87,11 +89,10 @@ exports.query = function(req, res) { // not tested yet / probably not properly i
       .catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
-
 /**
- * @desc: Creates an activity in the database
+ * @desc: Stores an activity in the database
  */
-function storeActivity(userId, type, targetId) {
+function addActivity(userId, type, targetId) {
 	
 	// Get privacy level for current activity type from user activity settings
 	return db.collection('user_activity_settings').findOneAsync({ 'userId': userId }).then((privacySettings) => {
@@ -105,33 +106,36 @@ function storeActivity(userId, type, targetId) {
 			'type': type,
 			'targetId': targetId,
 			'privacyLevel': privacyLevel
-	   };
-	   
-	   // Adds object to database
-   	return db.collection('user_activities').insertAsync(activity);
+		};
+		
+		// Adds object to database
+		return db.collection('user_activities').insertAsync(activity);
 	});
 }
-exports.storeActivity = storeActivity;
+exports.addActivity = addActivity;
 
 
 /**
  * @desc: Creates an activity (to be called from POST)
  */
-exports.create = function(req, res) {
+/*exports.create = function(req, res) {
 	const type = req.body.type;
 	const targetId = ObjectId(req.body.targetId);
 	const userId = ObjectId(req.user._id);
 
-   // Reject if user id is missing
-   if(_.isEmpty(userId))
+   // Reject if user id or target id is missing
+   if(!userId || !targetId)
       return utils.rejectPromiseWithMessage(400, 'BAD_REQUEST');
 
    // Stores activity in database
-   storeActivity(userId, type, targetId)
+   addActivity(userId, type, targetId)
       .then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
-};
+};*/
 
 
+/**
+ * @desc: Deletes a specific activity
+ */
 exports.delete = function(req,res) {
 	const actId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);

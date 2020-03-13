@@ -23,10 +23,10 @@ You should have a server with ssh access and root permissions and you should kno
 
 ### 1. Get Code
 
-Get the code with one of the following two options:
+Get the code with *one* of the following two options:
 
-  * Download the [latest release](https://github.com/openevocracy/openevocracy/releases/tag/v0.2.0) or
-  * Clone the repository with `git clone https://github.com/openevocracy/openevocracy.git` and switch to the latest stable branch with `git checkout v0.2`
+  * Download the [latest release](https://github.com/openevocracy/openevocracy/releases/tag/v0.3.0) or
+  * Clone the repository with `git clone https://github.com/openevocracy/openevocracy.git` and switch to the latest stable branch with `git checkout v0.3`
 
 ### 2. Customize the config
 
@@ -56,7 +56,7 @@ Stop the OpenEvocracy instance, pull the updated image, start the instance again
 
 ```
 docker-compose down
-docker pull openevocracy/openevocracy:v0.2
+docker pull openevocracy/openevocracy:v0.3
 docker-compose up -d
 ```
 

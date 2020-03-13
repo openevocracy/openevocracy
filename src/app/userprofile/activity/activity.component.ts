@@ -76,6 +76,8 @@ export class UserprofileActivityComponent implements OnInit {
 		const skip = e.pageIndex*e.pageSize;
 		const limit = e.pageSize;
 		
+		console.log(skip, limit);
+		
 		// Get new activity list with skip and limit
 		this.getActivityList(skip, limit);
 	}
@@ -86,7 +88,7 @@ export class UserprofileActivityComponent implements OnInit {
 	public getActivityList(skip, limit) {
 		this.activityListService.getUserActivityList(this.profileId, skip, limit).subscribe(res => {
 			// Sort activities by timestamp (inversely)
-			const sortedActivityList = _.sortBy(res, 'timestamp').reverse();
+			const sortedActivityList = _.sortBy(res, 'timestamp');
 			
 			// Initialize activityList and construct all elements
 			this.activityList = [];

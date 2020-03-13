@@ -113,7 +113,7 @@ app.get('/file/topic/:id', auth(), topics.query.download);
 app.post('/json/topic/proposal/create', auth(), topics.proposals.create);
 
 // @desc: Get proposal doc for editor and html snapshot
-app.get('/json/topic/proposal/:id', auth(), topics.query.proposal);
+app.get('/json/topic/proposal/:id', auth(), topics.proposals.query);
 
 // @desc: Get detailed information about proposal pad
 //app.get('/json/proposal/editor/:id', auth(), pads.getPadProposalDetails);
@@ -153,7 +153,7 @@ app.get('/json/user/activitylistlength/:id', auth(), activities.getUserActivityL
  * @desc: Get, create and delete activities
  */
 app.get('/json/activity/:id', auth(), activities.query);
-app.post('/json/activity/create', auth(), activities.create);
+//app.post('/json/activity/create', auth(), activities.create);
 //app.delete('/json/activity/:id', auth(), activities.delete); //activities are now only deleted by the server
 
 // #########################

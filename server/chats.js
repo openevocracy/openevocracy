@@ -214,7 +214,7 @@ exports.processMentionedUsers = function(req, res) {
 	// Add activities for mentioned users
 	_.each(userIds, (userId) => {
 		console.log("User mentioned: ", userId);
-		activities.storeActivity(userId, C.ACT_MENTIONED, groupId);
+		activities.addActivity(userId, C.ACT_MENTIONED, groupId);
 	});
 	
 	// Sends mail to all mentioned users

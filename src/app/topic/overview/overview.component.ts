@@ -112,9 +112,6 @@ export class TopicOverviewComponent extends EditorComponent {
 			
 			// Redirect to proposal editor tab
 			this.router.navigate(['/topic', this.topicId, 'proposal']);
-			
-			// Add activity
-			this.activityListService.addActivity(C.ACT_PROPOSAL_CREATED, this.topicId).subscribe();
 		});
 	}
 	

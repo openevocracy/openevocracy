@@ -79,18 +79,10 @@ export class TopiclistComponent implements OnInit {
 				topic.voted = res.voted;
 				topic.numVotes--;
 			});
-			this.activityListService.addActivity(C.ACT_TOPIC_UNVOTE, tid).subscribe(res => { // add activity
-					if (!res)
-						console.log("Error: ACT_TOPIC_UNVOTE could not be added.");
-			});
 		} else {
 			this.topicService.vote(tid, uid).subscribe(res => {
 				topic.voted = res.voted;
 				topic.numVotes++;
-			});
-			this.activityListService.addActivity(C.ACT_TOPIC_VOTE, tid).subscribe(res => { // add activity
-					if (!res)
-						console.log("Error: ACT_TOPIC_VOTE could not be added.");
 			});
 		}
 	}
@@ -113,9 +105,6 @@ export class TopiclistComponent implements OnInit {
 				
 				// Navigate to new topic
 				this.router.navigate(['/topic/'+topicId]);
-				
-				// Add activity
-				this.activityListService.addActivity(C.ACT_TOPIC_CREATE, topicId).subscribe();
 				
 				// Show snackbar
 				this.snackbarService.showSnackbar('DIALOG_ADDTOPIC_SNACKBAR_SUCCESS');

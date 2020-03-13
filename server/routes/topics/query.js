@@ -9,6 +9,7 @@ const appRoot = require('app-root-path');
 const C = require('../../../shared/constants').C;
 const db = require('../../database').db;
 const utils = require('../../utils');
+const activities = require('../activities');
 const pads = require('../pads');
 const manage = require('./manage');
 
@@ -27,8 +28,13 @@ exports.vote = function(req, res) {
 	// If it does'nt exist: Insert
 	db.collection('topic_votes')
 		.updateAsync(topic_vote, topic_vote, {'upsert': true})
-		.then(function(update_result) { return { 'voted': true }; })
-		.then(res.json.bind(res));
+		.then(function(update_result) {
+			// Add activity
+			activities.addActivity(topic_vote.userId, C.ACT_TOPIC_VOTE, topic_vote.topicId);
+			
+			// Return voted value
+			return { 'voted': true };
+		}).then(res.json.bind(res));
 };
 
 /*
@@ -43,8 +49,13 @@ exports.unvote = function(req, res) {
     
 	// Remove vote from database
 	db.collection('topic_votes').removeAsync(topic_vote)
-		.then(function(remove_result) { return {'voted': false}; })
-		.then(res.json.bind(res));
+		.then(function(remove_result) {
+			// Add activity
+			activities.addActivity(topic_vote.userId, C.ACT_TOPIC_UNVOTE, topic_vote.topicId);
+			
+			// Return voted value
+			return {'voted': false};
+		}).then(res.json.bind(res));
 };
 
 /*
@@ -156,24 +167,6 @@ exports.overview = function(req, res) {
 };
 
 /**
- * @desc: Get topic proposal document information and html snapshot
- */
-exports.proposal = function(req, res) {
-	var topicId = ObjectId(req.params.id);
-   var userId = ObjectId(req.user._id);
-   
-   // Get proposal pad data
-   db.collection('pads_proposal')
-   	.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { '_id': true, 'docId': true, 'ownerId': true })
-   	.then((pad) => {
-   		if (_.isNull(pad))
-   			return utils.rejectPromiseWithAlert(404, 'danger', 'PAD_NOT_FOUND');
-   		// Extend pad by html snapshot and return whole pad
-   		return pads.addHtmlToPadAsync('proposal', pad);
-   }).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
-};
-
-/**
  * @desc: Updates a topic, can only be done by the author
  */
 exports.update = function(req, res) {
@@ -230,16 +223,14 @@ exports.create = function(req, res) {
 		topic.stage = C.STAGE_SELECTION; // start in selection stage
 		topic.level = 0;
 		topic.nextDeadline = manage.calculateDeadline(topic.stage);
-		var create_topic_promise = db.collection('topics').insertAsync(topic);
-
-		// Create description
-		/*var dpid = ObjectId(); // Create random pad id
-		var description = { 'pid': dpid, 'tid': topic._id };
-		var createTopicDescriptionPromise = db.collection('topic_descriptions').insertAsync(description);*/
+		const create_topic_promise = db.collection('topics').insertAsync(topic);
 		
 		// Create pad
 		var pad = { 'topicId': topic._id, 'ownerId': userId, 'expiration': topic.nextDeadline };
 		var create_pad_promise = pads.createPadAsync(pad, 'topic_description');
+		
+		// Add activity
+		activities.addActivity(userId, C.ACT_TOPIC_CREATE, topic._id);
 		
 		return Promise.join(create_topic_promise, create_pad_promise).return(topic);
 	}).then(function(topic) {
@@ -282,16 +273,3 @@ exports.getTopiclist = function(req, res) {
 		Promise.map(topics, _.partial(manage.appendTopicInfoAsync, _, userId, false)).then(res.json.bind(res));
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
-
-/*
- * @desc: Get a specific topiclist element
- */
-/*exports.getTopiclistElement = function(req, res) {
-	const topicId = ObjectId(req.params.id);
-	const userId = ObjectId(req.user._id);
-	
-	db.collection('topics').findOneAsync({'_id': topicId})
-		.then(manage.manageTopicStateAsync).then(function(topic) {
-			return manage.appendTopicInfoAsync(topic, userId, false);
-	}).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
-};*/

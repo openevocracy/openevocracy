@@ -289,7 +289,7 @@ exports.remixGroupsAsync = function(topic) {
 		const createActivity_promise = groupsMemberIds_promise.then((leaders) => {
 			_.each(leaders, function(el) {
 				console.log("Leader", el);
-				activities.storeActivity(el, C.ACT_ELECTED_DELEGATE, topicId);
+				activities.addActivity(el, C.ACT_ELECTED_DELEGATE, topicId);
 			});
 		});
 		// Add activities for all members who were not selected as delegates // TODO CHECK
@@ -297,7 +297,7 @@ exports.remixGroupsAsync = function(topic) {
 			res = query.groupMembers(groupId);
 			_.each(res.members, function(el) {
 				console.log("Non-leader", el.userId);
-				activities.storeActivity(el.userId, C.ACT_DROP_OUT, topicId);
+				activities.addActivity(el.userId, C.ACT_DROP_OUT, topicId);
 			});
 		});
 		
