@@ -207,7 +207,7 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 	/**
 	 * @desc: Is called when the description animation has finished
 	 */
-	private descAnimationDone(e) {
+	public descAnimationDone(e) {
 		// If default faded in
 		if (e.toState) {}
 		
@@ -223,7 +223,7 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 	/**
 	 * @desc: Is called when the detail animation has finished
 	 */
-	private detailAnimationDone(e) {
+	public detailAnimationDone(e) {
 		// If details faded in
 		if (e.toState) {
 			// Hide default text

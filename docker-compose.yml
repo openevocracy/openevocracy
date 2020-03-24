@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    image: openevocracy/openevocracy:v0.2
+    image: openevocracy/openevocracy:v0.3
     ports:
      - $PORT:8080
     depends_on:
@@ -12,7 +12,7 @@ services:
     environment:
      - ENV=prod
   mongodb:
-    image: mongo
+    image: mongo:3.4.23
     restart: always
     volumes:
     - ./data:/data/db

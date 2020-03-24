@@ -105,6 +105,8 @@ export class EditorComponent implements OnInit, OnDestroy {
 		this.connectionReconnectedSubscription.unsubscribe();
 	}
 	
+	public editorCreated(e) {}
+	
 	protected translatePlaceholder(key) {
 		this.translateService.get(key).subscribe(label => {
 			this.placeholder = label;
