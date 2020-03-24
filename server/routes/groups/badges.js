@@ -109,7 +109,6 @@ exports.updateEditorBadge = function(userId, pad) {
 	memberIds.forEach((memberId) => {
 		// Try to load badge status from cache
 		const badgeStatusFromCache = getFromCache(memberId, groupId);
-		console.log(badgeCache);
 		
 		// If badge status is not in cache, add it to cache, to speed up the next function call
 		let badgeStatus_promise = Promise.resolve(badgeStatusFromCache);

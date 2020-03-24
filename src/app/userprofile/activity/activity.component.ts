@@ -76,8 +76,6 @@ export class UserprofileActivityComponent implements OnInit {
 		const skip = e.pageIndex*e.pageSize;
 		const limit = e.pageSize;
 		
-		console.log(skip, limit);
-		
 		// Get new activity list with skip and limit
 		this.getActivityList(skip, limit);
 	}

@@ -72,8 +72,12 @@ mention-list ul li a:active {
 	text-decoration: none;
 }
 
+.ql-container { font-family: 'Roboto'; /*font-size: 15px;*/ }
+.ql-editor { line-height: 1.5; }
+/*.ql-snow .ql-editor h1 { font-size: 30px; line-height: 40px; }*/
+
 /* Editor line numbering */
-.ql-numbering span { position: absolute; font-size: 10px; font-family: monospace; cursor: pointer; color: $grey500; padding: 2px 10px; }
+.ql-numbering span { position: absolute; font-size: 10px; /*line-height: 23px;*/ font-family: monospace; cursor: pointer; color: $grey500; padding: 0 10px; }
 .ql-numbering span:hover, .ql-numbering span:focus, .ql-numbering span:active { color: $black; }
 
 /* Group vis */

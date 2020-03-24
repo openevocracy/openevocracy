@@ -1,0 +1,86 @@
+import * as uuid from 'uuid';
+
+//import * as Parchment from 'parchment';
+
+import * as QuillNamespace from 'quill';
+const Quill: any = QuillNamespace;
+
+const Block = Quill.import('blots/block');
+const Break = Quill.import('blots/break');
+//const Inline = Quill.import('blots/inline');
+//const TextBlot = Quill.import('blots/text');
+
+import Delta from 'quill-delta';
+
+export class P extends Block {
+
+  static blotName = 'blockP';
+  static tagName = 'p';
+
+	static create(p) {
+		const node = super.create();
+		console.log('create', p);
+		// If tag has no line id, add one
+		node.setAttribute('data-line', p.line || uuid.v4());
+		return node;
+	}
+  
+	static formats(node) {
+		//console.log('formats', node);
+		
+		// If a line was added before the current line, add new line id to the previous element
+		if (node.previousElementSibling && node.getAttribute('data-line') == node.previousElementSibling.getAttribute('data-line')) {
+			node.previousElementSibling.setAttribute('data-line', uuid.v4());
+		}
+		// If a line was added after the current line, add new line id to the next element
+		if (node.nextElementSibling && node.getAttribute('data-line') == node.nextElementSibling.getAttribute('data-line')) {
+			node.nextElementSibling.setAttribute('data-line', uuid.v4());
+		}
+		
+		return { 'line': node.getAttribute('data-line') };
+	}
+	
+	moveChildren(target, ref) {
+		//console.log('mv', target, ref);
+		
+		// When combining two lines, keep the id of the previous one
+		if(target && ref) {
+			target.domNode.dataset.line = target.prev.domNode.dataset.line;
+		}
+		
+		super.moveChildren(target, ref);
+	}
+	
+	/*split(index, force = false) {
+		console.log('split', index, force);
+		if (force && (index === 0 || index >= this.length() - 1)) {
+			let clone = this.clone();
+			console.log('clone', clone);
+			// If cursor is in beginning of line
+			if (index === 0) {
+				this.parent.insertBefore(clone, this);
+				
+				if(clone.prev)
+					console.log('0', clone.prev);
+				
+				return this;
+			// If cursor is in the middle or end of the line
+			} else {
+				this.parent.insertBefore(clone, this.next);
+				
+				if(clone.prev) {
+					console.log('1', clone.prev);
+					console.log(clone.prev.domNode.dataset.line);
+					clone.prev.domNode.dataset.line = clone.domNode.dataset.line;
+				}
+				
+				return clone;
+			}
+		} else {
+			let next = super.split(index, force);
+			console.log('next', next);
+			//this.cache = {};
+			return next;
+		}
+	}*/
+}

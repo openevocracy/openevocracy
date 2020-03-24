@@ -12,6 +12,10 @@ import { SnackbarService } from '../../_services/snackbar.service';
 
 import { EditorService } from '../../_editor/editor.service';
 import { LineNumbersService } from '../../_editor/linenumbers.service';
+//import { CustomBlock } from '../../_editor/custom-block';
+//import { IdAttribute } from '../../_editor/custom-block';
+import { Comment } from '../../_editor/blots';
+//import { Block } from '../../_editor/block-blots';
 
 import { EditorComponent } from '../../editor/editor.component';
 
@@ -20,6 +24,11 @@ import * as $ from 'jquery';
 import * as _ from 'underscore';
 
 import { C } from '../../../../shared/constants';
+
+import * as QuillNamespace from 'quill';
+const Quill: any = QuillNamespace;
+
+//const Keyboard = Quill.import('modules/keyboard');
 
 @Component({
 	selector: 'app-editor',
@@ -45,10 +54,27 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 	) {
 		super(snackBar, router, userService, translateService, connectionAliveService, editorService, dialog);
 		
+		/*const bindings = {
+			// Called when Enter is pressed
+			handleEnter: {
+				key: Keyboard.keys.ENTER,
+					handler: (range, context) => {
+					console.log('enter', range, context);
+				}
+			}
+      }*/
+		
 		// Initialize authorship module
 		this.quillModules = _.extend(this.quillModules,{
-			'authorship': { 'enabled': true, 'authorId': this.userId }
+			'authorship': { 'enabled': true, 'authorId': this.userId }/*,
+			'keyboard': { 'bindings': bindings }*/
 		});
+		
+		Quill.register(Comment);
+		//Quill.register('blots/block', Comment);
+		//Quill.register('blots/block', CustomBlock);
+		//Quill.register('attributors/attribute/id', IdAttribute);
+		//Quill.register('formats/id', IdAttribute);
 		
 		/*this.quillEditor.getModule('cursors').set({
 			id: this.me.userId,
@@ -81,6 +107,8 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 	 */
 	public editorCreated(editor) {
 		
+		//editor.register('blots/block', CustomBlock);
+		
 		// Bind all necessary information to editor
 		const quillEditor = _.extend(editor, {
 			'docId': this.group.docId,
@@ -109,7 +137,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 	 */
 	public afterContentInit() {
 		// Calculate and add line numbers to editor
-      this.lineNumbersService.getLineNumbers();
+      this.lineNumbersService.getLineNumbers(this.editor);
 	}
 	
 	/**
@@ -119,7 +147,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 		// Update numbering after every change
 		const numbering = document.getElementsByClassName("ql-numbering")[0];
 		numbering.remove();  // Remove
-		this.lineNumbersService.getLineNumbers();  // Add
+		this.lineNumbersService.getLineNumbers(this.editor);  // Add
 	}
 	
 	/**

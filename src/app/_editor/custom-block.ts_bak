@@ -1,0 +1,54 @@
+import * as uuid from 'uuid';
+
+//declare const Quill: any;
+
+import * as QuillNamespace from 'quill';
+const Quill: any = QuillNamespace;
+
+import Parchment from 'parchment'
+
+const IdAttribute = new Parchment.Attributor.Attribute('id', 'id', {
+    scope: Parchment.Scope.BLOCK,
+});
+
+//export { IdAttribute };
+
+const Block = Quill.import('blots/block');
+
+class CustomBlock extends Block { //Parchment.default.Block {
+	/*static create() {
+		const node = super.create();
+		node.setAttribute("data-line", uuid.v4());
+		return node;
+	}*/
+	
+	constructor(domNode) {
+		super(domNode);
+		console.log(domNode);
+		domNode.setAttribute('id', uuid.v4());
+		//this.cache = {};
+	}
+
+	split(index, force = false) {
+  		console.log('split');
+		if (force && (index === 0 || index >= this.length() - 1)) {
+			const clone = this.clone();
+			clone.domNode.id = uuid.v4();
+			if (index === 0) {
+				this.parent.insertBefore(clone, this);
+				return this;
+			}
+			this.parent.insertBefore(clone, this.next);
+			return clone;
+		}
+		const next = super.split(index, force);
+		next.domNode.id = uuid.v4();
+		//this.cache = {};
+		return next;
+  }
+}
+
+CustomBlock.blotName = 'block';
+CustomBlock.tagName = 'p';
+
+export { IdAttribute, CustomBlock };
