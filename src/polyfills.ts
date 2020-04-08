@@ -72,3 +72,6 @@ import 'zone.js/dist/zone';  // Included with Angular CLI.
 
 import * as process from 'process';
 window['process'] = process;
+
+// Adds global (see https://github.com/angular/angular-cli/issues/9827#issuecomment-386154063)
+(window as any).global = window;
