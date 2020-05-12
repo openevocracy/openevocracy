@@ -261,14 +261,6 @@ exports.logout = function(req, res) {
 
 // POST /json/auth/verifyEmail
 exports.verifyEmail = async function(req, res) {
-	if(cfg.DEBUG) {
-		await db.collection('users').updateAsync(
-			{'email': 'test@example.com'}, { $set: { 'verified': true } }, {});
-		
-		// Update was successful (user was found), send success
-		utils.sendAlert(res, 200, 'success', 'USER_ACCOUNT_VERIFICATION_SUCCESS');
-		return;
-	}
 	
 	// Get user id from query and store as object id
 	try {

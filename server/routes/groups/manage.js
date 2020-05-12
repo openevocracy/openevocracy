@@ -168,7 +168,7 @@ exports.createGroupsAsync = function(topic) {
 			// Filter by valid status and return id's of users
 			return _.pluck(_.filter(pads, function(pad) {
 				return pad.valid;
-			}), 'ownerId');
+			}), 'authorId');
 	});
 	
 	var storeValidParticipantsPromise = validParticipants_promise.then(function(validParticipants) {
@@ -199,9 +199,9 @@ exports.createGroupsAsync = function(topic) {
 		// Get group relations (previous pad ids and member ids)
 		// Note: previous group id is not possible here, since initially there is no previous group
 		const groupRelations_promise = db.collection('pads_proposal')
-			.find({ 'topicId': topicId, 'ownerId': {$in: group_members} }, {'_id': true, 'ownerId': true}).toArrayAsync()
+			.find({ 'topicId': topicId, 'authorId': {$in: group_members} }, {'_id': true, 'authorId': true}).toArrayAsync()
 			.map(function(rawGroupRelation) {
-				return { 'prevPadId': rawGroupRelation._id, 'userId': rawGroupRelation.ownerId };
+				return { 'prevPadId': rawGroupRelation._id, 'userId': rawGroupRelation.authorId };
 		});
 		
 		// Store group in database

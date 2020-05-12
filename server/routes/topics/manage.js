@@ -87,14 +87,14 @@ function manageConsensusStageAsync(topic, levelDuration) {
             };
                         
             // Add activity for author
-            const authorActivity_promise = activities.addActivity(topic.owner, C.ACT_TOPIC_COMPLETE, topicId);
+            const authorActivity_promise = activities.addActivity(topic.authorId, C.ACT_TOPIC_COMPLETE, topicId);
             
             // Add activities for interested persons (persons who voted for the respective topics)
 				const interestedActivity_promise = db.collection('topic_votes')
 					.find({'topicId': topicId}, {'userId': true}).toArrayAsync()
 					.then(function(userVotes) {
 							_.each(userVotes, function(el) {
-									if (!utils.equalId(el.userId, topic.owner)) // if activity has not yet been added
+									if (!utils.equalId(el.userId, topic.authorId)) // if activity has not yet been added
 										activities.addActivity(el.userId, C.ACT_TOPIC_COMPLETE, topicId);
 								});
 						});
@@ -286,14 +286,14 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 	if(with_details) {
 		// Get topic description
 		pad_description_promise = db.collection('pads_topic_description')
-			.findOneAsync({'topicId': topicId}, { 'docId': true, 'ownerId': true })
+			.findOneAsync({'topicId': topicId}, { 'docId': true, 'authorId': true })
 			.then(function(pad) {
 				return pads.addHtmlToPadAsync('topic_description', pad);
 		});
 		
 		// Get proposal of user
 		user_proposal_promise = db.collection('pads_proposal')
-			.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { 'docId': true, 'ownerId': true })
+			.findOneAsync({ 'topicId': topicId, 'authorId': userId }, { 'docId': true, 'authorId': true })
 			.then(function(pad) {
 				return _.isNull(pad) ? null : pads.addHtmlToPadAsync('proposal', pad);
 		});
