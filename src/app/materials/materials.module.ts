@@ -75,4 +75,4 @@ import {
 		
 	]
 })
-export class MaterialModule {}
+export class MaterialsModule {}

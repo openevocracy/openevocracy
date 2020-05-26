@@ -14,9 +14,9 @@ import { C } from '../../../../shared/constants';
 import * as _ from 'underscore';
 
 @Component({
-	selector: 'app-activity',
-	templateUrl: './activity.component.html',
-	styleUrls: ['./activity.component.scss']
+	selector: 'app-activities',
+	templateUrl: './activities.component.html',
+	styleUrls: ['./activities.component.scss']
 })
 export class UserprofileActivityComponent implements OnInit {
 	

@@ -28,11 +28,10 @@ import { GroupMembersComponent } from '../group/members/members.component';
 import { GroupForumThreadComponent } from '../group/forum/thread/thread.component';
 import { GroupForumComponent } from '../group/forum/forum.component';
 
-import { UserprofileComponent } from '../userprofile/userprofile.component';
-import { UserprofileOverviewComponent } from '../userprofile/overview/overview.component';
-import { UserprofileActivityComponent } from '../userprofile/activity/activity.component';
-
-import { SettingsComponent } from '../settings/settings.component';
+import { UserComponent } from '../user/user.component';
+import { UserprofileOverviewComponent } from '../user/overview/overview.component';
+import { UserprofileActivityComponent } from '../user/activities/activities.component';
+import { SettingsComponent } from '../user/settings/settings.component';
 
 const appChildRoutes: Routes = [
 	{ path: '', redirectTo: 'topiclist', pathMatch: 'full' },
@@ -69,7 +68,7 @@ const appChildRoutes: Routes = [
 	},
 	{
 		path: 'user/profile/:id',
-		component: UserprofileComponent,
+		component: UserComponent,
 		runGuardsAndResolvers: 'always',
 		children: [
 			{ path: '', redirectTo: 'overview', pathMatch: 'full' },

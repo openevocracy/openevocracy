@@ -8,11 +8,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import 'hammerjs';
 
 // Modules
-import { MaterialModule } from './_modules/material.module';
+import { MaterialsModule } from './materials/materials.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { QuillModule } from 'ngx-quill';
 import { MentionModule } from 'angular-mentions';
 import { VisModule } from 'ngx-vis';
+import { TopicModule } from './topic/topic.module';
+import { UserModule } from './user/user.module';
+import { GroupModule } from './group/group.module';
 
 // Routing
 import { AppRoutingModule } from './_routing/app-routing.module';
@@ -37,7 +40,6 @@ import { SecureComponent } from './secure/secure.component';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 import { TopiclistComponent } from './topiclist/topiclist.component';
-import { TopicComponent } from './topic/topic.component';
 
 // Dialogs
 import { ShareDialogComponent } from './dialogs/share/share.component';
@@ -70,34 +72,12 @@ import { LineNumbersService } from './_editor/linenumbers.service';
 import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 
-// Group
-import { GroupComponent } from './group/group.component';
-import { GroupMemberbarComponent } from './group/memberbar/memberbar.component';
-import { GroupEditorComponent } from './group/editor/editor.component';
-import { GroupForumComponent } from './group/forum/forum.component';
-import { GroupForumThreadComponent } from './group/forum/thread/thread.component';
-import { GroupChatComponent } from './group/chat/chat.component';
-import { GroupMembersComponent } from './group/members/members.component';
-import { GroupToolbarComponent } from './group/toolbar/toolbar.component';
-import { GroupDocumentComponent } from './group/document/document.component';
-
-// Topic
-import { TopicToolbarComponent } from './topic/toolbar/toolbar.component';
-import { TopicOverviewComponent } from './topic/overview/overview.component';
-import { TopicProposalComponent } from './topic/proposal/proposal.component';
-import { TopicGroupsComponent } from './topic/groups/groups.component';
-
 // New components (not sorted)
-import { SettingsComponent } from './settings/settings.component';
 import { EditorComponent } from './editor/editor.component';
 //import { PadviewComponent } from './padview/padview.component';
-import { UserprofileComponent } from './userprofile/userprofile.component';
 import { EditorFieldComponent } from './editorfield/editorfield.component';
 import { StarratingComponent } from './starrating/starrating.component';
 import { LoginEmailDialogComponent } from './dialogs/loginemail/loginemail.component';
-import { TopicStagebarComponent } from './topic/stagebar/stagebar.component';
-import { UserprofileOverviewComponent } from './userprofile/overview/overview.component';
-import { UserprofileActivityComponent } from './userprofile/activity/activity.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -119,48 +99,32 @@ export function loadConfig(configService: ConfigService) {
 		SecureComponent,
 		AlertComponent,
 		RegisterComponent,
-		TopicComponent,
 		CountdownComponent,
-		SettingsComponent,
 		EditorComponent,
-		GroupEditorComponent,
 		AddonePipe,
 		TimestampPipe,
 		//PadviewComponent,
-		UserprofileComponent,
 		ShareDialogComponent,
 		FeedbackDialogComponent,
-		GroupForumComponent,
 		EditThreadDialogComponent,
 		EditorFieldComponent,
-		GroupForumThreadComponent,
 		AskDeleteDialogComponent,
 		EditForumPostDialogComponent,
 		EditForumCommentDialogComponent,
 		GroupWelcomeDialogComponent,
-		GroupChatComponent,
-		GroupMembersComponent,
-		GroupToolbarComponent,
-		GroupComponent,
-		GroupMemberbarComponent,
 		StarratingComponent,
 		AddtopicDialogComponent,
 		CloseEditorDialogComponent,
 		LoginEmailDialogComponent,
-		GroupDocumentComponent,
-		TopicToolbarComponent,
-		TopicOverviewComponent,
-		TopicProposalComponent,
-		TopicGroupsComponent,
-		TopicStagebarComponent,
-		ProposalDialogComponent,
-		UserprofileOverviewComponent,
-		UserprofileActivityComponent
+		ProposalDialogComponent
 	],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,
-		MaterialModule,
+		MaterialsModule,
+		TopicModule,
+		UserModule,
+		GroupModule,
 		FontAwesomeModule,
 		AppRoutingModule,
 		PublicRoutingModule,

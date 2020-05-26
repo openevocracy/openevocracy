@@ -8,11 +8,11 @@ import * as _ from 'underscore';
 import { faFire, faUser } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
-	selector: 'app-userprofile',
-	templateUrl: './userprofile.component.html',
-	styleUrls: ['./userprofile.component.scss']
+	selector: 'app-user',
+	templateUrl: './user.component.html',
+	styleUrls: ['./user.component.scss']
 })
-export class UserprofileComponent implements OnInit {
+export class UserComponent implements OnInit {
 
 	public userId: string;
 	public profileId: string;

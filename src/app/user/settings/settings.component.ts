@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import { AlertService } from '../_services/alert.service';
-import { UtilsService } from '../_services/utils.service';
-import { UserService } from '../_services/user.service';
-import { HttpManagerService } from '../_services/http-manager.service';
+import { AlertService } from '../../_services/alert.service';
+import { UtilsService } from '../../_services/utils.service';
+import { UserService } from '../../_services/user.service';
+import { HttpManagerService } from '../../_services/http-manager.service';
 
 import { faSave } from '@fortawesome/free-solid-svg-icons';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
