@@ -10,7 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "extract": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json",
-    "test_integration": "ENV=test mocha --require test/it-helper test/users.js test/topics.js test/proposals.js test/activities.js --exit"
+    "test_integration": "ENV=test mocha --require test/it-helper test/users.js test/topics.js test/proposals.js test/activities.js"
   },
   "private": true,
   "dependencies": {
