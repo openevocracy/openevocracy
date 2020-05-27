@@ -7,6 +7,8 @@ import { TopicProposalComponent } from './proposal/proposal.component';
 import { TopicGroupsComponent } from './groups/groups.component';
 import { TopicStagebarComponent } from './stagebar/stagebar.component';
 
+import { TopicRoutingModule } from '../_routing/topic-routing.module';
+
 @NgModule({
 	declarations: [
 		TopicComponent,
@@ -15,6 +17,9 @@ import { TopicStagebarComponent } from './stagebar/stagebar.component';
 		TopicProposalComponent,
 		TopicGroupsComponent,
 		TopicStagebarComponent
+	],
+	imports: [
+		TopicRoutingModule
 	]
 })
 export class TopicModule {}

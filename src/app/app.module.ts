@@ -122,9 +122,6 @@ export function loadConfig(configService: ConfigService) {
 		BrowserModule,
 		BrowserAnimationsModule,
 		MaterialsModule,
-		TopicModule,
-		UserModule,
-		GroupModule,
 		FontAwesomeModule,
 		AppRoutingModule,
 		PublicRoutingModule,
@@ -134,6 +131,9 @@ export function loadConfig(configService: ConfigService) {
 		QuillModule.forRoot(),
 		MentionModule,
 		VisModule,
+		TopicModule,
+		UserModule,
+		GroupModule,
 		TranslateModule.forRoot({
 			loader: {
 				provide: TranslateLoader,

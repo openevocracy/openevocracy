@@ -10,6 +10,8 @@ import { GroupMembersComponent } from './members/members.component';
 import { GroupToolbarComponent } from './toolbar/toolbar.component';
 import { GroupDocumentComponent } from './document/document.component';
 
+import { GroupRoutingModule } from '../_routing/group-routing.module';
+
 @NgModule({
 	declarations: [
 		GroupComponent,
@@ -21,6 +23,9 @@ import { GroupDocumentComponent } from './document/document.component';
 		GroupMembersComponent,
 		GroupToolbarComponent,
 		GroupDocumentComponent
+	],
+	imports: [
+		GroupRoutingModule
 	]
 })
 export class GroupModule {}
