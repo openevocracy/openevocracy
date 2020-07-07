@@ -2,13 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogConfig } from "@angular/material";
 
-import { ShareDialogComponent } from '../dialogs/share/share.component';
-import { FeedbackDialogComponent } from '../dialogs/feedback/feedback.component';
+import { ShareDialogComponent } from '../../dialogs/share/share.component';
+import { FeedbackDialogComponent } from '../../dialogs/feedback/feedback.component';
 
-import { AlertService } from '../_services/alert.service';
-import { UserService } from '../_services/user.service';
-import { LanguageService } from '../_services/language.service';
-import { HttpManagerService } from '../_services/http-manager.service';
+import { AlertService } from '../../_services/alert.service';
+import { UserService } from '../../_services/user.service';
+import { LanguageService } from '../../_services/language.service';
+import { HttpManagerService } from '../../_services/http-manager.service';
 
 import { faCommentAlt, faGlobe, faCogs, faShareSquare } from '@fortawesome/free-solid-svg-icons';
 

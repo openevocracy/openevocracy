@@ -2,12 +2,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 
-import { Guard } from '../_services/guard.service';
+//import { Guard } from '../_services/guard.service';
 
 // Components
-import { SecureComponent } from '../secure/secure.component';
-import { TopiclistComponent } from '../topiclist/topiclist.component';
-import { EditorComponent } from '../editor/editor.component';
+//import { SecureComponent } from '../secure/secure.component';
+//import { TopiclistComponent } from '../topiclist/topiclist.component';
+//import { EditorComponent } from '../editor/editor.component';
 //import { PadviewComponent } from '../padview/padview.component';
 
 // Topic module
@@ -31,9 +31,9 @@ import { EditorComponent } from '../editor/editor.component';
 //import { UserprofileActivityComponent } from '../user/activities/activities.component';
 //import { SettingsComponent } from '../user/settings/settings.component';
 
-const appChildRoutes: Routes = [
-	{ path: '', redirectTo: 'topiclist', pathMatch: 'full' },
-	{ path: 'topiclist', component: TopiclistComponent },
+//const appChildRoutes: Routes = [
+	//{ path: '', redirectTo: 'topiclist', pathMatch: 'full' },
+	//{ path: 'topiclist', component: TopiclistComponent },
 	//{
 	//	path: 'topic/:id',
 	//	component: TopicComponent,
@@ -75,10 +75,10 @@ const appChildRoutes: Routes = [
 	//	]
 	//},
 	//{ path: 'settings/:id', component: SettingsComponent }
-];
+//];
 
 const appRoutes: Routes = [
-	{ path: '', component: SecureComponent, canActivate: [Guard], children: appChildRoutes }
+	//{ path: '', component: SecureComponent, canActivate: [Guard], children: appChildRoutes }
 ];
 
 @NgModule({

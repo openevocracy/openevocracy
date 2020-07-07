@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
-import { ConfigService } from '../_services/config.service';
+import { ConfigService } from '../../_services/config.service';
 
 // Read version from package.json file
 declare function require(moduleName: string): any;
-const { version: version } = require('../../../package.json');
+const { version: version } = require('../../../../package.json');
 
 
 @Component({

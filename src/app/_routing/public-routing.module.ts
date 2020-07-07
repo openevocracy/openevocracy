@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 
-import { AppRoutingModule } from './app-routing.module';
+import { SecureRoutingModule } from './secure-routing.module';
 
 import { PublicComponent } from '../public/public.component';
 import { LoginComponent } from '../public/login/login.component';
@@ -16,7 +16,7 @@ const publicChildRoutes: Routes = [
 
 const publicRoutes: Routes = [
 	{ path: '', component: PublicComponent, children: publicChildRoutes },
-	{ path: '', loadChildren: () => import('./app-routing.module').then(m => m.AppRoutingModule)/*, data: { preload: true }*/ }
+	{ path: '', loadChildren: () => import('./secure-routing.module').then(m => m.SecureRoutingModule)/*, data: { preload: true }*/ }
 ];
 
 @NgModule({
@@ -25,7 +25,7 @@ const publicRoutes: Routes = [
 		RouterModule.forRoot(publicRoutes/*, {
       	preloadingStrategy: PreloadAllModules
    	}*/),
-		AppRoutingModule
+		SecureRoutingModule
 	],
 	exports: [ RouterModule ],
 	declarations: []

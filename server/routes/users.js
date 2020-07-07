@@ -1,5 +1,6 @@
 // General libraries
 const _ = require('underscore');
+const to = require('await-to-js').default;
 const bcrypt = require('bcrypt');
 const db = require('../database').db;
 const ObjectId = require('mongodb').ObjectID;
@@ -443,7 +444,7 @@ exports.navigation = function(req, res) {
  *    userToken: token of user, contains userId and salt
  *    cb: callback function
  */
-function socketAuthentication(ws, userToken, cb) {
+async function socketAuthentication(ws, userToken, cb) {
 	// If token was not transmitted, return  and close connection
 	if(!userToken) {
 		ws.close();
@@ -451,9 +452,21 @@ function socketAuthentication(ws, userToken, cb) {
 	}
 	
 	// Get userToken from client request and decode
-	const decodedUserToken = jwt.verify(userToken, jwtOptions.secretOrKey);
+	const jwtVerify = Promise.promisify(jwt.verify);
+	const [err, decodedUserToken] = await to(jwtVerify(userToken, jwtOptions.secretOrKey));
 	
-	// Read userId and salt from decoded token
+	// If decoding was not successful, logout user and return
+	if (err) {
+		console.log('Token could not be verified', err);  // TODO Add to logfile later
+		// Get user id from decoded token
+		const userId = ObjectId(jwt.decode(userToken).payload.id);
+		// Close socket connection and log out user
+		ws.close();
+		logoutAsync(userId);
+		return;
+	}
+	
+	// Read salt from decoded token
 	const userId = ObjectId(decodedUserToken.id);
 	const userSalt = decodedUserToken.salt;
 	

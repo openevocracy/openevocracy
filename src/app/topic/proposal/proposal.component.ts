@@ -40,6 +40,9 @@ export class TopicProposalComponent extends EditorComponent {
 	public basicTopic: BasicTopic;
 	public isValid: boolean = false;
 	
+	//public valid_tooltip : string;
+	//public nonvalid_tooltip : string;
+	
 	public faCheckCircle = faCheckCircle;
 	public faTimesCircle = faTimesCircle;
 
@@ -73,6 +76,12 @@ export class TopicProposalComponent extends EditorComponent {
 			if (this.userId == this.proposal.authorId && this.basicTopic.stage == C.STAGE_PROPOSAL)
 				this.isEditor = true;
 		});
+		
+		// Translate tooltip texts
+		//this.translate.get("EDITOR_DOCUMENT_VALID_HELPTEXT").
+		//		subscribe(str => { this.valid_tooltip = str; });
+		//this.translate.get("EDITOR_DOCUMENT_NONVALID_HELPTEXT").
+		//		subscribe(str => { this.nonvalid_tooltip = str; });
 	}
 	
 	/*

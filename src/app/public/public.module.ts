@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // Components
-import { UserComponent } from './user.component';
-import { UserprofileOverviewComponent } from './overview/overview.component';
-import { UserprofileActivityComponent } from './activities/activities.component';
-import { SettingsComponent } from './settings/settings.component';
+import { PublicComponent } from './public.component';
+import { RegisterComponent } from './register/register.component';
+import { LoginComponent } from './login/login.component';
 
 // Modules
 import { TranslateModule } from '@ngx-translate/core';
@@ -15,24 +14,24 @@ import { MaterialsModule } from '../materials/materials.module';
 import { AlertModule } from '../alert/alert.module';
 
 // Routing Module
-import { UserRoutingModule } from '../_routing/user-routing.module';
+import { PublicRoutingModule } from '../_routing/public-routing.module';
 
 @NgModule({
 	declarations: [
-		UserComponent,
-		UserprofileOverviewComponent,
-		UserprofileActivityComponent,
-		SettingsComponent
+		PublicComponent,
+		RegisterComponent,
+		LoginComponent
 	],
 	imports: [
 		CommonModule,
+		PublicRoutingModule,
 		FormsModule,
 		ReactiveFormsModule,
-		UserRoutingModule,
+		//UserRoutingModule,
 		TranslateModule,
 		MaterialsModule,
 		FontAwesomeModule,
 		AlertModule
 	]
 })
-export class UserModule {}
+export class PublicModule {}
