@@ -6,7 +6,7 @@ import { Guard } from '../_services/guard.service';
 
 import { GroupResolver } from '../_resolver/group.resolver';
 
-import { SecureComponent } from '../secure/secure.component';
+//import { SecureComponent } from '../secure/secure.component';
 
 import { GroupComponent } from '../group/group.component';
 import { GroupEditorComponent } from '../group/editor/editor.component';
@@ -32,18 +32,19 @@ const groupChildRoutes: Routes = [
 		] }
 ];
 
-const groupRoutes: Routes = [
+/*const groupRoutes: Routes = [
 	{ path: '', component: SecureComponent, canActivate: [Guard], children: groupChildRoutes }
-];
+];*/
 
 @NgModule({
 	imports: [
 		CommonModule,
-		RouterModule.forRoot(groupRoutes, {
+		/*RouterModule.forRoot(groupRoutes, {
 			scrollPositionRestoration: 'enabled',
 			anchorScrolling: 'enabled',
 			onSameUrlNavigation: 'reload'
-		})
+		})*/
+		RouterModule.forChild(groupChildRoutes)
 	],
 	exports: [ RouterModule ],
 	providers: [ GroupResolver ],

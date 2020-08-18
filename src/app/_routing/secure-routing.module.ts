@@ -4,22 +4,26 @@ import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 import { Guard } from '../_services/guard.service';
 
 import { SecureComponent } from '../secure/secure.component';
+//import { AppComponent } from '../app.component';
 
-const secureChildRoutes: Routes = [];
-
-const secureRoutes: Routes = [
-	{ path: '', component: SecureComponent, canActivate: [Guard], children: secureChildRoutes }
+const secureChildRoutes: Routes = [
+	{ path: '', component: SecureComponent, canActivate: [Guard] }
 ];
+
+//const secureRoutes: Routes = [
+//	{ path: '', component: SecureComponent, canActivate: [Guard], children: secureChildRoutes }
+//];
 
 @NgModule({
 	imports: [
 		CommonModule,
-		RouterModule.forRoot(secureRoutes, {
+		/*RouterModule.forRoot(secureRoutes, {
 			scrollPositionRestoration: 'enabled',
 			anchorScrolling: 'enabled',
 			onSameUrlNavigation: 'reload',
       	//preloadingStrategy: PreloadAllModules
-   	})
+   	})*/
+   	RouterModule.forChild(secureChildRoutes)
 	],
 	exports: [ RouterModule ],
 	declarations: []

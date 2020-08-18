@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { Guard } from '../_services/guard.service';
 
-import { SecureComponent } from '../secure/secure.component';
+//import { SecureComponent } from '../secure/secure.component';
 
 import { UserComponent } from '../user/user.component';
 import { UserprofileOverviewComponent } from '../user/overview/overview.component';
@@ -23,18 +23,19 @@ const userChildRoutes: Routes = [
 	{ path: 'settings/:id', component: SettingsComponent }
 ];
 
-const userRoutes: Routes = [
+/*const userRoutes: Routes = [
 	{ path: '', component: SecureComponent, canActivate: [Guard], children: userChildRoutes }
-];
+];*/
 
 @NgModule({
 	imports: [
 		CommonModule,
-		RouterModule.forRoot(userRoutes, {
+		/*RouterModule.forRoot(userRoutes, {
 			scrollPositionRestoration: 'enabled',
 			anchorScrolling: 'enabled',
 			onSameUrlNavigation: 'reload'
-		})
+		})*/
+		RouterModule.forChild(userChildRoutes)
 	],
 	exports: [ RouterModule ],
 	providers: [],

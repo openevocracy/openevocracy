@@ -6,7 +6,7 @@ import { Guard } from '../_services/guard.service';
 
 import { TopicResolver } from '../_resolver/topic.resolver';
 
-import { SecureComponent } from '../secure/secure.component';
+//import { SecureComponent } from '../secure/secure.component';
 
 import { TopicComponent } from '../topic/topic.component';
 import { TopicOverviewComponent } from '../topic/overview/overview.component';
@@ -28,18 +28,19 @@ const topicChildRoutes: Routes = [
 	}
 ];
 
-const topicRoutes: Routes = [
+/*const topicRoutes: Routes = [
 	{ path: '', component: SecureComponent, canActivate: [Guard], children: topicChildRoutes }
-];
+];*/
 
 @NgModule({
 	imports: [
 		CommonModule,
-		RouterModule.forRoot(topicRoutes, {
+		/*RouterModule.forRoot(topicRoutes, {
 			scrollPositionRestoration: 'enabled',
 			anchorScrolling: 'enabled',
 			onSameUrlNavigation: 'reload'
-		})
+		})*/
+		RouterModule.forChild(topicChildRoutes)
 	],
 	exports: [ RouterModule ],
 	providers: [ TopicResolver ],

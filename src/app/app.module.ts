@@ -22,8 +22,10 @@ import { SecureModule } from './secure/secure.module';
 import { EditorModule } from './editor/editor.module';
 
 // Routing
-import { SecureRoutingModule } from './_routing/secure-routing.module';
-import { PublicRoutingModule } from './_routing/public-routing.module';
+//import { SecureRoutingModule } from './_routing/secure-routing.module';
+//import { PublicRoutingModule } from './_routing/public-routing.module';
+import { AppRoutingModule } from './_routing/app-routing.module';
+
 
 // Pipes
 import { AddonePipe } from './_pipes/addone.pipe';
@@ -120,15 +122,16 @@ export function loadConfig(configService: ConfigService) {
 		//AddtopicDialogComponent,
 		//CloseEditorDialogComponent,
 		//LoginEmailDialogComponent,
-		//ProposalDialogComponent
+		//ProposalDialogComponent,
 	],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,
 		MaterialsModule,
 		//FontAwesomeModule,
-		SecureRoutingModule,
-		PublicRoutingModule,
+		AppRoutingModule,
+		//SecureRoutingModule,
+		//PublicRoutingModule,
 		HttpClientModule,
 		//FormsModule,
 		//ReactiveFormsModule,
