@@ -2,18 +2,18 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 
-import { Guard } from '../_services/guard.service';
+//import { Guard } from '../_services/guard.service';
 
 import { TopicResolver } from '../_resolver/topic.resolver';
 
 //import { SecureComponent } from '../secure/secure.component';
 
-import { TopicComponent } from '../topic/topic.component';
+/*import { TopicComponent } from '../topic/topic.component';
 import { TopicOverviewComponent } from '../topic/overview/overview.component';
 import { TopicProposalComponent } from '../topic/proposal/proposal.component';
-import { TopicGroupsComponent } from '../topic/groups/groups.component';
+import { TopicGroupsComponent } from '../topic/groups/groups.component';*/
 
-const topicChildRoutes: Routes = [
+/*const topicChildRoutes: Routes = [
 	{
 		path: 'topic/:id',
 		component: TopicComponent,
@@ -26,7 +26,7 @@ const topicChildRoutes: Routes = [
 			{ path: 'groups', component: TopicGroupsComponent }
 		]
 	}
-];
+];*/
 
 /*const topicRoutes: Routes = [
 	{ path: '', component: SecureComponent, canActivate: [Guard], children: topicChildRoutes }
@@ -40,10 +40,11 @@ const topicChildRoutes: Routes = [
 			anchorScrolling: 'enabled',
 			onSameUrlNavigation: 'reload'
 		})*/
-		RouterModule.forChild(topicChildRoutes)
+		//RouterModule.forChild(topicChildRoutes)
+		RouterModule.forRoot([])
 	],
 	exports: [ RouterModule ],
-	providers: [ TopicResolver ],
+	//providers: [ TopicResolver ],
 	declarations: []
 })
 export class TopicRoutingModule { }

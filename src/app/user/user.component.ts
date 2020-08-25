@@ -30,7 +30,7 @@ export class UserComponent implements OnInit {
 	) {
 		// Get get user and profile id
 		this.userId = this.userService.getUserId();
-		this.profileId = this.router.url.split('/')[3];
+		this.profileId = this.router.url.split('/')[2];
 			
 		// Choose appropriate headline
 		// Headline for viewing own profile

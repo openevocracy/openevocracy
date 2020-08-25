@@ -54,7 +54,6 @@
 	"REGISTER_FORM_ACCOUNT_ALREADY_LINK": "login",
 	"REGISTER_FORM_ACCOUNT_ALREADY_SUFFIX": ".",
 	
-	"SETTINGS_TAB_TITLE_ACCOUNT": "User account",
 	"SETTINGS_ACCOUNT_TITLE_ID": "Your identification number",
 	"SETTINGS_ACCOUNT_TITLE_CREDENTIALS": "Your credentials",
 	"SETTINGS_BUTTON_SAVE": "Save",
@@ -89,6 +88,7 @@
 	"STAGE_COUNTDOWN_MINUTES_LEFT": "{{mm}} min. remaining",
 	"STAGE_COUNTDOWN_SECOND_LEFT": "1 sec. remaining",
 	"STAGE_COUNTDOWN_SECONDS_LEFT": "{{ss}} sec. remaining",
+	"STAGE_COUNTDOWN_OVER": "expired",
 	"TOPIC_SUBTITLE_1": "ends on",
 	"TOPIC_SUBTITLE_2": "at",
 	"TOPIC_SUBTITLE_3": "on",

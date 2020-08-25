@@ -154,9 +154,9 @@ exports.manageAndListTopicsAsync = manageAndListTopicsAsync;
  * @return {object} topic - adjusted topic
  */
 function manageTopicStateAsync(topic) {
-   
-	// Exit this function if stage transition is not due yet
-	if(Date.now() < topic.nextDeadline)
+	
+	// Exit this function if topic does not exist or stage transition is not due yet
+	if(_.isNull(topic) || Date.now() < topic.nextDeadline)
 		return Promise.resolve(topic);
 			
 	// Move to next stage

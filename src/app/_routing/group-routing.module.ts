@@ -8,15 +8,15 @@ import { GroupResolver } from '../_resolver/group.resolver';
 
 //import { SecureComponent } from '../secure/secure.component';
 
-import { GroupComponent } from '../group/group.component';
+/*import { GroupComponent } from '../group/group.component';
 import { GroupEditorComponent } from '../group/editor/editor.component';
 import { GroupDocumentComponent } from '../group/document/document.component';
 import { GroupChatComponent } from '../group/chat/chat.component';
 import { GroupMembersComponent } from '../group/members/members.component';
 import { GroupForumThreadComponent } from '../group/forum/thread/thread.component';
-import { GroupForumComponent } from '../group/forum/forum.component';
+import { GroupForumComponent } from '../group/forum/forum.component';*/
 
-const groupChildRoutes: Routes = [
+/*const groupChildRoutes: Routes = [
 	{ path: 'group/:id',
 		component: GroupComponent,
 		resolve: { 'basicGroup': GroupResolver },
@@ -30,7 +30,7 @@ const groupChildRoutes: Routes = [
 			{ path: 'forum/thread/:id', component: GroupForumThreadComponent },
 			{ path: 'members', component: GroupMembersComponent }
 		] }
-];
+];*/
 
 /*const groupRoutes: Routes = [
 	{ path: '', component: SecureComponent, canActivate: [Guard], children: groupChildRoutes }
@@ -44,7 +44,8 @@ const groupChildRoutes: Routes = [
 			anchorScrolling: 'enabled',
 			onSameUrlNavigation: 'reload'
 		})*/
-		RouterModule.forChild(groupChildRoutes)
+		//RouterModule.forChild(groupChildRoutes)
+		RouterModule.forRoot([])
 	],
 	exports: [ RouterModule ],
 	providers: [ GroupResolver ],

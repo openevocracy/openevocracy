@@ -40,7 +40,7 @@
 					</button>
 				</div>
 				<div class="post-meta">
-					{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', post.authorId]">{{ post.authorName }}</a>
+					{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user', post.authorId]">{{ post.authorName }}</a>
 					{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ post.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}</span><span *ngIf="post.editHistory.length != 0">, {{ post.editHistory.length }} {{ 'FORUM_POST_EDITS_LABEL' | translate }}</span>
 				</div>
 			</div>
@@ -69,7 +69,7 @@
 									<small *ngIf="comment.authorId == userId"><a (click)="editComment(post.postId, comment)">{{ 'FORUM_BUTTON_EDIT' | translate }}</a>&nbsp;&nbsp;<a (click)="deleteComment(post.postId, comment.commentId)">{{ 'FORUM_BUTTON_DELETE' | translate }}</a></small>
 								</div>
 								<div class="comment-meta">
-									<small><a [routerLink]="['/user/profile', comment.authorId]">{{ comment.authorName }}</a>, {{ comment.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}<span *ngIf="comment.editHistory.length != 0">, {{ comment.editHistory.length }} {{ 'FORUM_COMMENT_EDITS_LABEL' | translate }}</span></small>
+									<small><a [routerLink]="['/user', comment.authorId]">{{ comment.authorName }}</a>, {{ comment.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}<span *ngIf="comment.editHistory.length != 0">, {{ comment.editHistory.length }} {{ 'FORUM_COMMENT_EDITS_LABEL' | translate }}</span></small>
 								</div>
 							</div>
 						</div>

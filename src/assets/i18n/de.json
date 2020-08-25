@@ -54,7 +54,6 @@
 	"REGISTER_FORM_ACCOUNT_ALREADY_LINK": "Melde dich an",
 	"REGISTER_FORM_ACCOUNT_ALREADY_SUFFIX": ".",
 	
-	"SETTINGS_TAB_TITLE_ACCOUNT": "Benutzerkonto",
 	"SETTINGS_ACCOUNT_TITLE_ID": "Deine Identifikationsnummer",
 	"SETTINGS_ACCOUNT_TITLE_CREDENTIALS": "Deine Zugangsdaten",
 	"SETTINGS_BUTTON_SAVE": "Speichern",
@@ -89,6 +88,7 @@
 	"STAGE_COUNTDOWN_MINUTES_LEFT": "{{mm}} Min. verbleibend",
 	"STAGE_COUNTDOWN_SECOND_LEFT": "1 Sek. verbleibend",
 	"STAGE_COUNTDOWN_SECONDS_LEFT": "{{ss}} Sek. verbleibend",
+	"STAGE_COUNTDOWN_OVER": "abgelaufen",
 	"TOPIC_SUBTITLE_1": "endet am",
 	"TOPIC_SUBTITLE_2": "um",
 	"TOPIC_SUBTITLE_3": "am",

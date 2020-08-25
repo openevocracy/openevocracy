@@ -11,7 +11,7 @@
 					</h2>
 					<p *ngIf="proposal">
 						{{ 'GROUPVIS_PROPOSAL_DETAIL_PREFIX' | translate:{ 'numWords': proposal?.numWords } }}
-						<a [routerLink]="['/user/profile', proposal?.authorId]">{{ proposal?.authorId }}</a>
+						<a [routerLink]="['/user', proposal?.authorId]">{{ proposal?.authorId }}</a>
 						{{ proposal?.textDetailSuffix | translate:{ 'expiration': proposal?.expiration | date:'y-MM-dd' } }}
 					</p>
 					<p *ngIf="group">{{ group?.textDetail | translate:{ 'numMembers': group?.numMembers, 'numWords': group?.numWords, 'expiration': group?.expiration | date:'y-MM-dd' } }}</p>

@@ -13,6 +13,7 @@ import { MaterialsModule } from './materials/materials.module';
 //import { QuillModule } from 'ngx-quill';
 //import { MentionModule } from 'angular-mentions';
 //import { VisModule } from 'ngx-vis';
+import { HomeModule } from './home/home.module';
 import { TopicModule } from './topic/topic.module';
 import { UserModule } from './user/user.module';
 import { GroupModule } from './group/group.module';
@@ -28,7 +29,7 @@ import { AppRoutingModule } from './_routing/app-routing.module';
 
 
 // Pipes
-import { AddonePipe } from './_pipes/addone.pipe';
+//import { AddonePipe } from './_pipes/addone.pipe';
 //import { TimestampPipe } from './_pipes/timestamp.pipe';
 
 // Components Global
@@ -107,7 +108,7 @@ export function loadConfig(configService: ConfigService) {
 		//RegisterComponent,
 		//CountdownComponent,
 		//EditorComponent,
-		AddonePipe,
+		//AddonePipe,
 		//TimestampPipe,
 		//PadviewComponent,
 		//ShareDialogComponent,
@@ -138,6 +139,7 @@ export function loadConfig(configService: ConfigService) {
 		//QuillModule.forRoot(),
 		//MentionModule,
 		//VisModule,
+		HomeModule,
 		TopicModule,
 		UserModule,
 		GroupModule,

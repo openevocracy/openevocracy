@@ -5,10 +5,10 @@ import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 //import { SecureRoutingModule } from './secure-routing.module';
 
 //import { PublicComponent } from '../public/public.component';
-import { LoginComponent } from '../public/login/login.component';
-import { RegisterComponent } from '../public/register/register.component';
+//import { LoginComponent } from '../public/login/login.component';
+//import { RegisterComponent } from '../public/register/register.component';
 
-import { PublicChildRoutes } from './public.routes';
+//import { PublicChildRoutes } from './public.routes';
 
 //const publicChildRoutes: Routes = [
 /*const publicChildRoutes: Routes = [

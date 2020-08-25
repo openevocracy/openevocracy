@@ -15,31 +15,27 @@
 </div>
 
 <div class="container">
-	<mat-tab-group>
-		<mat-tab label="{{ 'SETTINGS_TAB_TITLE_ACCOUNT' | translate }}">
-			<h3>{{ 'SETTINGS_ACCOUNT_TITLE_ID' | translate }}:</h3>
-			<strong>{{ uid }}</strong>
-			
-			<h3>{{ 'SETTINGS_ACCOUNT_TITLE_CREDENTIALS' | translate }}:</h3>
-			<form [formGroup]="settingsForm" novalidate>
-				<p>
-					<mat-form-field>
-						<input matInput formControlName="email" type="email" placeholder="{{ 'FORM_LABEL_MAIL' | translate }}">
-					</mat-form-field>
-				</p>
-				
-				<p formGroupName="passwords">
-					<mat-form-field>
-						<input matInput formControlName="password" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD' | translate }}">
-					</mat-form-field>
-				</p>
-				
-				<p formGroupName="passwords">
-					<mat-form-field>
-						<input matInput formControlName="passwordrep" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD_REP' | translate }}">
-					</mat-form-field>
-				</p>
-			</form>
-		</mat-tab>
-	</mat-tab-group>
+	<h3>{{ 'SETTINGS_ACCOUNT_TITLE_ID' | translate }}:</h3>
+	<strong>{{ uid }}</strong>
+	
+	<h3>{{ 'SETTINGS_ACCOUNT_TITLE_CREDENTIALS' | translate }}:</h3>
+	<form [formGroup]="settingsForm" novalidate>
+		<p>
+			<mat-form-field>
+				<input matInput formControlName="email" type="email" placeholder="{{ 'FORM_LABEL_MAIL' | translate }}">
+			</mat-form-field>
+		</p>
+		
+		<p formGroupName="passwords">
+			<mat-form-field>
+				<input matInput formControlName="password" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD' | translate }}">
+			</mat-form-field>
+		</p>
+		
+		<p formGroupName="passwords">
+			<mat-form-field>
+				<input matInput formControlName="passwordrep" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD_REP' | translate }}">
+			</mat-form-field>
+		</p>
+	</form>
 </div>

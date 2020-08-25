@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+import { TopicResolver } from '../_resolver/topic.resolver';
+
 // Components
 import { TopicComponent } from './topic.component';
 import { TopicToolbarComponent } from './toolbar/toolbar.component';
@@ -29,6 +31,7 @@ import { TopicRoutingModule } from '../_routing/topic-routing.module';
 		TopicGroupsComponent,
 		TopicStagebarComponent
 	],
+	providers: [ TopicResolver ],
 	imports: [
 		CommonModule,
 		TopicRoutingModule,

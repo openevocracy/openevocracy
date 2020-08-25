@@ -34,10 +34,10 @@
 				<fa-icon [icon]="faCogs"></fa-icon>
 			</button>
 			<mat-menu #settings="matMenu" [overlapTrigger]="false">
-				<button mat-menu-item [routerLink]="['/user/profile', userId]">
+				<button mat-menu-item [routerLink]="['/user', userId]">
 					<span>{{ 'HEADER_MAINMENU_MY_PROFILE' | translate }}</span>
 				</button>
-				<button mat-menu-item [routerLink]="['/settings', userId]">
+				<button mat-menu-item routerLink="/settings">
 					<span>{{ 'HEADER_MAINMENU_SETTINGS' | translate }}</span>
 				</button>
 				<button mat-menu-item (click)="logout()">

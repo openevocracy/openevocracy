@@ -59,9 +59,9 @@ export class CountdownComponent implements OnDestroy {
 		delta -= minutes * 60;
 		seconds = delta % 60;
 		
-		if (this.delta < 2) // in this case, display one second left
+		if (this.delta == 0) // in this case, display a message that the countdown has ended
 		{
-			this.translate.get("STAGE_COUNTDOWN_SECOND_LEFT").
+			this.translate.get("STAGE_COUNTDOWN_OVER").
 				subscribe(str => {time = str; });
 		}
 		else if (this.delta < 60) // in this case, display seconds left

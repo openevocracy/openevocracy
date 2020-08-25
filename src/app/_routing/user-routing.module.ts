@@ -2,16 +2,16 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 
-import { Guard } from '../_services/guard.service';
+//import { Guard } from '../_services/guard.service';
 
 //import { SecureComponent } from '../secure/secure.component';
 
-import { UserComponent } from '../user/user.component';
+/*import { UserComponent } from '../user/user.component';
 import { UserprofileOverviewComponent } from '../user/overview/overview.component';
 import { UserprofileActivityComponent } from '../user/activities/activities.component';
-import { SettingsComponent } from '../user/settings/settings.component';
+import { SettingsComponent } from '../user/settings/settings.component';*/
 
-const userChildRoutes: Routes = [
+/*const userChildRoutes: Routes = [
 	{ path: 'user/profile/:id',
 		component: UserComponent,
 		runGuardsAndResolvers: 'always',
@@ -21,7 +21,7 @@ const userChildRoutes: Routes = [
 			{ path: 'activity', component: UserprofileActivityComponent }
 		] },
 	{ path: 'settings/:id', component: SettingsComponent }
-];
+];*/
 
 /*const userRoutes: Routes = [
 	{ path: '', component: SecureComponent, canActivate: [Guard], children: userChildRoutes }
@@ -35,7 +35,8 @@ const userChildRoutes: Routes = [
 			anchorScrolling: 'enabled',
 			onSameUrlNavigation: 'reload'
 		})*/
-		RouterModule.forChild(userChildRoutes)
+		//RouterModule.forChild(userChildRoutes)
+		RouterModule.forRoot([])
 	],
 	exports: [ RouterModule ],
 	providers: [],

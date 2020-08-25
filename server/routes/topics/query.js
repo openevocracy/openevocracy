@@ -110,6 +110,7 @@ exports.toolbar = function(req, res) {
    	return {
    		'_id': topic._id,
    		'name': topic.name,
+			'stage': topic.stage,
    		'nextDeadline': topic.nextDeadline
    	};
    }).then(res.json.bind(res));

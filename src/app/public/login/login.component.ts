@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from "@angular/material";
+import { Router } from "@angular/router"
 
 import { UserService } from '../../_services/user.service';
 import { AlertService } from '../../_services/alert.service';
@@ -35,7 +36,8 @@ export class LoginComponent implements OnInit {
 		private alertService: AlertService,
 		private httpManagerService: HttpManagerService,
 		private languageService: LanguageService,
-		private activatedRoute: ActivatedRoute
+		private activatedRoute: ActivatedRoute,
+		private router: Router
 	) {	
 		// Create form
 		this.loginForm = this.fb.group({
@@ -89,6 +91,9 @@ export class LoginComponent implements OnInit {
 		this.userService.authenticate(credentials).subscribe(res => {
 			// Initalize language for fresh logged in user
 			this.languageService.setClientLanguage();
+			
+			// Redirect user to secure home page
+			this.router.navigate(['/topiclist']);
 		}, err => {
 			console.log(err);
 			// Store alert.content to direct link, if alert contains one

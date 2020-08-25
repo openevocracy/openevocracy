@@ -11,7 +11,7 @@ export class UserprofileOverviewComponent implements OnInit {
 	public profileId: string;
 
 	constructor(private router: Router) {
-		this.profileId = this.router.url.split('/')[3];
+		this.profileId = this.router.url.split('/')[2];
 	}
 	
 	ngOnInit() {

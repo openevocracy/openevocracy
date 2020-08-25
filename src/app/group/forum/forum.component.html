@@ -18,7 +18,7 @@
 				<span class="thread-title">{{ thread.title }}</span>
 			</h2>
 			<div class="meta"><small>
-				{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', thread.authorId]">{{ thread.authorName }}</a>
+				{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user', thread.authorId]">{{ thread.authorName }}</a>
 				{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ thread.createdTimestamp | date:'y-MM-dd HH:mm' }}</span><span *ngIf="thread.lastResponse">, {{ 'FORUM_LAST_ACTIVITY_PRE_TIME' | translate }} {{ thread.lastResponse.timestamp | date:'y-MM-dd HH:mm' }} {{ 'FORUM_LAST_ACTIVITY_PRE_NAME' | translate }} <a [routerLink]="['/user/profile', thread.lastResponse.userId]">{{ thread.lastResponse.userName }}</a></span>
 			</small></div>
 		</div>

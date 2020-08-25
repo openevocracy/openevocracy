@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
-import { Guard } from '../_services/guard.service';
+//import { Guard } from '../_services/guard.service';
 
 //import { SecureComponent } from '../secure/secure.component';
 
-import { TopiclistComponent } from '../home/topiclist/topiclist.component';
+//import { TopiclistComponent } from '../home/topiclist/topiclist.component';
 
-const homeChildRoutes: Routes = [
+/*const homeChildRoutes: Routes = [
 	{ path: '', redirectTo: 'topiclist', pathMatch: 'full' },
 	{ path: 'topiclist', component: TopiclistComponent }
-];
+];*/
 
 /*const homeRoutes: Routes = [
 	{ path: '', component: SecureComponent, canActivate: [Guard], children: homeChildRoutes }
@@ -24,7 +24,8 @@ const homeChildRoutes: Routes = [
 			anchorScrolling: 'enabled',
 			onSameUrlNavigation: 'reload'
    		})*/
-   	RouterModule.forChild(homeChildRoutes)
+   	//RouterModule.forChild(homeChildRoutes)
+   	RouterModule.forRoot([])
 	],
 	exports: [ RouterModule ],
 	declarations: []

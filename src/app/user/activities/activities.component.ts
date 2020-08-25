@@ -46,7 +46,7 @@ export class UserprofileActivityComponent implements OnInit {
 		
 		// Get user and profile id
 		this.userId = this.userService.getUserId();
-		this.profileId = this.router.url.split('/')[3];
+		this.profileId = this.router.url.split('/')[2];
 		
 		// Get the count of the user's activities
 		this.activityListService.getUserActivityListLength(this.profileId).subscribe(len => {
