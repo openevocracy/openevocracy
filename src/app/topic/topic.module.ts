@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
-import { TopicResolver } from '../_resolver/topic.resolver';
+import { TopicResolver } from './topic.resolver';
 
 // Components
 import { TopicComponent } from './topic.component';
@@ -19,8 +20,11 @@ import { VisModule } from 'ngx-vis';
 import { CountdownModule } from '../countdown/countdown.module';
 import { MaterialsModule } from '../materials/materials.module';
 
+// Routes
+import { topicRoutes } from './topic.routes';
+
 // Routing Module
-import { TopicRoutingModule } from '../_routing/topic-routing.module';
+//import { TopicRoutingModule } from './topic-routing.module';
 
 @NgModule({
 	declarations: [
@@ -34,7 +38,8 @@ import { TopicRoutingModule } from '../_routing/topic-routing.module';
 	providers: [ TopicResolver ],
 	imports: [
 		CommonModule,
-		TopicRoutingModule,
+		RouterModule.forChild(topicRoutes),
+		//TopicRoutingModule,
 		TranslateModule,
 		FontAwesomeModule,
 		CountdownModule,

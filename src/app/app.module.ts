@@ -4,15 +4,12 @@ import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-//import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import 'hammerjs';
 
-// Modules
+// Contrib Modules
 import { MaterialsModule } from './materials/materials.module';
-//import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
-//import { QuillModule } from 'ngx-quill';
-//import { MentionModule } from 'angular-mentions';
-//import { VisModule } from 'ngx-vis';
+
+// Custom Modules
 import { HomeModule } from './home/home.module';
 import { TopicModule } from './topic/topic.module';
 import { UserModule } from './user/user.module';
@@ -22,44 +19,9 @@ import { DialogsModule } from './dialogs/dialogs.module';
 import { SecureModule } from './secure/secure.module';
 import { EditorModule } from './editor/editor.module';
 
-// Routing
-//import { SecureRoutingModule } from './_routing/secure-routing.module';
-//import { PublicRoutingModule } from './_routing/public-routing.module';
-import { AppRoutingModule } from './_routing/app-routing.module';
-
-
-// Pipes
-//import { AddonePipe } from './_pipes/addone.pipe';
-//import { TimestampPipe } from './_pipes/timestamp.pipe';
-
-// Components Global
+// App
+import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-//import { CountdownComponent } from './countdown/countdown.component';
-//import { AlertComponent } from './alert/alert.component';
-
-// Components Public
-//import { PublicComponent } from './public/public.component';
-//import { LoginComponent } from './public/login/login.component';
-//import { RegisterComponent } from './public/register/register.component';
-
-// Components Secure
-//import { SecureComponent } from './secure/secure.component';
-//import { HeaderComponent } from './header/header.component';
-//import { FooterComponent } from './footer/footer.component';
-//import { TopiclistComponent } from './topiclist/topiclist.component';
-
-// Dialogs
-//import { ShareDialogComponent } from './dialogs/share/share.component';
-//import { FeedbackDialogComponent } from './dialogs/feedback/feedback.component';
-//import { EditThreadDialogComponent } from './dialogs/editthread/editthread.component';
-//import { AskDeleteDialogComponent } from './dialogs/askdelete/askdelete.component';
-//import { EditForumPostDialogComponent } from './dialogs/editforumpost/editforumpost.component';
-//import { EditForumCommentDialogComponent } from './dialogs/editforumcomment/editforumcomment.component';
-//import { GroupWelcomeDialogComponent } from './dialogs/groupwelcome/groupwelcome.component';
-//import { AddtopicDialogComponent } from './dialogs/addtopic/addtopic.component';
-//import { CloseEditorDialogComponent } from './dialogs/closeeditor/closeeditor.component';
-//import { ProposalDialogComponent } from './dialogs/proposal/proposal.component';
-//import { LoginEmailDialogComponent } from './dialogs/loginemail/loginemail.component';
 
 // Services
 import { TopicsListService } from './_services/topiclist.service';
@@ -80,12 +42,6 @@ import { LineNumbersService } from './_editor/linenumbers.service';
 import { cfg } from '../../shared/config';
 import { C } from '../../shared/constants';
 
-// New components (not sorted)
-//import { EditorComponent } from './editor/editor.component';
-//import { PadviewComponent } from './padview/padview.component';
-//import { EditorFieldComponent } from './editorfield/editorfield.component';
-//import { StarratingComponent } from './starrating/starrating.component';
-
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
 	return new TranslateHttpLoader(http);
@@ -98,47 +54,13 @@ export function loadConfig(configService: ConfigService) {
 @NgModule({
 	declarations: [
 		AppComponent,
-		//HeaderComponent,
-		//FooterComponent,
-		//TopiclistComponent,
-		//LoginComponent,
-		//PublicComponent,
-		//SecureComponent,
-		//AlertComponent,
-		//RegisterComponent,
-		//CountdownComponent,
-		//EditorComponent,
-		//AddonePipe,
-		//TimestampPipe,
-		//PadviewComponent,
-		//ShareDialogComponent,
-		//FeedbackDialogComponent,
-		//EditThreadDialogComponent,
-		//EditorFieldComponent,
-		//AskDeleteDialogComponent,
-		//EditForumPostDialogComponent,
-		//EditForumCommentDialogComponent,
-		//GroupWelcomeDialogComponent,
-		//StarratingComponent,
-		//AddtopicDialogComponent,
-		//CloseEditorDialogComponent,
-		//LoginEmailDialogComponent,
-		//ProposalDialogComponent,
 	],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,
 		MaterialsModule,
-		//FontAwesomeModule,
 		AppRoutingModule,
-		//SecureRoutingModule,
-		//PublicRoutingModule,
 		HttpClientModule,
-		//FormsModule,
-		//ReactiveFormsModule,
-		//QuillModule.forRoot(),
-		//MentionModule,
-		//VisModule,
 		HomeModule,
 		TopicModule,
 		UserModule,
@@ -172,19 +94,7 @@ export function loadConfig(configService: ConfigService) {
 		LineNumbersService,
 		{ provide: 'C', useValue: C }
 	],
-	entryComponents: [
-		/*FeedbackDialogComponent,
-		AskDeleteDialogComponent,
-		EditForumPostDialogComponent,
-		EditForumCommentDialogComponent,
-		EditThreadDialogComponent,
-		ShareDialogComponent,
-		GroupWelcomeDialogComponent,
-		AddtopicDialogComponent,
-		CloseEditorDialogComponent,
-		LoginEmailDialogComponent,
-		ProposalDialogComponent*/
-	],
+	entryComponents: [],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 // Pipes
 import { AddonePipe } from '../_pipes/addone.pipe';
@@ -15,8 +16,11 @@ import { MaterialsModule } from '../materials/materials.module';
 import { AlertModule } from '../alert/alert.module';
 import { CountdownModule } from '../countdown/countdown.module';
 
+// Routes
+import { homeRoutes } from './home.routes';
+
 // Routing Module
-import { HomeRoutingModule } from '../_routing/home-routing.module';
+//import { HomeRoutingModule } from './home-routing.module';
 
 @NgModule({
 	declarations: [
@@ -24,15 +28,13 @@ import { HomeRoutingModule } from '../_routing/home-routing.module';
 		HomeComponent,
 		AddonePipe
 	],
-	/*exports: [
-		TopiclistComponent
-	],*/
 	imports: [
 		CommonModule,
+		RouterModule.forChild(homeRoutes),
 		TranslateModule,
 		FontAwesomeModule,
 		MaterialsModule,
-		HomeRoutingModule,
+		//HomeRoutingModule,
 		AlertModule,
 		CountdownModule
 	]

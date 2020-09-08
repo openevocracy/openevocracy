@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 // Components
 import { HeaderComponent } from './header/header.component';
@@ -11,8 +12,11 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MaterialsModule } from '../materials/materials.module';
 
+// Routes
+//import { secureRoutes } from './secure.routes';
+
 // Routing Module
-import { SecureRoutingModule } from '../_routing/secure-routing.module';
+//import { SecureRoutingModule } from './secure-routing.module';
 
 @NgModule({
 	declarations: [
@@ -27,10 +31,11 @@ import { SecureRoutingModule } from '../_routing/secure-routing.module';
 	],
 	imports: [
 		CommonModule,
+		RouterModule,//.forChild(secureRoutes),
 		TranslateModule,
 		FontAwesomeModule,
 		MaterialsModule,
-		SecureRoutingModule
+		//SecureRoutingModule
 	]
 })
 export class SecureModule {}

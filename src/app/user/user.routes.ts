@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 
-import { UserprofileOverviewComponent } from '../user/overview/overview.component';
-import { UserprofileActivityComponent } from '../user/activities/activities.component';
+import { UserprofileOverviewComponent } from './overview/overview.component';
+import { UserprofileActivityComponent } from './activities/activities.component';
 
 const userRoutes: Routes = [
 	{ path: '', redirectTo: 'overview', pathMatch: 'full' },

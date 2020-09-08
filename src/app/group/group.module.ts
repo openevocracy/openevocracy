@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
+import { RouterModule } from '@angular/router';
 
 // Components
 import { GroupComponent } from './group.component';
@@ -25,8 +26,11 @@ import { MentionModule } from 'angular-mentions';
 // Pipes
 import { TimestampPipe } from '../_pipes/timestamp.pipe';
 
+// Routes
+import { groupRoutes } from './group.routes';
+
 // Routing Module
-import { GroupRoutingModule } from '../_routing/group-routing.module';
+//import { GroupRoutingModule } from './group-routing.module';
 
 @NgModule({
 	declarations: [
@@ -43,8 +47,9 @@ import { GroupRoutingModule } from '../_routing/group-routing.module';
 	],
 	imports: [
 		CommonModule,
+		RouterModule.forChild(groupRoutes),
 		MaterialsModule,
-		GroupRoutingModule,
+		//GroupRoutingModule,
 		TranslateModule,
 		CountdownModule,
 		FontAwesomeModule,

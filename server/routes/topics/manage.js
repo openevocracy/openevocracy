@@ -36,7 +36,9 @@ function calculateDeadline(nextStage, prevDeadline, levelDuration) {
             break;
         case C.STAGE_PASSED:
         case C.STAGE_REJECTED:
-            nextDeadline = cfg.DURATION_NONE;
+        		// NOTE the following was removed to correct the countdown for finished topics
+        		//      if everything is okay for some time (say until 31.12.2020), remove this
+            //nextDeadline = cfg.DURATION_NONE;
             break;
     }
     
@@ -198,7 +200,7 @@ function manageTopicStateAsync(topic) {
 					stageStartedEntryName = 'stageConsensusStarted';
 				} else {
 					topic.stage = C.STAGE_REJECTED;
-					topic.nextDeadline = cfg.DURATION_NONE;
+					//topic.nextDeadline = cfg.DURATION_NONE;
 					topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS';
 					stageStartedEntryName = 'stageRejectedStarted';
 				}

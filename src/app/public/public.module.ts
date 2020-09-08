@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 // Components
 import { PublicComponent } from './public.component';
@@ -13,8 +14,11 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MaterialsModule } from '../materials/materials.module';
 import { AlertModule } from '../alert/alert.module';
 
+// Routes
+//import { publicRoutes } from './public.routes';
+
 // Routing Module
-import { PublicRoutingModule } from '../_routing/public-routing.module';
+//import { PublicRoutingModule } from './public-routing.module';
 
 @NgModule({
 	declarations: [
@@ -24,7 +28,8 @@ import { PublicRoutingModule } from '../_routing/public-routing.module';
 	],
 	imports: [
 		CommonModule,
-		PublicRoutingModule,
+		RouterModule,//.forChild(publicRoutes),
+		//PublicRoutingModule,
 		FormsModule,
 		ReactiveFormsModule,
 		//UserRoutingModule,

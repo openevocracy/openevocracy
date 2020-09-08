@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
 
-import { GroupEditorComponent } from '../group/editor/editor.component';
-import { GroupDocumentComponent } from '../group/document/document.component';
-import { GroupChatComponent } from '../group/chat/chat.component';
-import { GroupMembersComponent } from '../group/members/members.component';
-import { GroupForumThreadComponent } from '../group/forum/thread/thread.component';
-import { GroupForumComponent } from '../group/forum/forum.component';
+import { GroupEditorComponent } from './editor/editor.component';
+import { GroupDocumentComponent } from './document/document.component';
+import { GroupChatComponent } from './chat/chat.component';
+import { GroupMembersComponent } from './members/members.component';
+import { GroupForumThreadComponent } from './forum/thread/thread.component';
+import { GroupForumComponent } from './forum/forum.component';
 
 const groupRoutes: Routes = [
 	{ path: '', redirectTo: 'editor', pathMatch: 'full' },

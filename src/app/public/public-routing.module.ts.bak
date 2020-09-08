@@ -1,0 +1,17 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
+
+@NgModule({
+	imports: [
+		CommonModule,
+		RouterModule.forRoot([]
+		/*RouterModule.forRoot(PublicChildRoutes/*, {
+      	preloadingStrategy: PreloadAllModules
+   	}*/)//,
+		//SecureRoutingModule
+	],
+	exports: [ RouterModule ],
+	declarations: []
+})
+export class PublicRoutingModule { }
