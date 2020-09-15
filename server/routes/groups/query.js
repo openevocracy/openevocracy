@@ -50,7 +50,7 @@ exports.getBasicGroup = function(req, res) {
 	const lastActivity_promise = db.collection('group_relations')
 		.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
 	
-	// Get group name
+	// Get group
 	const group_promise = db.collection('groups').findOneAsync({ '_id': groupId });
 	
 	// Get group members
@@ -119,6 +119,8 @@ exports.getBasicGroup = function(req, res) {
 		return {
 			'groupId': groupId,
 			'groupName': group.name,
+			'groupLevel': group.level,
+			'groupNumber': group.num,
 			'padId': pad._id,
 			'expiration': pad.expiration,
 			'docId': pad.docId,

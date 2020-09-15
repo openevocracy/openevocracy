@@ -1,3 +1,5 @@
+import { ReflectiveInjector } from '@angular/core';
+import { UtilsService } from '../../_services/utils.service';
 import { BasicMember } from './basic-member';
 
 import * as _ from 'underscore';
@@ -14,7 +16,7 @@ export class BasicGroup {
 	topicName: string;
 	
 	members: BasicMember[];
-	
+	groupCode: string;
 	isExpired: boolean;
 	
 	constructor(res: any) {
@@ -28,9 +30,13 @@ export class BasicGroup {
 		this.topicId = res.topicId;
 		this.topicName = res.topicName;
 		
+		// Instantiate members
 		this.members = _.map(res.members, (member) => {
 			return new BasicMember(member);
 		});
+		
+		// Calculate group code
+		this.groupCode = this.calcGroupCode(res.groupLevel, res.groupNumber);
 		
 		// Check if group is already expired
 		const date = new Date();
@@ -46,5 +52,20 @@ export class BasicGroup {
 		
 		// Returns true or false (depending if user was found or not)
 		return !_.isNull(user);
+	}
+	
+	/**
+	 * @desc:
+	 */
+	public calcGroupCode(level: number, num: number): string {
+		// Instantiate utils service
+		const injector = ReflectiveInjector.resolveAndCreate([UtilsService]);
+		const utilsService = injector.get(UtilsService);
+		
+		// Translate number to letter code for level
+		const levelLetter = utilsService.numberToLetters(level+1);
+		
+		// Combine level letter and number of group and return final group code
+		return levelLetter + (num+1);
 	}
 }

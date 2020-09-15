@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 
+import { GroupResolver } from './group.resolver';
+
 // Components
 import { GroupComponent } from './group.component';
 import { GroupMemberbarComponent } from './memberbar/memberbar.component';
@@ -45,6 +47,7 @@ import { groupRoutes } from './group.routes';
 		GroupDocumentComponent,
 		TimestampPipe
 	],
+	providers: [ GroupResolver ],
 	imports: [
 		CommonModule,
 		RouterModule.forChild(groupRoutes),
