@@ -104,7 +104,7 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		const group = this.groupService.getBasicGroupFromCache(this.groupId);
 		
 		// Define title, id and expiration
-		this.title = '(' + group.groupCode + ' | ' + group.groupName + ') ' + group.topicName;
+		this.title = '(' + group.groupName + ' | ' + group.groupCode + ') ' + group.topicName;
 		this.topicId = group.topicId;
 		this.padId = group.padId;
 		this.expiration = group.expiration;

@@ -62,7 +62,7 @@ export class GroupChatComponent implements OnInit {
 		// Get current groupId
 		this.groupId = this.router.url.split('/')[2];
 		
-		// Listen to connection lost event
+		// Listen to 'connection lost' event
 		this.connectionAliveService.connectionLost.subscribe((res) => {
 			// If connection is lost, close pad socket connection
 			console.log('chat event: connection lost');
@@ -70,10 +70,10 @@ export class GroupChatComponent implements OnInit {
 				this.chatSocket.close();
 		});
 		
-		// Listen to connection reconnected event
+		// Listen to 'connection reconnected' event
 		this.connectionAliveService.connectionReconnected.subscribe((res) => {
 			console.log('chat event: reconnected');
-			// If connection is lost, reconnect pad socket
+			// If connection is available again, reconnect pad socket
 			this.initializeChatSocket();
 		});
 	}
