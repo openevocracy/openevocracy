@@ -1,3 +1,6 @@
+import { ReflectiveInjector } from '@angular/core';
+import { UtilsService } from '../../_services/utils.service';
+
 class Proposal {
 	padId: string;
 	authorId: string;
@@ -32,6 +35,8 @@ class Group {
 	isExpired: boolean;
 	textDetail: string = 'GROUPVIS_GROUP_DETAIL';
 	
+	groupCode: string;
+	
 	constructor(res: any) {
 		this.groupId = res.groupId;
 		this.name = res.name;
@@ -43,8 +48,26 @@ class Group {
 		const date = new Date();
 		this.isExpired = (this.expiration < date.getTime());
 		
+		// Calculate group code
+		this.code = this.calcGroupCode(res.groupLevel, res.groupNum);
+		
 		if (this.isExpired)
 			this.textDetail = 'GROUPVIS_GROUP_DETAIL_EXPIRED';
+	}
+	
+	/**
+	 * @desc: Calculates a code for the group, consisting of the level and the group number
+	 */
+	public calcGroupCode(level: number, num: number): string {
+		// Instantiate utils service
+		const injector = ReflectiveInjector.resolveAndCreate([UtilsService]);
+		const utilsService = injector.get(UtilsService);
+		
+		// Translate number to letter code for level
+		const levelLetter = utilsService.numberToLetters(level+1);
+		
+		// Combine level letter and number of group and return final group code
+		return levelLetter + (num+1);
 	}
 }
 

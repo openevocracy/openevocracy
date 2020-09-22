@@ -104,13 +104,15 @@ exports.getGroup = function(req, res) {
 		const numMembers_promise = db.collection('group_relations').countAsync({'groupId': pad.groupId});
 		
 		// Get name of group
-		const group_promise = db.collection('groups').findOneAsync({ '_id': pad.groupId }, { 'name': true });
+		const group_promise = db.collection('groups').findOneAsync({ '_id': pad.groupId }, { 'name': true, 'level': true, 'num': true });
 		
 		// Join all information and send response
 		return Promise.join(numWords_promise, numMembers_promise, group_promise)
 			.spread(function(numWords, numMembers, group) {
 				return {
 					'groupId': pad.groupId,
+					'groupLevel': group.level,
+					'groupNum': group.num,
 					'numWords': numWords,
 					'numMembers': numMembers,
 					'expiration': pad.expiration,

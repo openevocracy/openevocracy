@@ -7,7 +7,10 @@ import { forkJoin } from 'rxjs/observable/forkJoin';
 
 import { ProposalDialogComponent } from '../../dialogs/proposal/proposal.component';
 
-import { VisNetworkService, Data, DataSet, Node, Options, Edge } from 'ngx-vis';
+import { VisNetworkService, Data, Node, Options, Edge } from 'ngx-vis';
+
+import { Network } from "vis-network/peer/esm/vis-network";
+import { DataSet } from "vis-data/peer/esm/vis-data"
 
 import { Group, Proposal } from '../../_models/topic/groupvis';
 

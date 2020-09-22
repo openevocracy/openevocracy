@@ -80,14 +80,12 @@ exports.create = function(req, res) {
 			
 			// Store visited status in database (badge and thread viewed)
 			const threadViewed = misc.threadVisited(group._id, threadId, authorId);
-				
-			return Promise.all([sendMail_promise, threadViewed]);
 			
 			// Add author to email notification for this thread
 			const notifyAddAuthor_promise = users.enableEmailNotifyAsync(authorId, threadId);
 			
 			// Wait for promises and send response
-			Promise.join(thread_promise, post_promise, notifyAddAuthor_promise)
+			Promise.join(thread_promise, post_promise, notifyAddAuthor_promise, sendMail_promise, threadViewed)
 				.spread(function(thread, post) {
 					return { 'thread': thread, 'post': post };
 			}).then(res.json.bind(res));

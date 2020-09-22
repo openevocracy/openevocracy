@@ -97,6 +97,7 @@ export class GroupForumComponent implements OnInit {
 		const data = _.extend(thread, { 'forumId': this.forumId });
 		// Post thread to server and create thread in database
 		this.httpManagerService.post('/json/group/forum/thread/create', data).subscribe(res => {
+			
 			// Add new thread to beginning of threads array
 			this.threads.unshift(new Thread(res.thread.ops[0]));
 			

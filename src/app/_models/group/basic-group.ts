@@ -55,7 +55,7 @@ export class BasicGroup {
 	}
 	
 	/**
-	 * @desc:
+	 * @desc: Calculates a code for the group, consisting of the level and the group number
 	 */
 	public calcGroupCode(level: number, num: number): string {
 		// Instantiate utils service
