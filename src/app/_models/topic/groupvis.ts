@@ -35,7 +35,7 @@ class Group {
 	isExpired: boolean;
 	textDetail: string = 'GROUPVIS_GROUP_DETAIL';
 	
-	groupCode: string;
+	code: string;
 	
 	constructor(res: any) {
 		this.groupId = res.groupId;

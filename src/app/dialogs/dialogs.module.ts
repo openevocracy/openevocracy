@@ -19,6 +19,7 @@ import { LoginEmailDialogComponent } from './loginemail/loginemail.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { MaterialsModule } from '../materials/materials.module';
 import { FieldsModule } from '../fields/fields.module';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
 	declarations: [
@@ -40,7 +41,8 @@ import { FieldsModule } from '../fields/fields.module';
 		ReactiveFormsModule,
 		TranslateModule,
 		MaterialsModule,
-		FieldsModule
+		FieldsModule,
+		FontAwesomeModule
 	],
 	entryComponents: [
 		FeedbackDialogComponent,

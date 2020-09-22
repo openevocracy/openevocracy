@@ -11,6 +11,7 @@ export class EditorFieldComponent {
 	
 	@Input() labelKey: string;
 	@Input() required: string;
+	@Input() editorHeight: string = '200px';
 	
 	@Output() onEditorCreated = new EventEmitter();
 	

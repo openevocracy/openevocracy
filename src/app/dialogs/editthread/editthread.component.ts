@@ -7,6 +7,8 @@ import { Thread } from "../../_models/forum/thread";
 
 import * as _ from 'underscore';
 
+import { faPoll, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+
 export interface DialogData {
 	'mainPostHtml': string,
 	'thread': Thread
@@ -21,6 +23,8 @@ export class EditThreadDialogComponent {
 	
 	public onSubmit = new EventEmitter();
 
+	public options: number[] = [1,2,3];
+	public showOptions: boolean = false;
 	public heading: string;
 	public buttonLabel: string;
 	public mainPostHtml: string;
@@ -28,6 +32,10 @@ export class EditThreadDialogComponent {
 	public editor;
 	public editThreadForm: FormGroup;
 	public onlyMembers: boolean = false;
+	
+	// FontAwesome icons
+	public faPoll = faPoll;
+	public faTimesCircle = faTimesCircle;
 
 	constructor(
 		private fb: FormBuilder,
@@ -57,6 +65,10 @@ export class EditThreadDialogComponent {
 			this.heading = 'FORUM_DIALOG_EDIT_THREAD_HEADING';
 			this.buttonLabel = 'FORUM_BUTTON_EDIT_THREAD';
 		}
+	}
+	
+	public ngAfterViewChecked() {
+		this.showOptions = true;
 	}
 	
 	public close() {
