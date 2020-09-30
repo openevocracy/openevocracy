@@ -50,7 +50,7 @@ exports.getBasicGroup = function(req, res) {
 	const lastActivity_promise = db.collection('group_relations')
 		.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
 	
-	// Get group name
+	// Get group
 	const group_promise = db.collection('groups').findOneAsync({ '_id': groupId });
 	
 	// Get group members
@@ -61,7 +61,7 @@ exports.getBasicGroup = function(req, res) {
 		var prevPadIds = _.pluck(groupRelations, 'prevPadId');
 		if (group.level == 0) {
 			return db.collection('pads_proposal')
-				.find({ '_id': {$in: prevPadIds} }, { 'ownerId': true, 'docId': true }).toArrayAsync();
+				.find({ '_id': {$in: prevPadIds} }, { 'authorId': true, 'docId': true }).toArrayAsync();
 		} else {
 			return db.collection('pads_group')
 				.find({ '_id': {$in: prevPadIds} }, { 'groupId': true, 'docId': true }).toArrayAsync();
@@ -82,7 +82,7 @@ exports.getBasicGroup = function(req, res) {
       // Get proposal html
       const prevPadHtml_promise = Promise.join(group_promise, prevPads_promise).spread(function(group, prevPads) {
       	if (group.level == 0) {
-         	const prevUserPad = utils.findWhereObjectId(prevPads, {'ownerId': relation.userId});
+         	const prevUserPad = utils.findWhereObjectId(prevPads, {'authorId': relation.userId});
          	return pads.getPadHTMLAsync('proposal', prevUserPad.docId);
       	} else {
       		const prevGroupPad = utils.findWhereObjectId(prevPads, {'groupId': relation.prevGroupId});
@@ -119,6 +119,8 @@ exports.getBasicGroup = function(req, res) {
 		return {
 			'groupId': groupId,
 			'groupName': group.name,
+			'groupLevel': group.level,
+			'groupNumber': group.num,
 			'padId': pad._id,
 			'expiration': pad.expiration,
 			'docId': pad.docId,

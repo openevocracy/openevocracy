@@ -193,11 +193,11 @@ exports.sendMailOnce = sendMailOnce;
  */
 function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	
-	return db.collection('pads_proposal').find({'topicId': topic._id}, {'ownerId': true, 'expiration': true})
+	return db.collection('pads_proposal').find({'topicId': topic._id}, {'authorId': true, 'expiration': true})
 		.toArrayAsync().map(function(proposal) {
-			// Find user information for every proposal owner
+			// Find user information for every proposal author
 			return db.collection('users')
-				.findOneAsync({ '_id': proposal.ownerId }, {'email': true, 'lang': true})
+				.findOneAsync({ '_id': proposal.authorId }, {'email': true, 'lang': true})
 				.then((user) => {
 					// Get timestamp, when proposal was created
 					const created = proposal._id.getTimestamp();
@@ -215,10 +215,10 @@ function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubje
 	
 	// Delete after 31.05.2020
 	/*// In proposal stage, all sources in proposal tables are users
-	return db.collection('pads_proposal').find({'topicId': topic._id}, {'ownerId': true})
+	return db.collection('pads_proposal').find({'topicId': topic._id}, {'authorId': true})
 		.toArrayAsync().then(function(participants) {
 			return db.collection('users')
-				.find({ '_id': { $in: _.pluck(participants, 'ownerId') } }, {'email': true, 'lang': true})
+				.find({ '_id': { $in: _.pluck(participants, 'authorId') } }, {'email': true, 'lang': true})
 				.toArrayAsync();
 		}).map(function(user) {
 			sendMailOnce(user,

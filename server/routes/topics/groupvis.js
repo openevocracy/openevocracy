@@ -23,10 +23,10 @@ exports.query = function(req, res) {
 	const userId = ObjectId(req.user._id);
 	
 	// Get proposal padId's and (virtual) level's
-	const proposal_promise = db.collection('pads_proposal').find({'topicId': topicId}, {'ownerId': true}).toArrayAsync()
+	const proposal_promise = db.collection('pads_proposal').find({'topicId': topicId}, {'authorId': true}).toArrayAsync()
 		.map(function(pad) {
 			// me is true if both are equal, false otherwise
-			const me = utils.equalId(pad.ownerId, userId);
+			const me = utils.equalId(pad.authorId, userId);
 			return { 'id': pad._id, 'level': -1, 'me': me };
 	});
 	
@@ -40,7 +40,7 @@ exports.query = function(req, res) {
 			.then(function(group) {
 				// Flag groups where is user is/was part of
 				return getGroupRelationsAsync(group._id).then(function(rels) {
-					// Get ownerIds as array
+					// Get authorIds as array
 					const members = _.pluck(rels, 'userId');
 					// me is true if user is in that group, false otherwise
 					const me = utils.containsObjectId(members, userId);
@@ -81,11 +81,11 @@ exports.getProposal = function(req, res) {
 	var padId = ObjectId(req.params.id);
 	
 	db.collection('pads_proposal')
-		.findOneAsync({'_id': padId}, { 'docId': true, 'expiration': true, 'ownerId': true }).then(function(pad) {
+		.findOneAsync({'_id': padId}, { 'docId': true, 'expiration': true, 'authorId': true }).then(function(pad) {
 			// Get html with docId
 			return pads.getPadHTMLAsync('proposal', pad.docId).then(function(html) {
 				// Return number of words and expiration timestamp
-				return { 'padId': pad._id, 'html': html, 'numWords': utils.countHtmlWords(html), 'expiration': pad.expiration, 'authorId': pad.ownerId };
+				return { 'padId': pad._id, 'html': html, 'numWords': utils.countHtmlWords(html), 'expiration': pad.expiration, 'authorId': pad.authorId };
 			});
 	}).then(res.json.bind(res));
 };
@@ -104,13 +104,15 @@ exports.getGroup = function(req, res) {
 		const numMembers_promise = db.collection('group_relations').countAsync({'groupId': pad.groupId});
 		
 		// Get name of group
-		const group_promise = db.collection('groups').findOneAsync({ '_id': pad.groupId }, { 'name': true });
+		const group_promise = db.collection('groups').findOneAsync({ '_id': pad.groupId }, { 'name': true, 'level': true, 'num': true });
 		
 		// Join all information and send response
 		return Promise.join(numWords_promise, numMembers_promise, group_promise)
 			.spread(function(numWords, numMembers, group) {
 				return {
 					'groupId': pad.groupId,
+					'groupLevel': group.level,
+					'groupNum': group.num,
 					'numWords': numWords,
 					'numMembers': numMembers,
 					'expiration': pad.expiration,

@@ -78,13 +78,13 @@ exports.startPadServer = function(wss) {
 };
 
 /*
- * @desc: Checks if current user is owner of the pad and if pad is not already expired
+ * @desc: Checks if current user is author of the pad and if pad is not already expired
  * @params:
  *    session: contains the userId of the current user
- *    pad: contains meta information about the pad (i.e. owner and expiration date)
+ *    pad: contains meta information about the pad (i.e. author and expiration date)
  */
 function checkOwnerAndExpiration(session, pad) {
-	var isOwner = (session.userId.toString() == pad.ownerId.toString());
+	var isOwner = (session.userId.toString() == pad.authorId.toString());
 	var isExpired = (pad.expiration <= Date.now());
 	return isOwner && !isExpired;
 }
@@ -96,7 +96,7 @@ function checkOwnerAndExpiration(session, pad) {
  *    pad: contains meta information about the pad (i.e. group members and expiration date)
  */
 function checkOwnerAndExpirationGroup(session, pad) {
-	var isOwner = utils.containsObjectId(pad.ownerIds, session.userId);
+	var isOwner = utils.containsObjectId(pad.authorIds, session.userId);
 	var isExpired = (pad.expiration <= Date.now());
 	return isOwner && !isExpired;
 }
@@ -112,13 +112,13 @@ function initializeAccessControl() {
 		return true;
 	});
 	backend.allowUpdate('docs_topic_description', function(docId, oldDoc, newDoc, ops, session) {
-		// If user is owner and document is not expired
+		// If user is author and document is not expired
 		if (pads_topic_description[docId]) {
 			// If pad is already in cache, check condition
 			return checkOwnerAndExpiration(session, pads_topic_description[docId]);
 		} else {
 			// If pad is not in cache, get it from database, store it in cache and check condition
-			return Promise.resolve(db.collection('pads_topic_description').findOneAsync({'docId': ObjectId(docId)}, { 'ownerId': true, 'expiration': true })
+			return Promise.resolve(db.collection('pads_topic_description').findOneAsync({'docId': ObjectId(docId)}, { 'authorId': true, 'expiration': true })
 				.then(function(pad) {
 					pads_topic_description[docId] = pad;
 					return checkOwnerAndExpiration(session, pad);
@@ -131,13 +131,13 @@ function initializeAccessControl() {
 		return true;
 	});
 	backend.allowUpdate('docs_proposal', function(docId, oldDoc, newDoc, ops, session) {
-		// If user is owner and document is not expired
+		// If user is author and document is not expired
 		if (pads_proposal[docId]) {
 			// If pad is already in cache, check condition
 			return checkOwnerAndExpiration(session, pads_proposal[docId]);
 		} else {
 			// If pad is not in cache, get it from database, store it in cache and check condition
-			return Promise.resolve(db.collection('pads_proposal').findOneAsync({'docId': ObjectId(docId)}, { 'ownerId': true, 'expiration': true })
+			return Promise.resolve(db.collection('pads_proposal').findOneAsync({'docId': ObjectId(docId)}, { 'authorId': true, 'expiration': true })
 				.then(function(pad) {
 					pads_proposal[docId] = pad;
 					return checkOwnerAndExpiration(session, pad);
@@ -162,8 +162,8 @@ function initializeAccessControl() {
 					const members_promise = db.collection('group_relations').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
 					return Promise.join(pad, members_promise);
 				}).spread(function(pad, members) {
-					// Add owners to pad
-					pad.ownerIds = _.pluck(members, 'userId');
+					// Add authors to pad
+					pad.authorIds = _.pluck(members, 'userId');
 					// Store pad in cache
 					pads_group[docId] = pad;
 					// Return pad
@@ -172,7 +172,7 @@ function initializeAccessControl() {
 		}
 		
 		return currentPad_promise.then((currentPad) => {
-			// Check if user is owner and doc is not expired, finally return
+			// Check if user is author and doc is not expired, finally return
 			if (checkOwnerAndExpirationGroup(session, currentPad)) {
 				// Inform group toolbar badge about update
 				groups.badges.updateEditorBadge(session.userId, currentPad);
@@ -268,8 +268,8 @@ function queryViewAsync(collection_suffix, padId) {
 		
 		// Join all information and return
 		return Promise.join(html_promise, topicName_promise).spread(function(html, topicName) {
-			var ownerId = (collection_suffix == 'proposal') ? pad.ownerId : null;
-			return { 'topicId': pad.topicId, 'title': topicName, 'html': html, 'expiration': pad.expiration, 'ownerId': ownerId };
+			var authorId = (collection_suffix == 'proposal') ? pad.authorId : null;
+			return { 'topicId': pad.topicId, 'title': topicName, 'html': html, 'expiration': pad.expiration, 'authorId': authorId };
 		});
 	});
 }

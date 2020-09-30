@@ -483,7 +483,7 @@ async function socketAuthentication(ws, userToken, cb) {
 		.findOneAsync({'_id': userId}, {'salt': true}).then(function(dbUser) {
 			// If salt is not correct, close connection and return
 			if (dbUser.salt != userSalt) {
-				console.log('Connection rejected, users salt not correct');  // TODO Add to logfile later
+				console.log('Connection rejected, users salt not correct', userId);  // TODO Add to logfile later
 				// Close socket connection and log out user
 				ws.close();
 				logoutAsync(userId);

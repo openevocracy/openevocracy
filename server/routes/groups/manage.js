@@ -75,7 +75,7 @@ function assignParticipantsToGroups(participants) {
  *    nextDeadline: deadline of the next stage (not the old one)
  *    level: new level (old level +1)
  */
-function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, level) {
+function storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, nextDeadline, level) {
 	const chatRoomId = ObjectId();
 	const forumId = ObjectId();
 	
@@ -101,7 +101,7 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 	const createGroup_promise = groupName_promise.then(function(groupName) {
 		// Define group data
 		const group = {
-			'_id': groupId, 'name': groupName, 'level': level,
+			'_id': groupId, 'num': groupNumber, 'name': groupName, 'level': level,
 			'topicId': topicId, 'chatRoomId': chatRoomId, 'forumId': forumId
 		};
 		
@@ -168,7 +168,7 @@ exports.createGroupsAsync = function(topic) {
 			// Filter by valid status and return id's of users
 			return _.pluck(_.filter(pads, function(pad) {
 				return pad.valid;
-			}), 'ownerId');
+			}), 'authorId');
 	});
 	
 	var storeValidParticipantsPromise = validParticipants_promise.then(function(validParticipants) {
@@ -181,7 +181,7 @@ exports.createGroupsAsync = function(topic) {
 	// Create group and notify members
 	const createGroupsPromise = validParticipants_promise.then(function(validParticipants) {
 		return assignParticipantsToGroups(validParticipants);
-	}).map(function(group_members) {
+	}).map(function(group_members, groupNumber) {
 		// Create new group id
 		const topicId = topic._id;
 		const groupId = ObjectId();
@@ -199,9 +199,9 @@ exports.createGroupsAsync = function(topic) {
 		// Get group relations (previous pad ids and member ids)
 		// Note: previous group id is not possible here, since initially there is no previous group
 		const groupRelations_promise = db.collection('pads_proposal')
-			.find({ 'topicId': topicId, 'ownerId': {$in: group_members} }, {'_id': true, 'ownerId': true}).toArrayAsync()
+			.find({ 'topicId': topicId, 'authorId': {$in: group_members} }, {'_id': true, 'authorId': true}).toArrayAsync()
 			.map(function(rawGroupRelation) {
-				return { 'prevPadId': rawGroupRelation._id, 'userId': rawGroupRelation.ownerId };
+				return { 'prevPadId': rawGroupRelation._id, 'userId': rawGroupRelation.authorId };
 		});
 		
 		// Store group in database
@@ -209,7 +209,7 @@ exports.createGroupsAsync = function(topic) {
 		const nextDeadline = topic.nextDeadline;
 		const store_group_promise = groupRelations_promise.then(function(groupRelations) {
 			console.log('groupRelations', groupRelations);
-			return storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 0);
+			return storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, nextDeadline, 0);
 		});
 		
 		// Join promises and return group members
@@ -304,7 +304,8 @@ exports.remixGroupsAsync = function(topic) {
 		
 		// Insert all groups into database
 		var nextLevel = topic.level+1;
-		return Promise.map(groupsMemberIds_promise, function(groupMemberIds) {
+		return Promise.map(groupsMemberIds_promise, function(groupMemberIds, groupNumber) {
+			
          // Get group relations (prevPadIds, prevGroupIds and member ids)
 			var groupRelations_promise = db.collection('group_relations')
 				.find({ 'groupId': {$in: _.pluck(groups, '_id')}, 'userId': {$in: groupMemberIds} }, { 'groupId': true, 'userId': true }).toArrayAsync()
@@ -337,7 +338,7 @@ exports.remixGroupsAsync = function(topic) {
          
          // Store group in database
          var storeGroup_promise = groupRelations_promise.then(function(groupRelations) {
-         	return storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, nextLevel);
+         	return storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, nextDeadline, nextLevel);
          });
          
          // Send mail to notify level change

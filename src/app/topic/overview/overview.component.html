@@ -9,7 +9,7 @@
 		</div>
 		
 		<div *ngIf="!isEditor">
-			<button mat-button [routerLink]="['/user/profile', topic?.authorId]">
+			<button mat-button [routerLink]="['/user', topic?.authorId]">
 				<span><fa-icon [icon]="faUser"></fa-icon> {{ 'TOPIC_BUTTON_AUTHOR' | translate }}</span>
 			</button>
 		</div>

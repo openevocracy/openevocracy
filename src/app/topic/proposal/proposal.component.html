@@ -11,11 +11,11 @@
 		<span class="flex-spacer"></span>
 		
 		<div class="validity">
-			<span *ngIf="isValid" class="validity-valid">
+			<span *ngIf="isValid" class="validity-valid" matTooltip="{{ 'EDITOR_DOCUMENT_VALID_HELPTEXT' | translate }}">
 				<span class="valid-label">{{ 'EDITOR_DOCUMENT_VALID' | translate }}</span>
 				<fa-icon [icon]="faCheckCircle"></fa-icon>
 			</span>
-			<span *ngIf="!isValid" class="validity-not-valid" title="{{ 'EDITOR_DOCUMENT_NONVALID_HELPTEXT' | translate }}">
+			<span *ngIf="!isValid" class="validity-not-valid" matTooltip="{{ 'EDITOR_DOCUMENT_NONVALID_HELPTEXT' | translate }}">
 				<span class="valid-label">{{ 'EDITOR_DOCUMENT_NONVALID' | translate }}</span>
 				<fa-icon [icon]="faTimesCircle"></fa-icon>
 			</span>

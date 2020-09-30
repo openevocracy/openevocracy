@@ -40,6 +40,9 @@ export class TopicProposalComponent extends EditorComponent {
 	public basicTopic: BasicTopic;
 	public isValid: boolean = false;
 	
+	//public valid_tooltip : string;
+	//public nonvalid_tooltip : string;
+	
 	public faCheckCircle = faCheckCircle;
 	public faTimesCircle = faTimesCircle;
 
@@ -72,7 +75,16 @@ export class TopicProposalComponent extends EditorComponent {
 			
 			if (this.userId == this.proposal.authorId && this.basicTopic.stage == C.STAGE_PROPOSAL)
 				this.isEditor = true;
+			
+			// Get and show valid status for the first time, if editor is true, the status will be updated online while typing
+			this.isValid = this.isProposalValid();
 		});
+		
+		// Translate tooltip texts
+		//this.translate.get("EDITOR_DOCUMENT_VALID_HELPTEXT").
+		//		subscribe(str => { this.valid_tooltip = str; });
+		//this.translate.get("EDITOR_DOCUMENT_NONVALID_HELPTEXT").
+		//		subscribe(str => { this.nonvalid_tooltip = str; });
 	}
 	
 	/*
@@ -108,8 +120,8 @@ export class TopicProposalComponent extends EditorComponent {
 	 * @desc: Checks if a proposal is valid
 	 */
 	public isProposalValid(): boolean {
-		// Get raw text from editor
-		const text = this.editor.getText();
+		// Get raw text either from editor or from static proposal html
+		const text = this.editor ? this.editor.getText() : this.proposal.html;
 		// Count number of containing words
 		const numWords = this.utilsService.countStringWords(text);
 		// Return if proposal is valid or not

@@ -36,7 +36,9 @@ function calculateDeadline(nextStage, prevDeadline, levelDuration) {
             break;
         case C.STAGE_PASSED:
         case C.STAGE_REJECTED:
-            nextDeadline = cfg.DURATION_NONE;
+        		// NOTE the following was removed to correct the countdown for finished topics
+        		//      if everything is okay for some time (say until 31.12.2020), remove this
+            //nextDeadline = cfg.DURATION_NONE;
             break;
     }
     
@@ -87,14 +89,14 @@ function manageConsensusStageAsync(topic, levelDuration) {
             };
                         
             // Add activity for author
-            const authorActivity_promise = activities.addActivity(topic.owner, C.ACT_TOPIC_COMPLETE, topicId);
+            const authorActivity_promise = activities.addActivity(topic.authorId, C.ACT_TOPIC_COMPLETE, topicId);
             
             // Add activities for interested persons (persons who voted for the respective topics)
 				const interestedActivity_promise = db.collection('topic_votes')
 					.find({'topicId': topicId}, {'userId': true}).toArrayAsync()
 					.then(function(userVotes) {
 							_.each(userVotes, function(el) {
-									if (!utils.equalId(el.userId, topic.owner)) // if activity has not yet been added
+									if (!utils.equalId(el.userId, topic.authorId)) // if activity has not yet been added
 										activities.addActivity(el.userId, C.ACT_TOPIC_COMPLETE, topicId);
 								});
 						});
@@ -154,9 +156,9 @@ exports.manageAndListTopicsAsync = manageAndListTopicsAsync;
  * @return {object} topic - adjusted topic
  */
 function manageTopicStateAsync(topic) {
-   
-	// Exit this function if stage transition is not due yet
-	if(Date.now() < topic.nextDeadline)
+	
+	// Exit this function if topic does not exist or stage transition is not due yet
+	if(_.isNull(topic) || Date.now() < topic.nextDeadline)
 		return Promise.resolve(topic);
 			
 	// Move to next stage
@@ -198,7 +200,7 @@ function manageTopicStateAsync(topic) {
 					stageStartedEntryName = 'stageConsensusStarted';
 				} else {
 					topic.stage = C.STAGE_REJECTED;
-					topic.nextDeadline = cfg.DURATION_NONE;
+					//topic.nextDeadline = cfg.DURATION_NONE;
 					topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS';
 					stageStartedEntryName = 'stageRejectedStarted';
 				}
@@ -286,14 +288,14 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 	if(with_details) {
 		// Get topic description
 		pad_description_promise = db.collection('pads_topic_description')
-			.findOneAsync({'topicId': topicId}, { 'docId': true, 'ownerId': true })
+			.findOneAsync({'topicId': topicId}, { 'docId': true, 'authorId': true })
 			.then(function(pad) {
 				return pads.addHtmlToPadAsync('topic_description', pad);
 		});
 		
 		// Get proposal of user
 		user_proposal_promise = db.collection('pads_proposal')
-			.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { 'docId': true, 'ownerId': true })
+			.findOneAsync({ 'topicId': topicId, 'authorId': userId }, { 'docId': true, 'authorId': true })
 			.then(function(pad) {
 				return _.isNull(pad) ? null : pads.addHtmlToPadAsync('proposal', pad);
 		});

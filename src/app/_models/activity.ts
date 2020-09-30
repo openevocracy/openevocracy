@@ -21,8 +21,8 @@ export class Activity {
 	
 	private getCreationTimestamp(id) {
 		// Instantiate utils service
-		var injector = ReflectiveInjector.resolveAndCreate([UtilsService]);
-		var utilsService = injector.get(UtilsService);
+		const injector = ReflectiveInjector.resolveAndCreate([UtilsService]);
+		const utilsService = injector.get(UtilsService);
 		
 		// Get Timestamp from ObjectId
 		return utilsService.getTimestampFromObjectId(id);

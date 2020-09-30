@@ -1,0 +1,20 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Routes } from '@angular/router';
+
+@NgModule({
+	imports: [
+		CommonModule,
+		/*RouterModule.forRoot(userRoutes, {
+			scrollPositionRestoration: 'enabled',
+			anchorScrolling: 'enabled',
+			onSameUrlNavigation: 'reload'
+		})*/
+		//RouterModule.forChild(userChildRoutes)
+		RouterModule.forRoot([])
+	],
+	exports: [ RouterModule ],
+	providers: [],
+	declarations: []
+})
+export class UserRoutingModule { }

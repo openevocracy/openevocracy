@@ -1,0 +1,19 @@
+Debugger listening on ws://127.0.0.1:9229/d91769b7-164b-4a64-b324-386e93bb2039
+For help, see: https://nodejs.org/en/docs/inspector
+
+
+  users
+before
+    1) "before all" hook for "should register"
+
+
+  0 passing (2s)
+  1 failing
+
+  1) users
+       "before all" hook for "should register":
+     Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (/workspace/openevocracy/test/users.js)
+  
+
+
+
