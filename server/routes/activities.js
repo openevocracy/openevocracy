@@ -92,7 +92,7 @@ exports.query = function(req, res) { // not tested yet / probably not properly i
 /**
  * @desc: Stores an activity in the database
  */
-function addActivity(userId, type, targetId) {
+function addActivityAsync(userId, type, targetId) {
 	
 	// Get privacy level for current activity type from user activity settings
 	return db.collection('user_activity_settings').findOneAsync({ 'userId': userId }).then((privacySettings) => {
@@ -112,7 +112,7 @@ function addActivity(userId, type, targetId) {
 		return db.collection('user_activities').insertAsync(activity);
 	});
 }
-exports.addActivity = addActivity;
+exports.addActivityAsync = addActivityAsync;
 
 
 /**
@@ -128,7 +128,7 @@ exports.addActivity = addActivity;
       return utils.rejectPromiseWithMessage(400, 'BAD_REQUEST');
 
    // Stores activity in database
-   addActivity(userId, type, targetId)
+   addActivityAsync(userId, type, targetId)
       .then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
 };*/
 

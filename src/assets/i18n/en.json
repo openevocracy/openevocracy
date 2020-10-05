@@ -264,5 +264,7 @@
    "PAGINATOR_FIRST_PAGE_LABEL": "First page",
    "PAGINATOR_LAST_PAGE_LABEL": "Last page",
    "PAGINATOR_RANGE_PAGE_LABEL_1": "0 of {{length}}",
-   "PAGINATOR_RANGE_PAGE_LABEL_2": "{{startIndex}} - {{endIndex}} of {{length}}"
+   "PAGINATOR_RANGE_PAGE_LABEL_2": "{{startIndex}} - {{endIndex}} of {{length}}",
+      
+   "MODAL_SEND_REQUEST": "Submit"
 }

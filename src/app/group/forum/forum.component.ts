@@ -76,7 +76,7 @@ export class GroupForumComponent implements OnInit {
 		});
 	}
 	
-	/*
+	/**
 	 * @desc: Opens dialog to add new thread and subscribe to dialog
 	 *        function is called from "New thread"-Button
 	 */
@@ -89,7 +89,7 @@ export class GroupForumComponent implements OnInit {
 		});
 	}
 	
-	/*
+	/**
 	 * @desc: When a new thread is submitted from dialog, the new thread will be postet to server
 	 */
 	private onSubmit(thread) {

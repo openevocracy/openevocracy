@@ -16,7 +16,11 @@ export class GroupWelcomeDialogComponent {
 	) {}
 	
 	public ngAfterViewChecked() {
-		this.showAdditional = true;
+		// This is added to avoid an ugly gui effect regarding mat-accordion
+		// The timeout is necessary to avoid an error, see: https://blog.angular-university.io/angular-debugging/
+		setTimeout(() => {
+			this.showAdditional = true;
+		});
 	}
 	
 	public close() {

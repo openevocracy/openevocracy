@@ -61,6 +61,26 @@ exports.create = function(req, res) {
 			
 			// Store main post in database
 			const post_promise = db.collection('forum_posts').insertAsync(post);
+			
+			// Also add poll to database, if given
+			//const poll_promise
+			if (!_.isNull(body.poll)) {
+				
+				// Initialize poll options
+				const options = body.poll.options;
+				const optionValues = _.times(options.length, _.constant(0));
+				
+				// Define poll
+				const poll = {
+					'options': _.object(options, optionValues),
+					'allowMultipleOptions': body.poll.allowMultipleOptions,
+					'allowUpdate': true  // Allows an update after the poll is created, this is set to false if first vote was e
+				};
+				
+				console.log(poll);
+				
+				//const poll_promise = db.collection('forum_polls').insertAsync(poll);
+			}
 					
 			// Build link to forum and thread
 			const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;

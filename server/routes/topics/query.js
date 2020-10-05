@@ -30,7 +30,7 @@ exports.vote = function(req, res) {
 		.updateAsync(topic_vote, topic_vote, {'upsert': true})
 		.then(function(update_result) {
 			// Add activity
-			activities.addActivity(topic_vote.userId, C.ACT_TOPIC_VOTE, topic_vote.topicId);
+			activities.addActivityAsync(topic_vote.userId, C.ACT_TOPIC_VOTE, topic_vote.topicId);
 			
 			// Return voted value
 			return { 'voted': true };
@@ -51,7 +51,7 @@ exports.unvote = function(req, res) {
 	db.collection('topic_votes').removeAsync(topic_vote)
 		.then(function(remove_result) {
 			// Add activity
-			activities.addActivity(topic_vote.userId, C.ACT_TOPIC_UNVOTE, topic_vote.topicId);
+			activities.addActivityAsync(topic_vote.userId, C.ACT_TOPIC_UNVOTE, topic_vote.topicId);
 			
 			// Return voted value
 			return {'voted': false};
@@ -231,7 +231,7 @@ exports.create = function(req, res) {
 		var create_pad_promise = pads.createPadAsync(pad, 'topic_description');
 		
 		// Add activity
-		activities.addActivity(userId, C.ACT_TOPIC_CREATE, topic._id);
+		activities.addActivityAsync(userId, C.ACT_TOPIC_CREATE, topic._id);
 		
 		return Promise.join(create_topic_promise, create_pad_promise).return(topic);
 	}).then(function(topic) {

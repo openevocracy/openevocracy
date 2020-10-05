@@ -89,7 +89,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
             };
                         
             // Add activity for author
-            const authorActivity_promise = activities.addActivity(topic.authorId, C.ACT_TOPIC_COMPLETE, topicId);
+            const authorActivity_promise = activities.addActivityAsync(topic.authorId, C.ACT_TOPIC_COMPLETE, topicId);
             
             // Add activities for interested persons (persons who voted for the respective topics)
 				const interestedActivity_promise = db.collection('topic_votes')
@@ -97,7 +97,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
 					.then(function(userVotes) {
 							_.each(userVotes, function(el) {
 									if (!utils.equalId(el.userId, topic.authorId)) // if activity has not yet been added
-										activities.addActivity(el.userId, C.ACT_TOPIC_COMPLETE, topicId);
+										activities.addActivityAsync(el.userId, C.ACT_TOPIC_COMPLETE, topicId);
 								});
 						});
 		
