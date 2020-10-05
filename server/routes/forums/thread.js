@@ -63,24 +63,30 @@ exports.create = function(req, res) {
 			const post_promise = db.collection('forum_posts').insertAsync(post);
 			
 			// Also add poll to database, if given
-			//const poll_promise
-			if (!_.isNull(body.poll)) {
-				
-				// Initialize poll options
-				const options = body.poll.options;
-				const optionValues = _.times(options.length, _.constant(0));
-				
-				// Define poll
-				const poll = {
-					'options': _.object(options, optionValues),
-					'allowMultipleOptions': body.poll.allowMultipleOptions,
-					'allowUpdate': true  // Allows an update after the poll is created, this is set to false if first vote was e
-				};
-				
-				console.log(poll);
-				
-				//const poll_promise = db.collection('forum_polls').insertAsync(poll);
-			}
+			const poll_promise = Promise.resolve().then(() => {
+				if (!_.isNull(body.poll) && body.poll.options.length >= 2) {
+					
+					// Initialize poll options
+					const options = body.poll.options.map((label) => {
+						return { 'label': label, 'count': 0 };
+					});
+					
+					// Define poll
+					const poll = {
+						'postId': mainPostId,
+						'threadId': threadId,
+						'options': options,
+						'allowMultipleOptions': body.poll.allowMultipleOptions,
+						'allowUpdate': true  // Allows an update after the poll is created, this is set to false if first vote was e
+					};
+					
+					// Add poll to database
+					return db.collection('forum_polls').insertAsync(poll);
+				} else {
+					// Return null to Promise if no poll was sent
+					return null;
+				}
+			});
 					
 			// Build link to forum and thread
 			const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
@@ -105,7 +111,7 @@ exports.create = function(req, res) {
 			const notifyAddAuthor_promise = users.enableEmailNotifyAsync(authorId, threadId);
 			
 			// Wait for promises and send response
-			Promise.join(thread_promise, post_promise, notifyAddAuthor_promise, sendMail_promise, threadViewed)
+			Promise.join(thread_promise, post_promise, notifyAddAuthor_promise, sendMail_promise, threadViewed, poll_promise)
 				.spread(function(thread, post) {
 					return { 'thread': thread, 'post': post };
 			}).then(res.json.bind(res));
@@ -135,6 +141,14 @@ exports.query = function(req, res) {
 	// Get group
 	const group_promise = thread_promise.then((thread) => {
 		return db.collection('groups').findOneAsync({'forumId': thread.forumId});
+	});
+	
+	// Get poll if thread includes a poll
+	const poll_promise = db.collection('forum_polls').findOneAsync({'threadId': threadId}).then((poll) => {
+		if (!poll)
+			return null;
+		else
+			return _.pick(poll, 'options', 'allowMultipleOptions');
 	});
 	
 	// Get posts
@@ -205,11 +219,12 @@ exports.query = function(req, res) {
 			.updateAsync({ 'userId': userId }, { $addToSet: { 'viewed': threadId } }, { 'upsert': true });
 
 	// Send result
-	Promise.join(thread_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise, threadViewedByUser_promise)
-		.spread(function(thread, posts, viewsUpdate) {
+	Promise.join(thread_promise, posts_promise, poll_promise, viewsUpdate_promise, notifyStatus_promise, threadViewedByUser_promise)
+		.spread(function(thread, posts, poll) {
 		return {
 			'thread': thread,
-			'posts': posts
+			'posts': posts,
+			'poll': poll
 		};
 	}).then(res.json.bind(res));
 };

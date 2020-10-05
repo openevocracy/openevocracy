@@ -201,6 +201,7 @@
 	"FORUM_SNACKBAR_COMMENT_EDITED": "Der Kommentar wurde erfolgreich bearbeitet.",
 	"FORUM_SNACKBAR_MARK_SOLVED": "Der Thread wurde als gelöst markiert.",
 	"FORUM_SNACKBAR_MARK_UNSOLVED": "Der Thread wurde wieder als ungelöst markiert.",
+	"FORUM_SNACKBAR_POLL_OPTION_MISSING": "Die Umfrage benötigt mindestens zwei Optionen.",
 	"FORUM_POST_EDITS_LABEL": "Mal bearbeitet",
 	"FORUM_COMMENT_EDITS_LABEL": "Mal bearbeitet",
 	"FORUM_LAST_ACTIVITY_PRE_TIME": "letzte Antwort am",

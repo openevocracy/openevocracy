@@ -53,6 +53,23 @@
 				</div>
 				<div class="post-text" [innerHtml]="post.html"></div>
 			</div>
+			<div class="post-poll clearfix" *ngIf="poll && post.postId == thread.mainPostId">
+				<hr/>
+				<div *ngIf="poll.allowMultipleOptions">
+					<div class="option" *ngFor="let option of poll.options;">
+						<mat-checkbox>
+							{{option.label}}
+						</mat-checkbox>
+					</div>
+				</div>
+				<mat-radio-group *ngIf="!poll.allowMultipleOptions">
+					<div class="option" *ngFor="let option of poll.options; let j = index;">
+						<mat-radio-button [value]="'option'+j">
+							{{option.label}}
+						</mat-radio-button>
+					</div>
+				</mat-radio-group>
+			</div>
 			<div class="post-comments">
 				<div *ngFor="let comment of post.comments" class="comment">
 					<hr/>

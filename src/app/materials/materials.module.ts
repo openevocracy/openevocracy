@@ -20,6 +20,7 @@ import {
 	MatSelectModule,
 	MatBadgeModule,
 	MatCheckboxModule,
+	MatRadioModule,
 	MatExpansionModule,
 	MatPaginatorModule,
 	MatPaginatorIntl
@@ -44,6 +45,7 @@ import {
 		MatSelectModule,
 		MatBadgeModule,
 		MatCheckboxModule,
+		MatRadioModule,
 		MatExpansionModule,
 		MatPaginatorModule
 	],
@@ -65,6 +67,7 @@ import {
 		MatSelectModule,
 		MatBadgeModule,
 		MatCheckboxModule,
+		MatRadioModule,
 		MatExpansionModule,
 		MatPaginatorModule
 	],

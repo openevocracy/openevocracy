@@ -2,6 +2,7 @@ import { Component, Inject, EventEmitter } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 
+import { SnackbarService } from '../../_services/snackbar.service';
 import { CustomValidators } from '../../_utils/custom-validators';
 import { Thread } from "../../_models/forum/thread";
 
@@ -41,6 +42,7 @@ export class EditThreadDialogComponent {
 
 	constructor(
 		private fb: FormBuilder,
+		private snackbarService: SnackbarService,
 		private dialogRef: MatDialogRef<EditThreadDialogComponent>,
 		@Inject(MAT_DIALOG_DATA) public data: DialogData
 	) {
@@ -147,6 +149,14 @@ export class EditThreadDialogComponent {
 				'options': this.options.value,
 				'allowMultipleOptions': this.allowMultipleOptions
 			};
+		}
+		// If exactely one option is entered, we assume that the user wanted to add a poll
+		// Warn user that at least two options are necessary
+		if (optionsTrimmed.length == 1) {
+			// Show snackbar notification
+			this.snackbarService.showSnackbar('FORUM_SNACKBAR_POLL_OPTION_MISSING');
+			// Stop function here, so user has a chance to correct entries
+			return;
 		}
 		
 		// Bundle all form data

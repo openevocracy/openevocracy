@@ -22,6 +22,7 @@ import { GroupService } from '../../../_services/group.service';
 
 import { Thread } from "../../../_models/forum/thread";
 import { Post } from "../../../_models/forum/post";
+import { Poll } from "../../../_models/forum/poll";
 import { Edit } from "../../../_models/forum/edit";
 
 import { faArrowAltCircleLeft, faLock, faCaretUp, faCaretDown, faPenSquare, faTrash, faShareSquare, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
@@ -45,6 +46,7 @@ export class GroupForumThreadComponent implements OnInit {
 	public groupId: string;
 	public thread: Thread;
 	public posts: Post[];
+	public poll: Poll;
 	public isGroupMember: boolean = false;
 	public isExpired: boolean = true;
 	public solvedButtonTitle: string;
@@ -146,10 +148,12 @@ export class GroupForumThreadComponent implements OnInit {
 					this.posts.push(new Post(post));
 				}.bind(this));
 				
+				// Poll
+				this.poll = res.poll ? new Poll(res.poll) : null;
+				console.log(this.poll);
+				
 				// Sort posts
 				this.sortPosts('createdTimestamp', true, false);
-				
-				console.log(this.posts);
 				
 				// Return to subscribers
 				observer.next(true);
@@ -494,10 +498,10 @@ export class GroupForumThreadComponent implements OnInit {
 		// If dialog was approved, delete thread
 		deleteRef.componentInstance.onSubmit.subscribe(() => {
 			this.httpManagerService.delete('/json/group/forum/thread/'+this.thread.threadId).subscribe(res => {
-				// After everything is finished, show snackbar notification and redirect to forum list
-				this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_DELETED', function() {
-					this.router.navigate(['/group', this.groupId, 'forum'])
-				}.bind(this));
+				// Show snackbar notification
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_DELETED');
+				// Redirect to forum list
+				this.router.navigate(['/group', this.groupId, 'forum']);
 			});
 		});
 	}

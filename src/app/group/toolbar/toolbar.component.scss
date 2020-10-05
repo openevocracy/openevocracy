@@ -8,6 +8,6 @@ button { height: 38px; margin-top: 12px; }
 button.active { background-color: rgba(255,255,255,0.2); }
 button.badge-transparent .mat-badge-content { color: transparent; }
 
-.mat-badge-content { width: 16px; height: 16px; line-height: 16px; font-size: 10px; box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15); }
+.mat-badge-content { width: 12px; height: 12px; line-height: 16px; font-size: 10px; box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15); }
 .mat-badge-medium.mat-badge-overlap.mat-badge-after .mat-badge-content { right: 3px; }
 .mat-badge-medium.mat-badge-above .mat-badge-content { top: 3px; }

@@ -201,6 +201,7 @@
 	"FORUM_SNACKBAR_COMMENT_EDITED": "The comment was successfully updated.",
 	"FORUM_SNACKBAR_MARK_SOLVED": "The thread was marked as solved.",
 	"FORUM_SNACKBAR_MARK_UNSOLVED": "The thread was marked as unsolved again.",
+	"FORUM_SNACKBAR_POLL_OPTION_MISSING": "The poll requires at least two options.",
 	"FORUM_POST_EDITS_LABEL": "edits",
 	"FORUM_COMMENT_EDITS_LABEL": "edits",
 	"FORUM_LAST_ACTIVITY_PRE_TIME": "last response at",
