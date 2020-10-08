@@ -201,6 +201,7 @@
 	"FORUM_SNACKBAR_COMMENT_EDITED": "The comment was successfully updated.",
 	"FORUM_SNACKBAR_MARK_SOLVED": "The thread was marked as solved.",
 	"FORUM_SNACKBAR_MARK_UNSOLVED": "The thread was marked as unsolved again.",
+	"FORUM_SNACKBAR_POLL_OPTION_MISSING": "The poll requires at least two options.",
 	"FORUM_POST_EDITS_LABEL": "edits",
 	"FORUM_COMMENT_EDITS_LABEL": "edits",
 	"FORUM_LAST_ACTIVITY_PRE_TIME": "last response at",
@@ -264,5 +265,7 @@
    "PAGINATOR_FIRST_PAGE_LABEL": "First page",
    "PAGINATOR_LAST_PAGE_LABEL": "Last page",
    "PAGINATOR_RANGE_PAGE_LABEL_1": "0 of {{length}}",
-   "PAGINATOR_RANGE_PAGE_LABEL_2": "{{startIndex}} - {{endIndex}} of {{length}}"
+   "PAGINATOR_RANGE_PAGE_LABEL_2": "{{startIndex}} - {{endIndex}} of {{length}}",
+      
+   "MODAL_SEND_REQUEST": "Submit"
 }

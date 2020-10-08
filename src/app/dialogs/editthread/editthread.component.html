@@ -13,31 +13,31 @@
 		</div>
 		
 		<p>
-			<mat-slide-toggle [checked]="onlyMembers" (change)="onSlide($event)">{{ 'FORUM_DIALOG_THREAD_ONLY_MEMBERS' | translate }}</mat-slide-toggle>
+			<mat-slide-toggle [checked]="onlyMembers" (change)="onSlideMembersOnly($event)">{{ 'FORUM_DIALOG_THREAD_ONLY_MEMBERS' | translate }}</mat-slide-toggle>
 		</p>
 		
 		<div class="add" *ngIf="showOptions">
 		<mat-accordion>
-			<mat-expansion-panel hideToggle class="addpoll">
+			<mat-expansion-panel hideToggle class="addpoll" formArrayName="options">
 				<mat-expansion-panel-header>
 					<mat-panel-title>
 						<fa-icon [icon]="faPoll"></fa-icon> <span class="label">Umfrage hinzufügen</span>
 					</mat-panel-title>
 				</mat-expansion-panel-header>
 				
-				<div *ngFor="let n of options">
+				<div *ngFor="let option of options.controls; let i = index">
 					<mat-form-field>
-						<mat-label>Option {{n}}</mat-label>
-						<input matInput>
+						<mat-label>Option {{i+1}}</mat-label>
+						<input matInput [formControlName]="i" type="text">
 					</mat-form-field>
-					<button mat-icon-button aria-label="Remove option">
+					<button mat-icon-button aria-label="Remove option" (click)="removePollOption(i)">
 						<fa-icon class="removeoption" [icon]="faTimesCircle"></fa-icon>
 					</button>
 				</div>
 				
 				<p>
-					<button class="addoption" mat-flat-button color="primary">Add option</button>
-					<mat-slide-toggle [checked]="allowMultipleOptions" (change)="onSlideOptions($event)">Allow multiple selections</mat-slide-toggle>
+					<button class="addoption" mat-flat-button color="primary" (click)="addPollOption()">Add option</button>
+					<mat-slide-toggle [checked]="allowMultipleOptions" (change)="onSlidePollAllowMultiple($event)">Allow multiple selections</mat-slide-toggle>
 				</p>
 			</mat-expansion-panel>
 		</mat-accordion>

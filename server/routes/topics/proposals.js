@@ -31,7 +31,7 @@ exports.create = function(req, res) {
 				return pads.createPadAsync(pad, 'proposal').then(function(pad) {
 					
 					// Add activity
-					activities.addActivity(userId, C.ACT_PROPOSAL_CREATED, topicId);
+					activities.addActivityAsync(userId, C.ACT_PROPOSAL_CREATED, topicId);
 					
 					// Send success to client
 					utils.sendAlert(res, 200, 'success', 'TOPIC_PROPOSAL_ALERT_CREATED');

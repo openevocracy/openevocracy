@@ -3,8 +3,9 @@ const C = require("./constants").C;
 
 // The keys have to be the same as in config.env.prod.js (this is checked in app.js)
 exports.cfg = {
-	DEBUG:         true,
-	MAIL_ENABLED:  true,
+	DEBUG: true,
+	TEST: false,
+	MAIL_ENABLED: false,
 	CRON_INTERVAL: 1,  // Run cron every x minute(s)
 	ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
 	CHATROOM_CACHE_TIMEOUT: 1*C.DAY,  // Chat room is removed from cache when it was not called for more than x hours/days
@@ -20,8 +21,8 @@ exports.cfg = {
 	GROUP_SIZE: 3, // Minimum 3
 	
 	DURATION_SELECTION : 0.5*C.MINUTE,
-	DURATION_PROPOSAL  : 600*C.MINUTE,
-	DURATION_LEVEL     : 99999*C.MINUTE,
+	DURATION_PROPOSAL  : 2*C.MINUTE,
+	DURATION_LEVEL     : 2*C.MINUTE,
 	DURATION_NONE      : -1,
 	
 	// Time before end

@@ -262,7 +262,7 @@ exports.logout = function(req, res) {
 
 // POST /json/auth/verifyEmail
 exports.verifyEmail = async function(req, res) {
-	if(cfg.DEBUG) {
+	if(cfg.TEST) {
 		await db.collection('users').updateAsync(
 			{'email': 'test@example.com'}, { $set: { 'verified': true } }, {});
 		

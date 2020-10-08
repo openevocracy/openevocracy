@@ -53,6 +53,33 @@
 				</div>
 				<div class="post-text" [innerHtml]="post.html"></div>
 			</div>
+			<div class="post-poll clearfix" *ngIf="poll && post.postId == thread.mainPostId">
+				<hr/>
+				<!-- If user has NOT filled poll already and if user from group -->
+				<div *ngIf="isGroupMember" novalidate>
+					<div *ngIf="poll.allowMultipleOptions">
+						<div class="option" *ngFor="let option of poll.options;">
+							<mat-checkbox (change)="checkboxSelected(option.index)">
+								{{option.label}} <span class="count">({{option.count}} / {{poll.countSum}})</span>
+							</mat-checkbox>
+						</div>
+					</div>
+					<mat-radio-group [(ngModel)]="pollChosenRadioButton" *ngIf="!poll.allowMultipleOptions">
+						<div class="option" *ngFor="let option of poll.options;">
+							<mat-radio-button [value]="option.index">
+								{{option.label}} <span class="count">({{option.count}} / {{poll.countSum}})</span>
+							</mat-radio-button>
+						</div>
+					</mat-radio-group>
+					<button class="poll-submit" mat-raised-button color="primary" title="{{ 'FORUM_POLL_BUTTON_SUBMIT' | translate }}" (click)="submitPoll()">
+						<span>{{ 'FORUM_POLL_BUTTON_SUBMIT' | translate }}</span>
+					</button>
+				</div>
+				<!-- If user has filled poll or if user is not from group -->
+				<div class="poll-results" *ngIf="!isGroupMember">
+					(intermediate) poll results
+				</div>
+			</div>
 			<div class="post-comments">
 				<div *ngFor="let comment of post.comments" class="comment">
 					<hr/>

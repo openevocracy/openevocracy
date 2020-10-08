@@ -61,6 +61,33 @@ exports.create = function(req, res) {
 			
 			// Store main post in database
 			const post_promise = db.collection('forum_posts').insertAsync(post);
+			
+			// Also add poll to database, if given
+			const poll_promise = Promise.resolve().then(() => {
+				if (!_.isNull(body.poll) && body.poll.options.length >= 2) {
+					
+					// Initialize poll options
+					const options = body.poll.options.map((label, index) => {
+						return { 'index': index, 'label': label, 'count': 0 };
+					});
+					
+					// Define poll
+					const poll = {
+						'postId': mainPostId,
+						'threadId': threadId,
+						'options': options,
+						'userIdsVoted': [],
+						'allowMultipleOptions': body.poll.allowMultipleOptions,
+						'allowUpdate': true  // Allows an update after the poll is created, this is set to false if first vote was e
+					};
+					
+					// Add poll to database
+					return db.collection('forum_polls').insertAsync(poll);
+				} else {
+					// Return null to Promise if no poll was sent
+					return null;
+				}
+			});
 					
 			// Build link to forum and thread
 			const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
@@ -85,7 +112,7 @@ exports.create = function(req, res) {
 			const notifyAddAuthor_promise = users.enableEmailNotifyAsync(authorId, threadId);
 			
 			// Wait for promises and send response
-			Promise.join(thread_promise, post_promise, notifyAddAuthor_promise, sendMail_promise, threadViewed)
+			Promise.join(thread_promise, post_promise, notifyAddAuthor_promise, sendMail_promise, threadViewed, poll_promise)
 				.spread(function(thread, post) {
 					return { 'thread': thread, 'post': post };
 			}).then(res.json.bind(res));
@@ -117,8 +144,26 @@ exports.query = function(req, res) {
 		return db.collection('groups').findOneAsync({'forumId': thread.forumId});
 	});
 	
+	// Get poll if thread includes a poll
+	const poll_promise = db.collection('forum_polls').findOneAsync({'threadId': threadId}).then((poll) => {
+		if (!poll) {
+			// If no poll was found, we assume that no poll was created for this thread, just return null in this case
+			return null;
+		} else {
+			// Add number of group members to poll
+			return group_promise.then((group) => {
+				return db.collection('group_relations').countAsync({'groupId': group._id});
+			}).then((numGroupMembers) => {
+				// Pick basic poll values
+				const basicPoll = _.pick(poll, '_id', 'options', 'allowMultipleOptions', 'userIdsVoted');
+				// Add number of group members to basic poll values
+				return {...basicPoll, 'numGroupMembers': numGroupMembers};
+			});
+		}
+	});
+	
 	// Get posts
-	const posts_promise = group_promise.then(function(group) {
+	const posts_promise = group_promise.then((group)  => {
 		return db.collection('forum_posts').find({ 'threadId': threadId }).toArrayAsync().map(function(post) {
 			
 			// Check if user has voted for this post
@@ -185,11 +230,12 @@ exports.query = function(req, res) {
 			.updateAsync({ 'userId': userId }, { $addToSet: { 'viewed': threadId } }, { 'upsert': true });
 
 	// Send result
-	Promise.join(thread_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise, threadViewedByUser_promise)
-		.spread(function(thread, posts, viewsUpdate) {
+	Promise.join(thread_promise, posts_promise, poll_promise, viewsUpdate_promise, notifyStatus_promise, threadViewedByUser_promise)
+		.spread(function(thread, posts, poll) {
 		return {
 			'thread': thread,
-			'posts': posts
+			'posts': posts,
+			'poll': poll
 		};
 	}).then(res.json.bind(res));
 };
@@ -269,3 +315,65 @@ exports.updateSolved = function(req, res) {
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
 };
 
+exports.updatePoll = function(req, res) {
+	const userId = ObjectId(req.user._id);
+	const pollId = ObjectId(req.params.id);
+	const forumId = ObjectId(req.body.forumId);
+	const votes = req.body.votes;
+	
+	// Check if at least one option was given
+	const numChosenOptions = votes.reduce((tot, num) => tot + num);
+	if (numChosenOptions == 0) {
+		res.status(400).send('NO_OPTION_CHOSEN');
+		return;
+	}
+	
+	// Get groupId
+	db.collection('forums').findOneAsync({ '_id': forumId }, { 'groupId': true }).then((groupId) => {
+		return db.collection('group_relations').find({ 'groupId': groupId }, { 'userId': true }).toArrayAsync();
+	}).then((groupMembers) => {
+		// Look for current user in group members array
+		const userIsMember = groupMembers.find(member => member.userId == userId);
+		// Return permission status as boolean
+		return !_.isUndefined(userIsMember);
+	}).then((hasUserPermission) => {
+		// If user has no permission, reject promise
+		if (!hasUserPermission)
+			return Promise.rejectPromiseWithMessage(401, 'NO_PERMISSION');
+		
+		// Get poll
+		return db.collection('forum_polls').findOneAsync({ '_id': pollId });
+	}).then((poll) => {
+		// Look if userId is stored in already voted user ids
+		const userCanVote = poll.userIdsVoted.find(votedUserId => votedUserId == userId);
+		// If userCanVote is undefined, the user is allowed to vote
+		return _.isUndefined(userCanVote);
+	}).then((userCanVote) => {
+		if (!userCanVote)
+			return Promise.rejectPromiseWithMessage(401, 'ALREADY_VOTED');
+		
+		
+	});
+	
+	// X Check if at least one option was given
+	// X Check if user has permission to vote
+	// X Check if user has already voted
+	// Check if multiple options are given and if multiple options are allowed
+	
+	// Store poll options in forum post
+	db.collection('forum_polls').findOneAsync({ '_id': pollId }).then((poll) => {
+		
+		// Increment options counts
+		votes.forEach((vote, index) => {
+			let option = _.findWhere(poll.options, { 'index': index });
+			option.count += vote;
+			console.log(option);
+		});
+		
+		// Add user to voted users
+		poll.userIdsVoted.push(userId);
+		
+		console.log(poll);
+	}).then(res.json.bind(res));
+	
+};

@@ -22,6 +22,7 @@ import { GroupService } from '../../../_services/group.service';
 
 import { Thread } from "../../../_models/forum/thread";
 import { Post } from "../../../_models/forum/post";
+import { Poll } from "../../../_models/forum/poll";
 import { Edit } from "../../../_models/forum/edit";
 
 import { faArrowAltCircleLeft, faLock, faCaretUp, faCaretDown, faPenSquare, faTrash, faShareSquare, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
@@ -56,6 +57,11 @@ export class GroupForumThreadComponent implements OnInit {
 		'sumVotes': 'FORUM_SORT_LABEL_VOTES',
 		'createdTimestamp': 'FORUM_SORT_LABEL_DATE'
 	};
+	
+	// Poll
+	public poll: Poll;
+	public pollChosenCheckboxes = [];
+	public pollChosenRadioButton: number;
 	
 	// FontAwesome icons
 	public faArrowAltCircleLeft = faArrowAltCircleLeft;
@@ -146,10 +152,14 @@ export class GroupForumThreadComponent implements OnInit {
 					this.posts.push(new Post(post));
 				}.bind(this));
 				
+				// Poll
+				this.poll = res.poll ? new Poll(res.poll) : null;
+				// If thread has poll, initialize checkbox array
+				if (this.poll)
+					this.pollChosenCheckboxes = Array(this.poll.options.length).fill(false);
+				
 				// Sort posts
 				this.sortPosts('createdTimestamp', true, false);
-				
-				console.log(this.posts);
 				
 				// Return to subscribers
 				observer.next(true);
@@ -494,10 +504,10 @@ export class GroupForumThreadComponent implements OnInit {
 		// If dialog was approved, delete thread
 		deleteRef.componentInstance.onSubmit.subscribe(() => {
 			this.httpManagerService.delete('/json/group/forum/thread/'+this.thread.threadId).subscribe(res => {
-				// After everything is finished, show snackbar notification and redirect to forum list
-				this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_DELETED', function() {
-					this.router.navigate(['/group', this.groupId, 'forum'])
-				}.bind(this));
+				// Show snackbar notification
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_DELETED');
+				// Redirect to forum list
+				this.router.navigate(['/group', this.groupId, 'forum']);
 			});
 		});
 	}
@@ -639,6 +649,41 @@ export class GroupForumThreadComponent implements OnInit {
 				// Show snack bar notification
 				this.snackbarService.showSnackbar('FORUM_SNACKBAR_COMMENT_DELETED');
 			});
+		});
+	}
+	
+	/**
+	 * @desc: This function is called when a option of a poll is selected or deselected
+	 */
+	public checkboxSelected(optionIndex) {
+		this.pollChosenCheckboxes[optionIndex] = !this.pollChosenCheckboxes[optionIndex];
+	}
+	
+	/**
+	 * @desc: Submitting the poll option values when the related button is pressed
+	 */
+	public submitPoll() {
+		let votes = Array(this.poll.options.length).fill(false);
+		
+		if (this.poll.allowMultipleOptions)
+			votes = this.pollChosenCheckboxes;
+			
+		if (!this.poll.allowMultipleOptions)
+			votes[this.pollChosenRadioButton] = true;
+		
+		// If no option was chosen, show notification and return early
+		const numChosenOptions = votes.reduce((tot, num) => tot + num);
+		if (numChosenOptions == 0) {
+			this.snackbarService.showSnackbar('FORUM_SNACKBAR_POLL_NO_OPTION_CHOSEN');
+			return;
+		}
+		
+		console.log('chosen indices', votes);
+		
+		const data = { 'votes': votes, 'forumId': this.thread.forumId };
+		
+		this.httpManagerService.patch('/json/group/forum/thread/poll/'+this.poll.pollId, data).subscribe(res => {
+			console.log('res', res);
 		});
 	}
 

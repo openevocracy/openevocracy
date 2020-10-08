@@ -1,7 +1,8 @@
 import { Component, Inject, EventEmitter } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 
+import { SnackbarService } from '../../_services/snackbar.service';
 import { CustomValidators } from '../../_utils/custom-validators';
 import { Thread } from "../../_models/forum/thread";
 
@@ -23,8 +24,10 @@ export class EditThreadDialogComponent {
 	
 	public onSubmit = new EventEmitter();
 
-	public options: number[] = [1,2,3];
+	public allowMultipleOptions: boolean = false;
+	//public options: number[] = [1,2];
 	public showOptions: boolean = false;
+	
 	public heading: string;
 	public buttonLabel: string;
 	public mainPostHtml: string;
@@ -39,11 +42,15 @@ export class EditThreadDialogComponent {
 
 	constructor(
 		private fb: FormBuilder,
+		private snackbarService: SnackbarService,
 		private dialogRef: MatDialogRef<EditThreadDialogComponent>,
 		@Inject(MAT_DIALOG_DATA) public data: DialogData
 	) {
 		this.editThreadForm = this.fb.group({
-			title: ['', CustomValidators.required]
+			title: ['', CustomValidators.required],
+			options: this.fb.array([
+				this.fb.control('')
+			])
 		});
 		
 		// If no thread was injected, create a new thread
@@ -68,7 +75,18 @@ export class EditThreadDialogComponent {
 	}
 	
 	public ngAfterViewChecked() {
-		this.showOptions = true;
+		// This is added to avoid an ugly gui effect regarding mat-accordion
+		// The timeout is necessary to avoid an error, see: https://blog.angular-university.io/angular-debugging/
+		setTimeout(() => {
+			this.showOptions = true;
+		});
+	}
+	
+	/**
+	 * @desc: Getter for poll options form array
+	 */
+	get options(): FormArray {
+		return this.editThreadForm.get('options') as FormArray;
 	}
 	
 	public close() {
@@ -83,7 +101,34 @@ export class EditThreadDialogComponent {
 			this.editor.clipboard.dangerouslyPasteHTML(0, this.mainPostHtml);
 	}
 	
-	public onSlide(e: any) {
+	/**
+	 * @desc: Adds an option from poll
+	 */
+	public addPollOption(): void {
+		//const last = this.options[this.options.length-1];
+		//this.options.push(last+1);
+		this.options.push(this.fb.control(''));
+	}
+	
+	/**
+	 * @desc: Removes an option from poll
+	 */
+	public removePollOption(index): void {
+		//this.options.splice(index, 1);
+		this.options.removeAt(index);
+	}
+	
+	/**
+	 * @desc: Allow or disallow to choose multiple poll options
+	 */
+	public onSlidePollAllowMultiple(e: any): void {
+		this.allowMultipleOptions = e.checked;
+	}
+	
+	/**
+	 * @desc: Allow or disallow posts and comments of non-members
+	 */
+	public onSlideMembersOnly(e: any): void {
 		this.onlyMembers = e.checked;
 	}
 	
@@ -92,11 +137,34 @@ export class EditThreadDialogComponent {
 		if(!this.editThreadForm.valid || this.editor.getText().trim() == "")
 			return;
 		
+		// Remove empty options
+		const optionsTrimmed = _.reject(this.options.value, (option) => {
+			return option.trim() == "";
+		});
+		
+		// Only add poll if at least two non-empty poll options are defined by the user
+		let poll = null;
+		if (optionsTrimmed.length >= 2) {
+			poll = {
+				'options': this.options.value,
+				'allowMultipleOptions': this.allowMultipleOptions
+			};
+		}
+		// If exactely one option is entered, we assume that the user wanted to add a poll
+		// Warn user that at least two options are necessary
+		if (optionsTrimmed.length == 1) {
+			// Show snackbar notification
+			this.snackbarService.showSnackbar('FORUM_SNACKBAR_POLL_OPTION_MISSING');
+			// Stop function here, so user has a chance to correct entries
+			return;
+		}
+		
 		// Bundle all form data
-		var thread = {
+		const thread = {
 			'title': this.editThreadForm.value.title,
 			'html': this.editor.root.innerHTML,
-			'private': this.onlyMembers
+			'private': this.onlyMembers,
+			'poll': poll
 		}
 		
 		// Emit to parent
