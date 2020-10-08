@@ -223,45 +223,29 @@ exports.createGroupsAsync = function(topic) {
 
 /**
  * @desc: Add activity for all delegates in all groups of last level
- * TODO Cleanup, remove console.logs
  */
 function storeLeadersActivity(leaderIds, topicId) {
-	console.log('storeLeadersActivity');
-	console.log('leaderIds', leaderIds);
-	let promises = [];
-	_.each(leaderIds, (leaderId) => {
-		console.log("Activity added for leader", leaderId);
-		const promise = activities.addActivityAsync(leaderId, C.ACT_ELECTED_DELEGATE, topicId);
-		promises.push(promise);
+	const promises = leaderIds.map(leaderId => {
+		return activities.addActivityAsync(leaderId, C.ACT_ELECTED_DELEGATE, topicId);
 	});
-	
 	return Promise.all(promises);
 }
 
 /**
  * @desc: Add activity for all non-delegates in all groups of last level
- * TODO Cleanup, remove console.logs
  */
 function storeNonLeadersActivity(groupIds, leaderIds, topicId) {
-	console.log('storeNonLeadersActivity');
 	return Promise.map(groupIds, (groupId) => {
 		return helper.getGroupMembersAsync(groupId).then((groupMembers) => {
 			// Get ids from group members
 			return _.pluck(groupMembers, 'userId');
 		}).then((groupMemberIds) => {
-			console.log('groupMemberIds', groupMemberIds);
 			// Remove leaderIds from memberIds
-			const nonLeaderMemberIds = _.without(groupMemberIds, ...leaderIds);
-			console.log('nonLeaderMemberIds', nonLeaderMemberIds);
-			// Initialize promise array to store activity promises
-			let activityPromises = [];
+			const nonLeaderMemberIds = groupMemberIds.filter((id) => !utils.containsObjectId(leaderIds, id));
 			// Add activity to every non leader member
-			_.each(nonLeaderMemberIds,(memberId) => {
-				console.log("Activity added for non-leader", memberId);
-				const promise = activities.addActivityAsync(memberId, C.ACT_DROP_OUT, topicId);
-				activityPromises.push(promise);
+			return nonLeaderMemberIds.map((memberId) => {
+				return activities.addActivityAsync(memberId, C.ACT_DROP_OUT, topicId);
 			});
-			return activityPromises;
 		});
 	});
 }
@@ -364,26 +348,26 @@ exports.remixGroupsAsync = function(topic) {
 				return utils.mergeCollections(prevGroups, prevPads, 'prevGroupId');
 			});
          
-         // Initalize group variables
-         var groupId = ObjectId();
-         var topicId = topic._id;
-         var padId = ObjectId();
-         var prevDeadline = topic.nextDeadline;
-         var nextDeadline = topics.manage.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
-         
-         // Store group in database
-         var storeGroup_promise = groupRelations_promise.then(function(groupRelations) {
-         	return storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, nextDeadline, nextLevel);
-         });
-         
-         // Send mail to notify level change
-         var sendMail_promise = db.collection('users')
+			// Initalize group variables
+			const groupId = ObjectId();
+			const topicId = topic._id;
+			const padId = ObjectId();
+			const prevDeadline = topic.nextDeadline;
+			const nextDeadline = topics.manage.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
+			
+			// Store group in database
+			const storeGroup_promise = groupRelations_promise.then(function(groupRelations) {
+				return storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, nextDeadline, nextLevel);
+			});
+			
+			// Send mail to notify level change
+			const sendMail_promise = db.collection('users')
 				.find({'_id': {$in: groupMemberIds}}, {'email': true}).toArrayAsync().then(function(users) {
 					mail.sendMailMulti(users,
 						'EMAIL_LEVEL_CHANGE_SUBJECT', [topic.name],
 						'EMAIL_LEVEL_CHANGE_MESSAGE', [topic.name, groupId.toString(), cfg.PRIVATE.BASE_URL]);
-         });
-            
+			});
+		
 			return Promise.join(sendMail_promise, storeGroup_promise);
 		});
 		

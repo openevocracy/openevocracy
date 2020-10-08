@@ -229,6 +229,9 @@ app.delete('/json/group/forum/thread/:id', auth(), forums.thread.delete);
 // @desc: Update solved state of thread
 app.post('/json/group/forum/thread/solved', auth(), forums.thread.updateSolved);
 
+// @desc: Update poll
+app.patch('/json/group/forum/thread/poll/:id', auth(), forums.thread.updatePoll);
+
 // @desc: Create new post in forum thread
 app.post('/json/group/forum/post/create', auth(), forums.post.create);
 
