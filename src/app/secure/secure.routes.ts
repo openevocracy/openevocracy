@@ -23,7 +23,10 @@ const secureRoutes: Routes = [
 		component: HomeComponent,
 		runGuardsAndResolvers: 'always',
 		//children: homeRoutes
-		loadChildren: '../home/home.module#HomeModule'
+		//loadChildren: '../home/home.module#HomeModule'
+		loadChildren: () => import('../home/home.module').then(mod => mod.HomeModule)
+		// There was a problem with the other method
+		// See: https://stackoverflow.com/a/57776197/2692283
 	},
 	{
 		path: 'topic/:id',
@@ -31,7 +34,8 @@ const secureRoutes: Routes = [
 		resolve: { 'manageTopic': TopicResolver },
 		runGuardsAndResolvers: 'always',
 		//children: topicRoutes
-		loadChildren: '../topic/topic.module#TopicModule'
+		//loadChildren: '../topic/topic.module#TopicModule'
+		loadChildren: () => import('../topic/topic.module').then(mod => mod.TopicModule)
 	},
 	{
 		path: 'group/:id',
@@ -39,14 +43,16 @@ const secureRoutes: Routes = [
 		resolve: { 'basicGroup': GroupResolver },
 		runGuardsAndResolvers: 'always',
 		//children: groupRoutes
-		loadChildren: '../group/group.module#GroupModule'
+		//loadChildren: '../group/group.module#GroupModule'
+		loadChildren: () => import('../group/group.module').then(mod => mod.GroupModule)
 	},
 	{
 		path: 'user/:id',
 		component: UserComponent,
 		runGuardsAndResolvers: 'always',
 		//children: userRoutes
-		loadChildren: '../user/user.module#UserModule'
+		//loadChildren: '../user/user.module#UserModule'
+		loadChildren: () => import('../user/user.module').then(mod => mod.UserModule)
 	},
 	{ path: 'settings', component: SettingsComponent } //{ path: 'settings/:id', component: SettingsComponent }
 ];
