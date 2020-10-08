@@ -36,8 +36,10 @@ export class GroupService {
 			// Try to get group from cache
 			const cachedGroup = this.getBasicGroupFromCache(groupId);
 			
-			// If group was found in cache, return it
-			if (cachedGroup) {
+			// If group was found in cache and was not expired inbetween, return it
+			// Note: Groups in finished or rejected topics are always taken from the database (expiration quals last deadline)
+			//       We assume that these groups are not opened very often
+			if (cachedGroup && cachedGroup.expiration > Date.now()) {
 				// Hand over to next subscription
 				observer.next(cachedGroup);
 				observer.complete();
