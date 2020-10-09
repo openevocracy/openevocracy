@@ -10,22 +10,22 @@ import { Router, Event, NavigationStart, NavigationEnd, NavigationError, Navigat
 })
 
 export class AppComponent {
-	private loading: boolean = false;
+	public loading: boolean = false;
 	private routing: boolean = false;
-	
+
 	constructor(
 		private languageService: LanguageService,
 		private router: Router
 	) {
 		// Initialize the language
 		languageService.initializeTranslation();
-		
+
 		// Listen to route changes for visual effects
 		router.events.subscribe((routerEvent: Event) => {
 			this.checkRouterEvent(routerEvent)
 		});
 	}
-	
+
 	/**
 	 * @desc: Shows a loading animation when loading takes a bit longer than normal
 	 */
@@ -40,7 +40,7 @@ export class AppComponent {
 					this.loading = true;
 			}, 100);
 		}
-		
+
 		// Hide loading if navigation ends
 		if (
 			routerEvent instanceof NavigationEnd ||
