@@ -680,10 +680,11 @@ export class GroupForumThreadComponent implements OnInit {
 		
 		console.log('chosen indices', votes);
 		
-		const data = { 'votes': votes, 'forumId': this.thread.forumId };
+		const data = { 'votes': votes };
 		
 		this.httpManagerService.patch('/json/group/forum/thread/poll/'+this.poll.pollId, data).subscribe(res => {
 			console.log('res', res);
+			this.snackbarService.showSnackbar('FORUM_SNACKBAR_POLL_SUCCESSFULLY_VOTED');
 		});
 	}
 

@@ -60,14 +60,14 @@
 					<div *ngIf="poll.allowMultipleOptions">
 						<div class="option" *ngFor="let option of poll.options;">
 							<mat-checkbox (change)="checkboxSelected(option.index)">
-								{{option.label}} <span class="count">({{option.count}} / {{poll.countSum}})</span>
+								{{option.label}} <span class="count">({{option.count}} / {{poll.numGroupMembers}})</span>
 							</mat-checkbox>
 						</div>
 					</div>
 					<mat-radio-group [(ngModel)]="pollChosenRadioButton" *ngIf="!poll.allowMultipleOptions">
 						<div class="option" *ngFor="let option of poll.options;">
 							<mat-radio-button [value]="option.index">
-								{{option.label}} <span class="count">({{option.count}} / {{poll.countSum}})</span>
+								{{option.label}} <span class="count">({{option.count}} / {{poll.numGroupMembers}})</span>
 							</mat-radio-button>
 						</div>
 					</mat-radio-group>
