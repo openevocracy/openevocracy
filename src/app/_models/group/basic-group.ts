@@ -47,11 +47,22 @@ export class BasicGroup {
 	 * @desc: Searches for a user in group members and returns boolean flag of member status
 	 */
 	public isMember(userId: string): boolean {
-		// Try to find user in group members
-		const user = _.findWhere(this.members, { 'userId': userId });
+		// Try to find member in group members
+		const member = _.findWhere(this.members, { 'userId': userId });
 		
-		// Returns true or false (depending if user was found or not)
-		return !_.isNull(user);
+		// Returns true or false (depending if member was found or not)
+		return !_.isNull(member);
+	}
+	
+	/**
+	 * @desc: Searches for a user in group members and returns name of member
+	 */
+	public memberName(userId: string): string {
+		// Try to find member in group members
+		const member = _.findWhere(this.members, { 'userId': userId });
+		
+		// Returns name of member
+		return member.name;
 	}
 	
 	/**

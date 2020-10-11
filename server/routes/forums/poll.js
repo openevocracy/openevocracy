@@ -7,6 +7,54 @@ const db = require('../../database').db;
 const utils = require('../../utils');
 
 /**
+ * @desc: Create and store new poll in databse
+ */
+exports.createAsync = function(rawPoll, threadId, groupId) {
+	if (_.isNull(rawPoll) || rawPoll.options.length < 2)
+		return Promise.resolve();
+
+	// Initialize poll options
+	const options = rawPoll.options.map((label, index) => {
+		return { 'index': index, 'label': label, 'votedUserIds': [] };
+	});
+	
+	// Define poll
+	const poll = {
+		'groupId': groupId,
+		'threadId': threadId,
+		'options': options,
+		'userIdsVoted': [],
+		'allowMultipleOptions': rawPoll.allowMultipleOptions,
+		'allowUpdate': true  // Allows an update after the poll is created, this is set to false if first vote was e
+	};
+	
+	// Add poll to database
+	return db.collection('forum_polls').insertAsync(poll);
+};
+
+/**
+ * @desc: Gets promise from database by threadId
+ */
+exports.getAsync = function(threadId) {
+	return db.collection('forum_polls').findOneAsync({'threadId': threadId}).then((poll) => {
+		if (!poll) {
+			// If no poll was found, we assume that no poll was created for this thread, just return null in this case
+			return null;
+		} else {
+			// Add number of group members to poll
+			return db.collection('group_relations').countAsync(
+				{'groupId': poll.groupId}
+			).then((numGroupMembers) => {
+				// Pick basic poll values
+				const basicPoll = _.pick(poll, '_id', 'options', 'allowMultipleOptions', 'userIdsVoted');
+				// Add number of group members to basic poll values
+				return {...basicPoll, 'numGroupMembers': numGroupMembers};
+			});
+		}
+	});
+};
+
+/**
  * @desc: Stores votes for options in poll
  */
 exports.vote = async function(req, res) {
@@ -68,14 +116,16 @@ exports.vote = async function(req, res) {
 	 */
 	// Increment options counts
 	votes.forEach((vote, index) => {
-		let option = _.findWhere(poll.options, { 'index': index });
-		option.count += vote;
+		if (vote) {
+			let option = _.findWhere(poll.options, { 'index': index });
+			option.votedUserIds.push(userId);
+		}
 	});
 	
 	// Add user to voted users
 	poll.userIdsVoted.push(userId);
 	
-	// Update poll options and voted userIds
+	// Update poll options
 	db.collection('forum_polls').updateAsync(
 		{ '_id': pollId }, { $set: { 'options': poll.options, 'userIdsVoted': poll.userIdsVoted } }
 	).then(res.json.bind(res));

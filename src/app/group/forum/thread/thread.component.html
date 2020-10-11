@@ -67,10 +67,28 @@
 					</div>
 					<mat-radio-group [(ngModel)]="pollChosenRadioButton" *ngIf="!poll.allowMultipleOptions">
 						<div class="option" *ngFor="let option of poll.options;">
-							<mat-radio-button [value]="option.index">
-								{{option.label}} <span class="count">({{option.count}} / {{poll.numGroupMembers}})</span>
-							</mat-radio-button>
-							<mat-progress-bar mode="determinate" [value]="option.count/poll.numGroupMembers*100"></mat-progress-bar>
+							<div class="flex option-top">
+								<mat-radio-button [value]="option.index">
+									{{option.label}}
+								</mat-radio-button>
+								<span class="flex-spacer"></span>
+								<span class="percent">{{option.count/poll.numGroupMembers*100}}%</span>
+							</div>
+							<mat-progress-bar class="option-progress" mode="determinate" [value]="option.count/poll.numGroupMembers*100"></mat-progress-bar>
+							<div class="flex option-bottom">
+								<div class="count">
+									<span>{{option.count}}</span>
+									<span *ngIf="option.count == 1"> {{'FORUM_POLL_LABEL_VOTE' | translate}}</span>
+									<span *ngIf="option.count > 1 || option.count == 0"> {{'FORUM_POLL_LABEL_VOTES' | translate}}</span>
+								</div>
+								<span class="flex-spacer"></span>
+								<div>
+									<span *ngFor="let votedUserId of option.votedUserIds; let j = index;">
+										<span>{{ group.memberName(votedUserId) }}</span>
+										<span *ngIf="(j+1) < option.votedUserIds.length">, </span>
+									</span>
+								</div>
+							</div>
 						</div>
 					</mat-radio-group>
 					<button class="poll-submit" mat-raised-button color="primary" title="{{ 'FORUM_POLL_BUTTON_SUBMIT' | translate }}" (click)="submitPoll()">
@@ -104,7 +122,7 @@
 						</div>
 					</div>
 				</div>
-				<div *ngIf="isGroupMember && !isExpired">
+				<div *ngIf="isGroupMember && !group.isExpired">
 					<hr/>
 					<div class="comment-add">
 						<a class="comment-add-link" *ngIf="commentField!=i" (click)="showCommentField(i)" title="{{ 'FORUM_LINK_ADD_COMMENT' | translate }}">
@@ -127,7 +145,7 @@
 		</div>
 	</div>
 	
-	<div *ngIf="(!thread?.private || isGroupMember) && !isExpired" id="newpost" class="post">
+	<div *ngIf="(!thread?.private || isGroupMember) && !group.isExpired" id="newpost" class="post">
 		<h2>{{ 'FORUM_HEADING_NEW_POST' | translate }}</h2>
 		
 		<editor-field (onEditorCreated)="editorCreated($event)"></editor-field>
@@ -137,7 +155,7 @@
 		</button>
 	</div>
 	
-	<div *ngIf="(thread?.private && !isGroupMember) && !isExpired" id="newpost_private" class="post">
+	<div *ngIf="(thread?.private && !isGroupMember) && !group.isExpired" id="newpost_private" class="post">
 		<p>{{ 'FORUM_NEW_POST_PRIVATE_MSG' | translate }}</p>
 	</div>
 </div>

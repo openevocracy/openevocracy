@@ -202,6 +202,7 @@
 	"FORUM_SNACKBAR_MARK_SOLVED": "Der Thread wurde als gelöst markiert.",
 	"FORUM_SNACKBAR_MARK_UNSOLVED": "Der Thread wurde wieder als ungelöst markiert.",
 	"FORUM_SNACKBAR_POLL_OPTION_MISSING": "Die Umfrage benötigt mindestens zwei Optionen.",
+	"FORUM_SNACKBAR_POLL_SUCCESSFULLY_VOTED": "Du hast erfolgreich abgestimmt.",
 	"FORUM_POST_EDITS_LABEL": "Mal bearbeitet",
 	"FORUM_COMMENT_EDITS_LABEL": "Mal bearbeitet",
 	"FORUM_LAST_ACTIVITY_PRE_TIME": "letzte Antwort am",
@@ -220,6 +221,9 @@
 	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_OFF": "Du wirst ab sofort nicht mehr über neue Beiträge in diesem Thread informiert.",
 	"FORUM_BUTTON_WATCH": "Beobachten",
 	"FORUM_NEW_POST_PRIVATE_MSG": "Du hast nicht die Berechtigung in diesem privaten Thread zu schreiben, da du nicht Mitglied der verknüpften Gruppe bist.",
+	"FORUM_POLL_FORM_ADD": "Umfrage hinzufügen",
+	"FORUM_POLL_LABEL_VOTE": "Stimme",
+	"FORUM_POLL_LABEL_VOTES": "Stimmen",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",

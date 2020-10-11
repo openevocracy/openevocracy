@@ -20,6 +20,7 @@ import { UserService } from '../../../_services/user.service';
 import { SnackbarService } from '../../../_services/snackbar.service';
 import { GroupService } from '../../../_services/group.service';
 
+import { BasicGroup } from "../../../_models/group/basic-group";
 import { Thread } from "../../../_models/forum/thread";
 import { Post } from "../../../_models/forum/post";
 import { Poll } from "../../../_models/forum/poll";
@@ -46,8 +47,8 @@ export class GroupForumThreadComponent implements OnInit {
 	public groupId: string;
 	public thread: Thread;
 	public posts: Post[];
+	public group: BasicGroup;
 	public isGroupMember: boolean = false;
-	public isExpired: boolean = true;
 	public solvedButtonTitle: string;
 	public sortedBy: string = "";
 	public missingWordsComments: boolean[] = [];
@@ -98,9 +99,8 @@ export class GroupForumThreadComponent implements OnInit {
 			this.groupId = params.id;
 			
 			// Get group from group service cache
-			const group = this.groupService.getBasicGroupFromCache(this.groupId);
-			this.isGroupMember = group.isMember(this.userId);
-			this.isExpired = group.isExpired;
+			this.group = this.groupService.getBasicGroupFromCache(this.groupId);
+			this.isGroupMember = this.group.isMember(this.userId);
 		});
 		
 		// Get forum id from url

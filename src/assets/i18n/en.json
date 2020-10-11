@@ -202,6 +202,7 @@
 	"FORUM_SNACKBAR_MARK_SOLVED": "The thread was marked as solved.",
 	"FORUM_SNACKBAR_MARK_UNSOLVED": "The thread was marked as unsolved again.",
 	"FORUM_SNACKBAR_POLL_OPTION_MISSING": "The poll requires at least two options.",
+	"FORUM_SNACKBAR_POLL_SUCCESSFULLY_VOTED": "You have successfully voted.",
 	"FORUM_POST_EDITS_LABEL": "edits",
 	"FORUM_COMMENT_EDITS_LABEL": "edits",
 	"FORUM_LAST_ACTIVITY_PRE_TIME": "last response at",
@@ -220,6 +221,9 @@
 	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_OFF": "You won't be informed anymore about new posts in this thread.",
 	"FORUM_BUTTON_WATCH": "Watch",
 	"FORUM_NEW_POST_PRIVATE_MSG": "You are not allowed to post in this private thread, since you are not member of the related group.",
+	"FORUM_POLL_FORM_ADD": "Add poll",
+	"FORUM_POLL_LABEL_VOTE": "Vote",
+	"FORUM_POLL_LABEL_VOTES": "Votes",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",

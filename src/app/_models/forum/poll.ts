@@ -1,12 +1,14 @@
 export class Option {
 	index: number;
 	label: string;
+	votedUserIds: string[];
 	count: number;
 	
 	constructor(res: any) {
 		this.index = res.index;
 		this.label = res.label;
-		this.count = res.count;
+		this.votedUserIds = res.votedUserIds;
+		this.count = res.votedUserIds.length;
 	}
 }
 
@@ -27,7 +29,7 @@ export class Poll {
 			return new Option({
 				'index': opt.index,
 				'label': opt.label,
-				'count': opt.count
+				'votedUserIds': opt.votedUserIds
 			});
 		});
 		

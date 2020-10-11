@@ -59,23 +59,23 @@ exports.create = function(req, res) {
 				const memberName_promise = groups.helper.getGroupUserNameAsync()
 				
 				// Perform a lot of tasks, where group is necessary
-				const sendMail_promise = db.collection('group_relations')
-					.findOneAsync({ '_id': group._id, 'userId': authorId }).then((member) => {
-						
-						// Build link to thread
-						const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
-						
-						// Define parameter for email body
-						const bodyParams = [ member.userName, group.name, urlToThread+'#'+postId, urlToThread ];
-						
-						// Define email translation strings
-						const mail = {
-							'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
-							'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
-						};
-						
-						// Finally, send email to watching users, exept the author
-						return helper.sendMailToWatchingUsersAsync(threadId, authorId, mail);
+				const sendMail_promise = db.collection('group_relations').findOneAsync(
+					{ 'groupId': group._id, 'userId': authorId }, { 'userName': true }
+				).then((member) => {
+					// Build link to thread
+					const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
+					
+					// Define parameter for email body
+					const bodyParams = [ member.userName, group.name, urlToThread+'#'+postId, urlToThread ];
+					
+					// Define email translation strings
+					const mail = {
+						'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
+						'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
+					};
+					
+					// Finally, send email to watching users, exept the author
+					return helper.sendMailToWatchingUsersAsync(threadId, authorId, mail);
 				});
 				
 				// Store visited status in database (badge and thread viewed)
