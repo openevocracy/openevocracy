@@ -1,4 +1,4 @@
-image: node:8
+image: node:10
 
 services:
 - docker:stable-dind
@@ -70,6 +70,7 @@ test_platform:
 
 test_integration:
   stage: test
+  when: manual
   script:
   - cp shared/config.base.default.js shared/config.base.js
   - npm install

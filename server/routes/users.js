@@ -474,7 +474,7 @@ async function socketAuthentication(ws, userToken, cb) {
 		return;
 	}
 	
-	// Read userId and salt from decoded token
+	// Read salt from decoded token
 	const userId = ObjectId(decodedUserToken.id);
 	const userSalt = decodedUserToken.salt;
 	
