@@ -34,11 +34,15 @@ exports.query = function(req, res) {
 			const numPosts_promise = db.collection('forum_posts').countAsync({ 'threadId': thread._id });
 			
 			// Add author name (can be null if not available)
-			const authorName = groups.helper.generateMemberName(group._id, thread.authorId);
+			const authorName_promise = groups.helper.getGroupUserNameAsync(group._id, thread.authorId);
 			
 			// Add user name to last activity, if last activity exists
-			if(thread.lastResponse)
-				thread.lastResponse.userName = groups.helper.generateMemberName(group._id, thread.lastResponse.userId);
+			const lastActivityUserName_promise = Promise.resolve().then(() => {
+				if (thread.lastResponse)
+					return groups.helper.getGroupUserNameAsync(group._id, thread.lastResponse.userId);
+				else
+					return null;
+			});
 			
 			// Get viewed status for all threads in current forum
 			const viewedStatus_promise = db.collection('forum_threads_viewed')
@@ -48,8 +52,12 @@ exports.query = function(req, res) {
 			});
 			
 			// Add sum of votes of mainpost and number of posts to every thread
-			return Promise.join(sumMainpostVotes_promise, numPosts_promise, viewedStatus_promise)
-				.spread(function(sumMainpostVotes, numPosts, viewedStatus) {
+			return Promise.join(sumMainpostVotes_promise, numPosts_promise, viewedStatus_promise, authorName_promise, lastActivityUserName_promise)
+				.spread(function(sumMainpostVotes, numPosts, viewedStatus, authorName, lastActivityUserName) {
+					// Add last activity user name if given
+					if (lastActivityUserName !== null)
+						thread.lastResponse.userName = lastActivityUserName;
+					
 					// Reduce numPosts by 1 since the main post shall not be counted
 					return _.extend(thread, {
 						'sumMainpostVotes': sumMainpostVotes,

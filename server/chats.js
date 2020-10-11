@@ -95,7 +95,7 @@ function extendUsersAsync(groupId) {
 			return { 
 				'userId': member.userId,
 				'color': member.userColor,
-				'name': groups.helper.generateMemberName(groupId, member.userId)/*,
+				'name': member.userName/*,
 				'isOnline': users.isOnline(user.userId)*/
 			};
 	});

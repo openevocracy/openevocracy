@@ -92,7 +92,7 @@ exports.getBasicGroup = function(req, res) {
       
       return Promise.props({
       	'userId': relation.userId,
-			'name': helper.generateMemberName(groupId, relation.userId),
+			'name': relation.userName,
 			'color': relation.userColor,
 			'prevGroupId': relation.prevGroupId,
 			'prevPadHtml': prevPadHtml_promise

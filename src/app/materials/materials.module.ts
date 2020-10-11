@@ -22,6 +22,7 @@ import {
 	MatCheckboxModule,
 	MatRadioModule,
 	MatExpansionModule,
+	MatProgressBarModule,
 	MatPaginatorModule,
 	MatPaginatorIntl
 } from '@angular/material';
@@ -47,6 +48,7 @@ import {
 		MatCheckboxModule,
 		MatRadioModule,
 		MatExpansionModule,
+		MatProgressBarModule,
 		MatPaginatorModule
 	],
 	exports: [
@@ -69,6 +71,7 @@ import {
 		MatCheckboxModule,
 		MatRadioModule,
 		MatExpansionModule,
+		MatProgressBarModule,
 		MatPaginatorModule
 	],
 	providers: [

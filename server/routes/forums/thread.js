@@ -89,22 +89,27 @@ exports.create = function(req, res) {
 					return null;
 				}
 			});
+			
+			// Send email to watching users, exept the author
+			const sendMail_promise = db.collection('group_relations')
+				.findOneAsync({ '_id': group._id, 'userId': authorId }).then((member) => {
+				
+					// Build link to forum and thread
+					const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
+					const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
 					
-			// Build link to forum and thread
-			const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
-			const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
-			
-			// Define parameter for email body
-			const bodyParams = [ groups.helper.generateMemberName(group._id, authorId), group.name, urlToThread, urlToForum ];
-			
-			// Define email translation strings
-			const mail = {
-				'subject': 'EMAIL_NEW_THREAD_CREATED_SUBJECT', 'subjectParams': [],
-				'body': 'EMAIL_NEW_THREAD_CREATED_BODY', 'bodyParams': bodyParams
-			};
-			
-			// Finally, send email to watching users, exept the author
-			const sendMail_promise = helper.sendMailToWatchingUsersAsync(forumId, authorId, mail);
+					// Define parameter for email body
+					const bodyParams = [ member.userName, group.name, urlToThread, urlToForum ];
+					
+					// Define email translation strings
+					const mail = {
+						'subject': 'EMAIL_NEW_THREAD_CREATED_SUBJECT', 'subjectParams': [],
+						'body': 'EMAIL_NEW_THREAD_CREATED_BODY', 'bodyParams': bodyParams
+					};
+				
+					// Finally, send email to watching users, exept the author
+					return helper.sendMailToWatchingUsersAsync(forumId, authorId, mail);
+			});
 			
 			// Store visited status in database (badge and thread viewed)
 			const threadViewed = misc.threadVisited(group._id, threadId, authorId);
@@ -174,7 +179,7 @@ exports.query = function(req, res) {
 			const postSumVotes_promise = helper.sumVotesAsync(post._id);
 			
 			// Add post author name (can be null if not available)
-			const postAuthorName_promise = groups.helper.generateMemberName(group._id, post.authorId);
+			const postAuthorName_promise = groups.helper.getGroupUserNameAsync(group._id, post.authorId);
 			
 			// Get edits of this post
 			const postEdits_promise = db.collection('forum_edits').find({ 'entityId': post._id }).toArrayAsync();
@@ -188,7 +193,7 @@ exports.query = function(req, res) {
 				const commentSumVotes_promise = helper.sumVotesAsync(comment._id);
 				
 				// Add comment author name (can be null if not available)
-				const commentAuthorName_promise = groups.helper.generateMemberName(group._id, comment.authorId);
+				const commentAuthorName_promise = groups.helper.getGroupUserNameAsync(group._id, comment.authorId);
 				
 				// Get edits of this comment
 				const commentEdits_promise = db.collection('forum_edits').find({ 'entityId': comment._id }).toArrayAsync();

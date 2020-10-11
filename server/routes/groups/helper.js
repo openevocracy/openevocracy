@@ -18,15 +18,50 @@ exports.getGroupMembersAsync = function(groupId) {
 };
 
 /*
- * @desc: Generate username from chance library, using groupId and userId as seed
+ * @desc: Generate member names for all members of a group
+ *			 from chance library, using groupId and userId as seed
+ * @note: It is important to generate all names together, given all userIds,
+ *			 since the names should be unique
  */
-exports.generateMemberName = function(groupId, userId) {
-	// Create new chance object, which seed exists out of groupId and userId
-   const seed = groupId.toString()+userId.toString();
-   const chanceName = new Chance(seed);
-   
-   // Generate name and return
-   return chanceName.first();
+exports.generateMemberNames = function(groupId, userIds) {
+	let userNames = [];
+	
+	userIds.forEach((userId) => {
+		// Create new chance object, which seed exists out of groupId and userId
+		const seed = groupId.toString()+userId.toString();
+		const chanceName = new Chance(seed);
+		
+		// Sample a user name, until user name is unique in this group
+		let userName = chanceName.first();
+		while(_.contains(userNames, userName)) {
+			userName = chanceName.first();
+		}
+		
+		// Push user name to user names array
+		userNames.push(userName);
+	});
+	
+	return userNames;
+};
+
+/**
+ * @desc: Gets user name for member or members in group from database
+ */
+exports.getGroupUserNameAsync = function(groupId, userId) {
+	return db.collection('group_relations').findOneAsync(
+		{ 'groupId': groupId, 'userId': userId }, { 'userName': true }
+	).get('userName');
+};
+
+/**
+ * @desc: Gets all user names for alls members of group from database
+ */
+exports.getGroupUserNamesAsync = function(groupId) {
+	return db.collection('group_relations').find(
+		{ 'groupId': groupId }, { 'userName': true }
+	).toArrayAsync().map((member) => {
+		return member.userName;
+	});
 };
 
 /**

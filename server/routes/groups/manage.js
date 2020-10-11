@@ -78,6 +78,7 @@ function assignParticipantsToGroups(participants) {
 function storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, nextDeadline, level) {
 	const chatRoomId = ObjectId();
 	const forumId = ObjectId();
+	const userIds = _.pluck(groupRelations, 'userId');
 	
 	// Sample group name
 	const groupName_promise = db.collection('groups').find({ 'topicId': topicId }, { 'name': true }).toArrayAsync()
@@ -117,9 +118,11 @@ function storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, n
 	const forum = { '_id': forumId, 'groupId': groupId };
 	const createForum_promise = db.collection('forums').insertAsync(forum);
 	
-	// Sample colors for users
-	const userColors = helper.generateMemberColors(groupId, _.pluck(groupRelations, 'userId'));
-	console.log('storeGroupAsync userColors', userColors);
+	// Sample colors for members
+	const userColors = helper.generateMemberColors(groupId, userIds);
+	
+	// Sample names for members
+	const userNames = helper.generateMemberNames(groupId, userIds);
 	
 	// Store group members
 	const members_promise = Promise.map(groupRelations, function(rel, index) {
@@ -132,6 +135,7 @@ function storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, n
 			'groupId': groupId,
 			'userId': rel.userId,
 			'userColor': userColors[index],
+			'userName': userNames[index],
 			'prevGroupId': prevGroupId,
 			'prevPadId': rel.prevPadId,
 			'lastActivity': -1

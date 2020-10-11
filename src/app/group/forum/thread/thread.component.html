@@ -62,6 +62,7 @@
 							<mat-checkbox (change)="checkboxSelected(option.index)">
 								{{option.label}} <span class="count">({{option.count}} / {{poll.numGroupMembers}})</span>
 							</mat-checkbox>
+							<mat-progress-bar mode="determinate" value="40"></mat-progress-bar>
 						</div>
 					</div>
 					<mat-radio-group [(ngModel)]="pollChosenRadioButton" *ngIf="!poll.allowMultipleOptions">
@@ -69,6 +70,7 @@
 							<mat-radio-button [value]="option.index">
 								{{option.label}} <span class="count">({{option.count}} / {{poll.numGroupMembers}})</span>
 							</mat-radio-button>
+							<mat-progress-bar mode="determinate" [value]="option.count/poll.numGroupMembers*100"></mat-progress-bar>
 						</div>
 					</mat-radio-group>
 					<button class="poll-submit" mat-raised-button color="primary" title="{{ 'FORUM_POLL_BUTTON_SUBMIT' | translate }}" (click)="submitPoll()">
