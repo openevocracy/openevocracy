@@ -120,7 +120,7 @@
     "uuid": "^7.0.2",
     "uws": "^100.0.1",
     "validate.js": "0.13.1",
-    "vis-data": "^7.0.0",
+    "vis-data": "7.0.0",
     "vis-util": "^4.3.4",
     "websocket-json-stream": "0.0.3",
     "ws": "^7.2.0",
