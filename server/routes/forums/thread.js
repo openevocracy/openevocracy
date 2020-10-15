@@ -67,15 +67,13 @@ exports.create = function(req, res) {
 			const poll_promise = poll.createAsync(body.poll, threadId, group._id);
 			
 			// Send email to watching users, exept the author
-			const sendMail_promise = db.collection('group_relations').findOneAsync(
-				{ 'groupId': group._id, 'userId': authorId }, { 'userName': true }
-			).then((member) => {
+			const sendMail_promise = groups.helper.getOrGenerateMemberName(group._id, authorId).then((userName) => {
 				// Build link to forum and thread
 				const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
 				const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
 				
 				// Define parameter for email body
-				const bodyParams = [ member.userName, group.name, urlToThread, urlToForum ];
+				const bodyParams = [ userName, group.name, urlToThread, urlToForum ];
 				
 				// Define email translation strings
 				const mail = {
@@ -136,8 +134,8 @@ exports.query = async function(req, res) {
 		// Count sum of total votes for this post
 		const postSumVotes_promise = helper.sumVotesAsync(post._id);
 		
-		// Add post author name (can be null if not available)
-		const postAuthorName_promise = groups.helper.getGroupUserNameAsync(group._id, post.authorId);
+		// Add post author name
+		const postAuthorName_promise = groups.helper.getOrGenerateMemberName(group._id, post.authorId);
 		
 		// Get edits of this post
 		const postEdits_promise = db.collection('forum_edits').find({ 'entityId': post._id }).toArrayAsync();
@@ -151,7 +149,7 @@ exports.query = async function(req, res) {
 			const commentSumVotes_promise = helper.sumVotesAsync(comment._id);
 			
 			// Add comment author name (can be null if not available)
-			const commentAuthorName_promise = groups.helper.getGroupUserNameAsync(group._id, comment.authorId);
+			const commentAuthorName_promise = groups.helper.getOrGenerateMemberName(group._id, comment.authorId);
 			
 			// Get edits of this comment
 			const commentEdits_promise = db.collection('forum_edits').find({ 'entityId': comment._id }).toArrayAsync();

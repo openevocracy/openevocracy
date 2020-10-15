@@ -33,13 +33,13 @@ exports.query = function(req, res) {
 			// Get number of posts
 			const numPosts_promise = db.collection('forum_posts').countAsync({ 'threadId': thread._id });
 			
-			// Add author name (can be null if not available)
-			const authorName_promise = groups.helper.getGroupUserNameAsync(group._id, thread.authorId);
+			// Add author name
+			const authorName_promise = groups.helper.getOrGenerateMemberName(group._id, thread.authorId);
 			
 			// Add user name to last activity, if last activity exists
 			const lastActivityUserName_promise = Promise.resolve().then(() => {
 				if (thread.lastResponse)
-					return groups.helper.getGroupUserNameAsync(group._id, thread.lastResponse.userId);
+					return groups.helper.getOrGenerateMemberName(group._id, thread.lastResponse.userId);
 				else
 					return null;
 			});

@@ -27,22 +27,49 @@ exports.generateMemberNames = function(groupId, userIds) {
 	let userNames = [];
 	
 	userIds.forEach((userId) => {
-		// Create new chance object, which seed exists out of groupId and userId
-		const seed = groupId.toString()+userId.toString();
-		const chanceName = new Chance(seed);
-		
-		// Sample a user name, until user name is unique in this group
-		let userName = chanceName.first();
-		while(_.contains(userNames, userName)) {
-			userName = chanceName.first();
-		}
-		
+		// Generate unique username, given all already existing userNames
+		const userName = generateUniqueName(groupId, userId, userNames)
 		// Push user name to user names array
 		userNames.push(userName);
 	});
 	
 	return userNames;
 };
+
+exports.getOrGenerateMemberName = async function(groupId, userId) {
+	// Get all user names from group
+	const members = await db.collection('group_relations').find(
+		{ 'groupId': groupId }, { 'userId': true, 'userName': true }
+	).toArrayAsync();
+	
+	console.log(members);
+	
+	const member = utils.findWhereObjectId(members, { 'userId': userId });
+	
+	console.log(member);
+	
+	console.log(_.pluck(members, 'userName'));
+	
+	// Return unique user name
+	if (_.isUndefined(member))
+		return generateUniqueName(groupId, userId, _.pluck(members, 'userName'));
+	else
+		return member.userName;
+};
+
+function generateUniqueName(groupId, userId, presentUserNames) {
+	// Create new chance object, which seed exists out of groupId and userId
+	const seed = groupId.toString()+userId.toString();
+	const chanceName = new Chance(seed);	
+	
+	// Sample a user name, until user name is unique in this group
+	let userName = chanceName.first();
+	while(presentUserNames.includes(userName)) {
+		userName = chanceName.first();
+	}
+	
+	return userName;
+}
 
 /**
  * @desc: Gets user name for member or members in group from database

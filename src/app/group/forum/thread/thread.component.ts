@@ -60,7 +60,7 @@ export class GroupForumThreadComponent implements OnInit {
 	};
 	
 	// Poll
-	public poll: Poll;
+	public poll: Poll = null;
 	public pollChosenOptions = [];
 	public pollOptionsProgress = [];
 	
@@ -112,10 +112,10 @@ export class GroupForumThreadComponent implements OnInit {
 				
 				// Get fragment and jump to related anchor, if fragment is given
 				const fragment = this.router.url.split('#')[1];
-				if (!_.isUndefined(fragment)) {
+				/*if (!_.isUndefined(fragment)) {
 					// Note: setTimout is necessary due to a bug: https://github.com/angular/angular/issues/15634
 					setTimeout(() => { this.navigateToUrlWithFragment(fragment) }, 0);
-				}
+				}*/
 			});
 		});
 	}
@@ -153,10 +153,11 @@ export class GroupForumThreadComponent implements OnInit {
 				}.bind(this));
 				
 				// Poll
-				this.poll = res.poll ? new Poll(res.poll) : null;
-				this.pollChosenOptions = this.poll.getMyChosenOptions(this.userId);
-				this.updateOptionsProgress();
-				console.log(this.pollOptionsProgress);
+				if (res.poll !== null) {
+					this.poll = new Poll(res.poll);
+					this.pollChosenOptions = this.poll.getMyChosenOptions(this.userId);
+					this.updateOptionsProgress();
+				}
 				
 				// Sort posts
 				this.sortPosts('createdTimestamp', true, false);

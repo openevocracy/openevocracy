@@ -55,18 +55,16 @@ exports.create = function(req, res) {
 				const lastResponse = { 'timestamp': Date.now(), 'userId': authorId };
 				const thread_promise = db.collection('forum_threads')
 					.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
-					
-				const memberName_promise = groups.helper.getGroupUserNameAsync()
+				
+				
 				
 				// Perform a lot of tasks, where group is necessary
-				const sendMail_promise = db.collection('group_relations').findOneAsync(
-					{ 'groupId': group._id, 'userId': authorId }, { 'userName': true }
-				).then((member) => {
+				const sendMail_promise = groups.helper.getOrGenerateMemberName(group._id, authorId).then((userName) => {
 					// Build link to thread
 					const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
 					
 					// Define parameter for email body
-					const bodyParams = [ member.userName, group.name, urlToThread+'#'+postId, urlToThread ];
+					const bodyParams = [ userName, group.name, urlToThread+'#'+postId, urlToThread ];
 					
 					// Define email translation strings
 					const mail = {
