@@ -28,6 +28,8 @@ export class EditThreadDialogComponent {
 	//public options: number[] = [1,2];
 	public showOptions: boolean = false;
 	
+	public isNew: boolean;
+	
 	public heading: string;
 	public buttonLabel: string;
 	public mainPostHtml: string;
@@ -55,12 +57,14 @@ export class EditThreadDialogComponent {
 		
 		// If no thread was injected, create a new thread
 		if (_.isNull(this.data)) {
+			this.isNew = true;
 			// Set heading and button label
 			this.heading = 'FORUM_DIALOG_NEW_THREAD_HEADING';
 			this.buttonLabel = 'FORUM_BUTTON_NEW_THREAD';
 		}
 		// If thread was injected, edit existing thread
 		else {
+			this.isNew = false;
 			// Store main post html (is set after editor is ready)
 			this.mainPostHtml = this.data.mainPostHtml;
 			
@@ -79,7 +83,7 @@ export class EditThreadDialogComponent {
 		// The timeout is necessary to avoid an error, see: https://blog.angular-university.io/angular-debugging/
 		setTimeout(() => {
 			this.showOptions = true;
-		});
+		}, 100);
 	}
 	
 	/**

@@ -22,7 +22,7 @@ exports.cfg = {
 	
 	DURATION_SELECTION : 0.5*C.MINUTE,
 	DURATION_PROPOSAL  : 2*C.MINUTE,
-	DURATION_LEVEL     : 2*C.MINUTE,
+	DURATION_LEVEL     : 99999*C.MINUTE,
 	DURATION_NONE      : -1,
 	
 	// Time before end

@@ -224,6 +224,9 @@
 	"FORUM_POLL_FORM_ADD": "Add poll",
 	"FORUM_POLL_LABEL_VOTE": "Vote",
 	"FORUM_POLL_LABEL_VOTES": "Votes",
+	"FORUM_POLL_OPTION_LABEL": "Option",
+	"FORUM_POLL_BUTTON_OPTION_ADD": "Add option",
+	"FORUM_POLL_TOGGLE_MULTIPLE": "Allow selecting multiple options",
 	
 	"CHAT_MESSAGE_LABEL": "Your message to the group...",
 	"CHAT_ROOM_ENTER": "entered the chatroom.",

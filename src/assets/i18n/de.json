@@ -224,6 +224,9 @@
 	"FORUM_POLL_FORM_ADD": "Umfrage hinzufügen",
 	"FORUM_POLL_LABEL_VOTE": "Stimme",
 	"FORUM_POLL_LABEL_VOTES": "Stimmen",
+	"FORUM_POLL_OPTION_LABEL": "Option",
+	"FORUM_POLL_BUTTON_OPTION_ADD": "Option hinzufügen",
+	"FORUM_POLL_TOGGLE_MULTIPLE": "Die Auswahl mehrerer Optionen erlauben",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",

@@ -22,12 +22,8 @@ export class GroupDocumentComponent implements OnInit {
 		// Get group from group service cache
 		const group = this.groupService.getBasicGroupFromCache(groupId);
 		
-		console.log(group);
-		
 		// Define group pad html
 		this.padHtml = group.padHtml;
-		
-		console.log(this.padHtml);
 	}
 	
 	ngOnInit() {

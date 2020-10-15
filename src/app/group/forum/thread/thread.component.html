@@ -55,49 +55,27 @@
 			</div>
 			<div class="post-poll clearfix" *ngIf="poll && post.postId == thread.mainPostId">
 				<hr/>
-				<!-- If user has NOT filled poll already and if user from group -->
-				<div *ngIf="isGroupMember" novalidate>
-					<div *ngIf="poll.allowMultipleOptions">
-						<div class="option" *ngFor="let option of poll.options;">
-							<mat-checkbox (change)="checkboxSelected(option.index)">
-								{{option.label}} <span class="count">({{option.count}} / {{poll.numGroupMembers}})</span>
-							</mat-checkbox>
-							<mat-progress-bar mode="determinate" value="40"></mat-progress-bar>
+				<div class="option" [ngClass]="{ 'option-selected': isGroupMember && pollChosenOptions.includes(option.index), 'option-hover': isGroupMember}" *ngFor="let option of poll.options;" (click)="optionClicked(option.index)">
+					<div class="flex option-top">
+						<span>{{option.label}}</span>
+						<span class="flex-spacer"></span>
+						<span class="percent">{{ pollOptionsProgress[option.index] }}%</span>
+					</div>
+					<mat-progress-bar class="option-progress" mode="determinate" [value]="pollOptionsProgress[option.index]"></mat-progress-bar>
+					<div class="flex option-bottom">
+						<div class="count">
+							<span>{{option.count}}</span>
+							<span *ngIf="option.count == 1"> {{'FORUM_POLL_LABEL_VOTE' | translate}}</span>
+							<span *ngIf="option.count > 1 || option.count == 0"> {{'FORUM_POLL_LABEL_VOTES' | translate}}</span>
+						</div>
+						<span class="flex-spacer"></span>
+						<div>
+							<span *ngFor="let votedUserId of option.votedUserIds; let j = index;">
+								<span>{{ group.memberName(votedUserId) }}</span>
+								<span *ngIf="(j+1) < option.votedUserIds.length">, </span>
+							</span>
 						</div>
 					</div>
-					<mat-radio-group [(ngModel)]="pollChosenRadioButton" *ngIf="!poll.allowMultipleOptions">
-						<div class="option" *ngFor="let option of poll.options;">
-							<div class="flex option-top">
-								<mat-radio-button [value]="option.index">
-									{{option.label}}
-								</mat-radio-button>
-								<span class="flex-spacer"></span>
-								<span class="percent">{{option.count/poll.numGroupMembers*100}}%</span>
-							</div>
-							<mat-progress-bar class="option-progress" mode="determinate" [value]="option.count/poll.numGroupMembers*100"></mat-progress-bar>
-							<div class="flex option-bottom">
-								<div class="count">
-									<span>{{option.count}}</span>
-									<span *ngIf="option.count == 1"> {{'FORUM_POLL_LABEL_VOTE' | translate}}</span>
-									<span *ngIf="option.count > 1 || option.count == 0"> {{'FORUM_POLL_LABEL_VOTES' | translate}}</span>
-								</div>
-								<span class="flex-spacer"></span>
-								<div>
-									<span *ngFor="let votedUserId of option.votedUserIds; let j = index;">
-										<span>{{ group.memberName(votedUserId) }}</span>
-										<span *ngIf="(j+1) < option.votedUserIds.length">, </span>
-									</span>
-								</div>
-							</div>
-						</div>
-					</mat-radio-group>
-					<button class="poll-submit" mat-raised-button color="primary" title="{{ 'FORUM_POLL_BUTTON_SUBMIT' | translate }}" (click)="submitPoll()">
-						<span>{{ 'FORUM_POLL_BUTTON_SUBMIT' | translate }}</span>
-					</button>
-				</div>
-				<!-- If user has filled poll or if user is not from group -->
-				<div class="poll-results" *ngIf="!isGroupMember">
-					(intermediate) poll results
 				</div>
 			</div>
 			<div class="post-comments">

@@ -51,7 +51,7 @@ export class BasicGroup {
 		const member = _.findWhere(this.members, { 'userId': userId });
 		
 		// Returns true or false (depending if member was found or not)
-		return !_.isNull(member);
+		return !_.isUndefined(member);
 	}
 	
 	/**

@@ -61,8 +61,8 @@ export class GroupForumThreadComponent implements OnInit {
 	
 	// Poll
 	public poll: Poll;
-	public pollChosenCheckboxes = [];
-	public pollChosenRadioButton: number;
+	public pollChosenOptions = [];
+	public pollOptionsProgress = [];
 	
 	// FontAwesome icons
 	public faArrowAltCircleLeft = faArrowAltCircleLeft;
@@ -154,9 +154,9 @@ export class GroupForumThreadComponent implements OnInit {
 				
 				// Poll
 				this.poll = res.poll ? new Poll(res.poll) : null;
-				// If thread has poll, initialize checkbox array
-				if (this.poll)
-					this.pollChosenCheckboxes = Array(this.poll.options.length).fill(false);
+				this.pollChosenOptions = this.poll.getMyChosenOptions(this.userId);
+				this.updateOptionsProgress();
+				console.log(this.pollOptionsProgress);
 				
 				// Sort posts
 				this.sortPosts('createdTimestamp', true, false);
@@ -652,40 +652,86 @@ export class GroupForumThreadComponent implements OnInit {
 		});
 	}
 	
-	/**
-	 * @desc: This function is called when a option of a poll is selected or deselected
-	 */
-	public checkboxSelected(optionIndex) {
-		this.pollChosenCheckboxes[optionIndex] = !this.pollChosenCheckboxes[optionIndex];
+	public updateOptionsProgress(): void {
+		const p = this.poll
+		
+		// Update sum of all votes
+		p.updateCountSum();
+		
+		// Update progress for every option
+		this.pollOptionsProgress = this.poll.options.map((opt) => {
+			if (this.poll.allowMultipleOptions) {
+				//return (p.countSum == 0) ? 0 : 100*opt.count/(p.numGroupMembers*p.options.length);
+				return (p.userIdsVoted.length == 0) ? 0 : Math.round(100*100*opt.count/p.userIdsVoted.length)/100;
+			} else {
+				//return 100*opt.count/p.numGroupMembers;
+				return (p.countSum == 0) ? 0 : Math.round(100*100*opt.count/p.countSum)/100;
+			}
+		});
+	}
+	
+	public addOption(optionIndex: number): number[] {
+		// Some shorthand variables
+		let ops = this.pollChosenOptions;
+		let option = this.poll.options[optionIndex];
+		
+		// Update chosen options
+		if (this.poll.allowMultipleOptions) {
+			ops.push(optionIndex);
+		} else {
+			ops = [optionIndex];
+			// Remove user from all other options
+			this.poll.removeUserIdFromAllOptions(this.userId);
+		}
+		
+		// Add user to option
+		option.add(this.userId);
+		
+		return ops;
+	}
+	
+	public removeOption(optionIndex: number): number[] {
+		// Some shorthand variables
+		let ops = this.pollChosenOptions;
+		let option = this.poll.options[optionIndex];
+		
+		// Update chosen options
+		if (this.poll.allowMultipleOptions) {
+			const idx = ops.indexOf(optionIndex);
+			ops.splice(idx, 1);
+		} else {
+			ops = [];
+		}
+		
+		// Remove user from option
+		option.remove(this.userId);
+		
+		return ops;
 	}
 	
 	/**
-	 * @desc: Submitting the poll option values when the related button is pressed
+	 * @desc: When a poll option was chosen, evaluate new value and (may) send patch to server
 	 */
-	public submitPoll() {
-		let votes = Array(this.poll.options.length).fill(false);
+	public optionClicked(optionIndex: number): void {
+		if (!this.isGroupMember) return;
 		
-		if (this.poll.allowMultipleOptions)
-			votes = this.pollChosenCheckboxes;
-			
-		if (!this.poll.allowMultipleOptions)
-			votes[this.pollChosenRadioButton] = true;
+		const isAlreadyChosen = this.pollChosenOptions.includes(optionIndex);
+		// Update option
+		this.pollChosenOptions = (isAlreadyChosen) ? this.removeOption(optionIndex) : this.addOption(optionIndex);
 		
-		// If no option was chosen, show notification and return early
-		const numChosenOptions = votes.reduce((tot, num) => tot + num);
-		if (numChosenOptions == 0) {
-			this.snackbarService.showSnackbar('FORUM_SNACKBAR_POLL_NO_OPTION_CHOSEN');
-			return;
-		}
+		// If user has not voted before, add the user to userIdsVoted
+		const hasUserVoted = this.poll.userIdsVoted.includes(this.userId)
+		if (!hasUserVoted)
+			this.poll.userIdsVoted.push(this.userId);
 		
-		console.log('chosen indices', votes);
+		// Update progress
+		this.updateOptionsProgress();
 		
-		const data = { 'votes': votes };
-		
+		// Send data to server
+		const data = { 'votes': this.pollChosenOptions };
 		this.httpManagerService.patch('/json/group/forum/thread/poll/'+this.poll.pollId, data).subscribe(res => {
-			console.log('res', res);
+			// Show snackbar
 			this.snackbarService.showSnackbar('FORUM_SNACKBAR_POLL_SUCCESSFULLY_VOTED');
 		});
 	}
-
 }

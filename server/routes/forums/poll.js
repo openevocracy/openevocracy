@@ -23,9 +23,8 @@ exports.createAsync = function(rawPoll, threadId, groupId) {
 		'groupId': groupId,
 		'threadId': threadId,
 		'options': options,
-		'userIdsVoted': [],
 		'allowMultipleOptions': rawPoll.allowMultipleOptions,
-		'allowUpdate': true  // Allows an update after the poll is created, this is set to false if first vote was e
+		'userIdsVoted': []
 	};
 	
 	// Add poll to database
@@ -62,34 +61,14 @@ exports.vote = async function(req, res) {
 	const pollId = ObjectId(req.params.id);
 	const votes = req.body.votes;
 	
-	/**
-	 * Check if at least one option was chosen
-	 */ 
-	const numChosenOptions = votes.reduce((tot, num) => tot + num);
-	if (numChosenOptions == 0) {
-		res.status(400).send('NO_OPTION_CHOSEN');
-		return;
-	}
-	
 	// Wait for poll
 	const poll = await db.collection('forum_polls').findOneAsync({ '_id': pollId });
-	
-	/**
-	 * Check if user has not already voted
-	 */
-	// Look if userId is stored in already voted user ids
-	const hasUserNotVoted = poll.userIdsVoted.find(votedUserId => utils.equalId(votedUserId, userId));
-	// If hasUserNotVoted is not undefined, user has already voted
-	if (!_.isUndefined(hasUserNotVoted)) {
-		res.status(401).send('ALREADY_VOTED');
-		return;
-	}
 	
 	/**
 	 * Check if user has chosen multiple options and if multiple options are allowed
 	 */
 	// Number of chosen options is greater one and multiple options are not allowed
-	if(numChosenOptions > 1 && !poll.allowMultipleOptions) {
+	if(votes.length > 1 && !poll.allowMultipleOptions) {
 		res.status(400).send('MULTIPLE_OPTIONS_NOT_ALLOWED');
 		return;
 	}
@@ -114,16 +93,26 @@ exports.vote = async function(req, res) {
 	/**
 	 * Update poll
 	 */
-	// Increment options counts
-	votes.forEach((vote, index) => {
-		if (vote) {
-			let option = _.findWhere(poll.options, { 'index': index });
-			option.votedUserIds.push(userId);
+	poll.options.forEach((opt) => {
+		const optionVoted = votes.includes(opt.index);
+		const userVoted = utils.containsObjectId(opt.votedUserIds, userId);
+		
+		// If current option was voted, add user if not exists
+		if (optionVoted && !userVoted) {
+			opt.votedUserIds.push(userId);
+		}
+		
+		// If current option was not voted, remove user if exists
+		if (!optionVoted && userVoted) {
+			const idx = opt.votedUserIds.indexOf(userId);
+			opt.votedUserIds.splice(idx, 1);
 		}
 	});
 	
-	// Add user to voted users
-	poll.userIdsVoted.push(userId);
+	// Add user to voted users, if not already in
+	const undefinedIfUserHasNotVoted = poll.userIdsVoted.find(votedUserId => utils.equalId(votedUserId, userId));
+	if (_.isUndefined(undefinedIfUserHasNotVoted))
+		poll.userIdsVoted.push(userId);
 	
 	// Update poll options
 	db.collection('forum_polls').updateAsync(
