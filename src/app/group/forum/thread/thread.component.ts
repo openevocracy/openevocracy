@@ -42,6 +42,7 @@ export class GroupForumThreadComponent implements OnInit {
 	public saving: boolean = false;
 	public commentField: number = -1;
 	public fragment: string = "";
+	public fragmentTimeout;
 	public editor;
 	public userId: string;
 	public groupId: string;
@@ -53,7 +54,6 @@ export class GroupForumThreadComponent implements OnInit {
 	public sortedBy: string = "";
 	public missingWordsComments: boolean[] = [];
 	public forumMinWordsCommentMsgTranslated: string = "";
-	public fragmentTimeout;
 	public sortLabels = {
 		'sumVotes': 'FORUM_SORT_LABEL_VOTES',
 		'createdTimestamp': 'FORUM_SORT_LABEL_DATE'
@@ -110,11 +110,10 @@ export class GroupForumThreadComponent implements OnInit {
 				// Set solved button label
 				this.solvedButtonTitle = this.thread.closed ? 'FORUM_BUTTON_TITLE_UNSOLVED' : 'FORUM_BUTTON_TITLE_SOLVED';
 				
-				// Get fragment and jump to related anchor, if fragment is given
-				const fragment = this.router.url.split('#')[1];
+				// TODO If fragment is set, jump to related anchor
+				//const fragment = this.router.url.split('#')[1];
 				/*if (!_.isUndefined(fragment)) {
-					// Note: setTimout is necessary due to a bug: https://github.com/angular/angular/issues/15634
-					setTimeout(() => { this.navigateToUrlWithFragment(fragment) }, 0);
+					// Jump here, NOTE: https://github.com/angular/angular/issues/30139
 				}*/
 			});
 		});
@@ -353,10 +352,11 @@ export class GroupForumThreadComponent implements OnInit {
 		this.httpManagerService.post('/json/group/forum/comment/create', data).subscribe(res => {
 			// Scroll to and highlight post, related to created comment
 			const relatedPostId = res[0].ops[0].postId;
-			this.navigateToUrlWithFragment(relatedPostId);
 			
 			// Reload model
 			this.loadThread(this.thread.threadId).subscribe(() => {
+				// Highlight related post
+				this.highlightFragment(relatedPostId);
 				// Show snack bar notification
 				this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_COMMENT');
 			});
@@ -402,14 +402,13 @@ export class GroupForumThreadComponent implements OnInit {
 			// Clear editor
 			this.editor.setText('');
 			
-			// FIXME: Scrolling is currently not working, since post is added to DOM afterwards
-			//        Either reload page after creation or find another solution for scrolling?
-			// Scroll to and highlight newly created post
+			// Get id of submitted post
 			const submittedPostId = res[0].insertedIds[0];
-			this.navigateToUrlWithFragment(submittedPostId);
 			
 			// Reload model
 			this.loadThread(this.thread.threadId).subscribe(() => {
+				// Highlight submitted post
+				this.highlightFragment(submittedPostId);
 				// After everything is finished, show snackbar notification and enable editor again
 				this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_POST', this.enableNewPostEditor.bind(this));
 			});
@@ -417,44 +416,10 @@ export class GroupForumThreadComponent implements OnInit {
 	}
 	
 	/**
-	 * @desc: Navigate to current URL, but without fragment (everything removed after '#')
-	 */
-	public navigateToUrlWithoutFragment() {
-		// Set URL to url of thread
-		return this.router.navigate( [this.getUrlwithoutFragment()] );
-	}
-	
-	/**
-	 * @desc: Navigate to current URL, but with other fragment (after '#')
-	 */
-	public navigateToUrlWithFragment(fragment) {
-		console.log('navigateToUrlWithFragment', fragment);
-		// Jump to anchor of fragment
-		this.viewportScroller.scrollToAnchor(fragment);
-		
-		// Highlight post
-		this.highlightFragment(fragment);
-		
-		// Finally set route
-		return this.router.navigate( [this.getUrlwithoutFragment()], { 'fragment': fragment } );
-	}
-	
-	/**
-	 * @desc: Removes the fragment from URL (everything after '#')
-	 */
-	public getUrlwithoutFragment() {
-		// Split url on hash and only return first part
-		return this.router.url.split("#")[0];
-	}
-	
-	/**
-	 * @desc: Opens the share dialog and shows share link for the thread
+	 * @desc: If share button on main post is chosen, open the share dialog and shows share link for the whole thread
 	 */
 	public shareThread() {
-		this.navigateToUrlWithoutFragment().then(()=>{
-		  // Show share dialog after url was set
-			this.matDialog.open(ShareDialogComponent);
-		});
+		this.matDialog.open(ShareDialogComponent);
 	}
 	
 	/**
@@ -517,10 +482,10 @@ export class GroupForumThreadComponent implements OnInit {
 	 * @desc: Opens the share dialog and shows share link for specific post
 	 */
 	public sharePost(postId) {
-		this.navigateToUrlWithFragment(postId).then(() => {
-			// Show share dialog after url was set
-			this.matDialog.open(ShareDialogComponent);
-		});
+		// Highlight related post
+		this.highlightFragment(postId);
+		// Open share dialog
+		this.matDialog.open(ShareDialogComponent);
 	}
 	
 	/**

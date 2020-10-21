@@ -1,36 +1,39 @@
-var _ = require('underscore');
-var Promise = require('bluebird');
-var nodemailer = require('nodemailer');
-var crypto = require('crypto');
+const _ = require('underscore');
+const Promise = require('bluebird');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
-var db = require('./database').db;
-var utils = require('./utils');
-var i18next = require('i18next');
-var strformat = require('strformat');
-var groups = require('./routes/groups');
+const db = require('./database').db;
+const utils = require('./utils');
+const i18next = require('i18next');
+const strformat = require('strformat');
+const groups = require('./routes/groups');
 
-var C = require('../shared/constants').C;
-var cfg = require('../shared/config').cfg;
+const C = require('../shared/constants').C;
+const cfg = require('../shared/config').cfg;
 
 // Mail transporter
-var transporter;
+let transporter;
 
 // Mail queue
-var queue = [];
+let queue = [];
 
 // Language sources
-var en = require('./i18n/en.json');
-var de = require('./i18n/de.json');
+const en = require('./i18n/en.json');
+const de = require('./i18n/de.json');
 
 function getTimeString(time) {
-	var stringHours = 'h';
-	var stringDays = 'd';
+	const stringHours = 'h';
+	const stringDays = 'd';
 	if(time <= C.DAY)
 		return (Math.round(time/C.HOUR)).toString() + ' ' + stringHours;
 	else
 		return (Math.round(time/C.DAY)).toString() + ' ' + stringDays;
 }
 
+/**
+ * @desc: Initialize translation, smpt connection and transporter
+ */
 exports.initialize = function() {
 	// Initialize i18n
 	i18next.init({
@@ -63,13 +66,17 @@ exports.initialize = function() {
 	transporter = nodemailer.createTransport(smtpConfig);
 };
 
-// @desc: Hash mail using an identifier (e.g. translation key of subject) and email of user
+/**
+ * @desc: Hash mail using an identifier (e.g. translation key of subject) and email of user
+ */
 function mailHash(mailType, mailIdentifier, mailUser) {
     return crypto.createHash('sha256').
         update(mailType).update(mailIdentifier.toString()).update(mailUser.toString()).digest('hex');
 }
 
-// @desc: If parameters exist, translate and fill params; if not, just translate
+/**
+ * @desc: If parameters exist, translate and fill params; if not, just translate
+ */
 function formatAndTranslate(key, params) {
 	if(params.length > 0)
 		return strformat.call(this, i18next.t(key), ...params);
@@ -188,7 +195,9 @@ function sendMailMulti(mailUsers, mailSubject, mailSubjectParams, mailBody, mail
 }
 exports.sendMailMulti = sendMailMulti;
 
-// @desc: Send email only once and avoid multiple times sending the same mail (more details in 'sendMail' func)
+/**
+ * @desc: Send email only once and avoid multiple times sending the same mail (more details in 'sendMail' func)
+ */
 function sendMailOnce(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams, hash, interval) {
 	// Use interval to allow resending a specific mail after some time
 	return db.collection('mail').findOneAsync({$query:{ 'hash': hash }, $orderby:{ '_id': -1 }}).then(function(hashFromDb) {
@@ -246,6 +255,9 @@ function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubje
 }
 exports.sendEmailToAllTopicParticipants = sendEmailToAllTopicParticipants;
 
+/**
+ * @desc: Send email to all members of *several* groups
+ */
 function sendEmailToMembersOfSpecificGroups(mailType, gids, tid, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// Send email to members of specific groups
 	// "gids" is an array of group id's where a mail should be sent to
@@ -269,6 +281,9 @@ function sendEmailToMembersOfSpecificGroups(mailType, gids, tid, mailSubject, ma
 		});
 }
 
+/**
+ * @desc: Send email to all members of a group
+ */
 function sendEmailToAllActiveGroupMembers(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// Remind members that the deadline of the level (group) is coming
 	return groups.helper.getGroupsOfSpecificLevelAsync(topic._id, topic.level).then(function(groups) {
@@ -280,6 +295,9 @@ function sendEmailToAllActiveGroupMembers(mailType, topic, mailSubject, mailSubj
 }
 exports.sendEmailToAllActiveGroupMembers = sendEmailToAllActiveGroupMembers;
 
+/**
+ * @desc: Send email to all members of a group which were not active for a longer time
+ */
 function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// If lazy reminder is disabled then exit early
 	if(cfg.REMINDER_GROUP_LAZY < 0)
@@ -310,6 +328,9 @@ function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailSubjec
 }
 exports.sendEmailToAllLazyGroupMembers = sendEmailToAllLazyGroupMembers;
 
+/**
+ * @desc: Send email to all members of a group which have not rated other members so far
+ */
 function sendEmailRatingReminderToGroupMembers(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// If rating reminder is disabled then exit early
 	if(cfg.REMINDER_GROUP_RATING < 0)

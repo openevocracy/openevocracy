@@ -1,4 +1,4 @@
-var _ = require('underscore');
+const _ = require('underscore');
 const CronJob = require('cron').CronJob;
 const cfg = require('../shared/config').cfg;
 const mail = require('./mail');

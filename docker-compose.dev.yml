@@ -12,7 +12,7 @@ services:
     environment:
      - ENV=prod
   mongodb:
-    image: mongo
+    image: mongo:3.4.23
     restart: always
     volumes:
     - ./data:/data/db
