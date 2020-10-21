@@ -6,7 +6,6 @@ exports.cfg = {
 	DEBUG : false,
 	TEST: false,
 	MAIL_ENABLED:  true,
-	CRON_INTERVAL: 5, // run cron every x minute(s)
 	ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
 	CHATROOM_CACHE_TIMEOUT: 1*C.DAY,  // Chat room is removed from cache when it was not called for more than x hours/days
 

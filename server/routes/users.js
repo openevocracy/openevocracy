@@ -503,7 +503,7 @@ exports.sendFeedback = function(req, res) {
 	const feedback = req.body.feedback;
 	
 	// Send mail
-	mail.sendMail('feedback@openevocracy.org', 'Evocracy | Feedback Nachricht', feedback);
+	mail.addMailToQueue('feedback@openevocracy.org', 'Evocracy | Feedback Nachricht', feedback);
 	
 	// Respond with alert
 	utils.sendAlert(res, 200, 'success', 'DIALOG_FEEDBACK_SUCESSFULLY_SENT');
