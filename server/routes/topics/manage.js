@@ -75,9 +75,9 @@ function manageConsensusStageAsync(topic, levelDuration) {
 				    });
             
             // Get pad PDF and save it in file system
-            finalDocumentHtml_promise.then(pads.getPadPDFAsync).then(function(data) {
-                var filename = path.join(appRoot.path, 'files/documents', topicId+'.pdf');
-                return fs.writeFileAsync(filename,data);
+            finalDocumentHtml_promise.then((html) => {
+            	// NOTE: return has no function here
+            	return pads.getPadPDFAsync(topicId, topic.name, html);
             });
             
             // Updates below are only required if consensus stage is over
@@ -87,7 +87,7 @@ function manageConsensusStageAsync(topic, levelDuration) {
                 'stagePassedStarted': Date.now(),
                 'finalDocument': finalDocumentHtml_promise
             };
-                        
+            
             // Add activity for author
             const authorActivity_promise = activities.addActivityAsync(topic.authorId, C.ACT_TOPIC_COMPLETE, topicId);
             

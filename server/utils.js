@@ -143,7 +143,6 @@ exports.config = function(req, res) {
 	res.json({'timestamp': now});
 };*/
 
-
 /**
  * @desc: Compares keys of two objects and returns true,
  *        if both contain identical keys

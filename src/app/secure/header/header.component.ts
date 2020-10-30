@@ -5,7 +5,7 @@ import { MatDialog, MatDialogConfig } from "@angular/material";
 import { ShareDialogComponent } from '../../dialogs/share/share.component';
 import { FeedbackDialogComponent } from '../../dialogs/feedback/feedback.component';
 
-import { AlertService } from '../../_services/alert.service';
+import { SnackbarService } from '../../_services/snackbar.service';
 import { UserService } from '../../_services/user.service';
 import { LanguageService } from '../../_services/language.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
@@ -31,7 +31,7 @@ export class HeaderComponent implements OnInit {
 	
 	constructor(
 		private dialog: MatDialog,
-		private alertService: AlertService,
+		private snackbarService: SnackbarService,
 		private httpManagerService: HttpManagerService,
 		private translateService: TranslateService,
 		private userService: UserService,
@@ -61,7 +61,8 @@ export class HeaderComponent implements OnInit {
 		      // Get feedback content, send mail, close and show alert
 				this.httpManagerService.post('/json/feedback', { 'feedback': result }).subscribe(res => {
 					// Show alert
-					this.alertService.alertFromServer(res.alert);
+					console.log(res);
+					this.snackbarService.showSnackbar('DIALOG_FEEDBACK_SUCESSFULLY_SENT');
 				});
 			}
    	});

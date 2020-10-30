@@ -505,8 +505,8 @@ exports.sendFeedback = function(req, res) {
 	// Send mail
 	mail.addMailToQueue('feedback@openevocracy.org', 'Evocracy | Feedback Nachricht', feedback);
 	
-	// Respond with alert
-	utils.sendAlert(res, 200, 'success', 'DIALOG_FEEDBACK_SUCESSFULLY_SENT');
+	// Respond success
+	res.status(200).send('');
 };
 
 /**

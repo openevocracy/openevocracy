@@ -40,6 +40,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 	public proposalHtml: string = "";
 	public group;
 	public me;
+	public hideEditor: boolean = true;
 
   constructor(
 		protected snackBar: MatSnackBar,
@@ -97,6 +98,8 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 		// If pad is expired or user is not member, redirect to document
 		if (this.group.isExpired || !this.group.isMember(this.userId))
 			this.router.navigate(['/group', groupId, 'document']);
+		else
+			this.hideEditor = false;
 	}
 	
 	/*
@@ -106,6 +109,8 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 	 *    editor: quill editor object
 	 */
 	public editorCreated(editor) {
+		if (this.hideEditor)
+			return;
 		
 		//editor.register('blots/block', CustomBlock);
 		

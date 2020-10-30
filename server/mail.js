@@ -100,6 +100,7 @@ function addMailToQueue(toEmailAddress, subject, text) {
 	// Add mail options to queue
 	queue.push(mailOptions);
 }
+exports.addMailToQueue = addMailToQueue;
 
 /**
  * @desc: Sends first email from queue, if exists

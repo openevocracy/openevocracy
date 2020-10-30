@@ -3,6 +3,9 @@ const _ = require('underscore');
 const Promise = require('bluebird');
 const ObjectId = require('mongodb').ObjectID;
 const pdf = require('phantom-html2pdf');
+const crypto = require('crypto');
+const path = require('path');
+const appRoot = require('app-root-path');
 
 // Collaborative libraries for pad synchronization
 const ShareDB = require('sharedb');
@@ -17,6 +20,14 @@ const db = require('../database').db;
 const utils = require('../utils');
 const groups = require('./groups');
 const users = require('./users');
+
+// For TeX/PDF document creation
+const { readFileSync } = require('fs');
+const { createReadStream, createWriteStream } = require('fs');
+const { join, resolve } = require('path');
+const { Readable } = require("stream");
+const latex = require('node-latex');
+const pandoc = require('node-pandoc-promise');
 
 // ShareDB backend and connection
 let backend;
@@ -315,7 +326,7 @@ function getPadHTMLAsync(collection_suffix, docId) {
 			resolve(html);
 		});
 	});
-};
+}
 exports.getPadHTMLAsync = getPadHTMLAsync;
 
 /*
@@ -324,24 +335,43 @@ exports.getPadHTMLAsync = getPadHTMLAsync;
  * @params:
  *    html: html of the pad
  */
-exports.getPadPDFAsync = function(html) {
-	console.log('getPadPDFAsync', html);
-	const pdfConvertAsync = Promise.promisify(pdf.convert);
+exports.getPadPDFAsync = async function(topicId, title, html) {
+	console.log('getPadPDFAsync', topicId, title, html);
 	
-	const css = "body { font-family: 'CMU Sans Serif'; font-size: 8pt; }";
-	const paperSize = { 'format': 'A4', 'orientation': 'portrait' };
+	// Arguments as an Array:
+	const args = '-f html -t latex'.split(' ');
 	
-	return pdfConvertAsync({'html': html, 'paperSize': paperSize, 'css': css})
-		.then(function(result) {
-		// This is required to convert the callback into a format
-		// suitable for promises, e.g. error is first parameter
-		function toBufferWrapper(bluebirdCallback) {
-		   result.toBuffer(_.partial(bluebirdCallback,undefined));
-		}
-		
-		var toBufferAsync = Promise.promisify(toBufferWrapper);
-		return toBufferAsync();
-	});
+	// Call pandoc and transform html string to latex string
+	const body = await pandoc(html, args);
+	
+	// Define date and hash
+	const date = new Date().toISOString();
+	const hash = crypto.createHash('sha256').update(html).digest('hex');
+	
+	// Read latex template from file
+	const texTemplateFilepath = path.join(appRoot.path, 'files/latex', 'final-document.tex');
+	const latexTemplate = readFileSync(texTemplateFilepath).toString();
+	
+	// Replace body placeholder with latex body from html file
+	const latexResult = latexTemplate
+		.replace('{{title}}', title)
+		.replace('{{date}}', date)
+		.replace('{{topicId}}', topicId)
+		.replace('{{hash}}', hash)
+		.replace('{{html}}', body);
+	
+	// Write file
+	const input = Readable.from([latexResult]);
+	
+	const pdfFilepath = path.join(appRoot.path, 'files/documents', topicId + '.pdf');
+	const output = createWriteStream(pdfFilepath);
+	
+	const logFilepath = path.join(appRoot.path, 'log', 'latex-errors.log');
+	const options = { 'errorLogs': logFilepath };
+	
+	latex(input, options).pipe(output);
+	
+	return true;
 };
 
 /**
@@ -351,4 +381,4 @@ exports.addHtmlToPadAsync = function(collection_suffix, pad) {
 	return getPadHTMLAsync(collection_suffix, pad.docId).then(function(html) {
 		return _.extend(pad, {'html': html});
 	});
-}
+};
