@@ -9,7 +9,7 @@
 		<button mat-button *ngIf="isMember && !isExpired" [matBadge]="editorBadge" matBadgeColor="warn" class="badge-transparent" [ngClass]="{'active': activeTab == 'editor'}" title="{{ 'GROUP_BUTTON_DOCUMENT' | translate }}" [routerLink]="['/group', groupId, 'editor']">
 			<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_BUTTON_DOCUMENT' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="isExpired" [ngClass]="{'active': activeTab == 'document'}" title="{{ 'GROUP_BUTTON_DOCUMENT' | translate }}" [routerLink]="['/group', groupId, 'document']">
+		<button mat-button *ngIf="!isMember || isExpired" [ngClass]="{'active': activeTab == 'document'}" title="{{ 'GROUP_BUTTON_DOCUMENT' | translate }}" [routerLink]="['/group', groupId, 'document']">
 			<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_BUTTON_DOCUMENT' | translate }}</span>
 		</button>
 		
@@ -19,7 +19,7 @@
 		<button mat-button [matBadge]="forumBadge" matBadgeColor="warn" [ngClass]="{'active': activeTab == 'forum'}" title="{{ 'GROUP_BUTTON_FORUM' | translate }}" [routerLink]="['/group', groupId, 'forum']">
 			<span><fa-icon [icon]="faComments"></fa-icon> {{ 'GROUP_BUTTON_FORUM' | translate }}</span>
 		</button>
-		<button mat-button *ngIf="isMember" [matBadge]="membersBadge" matBadgeColor="warn" class="badge-transparent" [ngClass]="{'active': activeTab == 'members'}" title="{{ 'GROUP_BUTTON_MEMBERS' | translate }}" [routerLink]="['/group', groupId, 'members']">
+		<button mat-button [matBadge]="membersBadge" matBadgeColor="warn" class="badge-transparent" [ngClass]="{'active': activeTab == 'members'}" title="{{ 'GROUP_BUTTON_MEMBERS' | translate }}" [routerLink]="['/group', groupId, 'members']">
 			<span><fa-icon [icon]="faUsers"></fa-icon> {{ 'GROUP_BUTTON_MEMBERS' | translate }}</span>
 		</button>
 		

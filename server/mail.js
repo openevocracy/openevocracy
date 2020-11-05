@@ -1,34 +1,40 @@
-var _ = require('underscore');
-var Promise = require('bluebird');
-var nodemailer = require('nodemailer');
-var crypto = require('crypto');
+const _ = require('underscore');
+const Promise = require('bluebird');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
-var db = require('./database').db;
-var utils = require('./utils');
-var i18next = require('i18next');
-var strformat = require('strformat');
-var groups = require('./routes/groups');
+const db = require('./database').db;
+const utils = require('./utils');
+const i18next = require('i18next');
+const strformat = require('strformat');
+const groups = require('./routes/groups');
 
-var C = require('../shared/constants').C;
-var cfg = require('../shared/config').cfg;
+const C = require('../shared/constants').C;
+const cfg = require('../shared/config').cfg;
 
 // Mail transporter
-var transporter;
+let transporter;
+
+// Mail queue
+let queue = [];
 
 // Language sources
-var en = require('./i18n/en.json');
-var de = require('./i18n/de.json');
+const en = require('./i18n/en.json');
+const de = require('./i18n/de.json');
 
 function getTimeString(time) {
-	var stringHours = 'h';
-	var stringDays = 'd';
+	const stringHours = 'h';
+	const stringDays = 'd';
 	if(time <= C.DAY)
 		return (Math.round(time/C.HOUR)).toString() + ' ' + stringHours;
 	else
 		return (Math.round(time/C.DAY)).toString() + ' ' + stringDays;
 }
 
-exports.initializeMail = function() {
+/**
+ * @desc: Initialize translation, smpt connection and transporter
+ */
+exports.initialize = function() {
 	// Initialize i18n
 	i18next.init({
 		fallbackLng: 'en',
@@ -60,13 +66,17 @@ exports.initializeMail = function() {
 	transporter = nodemailer.createTransport(smtpConfig);
 };
 
-// @desc: Hash mail using an identifier (e.g. translation key of subject) and email of user
+/**
+ * @desc: Hash mail using an identifier (e.g. translation key of subject) and email of user
+ */
 function mailHash(mailType, mailIdentifier, mailUser) {
     return crypto.createHash('sha256').
         update(mailType).update(mailIdentifier.toString()).update(mailUser.toString()).digest('hex');
 }
 
-// @desc: If parameters exist, translate and fill params; if not, just translate
+/**
+ * @desc: If parameters exist, translate and fill params; if not, just translate
+ */
 function formatAndTranslate(key, params) {
 	if(params.length > 0)
 		return strformat.call(this, i18next.t(key), ...params);
@@ -75,30 +85,45 @@ function formatAndTranslate(key, params) {
 }
 
 /**
- * @desc: Sends mail to an address, with a subject and a text
+ * @desc: Add an email with an address, a subject and a text to queue
  */
-function sendMail(toEmailAddress, subject, text) {
+function addMailToQueue(toEmailAddress, subject, text) {
 	// Define mail options with sender, receriver, subject and body
-		var mailOptions = {
-			'from': '"Evocracy Project" <'+cfg.PRIVATE.MAIL_ADDRESS+'>',
-			'to': toEmailAddress,
-			'subject': subject,
-			//'text': text  // plaintext body
-			'html': text  // html body
-		};
-		
-		// Send mail via nodemailer if MAIL flag is true in config
-		if(cfg.MAIL_ENABLED) {
-			transporter.sendMail(mailOptions, function(error, info) {
-				if (error)
-					return console.log(error);
-				console.log('Message sent: ' + info.response);
-			});
-		} else {
-			console.log('Message was NOT sent: Configurations flag MAIL was set to false');
-		}
+	var mailOptions = {
+		'from': '"Evocracy Project" <'+cfg.PRIVATE.MAIL_ADDRESS+'>',
+		'to': toEmailAddress,
+		'subject': subject,
+		//'text': text  // plaintext body
+		'html': text  // html body
+	};
+	
+	// Add mail options to queue
+	queue.push(mailOptions);
 }
-exports.sendMail = sendMail;
+exports.addMailToQueue = addMailToQueue;
+
+/**
+ * @desc: Sends first email from queue, if exists
+ */
+exports.sendMailFromQueue = function() {
+	// Get and remove first entry in queue and send mail
+	const mailOptions = queue.shift();
+	
+	// If no email is in queue, do nothing
+	if(_.isUndefined(mailOptions))
+		return;
+	
+	// Send mail via nodemailer if MAIL flag is true in config
+	if(cfg.MAIL_ENABLED) {
+		transporter.sendMail(mailOptions, function(error, info) {
+			if (error)
+				return console.log('Message not sent: ' + error);
+			console.log('Message sent: ' + info.response);
+		});
+	} else {
+		console.log('Message was NOT sent: Configurations flag MAIL was set to false');
+	}
+};
 
 /**
  * @desc: Takes user information, raw subject and raw text, including parameters, and sends mail
@@ -119,7 +144,7 @@ function sendMailToUser(mailUser, mailSubject, mailSubjectParams, mailBody, mail
 		var emailAdress = (_.isString(mailUser.email) ? [mailUser.email] : mailUser.email);
 		
 		// Send mail
-		sendMail(emailAdress, formatAndTranslate(mailSubject, mailSubjectParams), formatAndTranslate(mailBody, mailBodyParams));
+		addMailToQueue(emailAdress, formatAndTranslate(mailSubject, mailSubjectParams), formatAndTranslate(mailBody, mailBodyParams));
 	});
 }
 exports.sendMailToUser = sendMailToUser;
@@ -171,7 +196,9 @@ function sendMailMulti(mailUsers, mailSubject, mailSubjectParams, mailBody, mail
 }
 exports.sendMailMulti = sendMailMulti;
 
-// @desc: Send email only once and avoid multiple times sending the same mail (more details in 'sendMail' func)
+/**
+ * @desc: Send email only once and avoid multiple times sending the same mail (more details in 'sendMail' func)
+ */
 function sendMailOnce(mailUser, mailSubject, mailSubjectParams, mailBody, mailBodyParams, hash, interval) {
 	// Use interval to allow resending a specific mail after some time
 	return db.collection('mail').findOneAsync({$query:{ 'hash': hash }, $orderby:{ '_id': -1 }}).then(function(hashFromDb) {
@@ -193,11 +220,11 @@ exports.sendMailOnce = sendMailOnce;
  */
 function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	
-	return db.collection('pads_proposal').find({'topicId': topic._id}, {'ownerId': true, 'expiration': true})
+	return db.collection('pads_proposal').find({'topicId': topic._id}, {'authorId': true, 'expiration': true})
 		.toArrayAsync().map(function(proposal) {
-			// Find user information for every proposal owner
+			// Find user information for every proposal author
 			return db.collection('users')
-				.findOneAsync({ '_id': proposal.ownerId }, {'email': true, 'lang': true})
+				.findOneAsync({ '_id': proposal.authorId }, {'email': true, 'lang': true})
 				.then((user) => {
 					// Get timestamp, when proposal was created
 					const created = proposal._id.getTimestamp();
@@ -215,10 +242,10 @@ function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubje
 	
 	// Delete after 31.05.2020
 	/*// In proposal stage, all sources in proposal tables are users
-	return db.collection('pads_proposal').find({'topicId': topic._id}, {'ownerId': true})
+	return db.collection('pads_proposal').find({'topicId': topic._id}, {'authorId': true})
 		.toArrayAsync().then(function(participants) {
 			return db.collection('users')
-				.find({ '_id': { $in: _.pluck(participants, 'ownerId') } }, {'email': true, 'lang': true})
+				.find({ '_id': { $in: _.pluck(participants, 'authorId') } }, {'email': true, 'lang': true})
 				.toArrayAsync();
 		}).map(function(user) {
 			sendMailOnce(user,
@@ -229,6 +256,9 @@ function sendEmailToAllTopicParticipants(mailType, topic, mailSubject, mailSubje
 }
 exports.sendEmailToAllTopicParticipants = sendEmailToAllTopicParticipants;
 
+/**
+ * @desc: Send email to all members of *several* groups
+ */
 function sendEmailToMembersOfSpecificGroups(mailType, gids, tid, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// Send email to members of specific groups
 	// "gids" is an array of group id's where a mail should be sent to
@@ -252,6 +282,9 @@ function sendEmailToMembersOfSpecificGroups(mailType, gids, tid, mailSubject, ma
 		});
 }
 
+/**
+ * @desc: Send email to all members of a group
+ */
 function sendEmailToAllActiveGroupMembers(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// Remind members that the deadline of the level (group) is coming
 	return groups.helper.getGroupsOfSpecificLevelAsync(topic._id, topic.level).then(function(groups) {
@@ -263,6 +296,9 @@ function sendEmailToAllActiveGroupMembers(mailType, topic, mailSubject, mailSubj
 }
 exports.sendEmailToAllActiveGroupMembers = sendEmailToAllActiveGroupMembers;
 
+/**
+ * @desc: Send email to all members of a group which were not active for a longer time
+ */
 function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// If lazy reminder is disabled then exit early
 	if(cfg.REMINDER_GROUP_LAZY < 0)
@@ -293,6 +329,9 @@ function sendEmailToAllLazyGroupMembers(mailType, topic, mailSubject, mailSubjec
 }
 exports.sendEmailToAllLazyGroupMembers = sendEmailToAllLazyGroupMembers;
 
+/**
+ * @desc: Send email to all members of a group which have not rated other members so far
+ */
 function sendEmailRatingReminderToGroupMembers(mailType, topic, mailSubject, mailSubjectParams, mailBody, mailBodyParams) {
 	// If rating reminder is disabled then exit early
 	if(cfg.REMINDER_GROUP_RATING < 0)

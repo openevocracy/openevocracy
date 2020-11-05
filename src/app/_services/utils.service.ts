@@ -99,4 +99,27 @@ export class UtilsService {
 				return "TOPIC_STAGE_REJECTED";
 		}
 	}
+	
+	/**
+	 * @desc: Translates from number (basis 10) to letter (basis A-Z) code
+	 * @source: https://stackoverflow.com/a/45789255/2692283
+	 */
+	public numberToLetters(num: number): string {
+		// Initialize variables
+		let s = '';
+		let t;
+		
+		// Start while loop
+		while (num > 0) {
+			// Calc remainder of the number
+			t = (num - 1) % 26;
+			// Get letter for current remainder and append to front
+			s = String.fromCharCode(65 + t) + s;
+			// Get next digit
+			num = (num - t)/26 | 0;
+		}
+		
+		// Return letter code or undefined (if num was 0)
+		return s || undefined;
+	}
 }

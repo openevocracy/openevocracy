@@ -1,0 +1,41 @@
+<mat-toolbar color="primary">
+	<div class="flex container">
+		<h1>{{ 'HEADER_MAINMENU_SETTINGS' | translate }}</h1>
+		<span class="flex-spacer"></span>
+		<button mat-button title="Speichern" (click)="onSubmit()" [disabled]="settingsForm.invalid || disableButton">
+			<fa-icon *ngIf="showSpinner" [icon]="faSpinner" [spin]="true"></fa-icon>
+			<fa-icon *ngIf="!showSpinner" [icon]="faSave"></fa-icon>
+			<span> {{ 'SETTINGS_BUTTON_SAVE' | translate }}</span>
+		</button>
+	</div>
+</mat-toolbar>
+
+<div class="container alert-box">
+	<alert></alert>
+</div>
+
+<div class="container">
+	<h3>{{ 'SETTINGS_ACCOUNT_TITLE_ID' | translate }}:</h3>
+	<strong>{{ uid }}</strong>
+	
+	<h3>{{ 'SETTINGS_ACCOUNT_TITLE_CREDENTIALS' | translate }}:</h3>
+	<form [formGroup]="settingsForm" novalidate>
+		<p>
+			<mat-form-field>
+				<input matInput formControlName="email" type="email" placeholder="{{ 'FORM_LABEL_MAIL' | translate }}">
+			</mat-form-field>
+		</p>
+		
+		<p formGroupName="passwords">
+			<mat-form-field>
+				<input matInput formControlName="password" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD' | translate }}">
+			</mat-form-field>
+		</p>
+		
+		<p formGroupName="passwords">
+			<mat-form-field>
+				<input matInput formControlName="passwordrep" type="password" placeholder="{{ 'FORM_LABEL_PASSWORD_REP' | translate }}">
+			</mat-form-field>
+		</p>
+	</form>
+</div>

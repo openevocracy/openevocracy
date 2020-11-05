@@ -44,7 +44,7 @@ exports.getWelcomeData = function(req, res) {
 	const userId = ObjectId(req.user._id);
 	
 	// Get member name
-	const memberName = helper.generateMemberName(groupId, userId);
+	const memberName_promise = helper.getGroupUserNameAsync(groupId, userId);
 	
 	// Get group name
 	const group_promise = db.collection('groups').findOneAsync(
@@ -58,7 +58,7 @@ exports.getWelcomeData = function(req, res) {
 	});
 	
 	// Return result
-	Promise.join(group_promise, topicName_promise).spread((group, topicName) => {
+	Promise.join(group_promise, topicName_promise, memberName_promise).spread((group, topicName, memberName) => {
 		return {
 			'memberName': memberName,
 			'groupName': group.name,

@@ -4,8 +4,8 @@ const C = require("./constants").C;
 // The keys have to be the same as in config.env.dev.js (this is checked in app.js)
 exports.cfg = {
 	DEBUG : true,
+	TEST: true,
 	MAIL_ENABLED:  false,
-	CRON_INTERVAL: 1, // run cron every x minute(s)
 	ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
 	CHATROOM_CACHE_TIMEOUT: 1*C.DAY,  // Chat room is removed from cache when it was not called for more than x hours/days
 	
@@ -32,9 +32,9 @@ exports.cfg = {
 	REMINDER_GROUP_LAZY     : 5*C.DAY,
 	
 	// Date and time format
-   DATEFORMAT_DATETIME: baseCfg.DATEFORMAT_DATETIME,
-   DATEFORMAT_DATE: baseCfg.DATEFORMAT_DATE,
-   DATEFORMAT_TIME: baseCfg.DATEFORMAT_TIME,
+	DATEFORMAT_DATETIME: baseCfg.DATEFORMAT_DATETIME,
+	DATEFORMAT_DATE: baseCfg.DATEFORMAT_DATE,
+	DATEFORMAT_TIME: baseCfg.DATEFORMAT_TIME,
 	
 	PRIVATE: {
 		BASE_URL     : baseCfg.BASE_URL,

@@ -1,0 +1,47 @@
+/* Import variables */
+@import "~styles/variables";
+
+/* Inspired from: https://codepen.io/FabioG/pen/EKLMPb */
+
+$width: 100;  /* Width of all three dots together */
+$color: $grey400;  /* Color of dots */
+$speed: 0.9;  /* Speed of animation in seconds */
+
+.router-loading {
+  width: $width + 0px;
+  height: ($width / 3) - 10px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+.dot {
+  will-change: transform;
+  height: ($width / 3) - 10px;
+  width: ($width / 3) - 10px;
+  border-radius: 50%;
+  background-color: $color;
+  position: absolute;
+  animation: grow ($speed * 1s) ease-in-out infinite alternate;
+  
+  
+  &.dot1 {
+    left:0;
+    transform-origin: 100% 50%;
+  }
+  &.dot2 {
+    left:50%;
+    transform: translateX(-50%) scale(1);
+    animation-delay: ($speed/3 * 1s);
+  }
+  &.dot3 {
+    right:0;
+    animation-delay: ($speed/3 * 2s);
+  }
+}
+
+@keyframes grow{
+  to{
+    transform: translateX(-50%) scale(0);
+  }
+}

@@ -40,7 +40,7 @@
 					</button>
 				</div>
 				<div class="post-meta">
-					{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user/profile', post.authorId]">{{ post.authorName }}</a>
+					{{ 'FORUM_THREADLIST_AUTHOR_PREFIX' | translate }} <a [routerLink]="['/user', post.authorId]">{{ post.authorName }}</a>
 					{{ 'FORUM_THREADLIST_CREATION_DATE_PREFIX' | translate }} <span>{{ post.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}</span><span *ngIf="post.editHistory.length != 0">, {{ post.editHistory.length }} {{ 'FORUM_POST_EDITS_LABEL' | translate }}</span>
 				</div>
 			</div>
@@ -52,6 +52,31 @@
 					<div class="vote-fa vote-down" [ngClass]="{ 'voted': post.userVote==-1}" (click)="votePost(post.postId, -1)"><fa-icon [icon]="faCaretDown"></fa-icon></div>
 				</div>
 				<div class="post-text" [innerHtml]="post.html"></div>
+			</div>
+			<div class="post-poll clearfix" *ngIf="poll && post.postId == thread.mainPostId">
+				<hr/>
+				<div class="option" [ngClass]="{ 'option-selected': isGroupMember && pollChosenOptions.includes(option.index), 'option-hover': isGroupMember}" *ngFor="let option of poll.options;" (click)="optionClicked(option.index)">
+					<div class="flex option-top">
+						<span>{{option.label}}</span>
+						<span class="flex-spacer"></span>
+						<span class="percent">{{ pollOptionsProgress[option.index] }}%</span>
+					</div>
+					<mat-progress-bar class="option-progress" mode="determinate" [value]="pollOptionsProgress[option.index]"></mat-progress-bar>
+					<div class="flex option-bottom">
+						<div class="count">
+							<span>{{option.count}}</span>
+							<span *ngIf="option.count == 1"> {{'FORUM_POLL_LABEL_VOTE' | translate}}</span>
+							<span *ngIf="option.count > 1 || option.count == 0"> {{'FORUM_POLL_LABEL_VOTES' | translate}}</span>
+						</div>
+						<span class="flex-spacer"></span>
+						<div>
+							<span *ngFor="let votedUserId of option.votedUserIds; let j = index;">
+								<span>{{ group.memberName(votedUserId) }}</span>
+								<span *ngIf="(j+1) < option.votedUserIds.length">, </span>
+							</span>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="post-comments">
 				<div *ngFor="let comment of post.comments" class="comment">
@@ -69,13 +94,13 @@
 									<small *ngIf="comment.authorId == userId"><a (click)="editComment(post.postId, comment)">{{ 'FORUM_BUTTON_EDIT' | translate }}</a>&nbsp;&nbsp;<a (click)="deleteComment(post.postId, comment.commentId)">{{ 'FORUM_BUTTON_DELETE' | translate }}</a></small>
 								</div>
 								<div class="comment-meta">
-									<small><a [routerLink]="['/user/profile', comment.authorId]">{{ comment.authorName }}</a>, {{ comment.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}<span *ngIf="comment.editHistory.length != 0">, {{ comment.editHistory.length }} {{ 'FORUM_COMMENT_EDITS_LABEL' | translate }}</span></small>
+									<small><a [routerLink]="['/user', comment.authorId]">{{ comment.authorName }}</a>, {{ comment.createdTimestamp | date: cfg.DATEFORMAT_DATETIME }}<span *ngIf="comment.editHistory.length != 0">, {{ comment.editHistory.length }} {{ 'FORUM_COMMENT_EDITS_LABEL' | translate }}</span></small>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div *ngIf="isGroupMember && !isExpired">
+				<div *ngIf="isGroupMember && !group.isExpired">
 					<hr/>
 					<div class="comment-add">
 						<a class="comment-add-link" *ngIf="commentField!=i" (click)="showCommentField(i)" title="{{ 'FORUM_LINK_ADD_COMMENT' | translate }}">
@@ -98,7 +123,7 @@
 		</div>
 	</div>
 	
-	<div *ngIf="(!thread?.private || isGroupMember) && !isExpired" id="newpost" class="post">
+	<div *ngIf="(!thread?.private || isGroupMember) && !group.isExpired" id="newpost" class="post">
 		<h2>{{ 'FORUM_HEADING_NEW_POST' | translate }}</h2>
 		
 		<editor-field (onEditorCreated)="editorCreated($event)"></editor-field>
@@ -108,7 +133,7 @@
 		</button>
 	</div>
 	
-	<div *ngIf="(thread?.private && !isGroupMember) && !isExpired" id="newpost_private" class="post">
+	<div *ngIf="(thread?.private && !isGroupMember) && !group.isExpired" id="newpost_private" class="post">
 		<p>{{ 'FORUM_NEW_POST_PRIVATE_MSG' | translate }}</p>
 	</div>
 </div>

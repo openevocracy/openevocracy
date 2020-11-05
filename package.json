@@ -1,6 +1,6 @@
 {
   "name": "openevocracy",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -10,7 +10,8 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "extract": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json",
-    "test_integration": "ENV=test mocha --require test/it-helper test/users.js test/topics.js test/proposals.js test/activities.js --exit"
+    "test_integration_bak": "ENV=test mocha --require test/it-helper test/users.js test/topics.js test/proposals.js test/activities.js",
+    "test_integration": "ENV=test mocha ./test/init.js --delay"
   },
   "private": true,
   "dependencies": {
@@ -31,9 +32,10 @@
     "@ngx-translate/http-loader": "^4.0.0",
     "@types/jquery": "^3.3.31",
     "@types/vis": "^4.21.19",
-    "angular-mentions": "^1.0.4",
+    "angular-mentions": "1.1.0",
     "app-root-path": "2.2.1",
     "async-lock": "^1.2.2",
+    "await-to-js": "^2.1.1",
     "bcrypt": "^3.0.6",
     "bluebird": "^3.7.1",
     "body-parser": "1.19.0",
@@ -71,6 +73,7 @@
     "jsdom": "^15.2.0",
     "json": "*",
     "jsonwebtoken": "^8.5.1",
+    "keycharm": "^0.3.1",
     "mailcomposer": "^4.0.2",
     "method-override": "*",
     "methods": "*",
@@ -82,6 +85,9 @@
     "ngx-quill": "^7.3.7",
     "ngx-vis": "^3.0.4",
     "node-crontab": "*",
+    "node-latex": "^3.0.0",
+    "node-pandoc": "^0.3.0",
+    "node-pandoc-promise": "0.0.6",
     "node-uuid": "^1.4.8",
     "nodemailer": "^6.3.1",
     "parchment": "^1.1.4",
@@ -117,7 +123,8 @@
     "uuid": "^7.0.2",
     "uws": "^100.0.1",
     "validate.js": "0.13.1",
-    "vis-data": "^6.5.0",
+    "vis-data": "7.0.0",
+    "vis-util": "^4.3.4",
     "websocket-json-stream": "0.0.3",
     "ws": "^7.2.0",
     "zone.js": "~0.9.1"
@@ -147,7 +154,7 @@
     "karma-jasmine-html-reporter": "^1.4.2",
     "mocha": "^6.2.2",
     "mocha-prepare": "^0.1.0",
-    "mongo-unit": "^1.4.5",
+    "mongo-unit": "^2.0.1",
     "propagating-hammerjs": "^1.4.7",
     "protractor": "^5.4.2",
     "timsort": "^0.3.0",

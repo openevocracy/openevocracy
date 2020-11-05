@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const db = require('../database').db;
 const ObjectId = require('mongodb').ObjectID;
 const Promise = require('bluebird');
+const to = require('await-to-js').default;
 const validate = require('validate.js');
 
 // Passport JWT authentification
@@ -261,7 +262,7 @@ exports.logout = function(req, res) {
 
 // POST /json/auth/verifyEmail
 exports.verifyEmail = async function(req, res) {
-	if(cfg.DEBUG) {
+	if(cfg.TEST) {
 		await db.collection('users').updateAsync(
 			{'email': 'test@example.com'}, { $set: { 'verified': true } }, {});
 		
@@ -451,7 +452,7 @@ exports.navigation = function(req, res) {
  *    userToken: token of user, contains userId and salt
  *    cb: callback function
  */
-function socketAuthentication(ws, userToken, cb) {
+async function socketAuthentication(ws, userToken, cb) {
 	// If token was not transmitted, return  and close connection
 	if(!userToken) {
 		ws.close();
@@ -459,9 +460,21 @@ function socketAuthentication(ws, userToken, cb) {
 	}
 	
 	// Get userToken from client request and decode
-	const decodedUserToken = jwt.verify(userToken, jwtOptions.secretOrKey);
+	const jwtVerify = Promise.promisify(jwt.verify);
+	const [err, decodedUserToken] = await to(jwtVerify(userToken, jwtOptions.secretOrKey));
 	
-	// Read userId and salt from decoded token
+	// If decoding was not successful, logout user and return
+	if (err) {
+		console.log('Token could not be verified', err);  // TODO Add to logfile later
+		// Get user id from decoded token
+		const userId = ObjectId(jwt.decode(userToken).payload.id);
+		// Close socket connection and log out user
+		ws.close();
+		logoutAsync(userId);
+		return;
+	}
+	
+	// Read salt from decoded token
 	const userId = ObjectId(decodedUserToken.id);
 	const userSalt = decodedUserToken.salt;
 	
@@ -470,7 +483,7 @@ function socketAuthentication(ws, userToken, cb) {
 		.findOneAsync({'_id': userId}, {'salt': true}).then(function(dbUser) {
 			// If salt is not correct, close connection and return
 			if (dbUser.salt != userSalt) {
-				console.log('Connection rejected, users salt not correct');  // TODO Add to logfile later
+				console.log('Connection rejected, users salt not correct', userId);  // TODO Add to logfile later
 				// Close socket connection and log out user
 				ws.close();
 				logoutAsync(userId);
@@ -490,10 +503,10 @@ exports.sendFeedback = function(req, res) {
 	const feedback = req.body.feedback;
 	
 	// Send mail
-	mail.sendMail('feedback@openevocracy.org', 'Evocracy | Feedback Nachricht', feedback);
+	mail.addMailToQueue('feedback@openevocracy.org', 'Evocracy | Feedback Nachricht', feedback);
 	
-	// Respond with alert
-	utils.sendAlert(res, 200, 'success', 'DIALOG_FEEDBACK_SUCESSFULLY_SENT');
+	// Respond success
+	res.status(200).send('');
 };
 
 /**

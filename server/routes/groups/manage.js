@@ -75,9 +75,10 @@ function assignParticipantsToGroups(participants) {
  *    nextDeadline: deadline of the next stage (not the old one)
  *    level: new level (old level +1)
  */
-function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, level) {
+function storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, nextDeadline, level) {
 	const chatRoomId = ObjectId();
 	const forumId = ObjectId();
+	const userIds = _.pluck(groupRelations, 'userId');
 	
 	// Sample group name
 	const groupName_promise = db.collection('groups').find({ 'topicId': topicId }, { 'name': true }).toArrayAsync()
@@ -101,7 +102,7 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 	const createGroup_promise = groupName_promise.then(function(groupName) {
 		// Define group data
 		const group = {
-			'_id': groupId, 'name': groupName, 'level': level,
+			'_id': groupId, 'num': groupNumber, 'name': groupName, 'level': level,
 			'topicId': topicId, 'chatRoomId': chatRoomId, 'forumId': forumId
 		};
 		
@@ -117,9 +118,11 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 	const forum = { '_id': forumId, 'groupId': groupId };
 	const createForum_promise = db.collection('forums').insertAsync(forum);
 	
-	// Sample colors for users
-	const userColors = helper.generateMemberColors(groupId, _.pluck(groupRelations, 'userId'));
-	console.log('storeGroupAsync userColors', userColors);
+	// Sample colors for members
+	const userColors = helper.generateMemberColors(groupId, userIds);
+	
+	// Sample names for members
+	const userNames = helper.generateMemberNames(groupId, userIds);
 	
 	// Store group members
 	const members_promise = Promise.map(groupRelations, function(rel, index) {
@@ -132,6 +135,7 @@ function storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 
 			'groupId': groupId,
 			'userId': rel.userId,
 			'userColor': userColors[index],
+			'userName': userNames[index],
 			'prevGroupId': prevGroupId,
 			'prevPadId': rel.prevPadId,
 			'lastActivity': -1
@@ -168,7 +172,7 @@ exports.createGroupsAsync = function(topic) {
 			// Filter by valid status and return id's of users
 			return _.pluck(_.filter(pads, function(pad) {
 				return pad.valid;
-			}), 'ownerId');
+			}), 'authorId');
 	});
 	
 	var storeValidParticipantsPromise = validParticipants_promise.then(function(validParticipants) {
@@ -181,7 +185,7 @@ exports.createGroupsAsync = function(topic) {
 	// Create group and notify members
 	const createGroupsPromise = validParticipants_promise.then(function(validParticipants) {
 		return assignParticipantsToGroups(validParticipants);
-	}).map(function(group_members) {
+	}).map(function(group_members, groupNumber) {
 		// Create new group id
 		const topicId = topic._id;
 		const groupId = ObjectId();
@@ -199,9 +203,9 @@ exports.createGroupsAsync = function(topic) {
 		// Get group relations (previous pad ids and member ids)
 		// Note: previous group id is not possible here, since initially there is no previous group
 		const groupRelations_promise = db.collection('pads_proposal')
-			.find({ 'topicId': topicId, 'ownerId': {$in: group_members} }, {'_id': true, 'ownerId': true}).toArrayAsync()
+			.find({ 'topicId': topicId, 'authorId': {$in: group_members} }, {'_id': true, 'authorId': true}).toArrayAsync()
 			.map(function(rawGroupRelation) {
-				return { 'prevPadId': rawGroupRelation._id, 'userId': rawGroupRelation.ownerId };
+				return { 'prevPadId': rawGroupRelation._id, 'userId': rawGroupRelation.authorId };
 		});
 		
 		// Store group in database
@@ -209,7 +213,7 @@ exports.createGroupsAsync = function(topic) {
 		const nextDeadline = topic.nextDeadline;
 		const store_group_promise = groupRelations_promise.then(function(groupRelations) {
 			console.log('groupRelations', groupRelations);
-			return storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, 0);
+			return storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, nextDeadline, 0);
 		});
 		
 		// Join promises and return group members
@@ -220,6 +224,35 @@ exports.createGroupsAsync = function(topic) {
     
 	return Promise.join(createGroupsPromise, storeValidParticipantsPromise).get(0);
 };
+
+/**
+ * @desc: Add activity for all delegates in all groups of last level
+ */
+function storeLeadersActivity(leaderIds, topicId) {
+	const promises = leaderIds.map(leaderId => {
+		return activities.addActivityAsync(leaderId, C.ACT_ELECTED_DELEGATE, topicId);
+	});
+	return Promise.all(promises);
+}
+
+/**
+ * @desc: Add activity for all non-delegates in all groups of last level
+ */
+function storeNonLeadersActivity(groupIds, leaderIds, topicId) {
+	return Promise.map(groupIds, (groupId) => {
+		return helper.getGroupMembersAsync(groupId).then((groupMembers) => {
+			// Get ids from group members
+			return _.pluck(groupMembers, 'userId');
+		}).then((groupMemberIds) => {
+			// Remove leaderIds from memberIds
+			const nonLeaderMemberIds = groupMemberIds.filter((id) => !utils.containsObjectId(leaderIds, id));
+			// Add activity to every non leader member
+			return nonLeaderMemberIds.map((memberId) => {
+				return activities.addActivityAsync(memberId, C.ACT_DROP_OUT, topicId);
+			});
+		});
+	});
+}
 
 
 /**
@@ -239,11 +272,11 @@ exports.remixGroupsAsync = function(topic) {
 	var leaders_promise = groups_promise.map(function(group_in) {
 		var groupId = group_in._id;
 		
-		return ratings.getGroupLeaderAsync(groupId).then(function(leader) {
-			if(!_.isUndefined(leader))
-				return Promise.resolve(leader);
+		return ratings.getGroupLeaderAsync(groupId).then(function(leaderId) {
+			if(!_.isUndefined(leaderId))
+				return Promise.resolve(leaderId);
 			
-			// If group leader is undefined, pick one randomly
+			// If group leaderId is undefined, pick one randomly
 			return helper.getGroupMembersAsync(groupId).then(function(members) {
 				return Promise.resolve(_.sample(members).userId);
 			});
@@ -251,7 +284,7 @@ exports.remixGroupsAsync = function(topic) {
 	});
 	
     
-	return Promise.join(groups_promise, leaders_promise).spread(function(groups, leaders) {
+	return Promise.join(groups_promise, leaders_promise).spread(function(groups, leaderIds) {
 		/*
 		 * If there is NO group in the current topic level, there was not only one valid document in the current level
 		 */
@@ -283,28 +316,19 @@ exports.remixGroupsAsync = function(topic) {
        * If there is more than one group in the current topic level, prepare next level
        */
 		// Assign members to groups
-		var groupsMemberIds_promise = assignParticipantsToGroups(leaders);
+		const groupsMemberIds_promise = assignParticipantsToGroups(leaderIds);
 		
-		// Add activities for all delegates // TODO CHECK
-		const createActivity_promise = groupsMemberIds_promise.then((leaders) => {
-			_.each(leaders, function(el) {
-				console.log("Leader", el);
-				activities.addActivity(el, C.ACT_ELECTED_DELEGATE, topicId);
-			});
-		});
-		// Add activities for all members who were not selected as delegates // TODO CHECK
-		const createActivity_promise2 = createActivity_promise.then((par) => {
-			res = query.groupMembers(groupId);
-			_.each(res.members, function(el) {
-				console.log("Non-leader", el.userId);
-				activities.addActivity(el.userId, C.ACT_DROP_OUT, topicId);
-			});
-		});
+		// Add activities for all delegates
+		const leaderActivity_promise = storeLeadersActivity(leaderIds, topic._id);
 		
+		// Add activities for all members who were not selected as delegates
+		const groupIds = _.pluck(groups, '_id');
+		const nonLeaderActivity_promise = storeNonLeadersActivity(groupIds, leaderIds, topic._id);
 		
 		// Insert all groups into database
 		var nextLevel = topic.level+1;
-		return Promise.map(groupsMemberIds_promise, function(groupMemberIds) {
+		const storeGroups_promise = Promise.map(groupsMemberIds_promise, function(groupMemberIds, groupNumber) {
+			
          // Get group relations (prevPadIds, prevGroupIds and member ids)
 			var groupRelations_promise = db.collection('group_relations')
 				.find({ 'groupId': {$in: _.pluck(groups, '_id')}, 'userId': {$in: groupMemberIds} }, { 'groupId': true, 'userId': true }).toArrayAsync()
@@ -328,28 +352,33 @@ exports.remixGroupsAsync = function(topic) {
 				return utils.mergeCollections(prevGroups, prevPads, 'prevGroupId');
 			});
          
-         // Initalize group variables
-         var groupId = ObjectId();
-         var topicId = topic._id;
-         var padId = ObjectId();
-         var prevDeadline = topic.nextDeadline;
-         var nextDeadline = topics.manage.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
-         
-         // Store group in database
-         var storeGroup_promise = groupRelations_promise.then(function(groupRelations) {
-         	return storeGroupAsync(groupId, topicId, padId, groupRelations, nextDeadline, nextLevel);
-         });
-         
-         // Send mail to notify level change
-         var sendMail_promise = db.collection('users')
+			// Initalize group variables
+			const groupId = ObjectId();
+			const topicId = topic._id;
+			const padId = ObjectId();
+			const prevDeadline = topic.nextDeadline;
+			const nextDeadline = topics.manage.calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
+			
+			// Store group in database
+			const storeGroup_promise = groupRelations_promise.then(function(groupRelations) {
+				return storeGroupAsync(groupId, groupNumber, topicId, padId, groupRelations, nextDeadline, nextLevel);
+			});
+			
+			// Send mail to notify level change
+			const sendMail_promise = db.collection('users')
 				.find({'_id': {$in: groupMemberIds}}, {'email': true}).toArrayAsync().then(function(users) {
 					mail.sendMailMulti(users,
 						'EMAIL_LEVEL_CHANGE_SUBJECT', [topic.name],
 						'EMAIL_LEVEL_CHANGE_MESSAGE', [topic.name, groupId.toString(), cfg.PRIVATE.BASE_URL]);
-         });
-            
+			});
+		
 			return Promise.join(sendMail_promise, storeGroup_promise);
-		}).return({'nextStage': C.STAGE_CONSENSUS});  // We stay in consensus stage
+		});
+		
+		// Join all promises and return next stage
+		return Promise.join(leaderActivity_promise, nonLeaderActivity_promise, storeGroups_promise)
+			.return({'nextStage': C.STAGE_CONSENSUS});  // We stay in consensus stage
+		
 	}).catch(function(error) {
 		return {
 			'nextStage': C.STAGE_REJECTED,

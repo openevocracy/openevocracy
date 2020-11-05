@@ -30,7 +30,7 @@ exports.vote = function(req, res) {
 		.updateAsync(topic_vote, topic_vote, {'upsert': true})
 		.then(function(update_result) {
 			// Add activity
-			activities.addActivity(topic_vote.userId, C.ACT_TOPIC_VOTE, topic_vote.topicId);
+			activities.addActivityAsync(topic_vote.userId, C.ACT_TOPIC_VOTE, topic_vote.topicId);
 			
 			// Return voted value
 			return { 'voted': true };
@@ -51,7 +51,7 @@ exports.unvote = function(req, res) {
 	db.collection('topic_votes').removeAsync(topic_vote)
 		.then(function(remove_result) {
 			// Add activity
-			activities.addActivity(topic_vote.userId, C.ACT_TOPIC_UNVOTE, topic_vote.topicId);
+			activities.addActivityAsync(topic_vote.userId, C.ACT_TOPIC_UNVOTE, topic_vote.topicId);
 			
 			// Return voted value
 			return {'voted': false};
@@ -86,7 +86,7 @@ exports.basic = function(req, res) {
    }).then((topic) => {
 		// Try to find proposal of user
 		return db.collection('pads_proposal')
-			.findOneAsync({ 'topicId': topicId, 'ownerId': userId }, { '_id': true })
+			.findOneAsync({ 'topicId': topicId, 'authorId': userId }, { '_id': true })
 			.then((proposal) => {
 				return !_.isNull(proposal);
 		}).then((hasProposal) => {
@@ -110,6 +110,7 @@ exports.toolbar = function(req, res) {
    	return {
    		'_id': topic._id,
    		'name': topic.name,
+			'stage': topic.stage,
    		'nextDeadline': topic.nextDeadline
    	};
    }).then(res.json.bind(res));
@@ -124,7 +125,7 @@ exports.overview = function(req, res) {
    
    // Get author, docId and html of description
    const descriptionPad_promise = db.collection('pads_topic_description')
-   	.findOneAsync({ 'topicId': topicId }, { 'ownerId': true, 'docId': true })
+   	.findOneAsync({ 'topicId': topicId }, { 'authorId': true, 'docId': true })
    	.then(function(pad) {
    		// Add topic descrption html to pad
 			return pads.addHtmlToPadAsync('topic_description', pad);
@@ -156,7 +157,7 @@ exports.overview = function(req, res) {
    Promise.join(descriptionPad_promise, voted_promise, topic_promise, myGroup_promise)
    	.spread((descritpionPad, voted, topic, myGroup) => {
    		return {
-   			'authorId': descritpionPad.ownerId,
+   			'authorId': descritpionPad.authorId,
    			'descHtml': descritpionPad.html,
    			'descDocId': descritpionPad.docId,
    			'descPadId': descritpionPad._id,
@@ -175,10 +176,10 @@ exports.update = function(req, res) {
     const topicNew = req.body;
     
     db.collection('topics').findOneAsync({ '_id': topicId }).then(function(topic) {
-        // only the owner can update the topic
+        // only the authorId can update the topic
         if(!topic)
             return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
-        else if(!_.isEqual(topic.owner,userId))
+        else if(!_.isEqual(topic.authorId,userId))
             return utils.rejectPromiseWithAlert(403, 'danger', 'TOPIC_NOT_AUTHORIZED_FOR_UPDATE');
         else if(topic.stage != C.STAGE_SELECTION)
             return utils.rejectPromiseWithAlert(403, 'danger', 'TOPIC_UPDATE_ONLY_IN_SELECTION_STAGE');
@@ -219,18 +220,18 @@ exports.create = function(req, res) {
 		
 		// Create topic
 		topic._id = ObjectId();
-		topic.owner = ObjectId(req.user._id);
+		topic.authorId = ObjectId(req.user._id);
 		topic.stage = C.STAGE_SELECTION; // start in selection stage
 		topic.level = 0;
 		topic.nextDeadline = manage.calculateDeadline(topic.stage);
 		const create_topic_promise = db.collection('topics').insertAsync(topic);
 		
 		// Create pad
-		var pad = { 'topicId': topic._id, 'ownerId': userId, 'expiration': topic.nextDeadline };
+		var pad = { 'topicId': topic._id, 'authorId': userId, 'expiration': topic.nextDeadline };
 		var create_pad_promise = pads.createPadAsync(pad, 'topic_description');
 		
 		// Add activity
-		activities.addActivity(userId, C.ACT_TOPIC_CREATE, topic._id);
+		activities.addActivityAsync(userId, C.ACT_TOPIC_CREATE, topic._id);
 		
 		return Promise.join(create_topic_promise, create_pad_promise).return(topic);
 	}).then(function(topic) {
@@ -246,11 +247,11 @@ exports.delete = function(req,res) {
 	const topicId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 	
-	db.collection('topics').findOneAsync({ '_id': topicId }, { 'owner': true, 'stage': true })
+	db.collection('topics').findOneAsync({ '_id': topicId }, { 'authorId': true, 'stage': true })
 		.then(function(topic) {
-			// only the owner can delete the topic
+			// only the author can delete the topic
 			// and if the selection stage has passed, nobody can
-			if(!_.isEqual(topic.owner, userId) || topic.stage > C.STAGE_SELECTION)
+			if(!_.isEqual(topic.authorId, userId) || topic.stage > C.STAGE_SELECTION)
 				return utils.rejectPromiseWithAlert(401, 'danger', 'TOPIC_NOT_AUTHORISIZED_FOR_DELETION');
         
 			return Promise.join(

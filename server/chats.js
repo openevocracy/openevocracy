@@ -95,7 +95,7 @@ function extendUsersAsync(groupId) {
 			return { 
 				'userId': member.userId,
 				'color': member.userColor,
-				'name': groups.helper.generateMemberName(groupId, member.userId)/*,
+				'name': member.userName/*,
 				'isOnline': users.isOnline(user.userId)*/
 			};
 	});
@@ -214,7 +214,7 @@ exports.processMentionedUsers = function(req, res) {
 	// Add activities for mentioned users
 	_.each(userIds, (userId) => {
 		console.log("User mentioned: ", userId);
-		activities.addActivity(userId, C.ACT_MENTIONED, groupId);
+		activities.addActivityAsync(userId, C.ACT_MENTIONED, groupId);
 	});
 	
 	// Sends mail to all mentioned users

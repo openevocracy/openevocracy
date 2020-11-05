@@ -51,7 +51,7 @@ exports.create_topic_consensus_stage = function(req, res) {
     db.collection('topics').insert({
         '_id': tid,
         'name': 'ConsensusTest'+Date.now(),
-        'owner': ObjectId(req.user._id),
+        'authorId': ObjectId(req.user._id),
         'pid': ObjectId(),
         'stage': C.STAGE_CONSENSUS,
         'level': 0,
@@ -94,7 +94,7 @@ exports.create_topic_proposal_stage = function(req, res) {
     db.collection('topics').insert({
         '_id': ObjectId(),
         'name': 'ProposalTest'+Date.now(),
-        'owner': ObjectId(req.user._id),
+        'authorId': ObjectId(req.user._id),
         'pid': ObjectId(),
         'stage': C.STAGE_PROPOSAL,
         'level': 0,
@@ -161,7 +161,7 @@ exports.remix_groups = function(req, res) {
     db.collection('topics').insertAsync({
         '_id': tid,
         'name': 'RemixGroupTest'+Date.now(),
-        'owner': ObjectId(req.user._id),
+        'authorId': ObjectId(req.user._id),
         'pid': ObjectId(),
         'stage': C.STAGE_CONSENSUS,
         'level': 0,
