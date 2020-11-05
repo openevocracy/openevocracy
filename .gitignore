@@ -9,7 +9,7 @@
 /files
 
 # log
-/log
+#/log
 
 # dependencies
 /node_modules
