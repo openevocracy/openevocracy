@@ -36,6 +36,10 @@ export class GroupService {
 			// Try to get group from cache
 			const cachedGroup = this.getBasicGroupFromCache(groupId);
 			
+			console.log(cachedGroup);
+			if (!_.isUndefined(cachedGroup))
+				console.log(cachedGroup.expiration);
+			
 			// If group was found in cache and was not expired inbetween, return it
 			// Note: Groups in finished or rejected topics are always taken from the database (expiration equals last deadline)
 			//       We assume that these groups are not opened very often

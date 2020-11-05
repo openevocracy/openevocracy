@@ -5,7 +5,7 @@
 			<p *ngIf="topic?.stage != C.STAGE_REJECTED && topic?.stage != C.STAGE_PASSED">
 				{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_1' | translate }} {{ topic?.nextDeadline | date:'y-MM-dd' }} {{ 'TOPIC_SUBTITLE_2' | translate }} {{ topic?.nextDeadline | date:'HH:mm:ss' }} (<countdown [time]="topic?.nextDeadline"></countdown>)
 			</p>
-			<p *ngIf="topic?.stage == C.STAGE_PASSED">{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_3' | translate }} {{ topic?.stagePassedStarted | date:'y-MM-dd' }}</p>
+			<p *ngIf="topic?.stage == C.STAGE_PASSED">{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_3' | translate }} {{ topic?.nextDeadline | date:'y-MM-dd' }}</p>
 			<p *ngIf="topic?.stage == C.STAGE_REJECTED">{{ topic?.stageName | translate }} {{ 'TOPIC_SUBTITLE_3' | translate }}  {{ topic?.nextDeadline | date:'y-MM-dd' }} {{ 'TOPIC_SUBTITLE_2' | translate }} {{ topic?.nextDeadline | date:'HH:mm:ss' }}</p>
 		</div>
 		

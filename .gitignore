@@ -8,6 +8,9 @@
 # files
 /files
 
+# log
+/log
+
 # dependencies
 /node_modules
 
