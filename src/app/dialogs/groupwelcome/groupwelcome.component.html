@@ -9,7 +9,7 @@
 				<mat-panel-title>{{ 'GROUP_WELCOME_ADDITIONAL_HEADER' | translate }}</mat-panel-title>
 			</mat-expansion-panel-header>
 		
-			<div [innerHTML]="'GROUP_WELCOME_ADDITIONAL_CONTENT' | translate:{'topicName': data.topicName}"></div>
+			<div *ngIf="showAdditional" [innerHTML]="'GROUP_WELCOME_ADDITIONAL_CONTENT' | translate:{'topicName': data.topicName}"></div>
 		</mat-expansion-panel>
 	</mat-accordion>
 </mat-dialog-content>

@@ -9,6 +9,7 @@ const db = require('../../database').db;
 const utils = require('../../utils');
 const groups = require('../groups');
 const users = require('../users');
+const poll = require('./poll');
 const helper = require('./helper');
 const misc = require('./misc');
 
@@ -61,33 +62,37 @@ exports.create = function(req, res) {
 			
 			// Store main post in database
 			const post_promise = db.collection('forum_posts').insertAsync(post);
-					
-			// Build link to forum and thread
-			const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
-			const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
 			
-			// Define parameter for email body
-			const bodyParams = [ groups.helper.generateMemberName(group._id, authorId), group.name, urlToThread, urlToForum ];
+			// Add poll to database, if given
+			const poll_promise = poll.createAsync(body.poll, threadId, group._id);
 			
-			// Define email translation strings
-			const mail = {
-				'subject': 'EMAIL_NEW_THREAD_CREATED_SUBJECT', 'subjectParams': [],
-				'body': 'EMAIL_NEW_THREAD_CREATED_BODY', 'bodyParams': bodyParams
-			};
+			// Send email to watching users, exept the author
+			const sendMail_promise = groups.helper.getOrGenerateMemberName(group._id, authorId).then((userName) => {
+				// Build link to forum and thread
+				const urlToForum = cfg.PRIVATE.BASE_URL+'/group/forum/'+forumId;
+				const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
+				
+				// Define parameter for email body
+				const bodyParams = [ userName, group.name, urlToThread, urlToForum ];
+				
+				// Define email translation strings
+				const mail = {
+					'subject': 'EMAIL_NEW_THREAD_CREATED_SUBJECT', 'subjectParams': [],
+					'body': 'EMAIL_NEW_THREAD_CREATED_BODY', 'bodyParams': bodyParams
+				};
 			
-			// Finally, send email to watching users, exept the author
-			const sendMail_promise = helper.sendMailToWatchingUsersAsync(forumId, authorId, mail);
+				// Finally, send email to watching users, exept the author
+				return helper.sendMailToWatchingUsersAsync(forumId, authorId, mail);
+			});
 			
 			// Store visited status in database (badge and thread viewed)
 			const threadViewed = misc.threadVisited(group._id, threadId, authorId);
-				
-			return Promise.all([sendMail_promise, threadViewed]);
 			
 			// Add author to email notification for this thread
 			const notifyAddAuthor_promise = users.enableEmailNotifyAsync(authorId, threadId);
 			
 			// Wait for promises and send response
-			Promise.join(thread_promise, post_promise, notifyAddAuthor_promise)
+			Promise.join(thread_promise, post_promise, notifyAddAuthor_promise, sendMail_promise, threadViewed, poll_promise)
 				.spread(function(thread, post) {
 					return { 'thread': thread, 'post': post };
 			}).then(res.json.bind(res));
@@ -98,82 +103,81 @@ exports.create = function(req, res) {
 /**
  * @desc: Query thread of specific forum of specific group
  */
-exports.query = function(req, res) {
+exports.query = async function(req, res) {
 	const userId = ObjectId(req.user._id);
 	const threadId = ObjectId(req.params.id);
 	
 	// Get email notification status of user for this thread
-	const notifyStatus_promise = users.getEmailNotifyStatusAsync(userId, threadId);
+	const notifyStatus = await users.getEmailNotifyStatusAsync(userId, threadId);
 	
 	// Get thread and extend it by notify status
-	const thread_promise = notifyStatus_promise.then(function(notifyStatus) {
-		return db.collection('forum_threads')
-			.findOneAsync({'_id': threadId}).then(function(thread) {
-				// Extend thread by notify status
-				return _.extend(thread, { 'notifyStatus': notifyStatus });
-		});
-	}); 
-	
-	// Get group
-	const group_promise = thread_promise.then((thread) => {
-		return db.collection('groups').findOneAsync({'forumId': thread.forumId});
+	const thread = await db.collection('forum_threads')
+		.findOneAsync({'_id': threadId}).then(function(thread) {
+			// Extend thread by notify status
+			return _.extend(thread, { 'notifyStatus': notifyStatus });
 	});
 	
+	// Get group
+	const group = await db.collection('groups').findOneAsync({'forumId': thread.forumId});
+	
+	// Get poll if thread includes a poll
+	const poll_promise = poll.getAsync(threadId);
+	
 	// Get posts
-	const posts_promise = group_promise.then(function(group) {
-		return db.collection('forum_posts').find({ 'threadId': threadId }).toArrayAsync().map(function(post) {
+	const posts_promise = db.collection('forum_posts').find(
+		{ 'threadId': threadId }
+	).toArrayAsync().map(function(post) {
 			
-			// Check if user has voted for this post
-			const postUserVote_promise = helper.hasUserVotedAsync(post._id, userId);
+		// Check if user has voted for this post
+		const postUserVote_promise = helper.hasUserVotedAsync(post._id, userId);
+		
+		// Count sum of total votes for this post
+		const postSumVotes_promise = helper.sumVotesAsync(post._id);
+		
+		// Add post author name
+		const postAuthorName_promise = groups.helper.getOrGenerateMemberName(group._id, post.authorId);
+		
+		// Get edits of this post
+		const postEdits_promise = db.collection('forum_edits').find({ 'entityId': post._id }).toArrayAsync();
+		
+		// For every post, get comments
+		const comments_promise = db.collection('forum_comments').find({ 'postId': post._id }).toArrayAsync().map(function(comment) {
+			// Check if user has voted for this comment
+			const commentUserVote_promise = helper.hasUserVotedAsync(comment._id, userId);
 			
-			// Count sum of total votes for this post
-			const postSumVotes_promise = helper.sumVotesAsync(post._id);
+			// Count sum of votes for this post
+			const commentSumVotes_promise = helper.sumVotesAsync(comment._id);
 			
-			// Add post author name (can be null if not available)
-			const postAuthorName_promise = groups.helper.generateMemberName(group._id, post.authorId);
+			// Add comment author name (can be null if not available)
+			const commentAuthorName_promise = groups.helper.getOrGenerateMemberName(group._id, comment.authorId);
 			
-			// Get edits of this post
-			const postEdits_promise = db.collection('forum_edits').find({ 'entityId': post._id }).toArrayAsync();
+			// Get edits of this comment
+			const commentEdits_promise = db.collection('forum_edits').find({ 'entityId': comment._id }).toArrayAsync();
 			
-			// For every post, get comments
-			const comments_promise = db.collection('forum_comments').find({ 'postId': post._id }).toArrayAsync().map(function(comment) {
-				// Check if user has voted for this comment
-				const commentUserVote_promise = helper.hasUserVotedAsync(comment._id, userId);
+			// Extend comment by user vote and sum of votes
+			return Promise.join(commentUserVote_promise, commentSumVotes_promise, commentAuthorName_promise, commentEdits_promise)
+				.spread(function(commentUserVote, commentSumVotes, commentAuthorName, commentEdits) {
 				
-				// Count sum of votes for this post
-				const commentSumVotes_promise = helper.sumVotesAsync(comment._id);
-				
-				// Add comment author name (can be null if not available)
-				const commentAuthorName_promise = groups.helper.generateMemberName(group._id, comment.authorId);
-				
-				// Get edits of this comment
-				const commentEdits_promise = db.collection('forum_edits').find({ 'entityId': comment._id }).toArrayAsync();
-				
-				// Extend comment by user vote and sum of votes
-				return Promise.join(commentUserVote_promise, commentSumVotes_promise, commentAuthorName_promise, commentEdits_promise)
-					.spread(function(commentUserVote, commentSumVotes, commentAuthorName, commentEdits) {
-					
-					return _.extend(comment, {
-						'userVote': commentUserVote,
-						'sumVotes': commentSumVotes,
-						'authorName': commentAuthorName,
-						'editHistory': commentEdits
-					});
+				return _.extend(comment, {
+					'userVote': commentUserVote,
+					'sumVotes': commentSumVotes,
+					'authorName': commentAuthorName,
+					'editHistory': commentEdits
 				});
-					
 			});
-			
-			// Extend post by user vote, sum of votes and comments
-			return Promise.join(postUserVote_promise, postSumVotes_promise, postAuthorName_promise, postEdits_promise, comments_promise)
-				.spread(function(postUserVote, postSumVotes, postAuthorName, postEdits, comments) {
 				
-				return _.extend(post, {
-					'comments': comments,
-					'userVote': postUserVote,
-					'sumVotes': postSumVotes,
-					'authorName': postAuthorName,
-					'editHistory': postEdits
-				});
+		});
+		
+		// Extend post by user vote, sum of votes and comments
+		return Promise.join(postUserVote_promise, postSumVotes_promise, postAuthorName_promise, postEdits_promise, comments_promise)
+			.spread(function(postUserVote, postSumVotes, postAuthorName, postEdits, comments) {
+			
+			return _.extend(post, {
+				'comments': comments,
+				'userVote': postUserVote,
+				'sumVotes': postSumVotes,
+				'authorName': postAuthorName,
+				'editHistory': postEdits
 			});
 		});
 	});
@@ -187,11 +191,12 @@ exports.query = function(req, res) {
 			.updateAsync({ 'userId': userId }, { $addToSet: { 'viewed': threadId } }, { 'upsert': true });
 
 	// Send result
-	Promise.join(thread_promise, posts_promise, viewsUpdate_promise, notifyStatus_promise, threadViewedByUser_promise)
-		.spread(function(thread, posts, viewsUpdate) {
+	Promise.join(posts_promise, poll_promise, viewsUpdate_promise, threadViewedByUser_promise)
+		.spread(function(posts, poll) {
 		return {
 			'thread': thread,
-			'posts': posts
+			'posts': posts,
+			'poll': poll
 		};
 	}).then(res.json.bind(res));
 };

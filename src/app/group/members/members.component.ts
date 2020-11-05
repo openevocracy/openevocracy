@@ -35,6 +35,7 @@ export class GroupMembersComponent implements OnInit {
 	public members = {};
 	public isLastGroup: boolean = false;
 	public isExpired: boolean = false;
+	public isMember: boolean = false;
 	public animationState = 'show';
 	
 	public faUser = faUser;
@@ -71,6 +72,7 @@ export class GroupMembersComponent implements OnInit {
 		// If group is last group or is expired, don't show ratings
 		this.isLastGroup = group.isLastGroup;
 		this.isExpired = group.isExpired;
+		this.isMember = group.isMember(this.userId);
 		
 		// Get array of member ids
 		this.memberArray = group.members;

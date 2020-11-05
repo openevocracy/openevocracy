@@ -262,7 +262,7 @@ exports.logout = function(req, res) {
 
 // POST /json/auth/verifyEmail
 exports.verifyEmail = async function(req, res) {
-	if(cfg.DEBUG) {
+	if(cfg.TEST) {
 		await db.collection('users').updateAsync(
 			{'email': 'test@example.com'}, { $set: { 'verified': true } }, {});
 		
@@ -483,7 +483,7 @@ async function socketAuthentication(ws, userToken, cb) {
 		.findOneAsync({'_id': userId}, {'salt': true}).then(function(dbUser) {
 			// If salt is not correct, close connection and return
 			if (dbUser.salt != userSalt) {
-				console.log('Connection rejected, users salt not correct');  // TODO Add to logfile later
+				console.log('Connection rejected, users salt not correct', userId);  // TODO Add to logfile later
 				// Close socket connection and log out user
 				ws.close();
 				logoutAsync(userId);
@@ -503,10 +503,10 @@ exports.sendFeedback = function(req, res) {
 	const feedback = req.body.feedback;
 	
 	// Send mail
-	mail.sendMail('feedback@openevocracy.org', 'Evocracy | Feedback Nachricht', feedback);
+	mail.addMailToQueue('feedback@openevocracy.org', 'Evocracy | Feedback Nachricht', feedback);
 	
-	// Respond with alert
-	utils.sendAlert(res, 200, 'success', 'DIALOG_FEEDBACK_SUCESSFULLY_SENT');
+	// Respond success
+	res.status(200).send('');
 };
 
 /**

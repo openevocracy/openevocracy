@@ -104,7 +104,7 @@ exports.startGroupBadgeServer = function(wss) {
 exports.updateEditorBadge = function(userId, pad) {
 	// Get group and all members, but remove self
 	const groupId = pad.groupId;
-	const memberIds = utils.withoutObjectId(pad.ownerIds, userId);
+	const memberIds = utils.withoutObjectId(pad.authorIds, userId);
 	
 	memberIds.forEach((memberId) => {
 		// Try to load badge status from cache

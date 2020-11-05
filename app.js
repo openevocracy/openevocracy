@@ -1,25 +1,19 @@
-const _ = require('underscore');
+// Import modules
 const express = require('express');
 const logger = require('morgan');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const http = require('http');
-const chats = require('./server/chats');
-const CronJob = require('cron').CronJob;
-
-const mail = require('./server/mail');
 const path = require('path');
-const app = express();
-
 const passport = require('passport');
 
-const cfg = require('./shared/config').cfg;
-
-// Initalize mail
-mail.initializeMail();
+// Import helpers
+const cron = require('./server/cron');
+const utils = require('./server/utils');
+const chats = require('./server/chats');
+const mail = require('./server/mail');
 
 // Import routes
-const utils = require('./server/utils');
 const users = require('./server/routes/users');
 const topics = require('./server/routes/topics');
 const groups = require('./server/routes/groups');
@@ -29,9 +23,19 @@ const pads = require('./server/routes/pads');
 const activities = require('./server/routes/activities');
 const socialnet = require('./server/routes/socialnet');
 
+/**
+ * Initialize App
+ */
+
+// Check if config.env.* contain the same variables
+utils.checkConfig();
+
 // Set passport strategy
 const strategy = users.getStrategy();
 passport.use(strategy);
+
+// Create express app
+const app = express();
 
 // All express environments
 app.set('port', process.env.PORT);
@@ -44,37 +48,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(methodOverride());
 
+// Define and set path of build for express
 const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
 
-// Setup cronjob to run regulary
-const job = new CronJob({
-	cronTime: '*/'+cfg.CRON_INTERVAL+' * * * *',
-	onTick: function() {
-		// Manage topics
-		topics.manage.manageAndListTopicsAsync().then(function(topics) {
-			// FIXME: An error could occur if i18n and mail initialization is not ready when cronjob runs for the first time
-			_.map(topics, mail.sendTopicReminderMessages); // NOTE Promise.map does not work above
-		});
-		
-		// Regularily check for chatroom orphans
-		const now = new Date().getTime();
-		_.each(chats.rooms, (room, id) => {
-			// If room was not used for a longer time, remove it from cache
-			if (room.cacheUpdate + cfg.CHATROOM_CACHE_TIMEOUT < now)
-				delete chats.rooms[id];
-		});
-	},
-	start: true
-});
-job.start();
+// Initalize mail
+mail.initialize();
 
+// Initialize and start all cron jobs
+cron.initializeAndStart();
+
+// Define auth function for route permissions
 function auth() {
 	return passport.authenticate('jwt', { session: false });
 }
-
-// Check if config.env.* contain the same variables
-utils.checkConfig();
 
 // ###################
 // ### T O P I C S ###
@@ -228,6 +215,9 @@ app.delete('/json/group/forum/thread/:id', auth(), forums.thread.delete);
 
 // @desc: Update solved state of thread
 app.post('/json/group/forum/thread/solved', auth(), forums.thread.updateSolved);
+
+// @desc: Update poll
+app.patch('/json/group/forum/thread/poll/:id', auth(), forums.poll.vote);
 
 // @desc: Create new post in forum thread
 app.post('/json/group/forum/post/create', auth(), forums.post.create);

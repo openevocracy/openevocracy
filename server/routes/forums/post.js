@@ -56,30 +56,28 @@ exports.create = function(req, res) {
 				const thread_promise = db.collection('forum_threads')
 					.updateAsync({ '_id': threadId }, { $set: { 'closed': false, 'lastResponse': lastResponse } });
 				
+				
+				
 				// Perform a lot of tasks, where group is necessary
-				const group_promise = db.collection('groups')
-					.findOneAsync({ 'forumId': forumId }).then((group) => {
-						
-						// Build link to thread
-						const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
-						
-						// Define parameter for email body
-						const bodyParams = [ groups.helper.generateMemberName(group._id, authorId), group.name, urlToThread+'#'+postId, urlToThread ];
-						
-						// Define email translation strings
-						const mail = {
-							'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
-							'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
-						};
-						
-						// Finally, send email to watching users, exept the author
-						const sendMail_promise = helper.sendMailToWatchingUsersAsync(threadId, authorId, mail);
-						
-						// Store visited status in database (badge and thread viewed)
-						const threadViewed = misc.threadVisited(group._id, threadId, authorId);
-						
-						return Promise.all([sendMail_promise, threadViewed]);
+				const sendMail_promise = groups.helper.getOrGenerateMemberName(group._id, authorId).then((userName) => {
+					// Build link to thread
+					const urlToThread = cfg.PRIVATE.BASE_URL+'/group/forum/thread/'+threadId;
+					
+					// Define parameter for email body
+					const bodyParams = [ userName, group.name, urlToThread+'#'+postId, urlToThread ];
+					
+					// Define email translation strings
+					const mail = {
+						'subject': 'EMAIL_NEW_POST_CREATED_SUBJECT', 'subjectParams': [],
+						'body': 'EMAIL_NEW_POST_CREATED_BODY', 'bodyParams': bodyParams
+					};
+					
+					// Finally, send email to watching users, exept the author
+					return helper.sendMailToWatchingUsersAsync(threadId, authorId, mail);
 				});
+				
+				// Store visited status in database (badge and thread viewed)
+				const threadViewed_promise = misc.threadVisited(group._id, threadId, authorId);
 				
 				// Add author to email notification for the related post
 				const notifyAddUser_promise = users.getEmailNotifyStatusAsync(authorId, threadId).then(function(status) {
@@ -88,7 +86,7 @@ exports.create = function(req, res) {
 					return _.isNull(status) ? users.enableEmailNotifyAsync(authorId, threadId) : null;
 				});
 				
-				return Promise.all([createPost_promise, thread_promise, group_promise, notifyAddUser_promise])
+				return Promise.all([createPost_promise, thread_promise, sendMail_promise, threadViewed_promise, notifyAddUser_promise])
 					.then(res.json.bind(res));
 			
 			}).catch(utils.isOwnError, utils.handleOwnError(res));

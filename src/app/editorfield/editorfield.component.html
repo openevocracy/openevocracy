@@ -1,4 +1,0 @@
-<div class="editor" [ngClass]="{'dirty': isDirty, 'empty': isEmpty, 'focus': hasFocus, 'touched': wasTouched}">
-	<label>{{ labelKey | translate }}<span class="asterisk" *ngIf="required"> *</span></label>
-	<quill-editor class="editor-field" [modules]="quillModules" [styles]="{'height': '200px'}" [placeholder]="'...'" [required]="required" (onEditorCreated)="editorCreated($event)" (onContentChanged)="contentChanged($event)" (onSelectionChanged)="selectionChanged($event)"></quill-editor>
-</div>

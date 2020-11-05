@@ -48,6 +48,17 @@ hr { margin: 0; }
 .post-vote .vote-fa { margin: -10px 0; }
 .post-vote .voted fa-icon { color: $teal500; }
 
+/* Poll */
+.post-poll { padding: 0 20px; margin-left: 70px; }
+.post-poll hr { padding-bottom: 20px; }
+.post-poll .option { padding: 15px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 0 3px rgba(0,0,0,0.15); }
+.post-poll .option-hover { cursor: pointer; margin-right: 20px; }
+.post-poll .option-selected { background-color: $orange50; margin-right: 0 !important; margin-left: 20px; }
+.post-poll .poll-submit { margin-top: 15px; }
+.post-poll .option-top { font-weight: 500; }
+.post-poll .option-progress { margin: 15px 0; height: 6px; }
+.post-poll .option-bottom { font-size: 10px; }
+
 /* Comment */
 .post-comments { padding: 0 20px 10px 20px; margin-left: 70px; }
 .comment-add { padding: 20px 0; }

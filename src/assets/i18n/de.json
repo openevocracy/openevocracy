@@ -54,7 +54,6 @@
 	"REGISTER_FORM_ACCOUNT_ALREADY_LINK": "Melde dich an",
 	"REGISTER_FORM_ACCOUNT_ALREADY_SUFFIX": ".",
 	
-	"SETTINGS_TAB_TITLE_ACCOUNT": "Benutzerkonto",
 	"SETTINGS_ACCOUNT_TITLE_ID": "Deine Identifikationsnummer",
 	"SETTINGS_ACCOUNT_TITLE_CREDENTIALS": "Deine Zugangsdaten",
 	"SETTINGS_BUTTON_SAVE": "Speichern",
@@ -89,6 +88,7 @@
 	"STAGE_COUNTDOWN_MINUTES_LEFT": "{{mm}} Min. verbleibend",
 	"STAGE_COUNTDOWN_SECOND_LEFT": "1 Sek. verbleibend",
 	"STAGE_COUNTDOWN_SECONDS_LEFT": "{{ss}} Sek. verbleibend",
+	"STAGE_COUNTDOWN_OVER": "abgelaufen",
 	"TOPIC_SUBTITLE_1": "endet am",
 	"TOPIC_SUBTITLE_2": "um",
 	"TOPIC_SUBTITLE_3": "am",
@@ -201,6 +201,8 @@
 	"FORUM_SNACKBAR_COMMENT_EDITED": "Der Kommentar wurde erfolgreich bearbeitet.",
 	"FORUM_SNACKBAR_MARK_SOLVED": "Der Thread wurde als gelöst markiert.",
 	"FORUM_SNACKBAR_MARK_UNSOLVED": "Der Thread wurde wieder als ungelöst markiert.",
+	"FORUM_SNACKBAR_POLL_OPTION_MISSING": "Die Umfrage benötigt mindestens zwei Optionen.",
+	"FORUM_SNACKBAR_POLL_SUCCESSFULLY_VOTED": "Du hast erfolgreich abgestimmt.",
 	"FORUM_POST_EDITS_LABEL": "Mal bearbeitet",
 	"FORUM_COMMENT_EDITS_LABEL": "Mal bearbeitet",
 	"FORUM_LAST_ACTIVITY_PRE_TIME": "letzte Antwort am",
@@ -219,6 +221,12 @@
 	"FORUM_THREAD_EMAIL_NOTIFY_STATUS_OFF": "Du wirst ab sofort nicht mehr über neue Beiträge in diesem Thread informiert.",
 	"FORUM_BUTTON_WATCH": "Beobachten",
 	"FORUM_NEW_POST_PRIVATE_MSG": "Du hast nicht die Berechtigung in diesem privaten Thread zu schreiben, da du nicht Mitglied der verknüpften Gruppe bist.",
+	"FORUM_POLL_FORM_ADD": "Umfrage hinzufügen",
+	"FORUM_POLL_LABEL_VOTE": "Stimme",
+	"FORUM_POLL_LABEL_VOTES": "Stimmen",
+	"FORUM_POLL_OPTION_LABEL": "Option",
+	"FORUM_POLL_BUTTON_OPTION_ADD": "Option hinzufügen",
+	"FORUM_POLL_TOGGLE_MULTIPLE": "Die Auswahl mehrerer Optionen erlauben",
 	
 	"CHAT_MESSAGE_LABEL": "Deine Nachricht an die Gruppe...",
 	"CHAT_ROOM_ENTER": "hat den Raum betreten.",
@@ -234,7 +242,8 @@
 	"EDITOR_CONNECTION_LOST": "Verbindung verloren, Änderungen werden nicht gespeichert.",
 	"EDITOR_DOCUMENT_VALID": "Gültig",
 	"EDITOR_DOCUMENT_NONVALID": "Nicht gültig",
-	"EDITOR_DOCUMENT_NONVALID_HELPTEXT": "Das Dokument wird gültig, wenn du mehr Worte schreibst.",
+	"EDITOR_DOCUMENT_VALID_HELPTEXT": "Das Dokument ist gültig; du hast genug Wörter geschrieben.",
+	"EDITOR_DOCUMENT_NONVALID_HELPTEXT": "Das Dokument wird gültig, wenn du mehr Wörter schreibst.",
 	
 	"PADVIEW_EXPIRATION_LABEL": "Ablaufdatum",
 	"PADVIEW_SUBTITLE_DATE": "um",
@@ -263,5 +272,7 @@
    "PAGINATOR_FIRST_PAGE_LABEL": "Erste Seite",
    "PAGINATOR_LAST_PAGE_LABEL": "Letzte Seite",
    "PAGINATOR_RANGE_PAGE_LABEL_1": "0 von {{length}}",
-   "PAGINATOR_RANGE_PAGE_LABEL_2": "{{startIndex}} - {{endIndex}} von {{length}}"
+   "PAGINATOR_RANGE_PAGE_LABEL_2": "{{startIndex}} - {{endIndex}} von {{length}}",
+   
+   "MODAL_SEND_REQUEST": "Abschicken"
 }

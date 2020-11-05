@@ -20,8 +20,10 @@ import { UserService } from '../../../_services/user.service';
 import { SnackbarService } from '../../../_services/snackbar.service';
 import { GroupService } from '../../../_services/group.service';
 
+import { BasicGroup } from "../../../_models/group/basic-group";
 import { Thread } from "../../../_models/forum/thread";
 import { Post } from "../../../_models/forum/post";
+import { Poll } from "../../../_models/forum/poll";
 import { Edit } from "../../../_models/forum/edit";
 
 import { faArrowAltCircleLeft, faLock, faCaretUp, faCaretDown, faPenSquare, faTrash, faShareSquare, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
@@ -40,22 +42,27 @@ export class GroupForumThreadComponent implements OnInit {
 	public saving: boolean = false;
 	public commentField: number = -1;
 	public fragment: string = "";
+	public fragmentTimeout;
 	public editor;
 	public userId: string;
 	public groupId: string;
 	public thread: Thread;
 	public posts: Post[];
+	public group: BasicGroup;
 	public isGroupMember: boolean = false;
-	public isExpired: boolean = true;
 	public solvedButtonTitle: string;
 	public sortedBy: string = "";
 	public missingWordsComments: boolean[] = [];
 	public forumMinWordsCommentMsgTranslated: string = "";
-	public fragmentTimeout;
 	public sortLabels = {
 		'sumVotes': 'FORUM_SORT_LABEL_VOTES',
 		'createdTimestamp': 'FORUM_SORT_LABEL_DATE'
 	};
+	
+	// Poll
+	public poll: Poll = null;
+	public pollChosenOptions = [];
+	public pollOptionsProgress = [];
 	
 	// FontAwesome icons
 	public faArrowAltCircleLeft = faArrowAltCircleLeft;
@@ -92,9 +99,8 @@ export class GroupForumThreadComponent implements OnInit {
 			this.groupId = params.id;
 			
 			// Get group from group service cache
-			const group = this.groupService.getBasicGroupFromCache(this.groupId);
-			this.isGroupMember = group.isMember(this.userId);
-			this.isExpired = group.isExpired;
+			this.group = this.groupService.getBasicGroupFromCache(this.groupId);
+			this.isGroupMember = this.group.isMember(this.userId);
 		});
 		
 		// Get forum id from url
@@ -104,12 +110,11 @@ export class GroupForumThreadComponent implements OnInit {
 				// Set solved button label
 				this.solvedButtonTitle = this.thread.closed ? 'FORUM_BUTTON_TITLE_UNSOLVED' : 'FORUM_BUTTON_TITLE_SOLVED';
 				
-				// Get fragment and jump to related anchor, if fragment is given
-				const fragment = this.router.url.split('#')[1];
-				if (!_.isUndefined(fragment)) {
-					// Note: setTimout is necessary due to a bug: https://github.com/angular/angular/issues/15634
-					setTimeout(() => { this.navigateToUrlWithFragment(fragment) }, 0);
-				}
+				// TODO If fragment is set, jump to related anchor
+				//const fragment = this.router.url.split('#')[1];
+				/*if (!_.isUndefined(fragment)) {
+					// Jump here, NOTE: https://github.com/angular/angular/issues/30139
+				}*/
 			});
 		});
 	}
@@ -146,10 +151,15 @@ export class GroupForumThreadComponent implements OnInit {
 					this.posts.push(new Post(post));
 				}.bind(this));
 				
+				// Poll
+				if (res.poll !== null) {
+					this.poll = new Poll(res.poll);
+					this.pollChosenOptions = this.poll.getMyChosenOptions(this.userId);
+					this.updateOptionsProgress();
+				}
+				
 				// Sort posts
 				this.sortPosts('createdTimestamp', true, false);
-				
-				console.log(this.posts);
 				
 				// Return to subscribers
 				observer.next(true);
@@ -342,10 +352,11 @@ export class GroupForumThreadComponent implements OnInit {
 		this.httpManagerService.post('/json/group/forum/comment/create', data).subscribe(res => {
 			// Scroll to and highlight post, related to created comment
 			const relatedPostId = res[0].ops[0].postId;
-			this.navigateToUrlWithFragment(relatedPostId);
 			
 			// Reload model
 			this.loadThread(this.thread.threadId).subscribe(() => {
+				// Highlight related post
+				this.highlightFragment(relatedPostId);
 				// Show snack bar notification
 				this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_COMMENT');
 			});
@@ -391,14 +402,13 @@ export class GroupForumThreadComponent implements OnInit {
 			// Clear editor
 			this.editor.setText('');
 			
-			// FIXME: Scrolling is currently not working, since post is added to DOM afterwards
-			//        Either reload page after creation or find another solution for scrolling?
-			// Scroll to and highlight newly created post
+			// Get id of submitted post
 			const submittedPostId = res[0].insertedIds[0];
-			this.navigateToUrlWithFragment(submittedPostId);
 			
 			// Reload model
 			this.loadThread(this.thread.threadId).subscribe(() => {
+				// Highlight submitted post
+				this.highlightFragment(submittedPostId);
 				// After everything is finished, show snackbar notification and enable editor again
 				this.snackbarService.showSnackbar('FORUM_SNACKBAR_NEW_POST', this.enableNewPostEditor.bind(this));
 			});
@@ -406,44 +416,10 @@ export class GroupForumThreadComponent implements OnInit {
 	}
 	
 	/**
-	 * @desc: Navigate to current URL, but without fragment (everything removed after '#')
-	 */
-	public navigateToUrlWithoutFragment() {
-		// Set URL to url of thread
-		return this.router.navigate( [this.getUrlwithoutFragment()] );
-	}
-	
-	/**
-	 * @desc: Navigate to current URL, but with other fragment (after '#')
-	 */
-	public navigateToUrlWithFragment(fragment) {
-		console.log('navigateToUrlWithFragment', fragment);
-		// Jump to anchor of fragment
-		this.viewportScroller.scrollToAnchor(fragment);
-		
-		// Highlight post
-		this.highlightFragment(fragment);
-		
-		// Finally set route
-		return this.router.navigate( [this.getUrlwithoutFragment()], { 'fragment': fragment } );
-	}
-	
-	/**
-	 * @desc: Removes the fragment from URL (everything after '#')
-	 */
-	public getUrlwithoutFragment() {
-		// Split url on hash and only return first part
-		return this.router.url.split("#")[0];
-	}
-	
-	/**
-	 * @desc: Opens the share dialog and shows share link for the thread
+	 * @desc: If share button on main post is chosen, open the share dialog and shows share link for the whole thread
 	 */
 	public shareThread() {
-		this.navigateToUrlWithoutFragment().then(()=>{
-		  // Show share dialog after url was set
-			this.matDialog.open(ShareDialogComponent);
-		});
+		this.matDialog.open(ShareDialogComponent);
 	}
 	
 	/**
@@ -494,10 +470,10 @@ export class GroupForumThreadComponent implements OnInit {
 		// If dialog was approved, delete thread
 		deleteRef.componentInstance.onSubmit.subscribe(() => {
 			this.httpManagerService.delete('/json/group/forum/thread/'+this.thread.threadId).subscribe(res => {
-				// After everything is finished, show snackbar notification and redirect to forum list
-				this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_DELETED', function() {
-					this.router.navigate(['/group', this.groupId, 'forum'])
-				}.bind(this));
+				// Show snackbar notification
+				this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_DELETED');
+				// Redirect to forum list
+				this.router.navigate(['/group', this.groupId, 'forum']);
 			});
 		});
 	}
@@ -506,10 +482,10 @@ export class GroupForumThreadComponent implements OnInit {
 	 * @desc: Opens the share dialog and shows share link for specific post
 	 */
 	public sharePost(postId) {
-		this.navigateToUrlWithFragment(postId).then(() => {
-			// Show share dialog after url was set
-			this.matDialog.open(ShareDialogComponent);
-		});
+		// Highlight related post
+		this.highlightFragment(postId);
+		// Open share dialog
+		this.matDialog.open(ShareDialogComponent);
 	}
 	
 	/**
@@ -641,5 +617,87 @@ export class GroupForumThreadComponent implements OnInit {
 			});
 		});
 	}
-
+	
+	public updateOptionsProgress(): void {
+		const p = this.poll
+		
+		// Update sum of all votes
+		p.updateCountSum();
+		
+		// Update progress for every option
+		this.pollOptionsProgress = this.poll.options.map((opt) => {
+			if (this.poll.allowMultipleOptions) {
+				//return (p.countSum == 0) ? 0 : 100*opt.count/(p.numGroupMembers*p.options.length);
+				return (p.userIdsVoted.length == 0) ? 0 : Math.round(100*100*opt.count/p.userIdsVoted.length)/100;
+			} else {
+				//return 100*opt.count/p.numGroupMembers;
+				return (p.countSum == 0) ? 0 : Math.round(100*100*opt.count/p.countSum)/100;
+			}
+		});
+	}
+	
+	public addOption(optionIndex: number): number[] {
+		// Some shorthand variables
+		let ops = this.pollChosenOptions;
+		let option = this.poll.options[optionIndex];
+		
+		// Update chosen options
+		if (this.poll.allowMultipleOptions) {
+			ops.push(optionIndex);
+		} else {
+			ops = [optionIndex];
+			// Remove user from all other options
+			this.poll.removeUserIdFromAllOptions(this.userId);
+		}
+		
+		// Add user to option
+		option.add(this.userId);
+		
+		return ops;
+	}
+	
+	public removeOption(optionIndex: number): number[] {
+		// Some shorthand variables
+		let ops = this.pollChosenOptions;
+		let option = this.poll.options[optionIndex];
+		
+		// Update chosen options
+		if (this.poll.allowMultipleOptions) {
+			const idx = ops.indexOf(optionIndex);
+			ops.splice(idx, 1);
+		} else {
+			ops = [];
+		}
+		
+		// Remove user from option
+		option.remove(this.userId);
+		
+		return ops;
+	}
+	
+	/**
+	 * @desc: When a poll option was chosen, evaluate new value and (may) send patch to server
+	 */
+	public optionClicked(optionIndex: number): void {
+		if (!this.isGroupMember) return;
+		
+		const isAlreadyChosen = this.pollChosenOptions.includes(optionIndex);
+		// Update option
+		this.pollChosenOptions = (isAlreadyChosen) ? this.removeOption(optionIndex) : this.addOption(optionIndex);
+		
+		// If user has not voted before, add the user to userIdsVoted
+		const hasUserVoted = this.poll.userIdsVoted.includes(this.userId)
+		if (!hasUserVoted)
+			this.poll.userIdsVoted.push(this.userId);
+		
+		// Update progress
+		this.updateOptionsProgress();
+		
+		// Send data to server
+		const data = { 'votes': this.pollChosenOptions };
+		this.httpManagerService.patch('/json/group/forum/thread/poll/'+this.poll.pollId, data).subscribe(res => {
+			// Show snackbar
+			this.snackbarService.showSnackbar('FORUM_SNACKBAR_POLL_SUCCESSFULLY_VOTED');
+		});
+	}
 }

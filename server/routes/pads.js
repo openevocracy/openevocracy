@@ -3,6 +3,9 @@ const _ = require('underscore');
 const Promise = require('bluebird');
 const ObjectId = require('mongodb').ObjectID;
 const pdf = require('phantom-html2pdf');
+const crypto = require('crypto');
+const path = require('path');
+const appRoot = require('app-root-path');
 
 // Collaborative libraries for pad synchronization
 const ShareDB = require('sharedb');
@@ -17,6 +20,14 @@ const db = require('../database').db;
 const utils = require('../utils');
 const groups = require('./groups');
 const users = require('./users');
+
+// For TeX/PDF document creation
+const { readFileSync } = require('fs');
+const { createReadStream, createWriteStream } = require('fs');
+const { join, resolve } = require('path');
+const { Readable } = require("stream");
+const latex = require('node-latex');
+const pandoc = require('node-pandoc-promise');
 
 // ShareDB backend and connection
 let backend;
@@ -78,13 +89,13 @@ exports.startPadServer = function(wss) {
 };
 
 /*
- * @desc: Checks if current user is owner of the pad and if pad is not already expired
+ * @desc: Checks if current user is author of the pad and if pad is not already expired
  * @params:
  *    session: contains the userId of the current user
- *    pad: contains meta information about the pad (i.e. owner and expiration date)
+ *    pad: contains meta information about the pad (i.e. author and expiration date)
  */
 function checkOwnerAndExpiration(session, pad) {
-	var isOwner = (session.userId.toString() == pad.ownerId.toString());
+	var isOwner = (session.userId.toString() == pad.authorId.toString());
 	var isExpired = (pad.expiration <= Date.now());
 	return isOwner && !isExpired;
 }
@@ -96,7 +107,7 @@ function checkOwnerAndExpiration(session, pad) {
  *    pad: contains meta information about the pad (i.e. group members and expiration date)
  */
 function checkOwnerAndExpirationGroup(session, pad) {
-	var isOwner = utils.containsObjectId(pad.ownerIds, session.userId);
+	var isOwner = utils.containsObjectId(pad.authorIds, session.userId);
 	var isExpired = (pad.expiration <= Date.now());
 	return isOwner && !isExpired;
 }
@@ -112,13 +123,13 @@ function initializeAccessControl() {
 		return true;
 	});
 	backend.allowUpdate('docs_topic_description', function(docId, oldDoc, newDoc, ops, session) {
-		// If user is owner and document is not expired
+		// If user is author and document is not expired
 		if (pads_topic_description[docId]) {
 			// If pad is already in cache, check condition
 			return checkOwnerAndExpiration(session, pads_topic_description[docId]);
 		} else {
 			// If pad is not in cache, get it from database, store it in cache and check condition
-			return Promise.resolve(db.collection('pads_topic_description').findOneAsync({'docId': ObjectId(docId)}, { 'ownerId': true, 'expiration': true })
+			return Promise.resolve(db.collection('pads_topic_description').findOneAsync({'docId': ObjectId(docId)}, { 'authorId': true, 'expiration': true })
 				.then(function(pad) {
 					pads_topic_description[docId] = pad;
 					return checkOwnerAndExpiration(session, pad);
@@ -131,13 +142,13 @@ function initializeAccessControl() {
 		return true;
 	});
 	backend.allowUpdate('docs_proposal', function(docId, oldDoc, newDoc, ops, session) {
-		// If user is owner and document is not expired
+		// If user is author and document is not expired
 		if (pads_proposal[docId]) {
 			// If pad is already in cache, check condition
 			return checkOwnerAndExpiration(session, pads_proposal[docId]);
 		} else {
 			// If pad is not in cache, get it from database, store it in cache and check condition
-			return Promise.resolve(db.collection('pads_proposal').findOneAsync({'docId': ObjectId(docId)}, { 'ownerId': true, 'expiration': true })
+			return Promise.resolve(db.collection('pads_proposal').findOneAsync({'docId': ObjectId(docId)}, { 'authorId': true, 'expiration': true })
 				.then(function(pad) {
 					pads_proposal[docId] = pad;
 					return checkOwnerAndExpiration(session, pad);
@@ -162,8 +173,8 @@ function initializeAccessControl() {
 					const members_promise = db.collection('group_relations').find({'groupId': pad.groupId}, {'userId': true}).toArrayAsync();
 					return Promise.join(pad, members_promise);
 				}).spread(function(pad, members) {
-					// Add owners to pad
-					pad.ownerIds = _.pluck(members, 'userId');
+					// Add authors to pad
+					pad.authorIds = _.pluck(members, 'userId');
 					// Store pad in cache
 					pads_group[docId] = pad;
 					// Return pad
@@ -172,7 +183,7 @@ function initializeAccessControl() {
 		}
 		
 		return currentPad_promise.then((currentPad) => {
-			// Check if user is owner and doc is not expired, finally return
+			// Check if user is author and doc is not expired, finally return
 			if (checkOwnerAndExpirationGroup(session, currentPad)) {
 				// Inform group toolbar badge about update
 				groups.badges.updateEditorBadge(session.userId, currentPad);
@@ -268,8 +279,8 @@ function queryViewAsync(collection_suffix, padId) {
 		
 		// Join all information and return
 		return Promise.join(html_promise, topicName_promise).spread(function(html, topicName) {
-			var ownerId = (collection_suffix == 'proposal') ? pad.ownerId : null;
-			return { 'topicId': pad.topicId, 'title': topicName, 'html': html, 'expiration': pad.expiration, 'ownerId': ownerId };
+			var authorId = (collection_suffix == 'proposal') ? pad.authorId : null;
+			return { 'topicId': pad.topicId, 'title': topicName, 'html': html, 'expiration': pad.expiration, 'authorId': authorId };
 		});
 	});
 }
@@ -315,7 +326,7 @@ function getPadHTMLAsync(collection_suffix, docId) {
 			resolve(html);
 		});
 	});
-};
+}
 exports.getPadHTMLAsync = getPadHTMLAsync;
 
 /*
@@ -324,24 +335,43 @@ exports.getPadHTMLAsync = getPadHTMLAsync;
  * @params:
  *    html: html of the pad
  */
-exports.getPadPDFAsync = function(html) {
-	console.log('getPadPDFAsync', html);
-	const pdfConvertAsync = Promise.promisify(pdf.convert);
+exports.getPadPDFAsync = async function(topicId, title, html) {
+	console.log('getPadPDFAsync', topicId, title, html);
 	
-	const css = "body { font-family: 'CMU Sans Serif'; font-size: 8pt; }";
-	const paperSize = { 'format': 'A4', 'orientation': 'portrait' };
+	// Arguments as an Array:
+	const args = '-f html -t latex'.split(' ');
 	
-	return pdfConvertAsync({'html': html, 'paperSize': paperSize, 'css': css})
-		.then(function(result) {
-		// This is required to convert the callback into a format
-		// suitable for promises, e.g. error is first parameter
-		function toBufferWrapper(bluebirdCallback) {
-		   result.toBuffer(_.partial(bluebirdCallback,undefined));
-		}
-		
-		var toBufferAsync = Promise.promisify(toBufferWrapper);
-		return toBufferAsync();
-	});
+	// Call pandoc and transform html string to latex string
+	const body = await pandoc(html, args);
+	
+	// Define date and hash
+	const date = new Date().toISOString();
+	const hash = crypto.createHash('sha256').update(html).digest('hex');
+	
+	// Read latex template from file
+	const texTemplateFilepath = path.join(appRoot.path, 'files/latex', 'final-document.tex');
+	const latexTemplate = readFileSync(texTemplateFilepath).toString();
+	
+	// Replace body placeholder with latex body from html file
+	const latexResult = latexTemplate
+		.replace('{{title}}', title)
+		.replace('{{date}}', date)
+		.replace('{{topicId}}', topicId)
+		.replace('{{hash}}', hash)
+		.replace('{{html}}', body);
+	
+	// Write file
+	const input = Readable.from([latexResult]);
+	
+	const pdfFilepath = path.join(appRoot.path, 'files/documents', topicId + '.pdf');
+	const output = createWriteStream(pdfFilepath);
+	
+	const logFilepath = path.join(appRoot.path, 'log', 'latex-errors.log');
+	const options = { 'errorLogs': logFilepath };
+	
+	latex(input, options).pipe(output);
+	
+	return true;
 };
 
 /**
@@ -351,4 +381,4 @@ exports.addHtmlToPadAsync = function(collection_suffix, pad) {
 	return getPadHTMLAsync(collection_suffix, pad.docId).then(function(html) {
 		return _.extend(pad, {'html': html});
 	});
-}
+};

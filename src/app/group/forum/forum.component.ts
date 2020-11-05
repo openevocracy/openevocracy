@@ -76,7 +76,7 @@ export class GroupForumComponent implements OnInit {
 		});
 	}
 	
-	/*
+	/**
 	 * @desc: Opens dialog to add new thread and subscribe to dialog
 	 *        function is called from "New thread"-Button
 	 */
@@ -89,7 +89,7 @@ export class GroupForumComponent implements OnInit {
 		});
 	}
 	
-	/*
+	/**
 	 * @desc: When a new thread is submitted from dialog, the new thread will be postet to server
 	 */
 	private onSubmit(thread) {
@@ -97,6 +97,7 @@ export class GroupForumComponent implements OnInit {
 		const data = _.extend(thread, { 'forumId': this.forumId });
 		// Post thread to server and create thread in database
 		this.httpManagerService.post('/json/group/forum/thread/create', data).subscribe(res => {
+			
 			// Add new thread to beginning of threads array
 			this.threads.unshift(new Thread(res.thread.ops[0]));
 			

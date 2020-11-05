@@ -5,7 +5,7 @@ export class TopicProposal {
 	padId: string;
 	
 	constructor(res: any) {
-		this.authorId = res.ownerId;
+		this.authorId = res.authorId;
 		this.html = res.html;
 		this.docId = res.docId;
 		this.padId = res._id;
