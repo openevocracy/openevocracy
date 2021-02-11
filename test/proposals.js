@@ -6,24 +6,13 @@ const app = require('../app')
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-describe('topics', () => {
+describe('proposals', () => {
 	//beforeEach(() => mongoUnit.start());
 	//afterEach(() => mongoUnit.drop());
 
 	let uid, token, topic; 
 	before(async () => {
 		let res;
-		
-		/*res = await chai.request(app).post('/json/auth/register').send({
-			email: 'test@example.com',
-			password: 'password'
-		});
-		console.log(res.body);
-		
-		res = await chai.request(app).post('/json/auth/verifyEmail').send({
-			email: 'test@example.com'
-		});
-		console.log(res.body);*/
 		
 		// login
 		res = await chai.request(app).post('/json/auth/login').send({
@@ -45,16 +34,17 @@ describe('topics', () => {
 
 	it('should create proposal for topic only in proposal stage', async () => {
 		const res = await chai.request(app).post('/json/proposal/create').
-			set('Authorization', 'JWT ' + token).send({
+		set('Authorization', 'JWT ' + token).send({
 			topicId: topic._id,
 			userId: uid
 		});
+		console.log(res.body);
 		
 		expect(res.status).to.equal(400);
 		expect(res.body.alert.type).to.equal('danger');
 		expect(res.body.alert.content).to.equal('TOPIC_REQUIREMENT_PROPOSAL_STAGE');
 	});
- 
+
 	// TODO wait for next deadline or force it
 	
 	/*// @desc: Get detailed information about proposal pad
