@@ -1,33 +1,17 @@
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const mongoUnit = require('mongo-unit')
+const app = require('../app')
 
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-let app;
-
-describe('users', function() {
-	this.timeout(100000);
-	
+describe('users', () => {
 	//beforeEach(() => mongoUnit.start());
 	//afterEach(() => mongoUnit.drop());
-	/*before(async done => {
-		console.log('before');
-		const testMongoUrl = await mongoUnit.start();
-		/*process.env.TEST_DB_URL = testMongoUrl;
-		console.log(process.env.TEST_DB_URL);
-		
-		app = require('../app');
-		console.log('after');
-		
-		done();
-	});*/
-
+ 
 	it('should register', (done) => {
-		done();
-		
-		/*chai.request(app).post('/json/auth/register').send({
+		chai.request(app).post('/json/auth/register').send({
 			email: 'test@example.com',
 			password: 'password'
 		}).end((err, res) => {
@@ -36,10 +20,10 @@ describe('users', function() {
 			expect(res.body.alert.type).to.equal('success');
 			expect(res.body.alert.content).to.equal('USER_ACCOUNT_VERIFICATION_LINK_SENT');
 			done();
-		});*/
+		});
 	});
  
-	/*it('should not login without verification', (done) => {
+	it('should not login without verification', (done) => {
 		chai.request(app).post('/json/auth/login').send({
 			email: 'test@example.com',
 			password: 'password'
@@ -75,7 +59,7 @@ describe('users', function() {
 			expect(res.body.id).to.be.a('string');
 			done();
 		});
-	});*/
+	});
  
 	/*it('should send password', (done) => {
 		chai.request(app).post('/json/auth/password').send({
