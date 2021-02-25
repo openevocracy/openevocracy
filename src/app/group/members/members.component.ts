@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { trigger, style, animate, transition, state } from '@angular/animations';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import { UserService } from '../../_services/user.service';
 import { GroupService } from '../../_services/group.service';
 import { HttpManagerService } from '../../_services/http-manager.service';
+import { SnackbarService } from '../../_services/snackbar.service';
 
 import * as _ from 'underscore';
 
@@ -51,9 +52,11 @@ export class GroupMembersComponent implements OnInit {
 
 	constructor(
 		private router: Router,
+		private activatedRoute: ActivatedRoute,
 		private userService: UserService,
 		private groupService: GroupService,
-		private httpManagerService: HttpManagerService
+		private httpManagerService: HttpManagerService,
+		private snackbarService: SnackbarService
 	) {
 		// Get user id from user service
 		this.userId = this.userService.getUserId();
@@ -76,11 +79,21 @@ export class GroupMembersComponent implements OnInit {
 		
 		// Get array of member ids
 		this.memberArray = group.members;
+		console.log('memberArray', this.memberArray);
+		console.log('member user ids', Object.keys(this.members));
 		
 		// Define members as object, where keys are userIds
 		_.each(this.memberArray, (member) => {
 			// Define members as object, key is userId
 			this.members[member.userId] = member;
+		});
+		
+		// Check if member id was given as fragment in url
+		this.activatedRoute.fragment.subscribe((memberId: string) => {
+			// If memberId from fragment is contained in the members object, switch to this member
+			const memberIds = Object.keys(this.members)
+			if (memberIds.includes(memberId))
+				this.chooseMember(memberId);
 		});
 		
 		// If we are in last group or if document is expired, return here
@@ -147,7 +160,10 @@ export class GroupMembersComponent implements OnInit {
 	private postRating(ratingId, ratingValue) {
 		// Post rating to server
 		const rating = { 'groupId': this.groupId, 'ratedUserId': this.chosenMemberId, 'score': ratingValue, 'type': ratingId };
-		this.httpManagerService.post('/json/ratings/rate', rating).subscribe();
+		this.httpManagerService.post('/json/ratings/rate', rating).subscribe((res) => {
+			// Show snackbar confirming the rating
+			this.snackbarService.showSnackbar('GROUP_MEMBERS_RATING_SUCCESS');
+		});
 	}
 
 }

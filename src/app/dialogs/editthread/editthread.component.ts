@@ -137,8 +137,9 @@ export class EditThreadDialogComponent {
 	}
 	
 	public submit() {
-		// Check if form is valid
+		// Check if form is valid, if not, show a snackbar message
 		if(!this.editThreadForm.valid || this.editor.getText().trim() == "")
+			this.snackbarService.showSnackbar('FORUM_SNACKBAR_THREAD_REQUIRED_MISSING');
 			return;
 		
 		// Remove empty options

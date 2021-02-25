@@ -7,10 +7,7 @@ import { forkJoin } from 'rxjs/observable/forkJoin';
 
 import { ProposalDialogComponent } from '../../dialogs/proposal/proposal.component';
 
-import { VisNetworkService, Data, Node, Options, Edge } from 'ngx-vis';
-
-import { Network } from "vis-network/peer/esm/vis-network";
-import { DataSet } from "vis-data/peer/esm/vis-data"
+import { VisNetworkService, Data, DataSet, Node, Options, Edge } from 'ngx-vis';
 
 import { Group, Proposal } from '../../_models/topic/groupvis';
 
@@ -130,9 +127,14 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 				}
 			});
       	
+      	if(this.nodes) {
+      		return;
+      	}
+      	
       	// Create nodes and edges instances from objects
       	this.nodes = new DataSet<Node>(nodes);
 			this.edges = new DataSet<Edge>(res.edges);
+			console.log(this.nodes, this.edges);
 			
 			// Define data of network graph
 			this.visNetworkData = { 'nodes': this.nodes, 'edges': this.edges };

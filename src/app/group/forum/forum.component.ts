@@ -46,7 +46,8 @@ export class GroupForumComponent implements OnInit {
 		private matDialog: MatDialog,
 		private userService: UserService,
 		private groupService: GroupService,
-		private snackbarService: SnackbarService) {
+		private snackbarService: SnackbarService
+	) {
 			
 		// Store user id of current user
 		this.userId = this.userService.getUserId();

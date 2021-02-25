@@ -75,7 +75,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		
 		// Listen to connection lost event
 		this.connectionLostSubscription = this.connectionAliveService.connectionLost.subscribe((res) => {
-			console.log('diconnect editor');
+			console.log('disconnect editor');
 			// If connection is lost, close pad socket connection
 			if (this.padSocket)
 				this.padSocket.close();

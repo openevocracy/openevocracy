@@ -3,8 +3,11 @@
 		<span><span class="membericon"><fa-icon [icon]="faUser" [style.color]="member.color"></fa-icon><span class="badge" *ngIf="member.isOnline"></span></span> {{ member.name }}</span>
 	</button>
 	<mat-menu #menu="matMenu" [overlapTrigger]="false">
+		<button mat-menu-item [routerLink]="['/group', groupId, 'members']" [fragment]="member.userId">
+			<span><fa-icon [icon]="faFile"></fa-icon> {{ 'GROUP_MEMBERBAR_BUTTON_PROPOSAL' | translate }}</span>
+		</button>
 		<button mat-menu-item [routerLink]="['/user', member.userId]">
-			<span><fa-icon [icon]="faUser"></fa-icon> {{ 'GROUP_MEMBER_BUTTON_SHOW' | translate }}</span>
+			<span><fa-icon [icon]="faUser"></fa-icon> {{ 'GROUP_MEMBERBAR_BUTTON_PROFILE' | translate }}</span>
 		</button>
 	</mat-menu>
 </span>

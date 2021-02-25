@@ -32,8 +32,8 @@
 	</div>
 </stagebar>
 
-<div class="container vis-wrapper">
-	<div *ngIf="visNetworkData">
+<div class="container vis-wrapper" *ngIf="visNetworkData">
+	<div>
 		<div class="network-canvas" [visNetwork]="visNetwork" [visNetworkData]="visNetworkData" [visNetworkOptions]="visNetworkOptions" (initialized)="networkInitialized()"></div>
 	</div>
 	<div class="legend">

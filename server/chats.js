@@ -90,7 +90,7 @@ exports.queryChatRoomMessages = function(req, res) {
 function extendUsersAsync(groupId) {
 	// Get user color from databse
 	return db.collection('group_relations')
-		.find({ 'groupId': groupId }, { 'userId': true, 'userColor': true })
+		.find({ 'groupId': groupId }, { 'userId': true, 'userColor': true, 'userName': true })
 		.toArrayAsync().map((member) => {
 			return { 
 				'userId': member.userId,
