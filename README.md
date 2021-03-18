@@ -23,6 +23,8 @@ You should have a server with ssh access and root permissions and you should kno
   * docker: https://docs.docker.com/install/
   * docker-compose: https://docs.docker.com/compose/install/
 
+Make sure to have [**nginx** webserver configured properly](https://github.com/openevocracy/openevocracy/wiki/Server-configuration) to avoid socket connection interruptions.
+
 ### 1. Get Code
 
 Get the code with *one* of the following two options:
