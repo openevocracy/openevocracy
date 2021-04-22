@@ -1,0 +1,30 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper,left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+
+% settings
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{8pt}
+\renewcommand{\arraystretch}{1.2}
+\renewcommand{\baselinestretch}{1.2}
+
+% title
+\title{{{title}}}
+\author{ID: {{topicId}}\\Hash: {{hash}}}
+\date{{{date}}\vspace{1cm}}
+
+% avoids error with lists, see: https://tex.stackexchange.com/a/257464/36024
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% no numbering for sections
+\setcounter{secnumdepth}{0}
+
+\begin{document}
+
+\maketitle
+
+{{html}}
+
+\end{document}

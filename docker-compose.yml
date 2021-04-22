@@ -9,6 +9,7 @@ services:
     restart: always
     volumes:
      - ./shared/:/home/node/app/shared/
+     - ./files/:/home/node/app/files/
     environment:
      - ENV=prod
   mongodb:

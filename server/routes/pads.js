@@ -309,7 +309,8 @@ exports.getPadGroupView = function(req, res) {
  *    docId: id of the particular doc
  */
 function getPadHTMLAsync(collection_suffix, docId) {
-	// TODO: Do not call this function anytime when opening a topic. Instead, if connection is disconnected, store html in pad meta. Always just read html meta data from pad to show contents in topic.
+	// TODO: Do not call this function anytime when opening a topic. Instead, if connection is disconnected, store html in pad meta.
+	//			Always just read html meta data from pad to show contents in topic.
 	
 	// Connect to the particular pad
 	var doc = connection.get('docs_'+collection_suffix, docId);
@@ -331,7 +332,7 @@ exports.getPadHTMLAsync = getPadHTMLAsync;
 
 /*
  * @desc:
- *    Create pdf file from pad html
+ *    Create pdf file from pad html and stores it in file
  * @params:
  *    html: html of the pad
  */
@@ -349,7 +350,7 @@ exports.getPadPDFAsync = async function(topicId, title, html) {
 	const hash = crypto.createHash('sha256').update(html).digest('hex');
 	
 	// Read latex template from file
-	const texTemplateFilepath = path.join(appRoot.path, 'files/latex', 'final-document.tex');
+	const texTemplateFilepath = path.join(appRoot.path, 'templates/latex', 'final-document.tex');
 	const latexTemplate = readFileSync(texTemplateFilepath).toString();
 	
 	// Replace body placeholder with latex body from html file
@@ -362,6 +363,8 @@ exports.getPadPDFAsync = async function(topicId, title, html) {
 	
 	// Write file
 	const input = Readable.from([latexResult]);
+	
+	console.log('appRoot.path', appRoot.path);
 	
 	const pdfFilepath = path.join(appRoot.path, 'files/documents', topicId + '.pdf');
 	const output = createWriteStream(pdfFilepath);

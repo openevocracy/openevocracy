@@ -5,7 +5,7 @@ const C = require("./constants").C;
 exports.cfg = {
 	DEBUG: true,
 	TEST: false,
-	MAIL_ENABLED: true,
+	MAIL_ENABLED: false,
 	ALERT_REMOVAL_TIME:  8000,  // Time after alert is automatically removed (in ms)
 	CHATROOM_CACHE_TIMEOUT: 1*C.DAY,  // Chat room is removed from cache when it was not called for more than x hours/days
 	
@@ -19,9 +19,9 @@ exports.cfg = {
 	
 	GROUP_SIZE: 3, // Minimum 3
 	
-	DURATION_SELECTION : 1*C.MINUTE,
-	DURATION_PROPOSAL  : 2*C.MINUTE,
-	DURATION_LEVEL     : 99999*C.MINUTE, //99999*C.MINUTE,
+	DURATION_SELECTION : 0.5*C.MINUTE,
+	DURATION_PROPOSAL  : 1*C.MINUTE,
+	DURATION_LEVEL     : 2*C.MINUTE, //99999*C.MINUTE,
 	DURATION_NONE      : -1,
 	
 	// Time before end
