@@ -43,8 +43,7 @@ import { topicRoutes } from './topic.routes';
 		FontAwesomeModule,
 		CountdownModule,
 		MaterialsModule,
-		QuillModule.forRoot(),
-		VisModule
+		QuillModule.forRoot()
 	]
 })
 export class TopicModule {}
