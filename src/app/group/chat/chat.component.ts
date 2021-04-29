@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -21,7 +21,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons';
 	templateUrl: './chat.component.html',
 	styleUrls: ['../group.component.scss', './chat.component.scss']
 })
-export class GroupChatComponent implements OnInit {
+export class GroupChatComponent implements OnInit, OnDestroy {
 	
 	public C = C;
 	
@@ -81,6 +81,13 @@ export class GroupChatComponent implements OnInit {
 	ngOnInit() {
 		// Initialize chat
 		this.initializeChatSocket();
+	}
+	
+	ngOnDestroy() {
+		// Close socket if it is still open when closing the component
+		if (this.chatSocket) {
+			this.chatSocket.close();
+		}
 	}
 	
 	/*
@@ -152,6 +159,11 @@ export class GroupChatComponent implements OnInit {
 			// WebSocket connection was closed from server
 			this.chatSocket.onclose = (event) => {
 				//console.log(event);
+			};
+			
+			this.chatSocket.onerror = (err) => {
+				console.error('Socket encountered error: ', err.message, 'Closing socket');
+				this.chatSocket.close();
 			};
 			
 			// Scroll down

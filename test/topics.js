@@ -71,7 +71,7 @@ describe('topics', () => {
 	
 	it('should get overview topic data', async() => {
 		let res = await chai.request(app).get(`/json/topic/overview/${topic._id}`).
-		set('Authorization', `JWT ${token}`).send();
+			set('Authorization', `JWT ${token}`).send();
 		
 		console.log(res.body);
 		const overviewData = res.body;
@@ -80,14 +80,6 @@ describe('topics', () => {
 		expect(overviewData.descDocId).not.to.be.undefined;
 		expect(overviewData.descPadId).not.to.be.undefined;
 		expect(overviewData.voted).to.be.false;
-	});
-	
-	it.skip('should delete topic', async() => {
-		let res = await chai.request(app).delete(`/json/topic/${topic._id}`).
-		set('Authorization', `JWT ${token}`).send();
-		
-		console.log(res.body);
-		expect(res.body).to.have.lengthOf(0);
 	});
 	
 	it('should vote for a topic', async() => {
@@ -104,6 +96,14 @@ describe('topics', () => {
 		
 		console.log(res.body.voted);
 		expect(res.body.voted).to.equal(false);
+	});
+	
+	it('should delete topic', async() => {
+		let res = await chai.request(app).delete(`/json/topic/${topic._id}`).
+			set('Authorization', `JWT ${token}`).send();
+		
+		console.log(res.body);
+		expect(res.body).to.be.empty;
 	});
 
 	/*

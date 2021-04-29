@@ -43,9 +43,9 @@ exports.getStrategy = function() {
 	return strategy;
 };
 
-function savePasswordInDatabaseAsync(uid, password) {
+function savePasswordInDatabaseAsync(userId, password) {
     var hash = bcrypt.hashSync(password, 8);
-    return db.collection('users').updateAsync({ '_id': uid }, { $set: { 'password': hash } });
+    return db.collection('users').updateAsync({ '_id': userId }, { $set: { 'password': hash } });
 }
 
 function getUserByMailAsync(email) {
@@ -73,7 +73,7 @@ exports.login = function(req, res) {
 		return;
 	}
   
-	db.collection('users').findOneAsync({ 'email': email}).then(function (user) {
+	db.collection('users').findOneAsync({ 'email': email}).then((user) => {
 		// If user does not exist
 		if(_.isNull(user)) {
 			utils.sendAlert(res, 400, 'danger', 'USER_ACCOUNT_EMAIL_NOT_EXIST', { 'email': email });
@@ -94,13 +94,10 @@ exports.login = function(req, res) {
 			var token = jwt.sign(payload, jwtOptions.secretOrKey);
 			
 			// Set salt
-			db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then(function() {
+			db.collection('users').updateAsync({ '_id': user._id }, { $set: { 'salt': payload.salt } }).then((r) => {
 				res.json({ 'email': user.email, 'token': token, 'id': user._id });
-			}).catch(function(e) {
-				if(cfg.DEBUG_CONFIG)
-					utils.sendAlert(res, 500, 'danger', JSON.stringify(e));
-				else
-					utils.sendAlert(res, 500, 'danger', 'USER_ACCOUNT_SALT_NOT_UPDATED');
+			}).catch((e) => {
+				console.log('The user\'s salt could not be updated', e);
 			});
 		} else {
 			// Passwords did not match
@@ -251,12 +248,7 @@ exports.logout = function(req, res) {
 		else
 			res.send({});
 	}).catch(function(e) {
-		// If debug: Show detailed error
-		if(cfg.DEBUG_CONFIG)
-			utils.sendAlert(res, 500, 'success', JSON.stringify(e));
-		// If no debug: Just show message that salt could not be deleted
-		else
-			utils.sendAlert(res, 500, 'success', 'USER_ACCOUNT_LOGOUT_SALT_NOT_DELETED');
+		console.log('logging out user failed', e);
 	});
 };
 

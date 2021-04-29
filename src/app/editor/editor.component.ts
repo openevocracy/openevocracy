@@ -244,8 +244,10 @@ export class EditorComponent implements OnInit, OnDestroy {
 
 			// WebSocket connection was closed from server
 			this.padSocket.onclose = (event) => {
-				console.error('Socket connection has closed. If this happens more often it could be that your webserver needs to allow longer socket sessions.', event);
-				this.connectionAliveService.disconnect({ 'retry': true });
+				if (!event.wasClean) {
+					console.error('Socket connection has closed. If this happens more often it could be that your webserver needs to allow longer socket sessions.', event);
+					this.connectionAliveService.disconnect({ 'retry': true });
+				}
 			};
 	
 			// Enable edit again

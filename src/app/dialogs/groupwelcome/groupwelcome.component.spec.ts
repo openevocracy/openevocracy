@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GroupWelcomeDialogComponent } from './GroupWelcome.component';
+import { GroupWelcomeDialogComponent } from './groupwelcome.component';
 
 describe('GroupWelcomeDialogComponent', () => {
   let component: GroupWelcomeDialogComponent;

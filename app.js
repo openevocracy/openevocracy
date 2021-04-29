@@ -376,6 +376,7 @@ groups.badges.startGroupBadgeServer(wssBadge);
 users.startAliveServer(wssAlive, [wssPad, wssChat]);
 
 httpServer.on('upgrade', function upgrade(request, socket, head) {
+	
 	var queryArr = request.url.split("/socket/")[1].split("/");
 	var connectionType = queryArr[0];
 
@@ -399,7 +400,5 @@ httpServer.on('upgrade', function upgrade(request, socket, head) {
 		socket.destroy();
 	}
 });
-
-//var wss = new WebSocket.Server({'server': httpServer});
 
 module.exports = app;

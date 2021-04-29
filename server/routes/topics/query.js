@@ -253,7 +253,8 @@ exports.delete = function(req,res) {
 			// and if the selection stage has passed, nobody can
 			if(!_.isEqual(topic.authorId, userId) || topic.stage > C.STAGE_SELECTION)
 				return utils.rejectPromiseWithAlert(401, 'danger', 'TOPIC_NOT_AUTHORISIZED_FOR_DELETION');
-        
+			
+			// TODO what to remove, what to keep?
 			return Promise.join(
 				db.collection('topics').removeByIdAsync(topicId),
 				db.collection('topic_votes').removeAsync({'topicId': topicId}),

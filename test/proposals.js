@@ -33,7 +33,7 @@ describe('proposals', () => {
 	});
 
 	it('should create proposal for topic only in proposal stage', async () => {
-		const res = await chai.request(app).post('/json/proposal/create').
+		const res = await chai.request(app).post('/json/topic/proposal/create').
 		set('Authorization', 'JWT ' + token).send({
 			topicId: topic._id,
 			userId: uid

@@ -27,8 +27,12 @@ export class UserService {
 		return this.getUser().uid;
 	}
 	
+	/**
+	 * @desc: Gets user token. If user is null, return null.
+	 */
 	public getToken() {
-		return this.getUser().token;
+		const user = this.getUser();
+		return (user == null) ? null : user.token;
 	}
 	
 	public hasToken() {

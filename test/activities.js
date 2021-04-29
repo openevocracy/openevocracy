@@ -34,7 +34,7 @@ describe('activities', () => {
 		token = res.body.token;
 	});
  
-	let activityId;
+	/*let activityId;
 	it('should create activity', async () => {
 		const res = await chai.request(app).post('/json/activity/create').
 		set('Authorization', 'JWT ' + token).send({
@@ -47,7 +47,7 @@ describe('activities', () => {
 		expect(res.status).to.equal(200);
 		
 		activityId = res.body.insertedIds[0];
-	});
+	});*/
  
 	it('should get user activities', async () => {
 		const res = await chai.request(app).get('/json/useractivitylist/'+userId).
@@ -55,7 +55,7 @@ describe('activities', () => {
 		console.log(res.body);
 		
 		expect(res.status).to.equal(200);
-		expect(res.body[0]._id).to.equal(activityId);
+		//expect(res.body[0]._id).to.equal(activityId);
 	});
  
 	/*it('should delete user activity', async () => {

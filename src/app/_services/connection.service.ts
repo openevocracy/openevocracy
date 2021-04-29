@@ -14,7 +14,7 @@ export class ConnectionAliveService implements OnDestroy {
 	public isConnected:boolean = true;
 	public aliveSocket;
 	public pingTimeout;
-	public userToken;
+	//public userToken;
 	public pingInterval;
 	public retryTimeout;
 	
@@ -26,7 +26,7 @@ export class ConnectionAliveService implements OnDestroy {
 		private userService: UserService
 	) {
 		// Get user token from user service
-		this.userToken = this.userService.getToken();
+		//this.userToken = this.userService.getToken();
 	}
 	
 	/*
@@ -51,7 +51,7 @@ export class ConnectionAliveService implements OnDestroy {
 		
 		const parsed = parseUrl(origin);
 		const protocol = parsed.protocol.includes('https') ? 'wss://' : 'ws://';
-		this.aliveSocket = new WebSocket(protocol + parsed.host + '/socket/alive/' + this.userToken);
+		this.aliveSocket = new WebSocket(protocol + parsed.host + '/socket/alive/' + this.userService.getToken());
 		
 		this.aliveSocket.onopen = (event) => {
 			// If connection was broken before and is reconnected now
@@ -123,6 +123,10 @@ export class ConnectionAliveService implements OnDestroy {
 		
 		// Wait 500 ms to avoid visual effects when reloading (F5) the tab
 		setTimeout(() => {
+			// If user does not exist any more (is logged out), force retry to false
+			if (this.userService.getUser() == null)
+				params.retry = false;
+			
 			// Trigger offline event if was connected before
 			if (this.isConnected)
 				this.connectionLost.emit(params.retry);

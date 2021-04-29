@@ -56,11 +56,23 @@ If you want to stop the OpenEvocracy instance, change dir to project folder and 
 
 ## Update
 
-Stop the OpenEvocracy instance, pull the updated image, start the instance again. The database will not be touched.
+First stop the OpenEvocracy instance.
 
 ```
 docker-compose down
-docker pull openevocracy/openevocracy:v0.3.1
+```
+
+Fetch new files and checkout the branch with git.
+
+```
+git fetch
+git checkout v0.3
+```
+
+Now pull the updated image, start the instance again. The database will not be touched.
+
+```
+docker pull openevocracy/openevocracy:v0.3
 docker-compose up -d
 ```
 
