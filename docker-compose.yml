@@ -3,6 +3,7 @@ services:
   web:
     image: openevocracy/openevocracy:v0.3
     ports:
+    # PORT is not a unique name, if further containers are added, consider renaming the variable
      - $PORT:8080
     depends_on:
      - mongodb
@@ -11,6 +12,7 @@ services:
      - ./shared/:/home/node/app/shared/
      - ./files/:/home/node/app/files/
     environment:
+    # Define ENV environment variable here, since it is only valid for this container
      - ENV=prod
   mongodb:
     image: mongo:3

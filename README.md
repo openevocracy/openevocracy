@@ -29,14 +29,14 @@ Make sure to have [**nginx** webserver configured properly](https://github.com/o
 
 Get the code with *one* of the following two options:
 
-  * Download the [latest release](https://github.com/openevocracy/openevocracy/releases/tag/v0.3.1) or
-  * Clone the repository with `git clone https://github.com/openevocracy/openevocracy.git` and switch to the latest stable branch with `git checkout v0.3.1`
+  * Download the [latest release](https://github.com/openevocracy/openevocracy/releases/tag/v0.3.2) or
+  * Clone the repository with `git clone https://github.com/openevocracy/openevocracy.git` and switch to the latest stable branch with `git checkout v0.3.2`
 
 ### 2. Customize the config
 
-Inside the repository copy the file
+Inside the repository copy the files
 
-  * `shared/config.base.default.js` as `shared/config.base.js` and
+  * `shared/config.base.default.js` as `shared/config.base.js`
   * `shared/config.env.default.js` as `shared/config.env.prod.js`
 
 Customize the files `shared/config.base.js` and `shared/config.env.prod.js` according to your needs.
