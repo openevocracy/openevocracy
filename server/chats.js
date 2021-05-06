@@ -30,14 +30,14 @@ exports.queryChatRoomMessages = function(req, res) {
 	const userId = ObjectId(req.user._id);
 	
 	// Get chat room id
-	const chatRommId_promise = db.collection('groups')
+	const chatRoomId_promise = db.collection('groups')
 		.findOneAsync({ '_id': groupId }, { 'chatRoomId': true })
 		.then((group) => { return group.chatRoomId; });
 		
 	// Get extended users in chat room
 	const extendedUsers_promise = extendUsersAsync(groupId);
 	
-	Promise.join(chatRommId_promise, extendedUsers_promise).spread((chatRoomId, extendedUsers) => {
+	Promise.join(chatRoomId_promise, extendedUsers_promise).spread((chatRoomId, extendedUsers) => {
 		// Try to get room from cache, define user and prepare current timestamp
 		let room = rooms[chatRoomId];
 		const user = { 'userId': userId };
@@ -90,7 +90,7 @@ exports.queryChatRoomMessages = function(req, res) {
 function extendUsersAsync(groupId) {
 	// Get user color from databse
 	return db.collection('group_relations')
-		.find({ 'groupId': groupId }, { 'userId': true, 'userColor': true })
+		.find({ 'groupId': groupId }, { 'userId': true, 'userColor': true, 'userName': true })
 		.toArrayAsync().map((member) => {
 			return { 
 				'userId': member.userId,

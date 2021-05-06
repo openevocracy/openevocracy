@@ -1,16 +1,14 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { MatDialog } from "@angular/material";
+import { MatDialog } from '@angular/material';
 import { trigger, transition, group, animate, style, state } from '@angular/animations'
-import { forkJoin } from 'rxjs/observable/forkJoin';
+import { forkJoin } from 'rxjs';
 
 import { ProposalDialogComponent } from '../../dialogs/proposal/proposal.component';
 
-import { VisNetworkService, Data, Node, Options, Edge } from 'ngx-vis';
-
-import { Network } from "vis-network/peer/esm/vis-network";
-import { DataSet } from "vis-data/peer/esm/vis-data"
+import { DataSet } from 'vis-data/peer/esm/vis-data';
+import { Network, Data, Node, Options, Edge } from 'vis-network';
 
 import { Group, Proposal } from '../../_models/topic/groupvis';
 
@@ -35,7 +33,9 @@ import * as _ from 'underscore';
 		])
 	]
 })
-export class TopicGroupsComponent implements OnInit, OnDestroy {
+export class TopicGroupsComponent implements AfterViewInit, OnInit, OnDestroy {
+	
+	@ViewChild('network', { 'static': false }) public networkContainer: ElementRef;
 	
 	public topicId: string;
 	
@@ -54,7 +54,7 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 	public proposalColor = { 'background': '#9C27B0', 'border': '#9C27B0', 'hover': '#BA68C8', 'highlight': '#6A1B9A' };
 	public groupColor = { 'background': '#3F51B5', 'border': '#3F51B5', 'hover': '#7986CB', 'highlight': '#283593' };
 	
-	public visNetwork: string = 'groupvis';
+	public visNetwork: Network;
 	public visNetworkData: Data;
 	public nodes: DataSet<Node>;
 	public edges: DataSet<Edge>;
@@ -65,23 +65,24 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 		private dialog: MatDialog,
 		private utilsService: UtilsService,
 		private httpManagerService: HttpManagerService,
-		private translateService: TranslateService,
-		private visNetworkService: VisNetworkService
+		private translateService: TranslateService
 	) { }
 	
 	public ngOnInit(): void {
 		// Get topicId from route
 		this.topicId = this.router.url.split('/')[2];
-		
+	}
+	
+	public ngAfterViewInit(): void {
 		// Get nodes and edges of group hierarchy from server
 		this.httpManagerService.get('/json/groupvis/'+this.topicId).subscribe(this.drawGraph.bind(this));
 	}
 	
 	public ngOnDestroy(): void {
 		// De-register events
-		this.visNetworkService.off(this.visNetwork, 'hoverNode');
-		this.visNetworkService.off(this.visNetwork, 'blurNode');
-		this.visNetworkService.off(this.visNetwork, 'click');
+		this.visNetwork.off('hoverNode');
+		this.visNetwork.off('blurNode');
+		this.visNetwork.off('click');
 	}
 	
 	/**
@@ -93,13 +94,6 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 		
 		// Open dialog
 		this.dialog.open(ProposalDialogComponent, options);
-	}
-	
-	/**
-	 * @desc: Called when network is successfully initialized
-	 */
-	private networkInitialized(): void {
-		this.addGraphEvents();	
 	}
 	
 	/**
@@ -130,15 +124,29 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 				}
 			});
       	
+      	if(this.nodes) {
+      		return;
+      	}
+      	
       	// Create nodes and edges instances from objects
-      	this.nodes = new DataSet<Node>(nodes);
-			this.edges = new DataSet<Edge>(res.edges);
+      	this.nodes = nodes;
+			this.edges = res.edges;
+			console.log(this.nodes, this.edges);
 			
 			// Define data of network graph
 			this.visNetworkData = { 'nodes': this.nodes, 'edges': this.edges };
 			
 			// Define options for network graph
 			this.visNetworkOptions = options;
+			
+			// Add network
+			//const container = document.getElementById('network');
+			const container = this.networkContainer.nativeElement;
+			console.log(container);
+			this.visNetwork = new Network(container, this.visNetworkData, this.visNetworkOptions);
+			
+			// Add graph events
+			this.addGraphEvents();
 		});
 	}
 	
@@ -146,36 +154,22 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 	 * @desc: Adds events to graph
 	 */
 	private addGraphEvents(): void {
-		// Register events
-		this.visNetworkService.on(this.visNetwork, 'hoverNode');
-		this.visNetworkService.on(this.visNetwork, 'blurNode');
-		this.visNetworkService.on(this.visNetwork, 'click');
 		
 		// Set cursor to pointer on hovering a node
-		this.visNetworkService.hoverNode.subscribe((eventData: any[]) => {
-			// If event does not come from groupvis graph, stop here
-			if (eventData[0] != this.visNetwork)
-				return;
-			
-			eventData[1].event.target.style.cursor = 'pointer';
+		this.visNetwork.on('hoverNode', (eventData) => {
+			eventData.event.target.style.cursor = 'pointer';
 		});
 		
 		// Reset cursor to default on bluring a node
-		this.visNetworkService.blurNode.subscribe((eventData: any[]) => {
-			// If event does not come from groupvis graph, stop here
-			if (eventData[0] != this.visNetwork)
-				return;
-			
-			eventData[1].event.target.style.cursor = 'default';
+		this.visNetwork.on('blurNode', (eventData) => {
+			eventData.event.target.style.cursor = 'default';
 		});
 		
-		this.visNetworkService.click.subscribe((eventData: any[]) => {
-			// If event does not come from groupvis graph, stop here
-			if (eventData[0] != this.visNetwork)
-				return;
+		// Show/hide Details about group in toolbar
+		this.visNetwork.on('click', (eventData) => {
 			
 			// If background was clicked
-			if (eventData[1].nodes.length == 0) {
+			if (eventData.nodes.length == 0) {
 				// Clear nextDetails and isNodeSelected
 				this.nextDetails = undefined;
 				this.isNodeSelected = false;
@@ -184,10 +178,21 @@ export class TopicGroupsComponent implements OnInit, OnDestroy {
 			}
 			
 			// If node was clicked
-			if (eventData[1].nodes.length > 0) {
+			if (eventData.nodes.length > 0) {
 				// Get node
-				const id = eventData[1].nodes[0];
-				const node = this.nodes.get(id);
+				const id = eventData.nodes[0];
+				console.log(this.nodes);
+				// FIXME later
+				// Normally DataSet provides a get(id) method to get node, but that is not working ??
+				// Using javascript .find(node => node.id == id) works, but throws an error since this does not exist on DataSet ??
+				// So we have to do it manually:
+				let node;
+				for (let i = 0; i < this.nodes.length; i++) {
+					if (this.nodes[i].id == id) {
+						node = this.nodes[i];
+						break;
+					}
+				}
 				
 				// Store next node to show
 				this.nextDetails = node;

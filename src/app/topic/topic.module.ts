@@ -16,7 +16,6 @@ import { TopicStagebarComponent } from './stagebar/stagebar.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { QuillModule } from 'ngx-quill';
-import { VisModule } from 'ngx-vis';
 import { CountdownModule } from '../countdown/countdown.module';
 import { MaterialsModule } from '../materials/materials.module';
 
@@ -44,8 +43,7 @@ import { topicRoutes } from './topic.routes';
 		FontAwesomeModule,
 		CountdownModule,
 		MaterialsModule,
-		QuillModule.forRoot(),
-		VisModule
+		QuillModule.forRoot()
 	]
 })
 export class TopicModule {}

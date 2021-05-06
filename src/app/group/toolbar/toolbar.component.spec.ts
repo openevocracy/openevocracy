@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GroupToolbarComponent } from './header.component';
+import { GroupToolbarComponent } from './toolbar.component';
 
 describe('GroupToolbarComponent', () => {
   let component: GroupToolbarComponent;

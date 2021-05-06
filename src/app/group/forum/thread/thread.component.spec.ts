@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GroupForumThreadComponent } from './groupforumthread.component';
+import { GroupForumThreadComponent } from './thread.component';
 
 describe('GroupForumThreadComponent', () => {
   let component: GroupForumThreadComponent;

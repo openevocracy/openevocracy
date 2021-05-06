@@ -13,10 +13,14 @@ FROM node:10
 
 EXPOSE 8080
 
+RUN apt update && apt install -y pandoc texlive-latex-base texlive-fonts-recommended && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /home/node/app
 COPY --from=builder /home/node/app/dist/ dist/
 COPY shared/ shared/
 COPY server/ server/
+COPY files/ files/
+COPY templates/ templates/
 COPY app.js package.json ./
 RUN npm install --production
 

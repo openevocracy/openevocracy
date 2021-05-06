@@ -118,6 +118,7 @@ exports.addActivityAsync = addActivityAsync;
 /**
  * @desc: Creates an activity (to be called from POST)
  */
+ // NOTE Activities are always created from sever, never from client
 /*exports.create = function(req, res) {
 	const type = req.body.type;
 	const targetId = ObjectId(req.body.targetId);

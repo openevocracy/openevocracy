@@ -13,7 +13,7 @@ const activities = require('../activities');
 /*
  * @desc: Create new proposal
  */
-exports.create = function(req, res) {
+/*exports.create = function(req, res) {
 	const topicId = ObjectId(req.body.topicId);
 	const userId = ObjectId(req.body.userId);
 	
@@ -44,6 +44,39 @@ exports.create = function(req, res) {
 			}
 		});
 	}).catch(utils.isOwnError, utils.handleOwnError(res));
+};*/
+
+exports.create = async function(req, res) {
+	const topicId = ObjectId(req.body.topicId);
+	const userId = ObjectId(req.body.userId);
+	
+	const topic = await db.collection('topics').findOneAsync({ '_id': topicId });
+	
+	// Check if topic is at least in proposal stage to create proposal
+	console.log("topic", topic);
+	console.log(C.STAGE_PROPOSAL);
+	if (topic.stage < C.STAGE_PROPOSAL) {
+		utils.sendAlert(res, 400, 'danger', 'TOPIC_REQUIREMENT_PROPOSAL_STAGE');
+		return;
+	}
+
+	// Check if pad already exists, if not, create
+	let pad = await db.collection('pads_proposal').findOneAsync({ 'topicId': topicId, 'authorId': userId });
+
+	if (_.isNull(pad)) {
+		// If pad was not found, everyhting is correct and pad can be created
+		pad = { 'expiration': topic.nextDeadline, 'topicId': topicId, 'authorId': userId };
+		pad = await pads.createPadAsync(pad, 'proposal');
+			
+		// Add activity
+		activities.addActivityAsync(userId, C.ACT_PROPOSAL_CREATED, topicId);
+		
+		// Send success to client
+		utils.sendAlert(res, 200, 'success', 'TOPIC_PROPOSAL_ALERT_CREATED');
+	} else {
+		// If pad was found, something went wrong, sent alert
+		utils.sendAlert(res, 400, 'danger', 'TOPIC_PROPOSAL_ALREADY_EXISTS');
+	}
 };
 
 /**

@@ -41,7 +41,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 	public group;
 	public me;
 	public hideEditor: boolean = true;
-
+	
   constructor(
 		protected snackBar: MatSnackBar,
 		protected router: Router,

@@ -75,7 +75,7 @@ export class EditorComponent implements OnInit, OnDestroy {
 		
 		// Listen to connection lost event
 		this.connectionLostSubscription = this.connectionAliveService.connectionLost.subscribe((res) => {
-			console.log('diconnect editor');
+			console.log('disconnect editor');
 			// If connection is lost, close pad socket connection
 			if (this.padSocket)
 				this.padSocket.close();
@@ -244,7 +244,10 @@ export class EditorComponent implements OnInit, OnDestroy {
 
 			// WebSocket connection was closed from server
 			this.padSocket.onclose = (event) => {
-				//console.log(event);
+				if (!event.wasClean) {
+					console.error('Socket connection has closed. If this happens more often it could be that your webserver needs to allow longer socket sessions.', event);
+					this.connectionAliveService.disconnect({ 'retry': true });
+				}
 			};
 	
 			// Enable edit again

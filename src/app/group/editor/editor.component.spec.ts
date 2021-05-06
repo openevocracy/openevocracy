@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GroupEditorComponent } from './group.component';
+import { GroupEditorComponent } from './editor.component';
 
 describe('GroupEditorComponent', () => {
   let component: GroupEditorComponent;

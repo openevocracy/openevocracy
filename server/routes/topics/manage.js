@@ -46,11 +46,15 @@ function calculateDeadline(nextStage, prevDeadline, levelDuration) {
 }
 exports.calculateDeadline = calculateDeadline;
 
-function manageConsensusStageAsync(topic, levelDuration) {
+/**
+ * manages topics that have reached at least the consensus stage
+ */
+async function manageConsensusStageAsync(topic, levelDuration) {
     // levelDuration is an optional parameter
     // it will get a default value in calculateDeadline if not set (for testing purposes)
     var prevDeadline = topic.nextDeadline;
     
+
     return groups.manage.remixGroupsAsync(topic).then(function(result) {
         var update_set_promise;
         switch(result.nextStage) {
@@ -66,6 +70,26 @@ function manageConsensusStageAsync(topic, levelDuration) {
 				
 				// get the pad id of final document
 				// e.g. the proposal pad id of the group in the last level
+				
+				/* // async/await
+				// Get pad HTML and save it in file system
+				const group = await db.collection('groups').findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true});
+				console.log(group);
+				const docId = await db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
+				const padHtml = await pads.getPadHTMLAsync('group', docId);
+				
+				// Get pad PDF and save it in file system
+				const padPDF = await pads.getPadPDFAsync(topicId, topic.name, padHtml);
+				
+				// Updates below are only required if consensus stage is over
+            update_set_promise = {
+                'stage': (topic.stage = C.STAGE_PASSED),
+                'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_PASSED,prevDeadline)),
+                'stagePassedStarted': Date.now(),
+                'finalDocument': padPDF
+            };
+				*/
+				
 				const finalDocumentHtml_promise = db.collection('groups')
 					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
 					.then(function(group) {

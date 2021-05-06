@@ -1,6 +1,6 @@
 {
   "name": "openevocracy",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -10,8 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "extract": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json",
-    "test_integration_bak": "ENV=test mocha --require test/it-helper test/users.js test/topics.js test/proposals.js test/activities.js",
-    "test_integration": "ENV=test mocha ./test/init.js --delay"
+    "test_integration": "ENV=test mocha --require test/it-helper test/users.js test/topics.js test/proposals.js test/activities.js"
   },
   "private": true,
   "dependencies": {
@@ -83,7 +82,6 @@
     "morgan": "^1.9.1",
     "multer": "^1.4.2",
     "ngx-quill": "^7.3.7",
-    "ngx-vis": "^3.0.4",
     "node-crontab": "*",
     "node-latex": "^3.0.0",
     "node-pandoc": "^0.3.0",
@@ -124,6 +122,7 @@
     "uws": "^100.0.1",
     "validate.js": "0.13.1",
     "vis-data": "7.0.0",
+    "vis-network": "^7.6.4",
     "vis-util": "^4.3.4",
     "websocket-json-stream": "0.0.3",
     "ws": "^7.2.0",

@@ -100,6 +100,8 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 	}
 	
 	ngOnInit() {
+		console.log('toolbar init');
+		
 		// Get group from group service cache
 		const group = this.groupService.getBasicGroupFromCache(this.groupId);
 		
@@ -117,9 +119,13 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 	}
 	
 	ngOnDestroy() {
-		// Clear badges database value
-		if (this.badgeSocket)
+		console.log('toolbar destroy');
+		
+		// Clear badges database value and close socket
+		if (this.badgeSocket) {
 			this.clearBadgeDatabase();
+			this.badgeSocket.close();
+		}
 	}
 	
 	/**
@@ -130,6 +136,7 @@ export class GroupToolbarComponent implements OnInit, OnDestroy {
 		this.httpManagerService.get('/json/group/badges/' + this.groupId).subscribe(badge => {
 			// Update badges in toolbar
 			this.updateBadge(badge);
+			
 			// Init badge socket connection
 			this.initBadgeSocket();
 		});

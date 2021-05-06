@@ -33,8 +33,9 @@
 </stagebar>
 
 <div class="container vis-wrapper">
-	<div *ngIf="visNetworkData">
-		<div class="network-canvas" [visNetwork]="visNetwork" [visNetworkData]="visNetworkData" [visNetworkOptions]="visNetworkOptions" (initialized)="networkInitialized()"></div>
+	<div>
+		<div #network id="network"></div>
+		<!--<div class="network-canvas" [visNetwork]="visNetwork" [visNetworkData]="visNetworkData" [visNetworkOptions]="visNetworkOptions" (initialized)="networkInitialized()"></div>-->
 	</div>
 	<div class="legend">
 		<p><span class="legend-color" [style.background-color]="meColor.background"></span> {{ 'GROUPVIS_LEGEND_ME' | translate }}</p>

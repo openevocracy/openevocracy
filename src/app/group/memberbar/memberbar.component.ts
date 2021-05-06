@@ -7,7 +7,8 @@ import { UserService } from '../../_services/user.service';
 
 import { Member } from '../../_models/group/memberbar';
 
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faFile } from '@fortawesome/free-solid-svg-icons';
+
 import * as _ from 'underscore';
 
 @Component({
@@ -20,8 +21,10 @@ export class GroupMemberbarComponent implements OnInit, OnDestroy {
 	public userId;
 	public groupMembers: Member[] = [];
 	public onlineInterval;
+	public groupId;
 	
 	public faUser = faUser;
+	public faFile = faFile;
 
 	constructor(
 		private router: Router,
@@ -34,13 +37,13 @@ export class GroupMemberbarComponent implements OnInit, OnDestroy {
 	
 	ngOnInit() {
 		// Get current groupId
-		const groupId = this.router.url.split('/')[2];
+		this.groupId = this.router.url.split('/')[2];
 		
 		// Get group from group service cache
-		const group = this.groupService.getBasicGroupFromCache(groupId);
+		const group = this.groupService.getBasicGroupFromCache(this.groupId);
 		
 		// Get member online status for the first time
-		this.httpManagerService.get('/json/group/membersonline/' + groupId).subscribe(membersOnlineStatus => {
+		this.httpManagerService.get('/json/group/membersonline/' + this.groupId).subscribe(membersOnlineStatus => {
 			_.each(group.members, (member) => {
 				// Find current member in online status array
 				const foundMember = _.findWhere(membersOnlineStatus, { 'userId': member.userId });
@@ -53,7 +56,7 @@ export class GroupMemberbarComponent implements OnInit, OnDestroy {
 		
 		// Call online members every minute
 		this.onlineInterval = setInterval(() => {
-			this.httpManagerService.get('/json/group/membersonline/' + groupId).subscribe(membersOnlineStatus => {
+			this.httpManagerService.get('/json/group/membersonline/' + this.groupId).subscribe(membersOnlineStatus => {
 				// Update isOnline status of group members
 				_.each(this.groupMembers, (member) => {
 					const foundMember = _.findWhere(membersOnlineStatus, { 'userId': member.userId })
