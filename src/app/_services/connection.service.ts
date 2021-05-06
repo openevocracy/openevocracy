@@ -14,7 +14,6 @@ export class ConnectionAliveService implements OnDestroy {
 	public isConnected:boolean = true;
 	public aliveSocket;
 	public pingTimeout;
-	//public userToken;
 	public pingInterval;
 	public retryTimeout;
 	
@@ -24,10 +23,7 @@ export class ConnectionAliveService implements OnDestroy {
 
 	constructor(
 		private userService: UserService
-	) {
-		// Get user token from user service
-		//this.userToken = this.userService.getToken();
-	}
+	) { }
 	
 	/*
 	 * @desc: Lifecylce hook, used to close socket connection properly if depending components are destroyed

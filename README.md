@@ -34,7 +34,10 @@ Get the code with *one* of the following two options:
 
 ### 2. Customize the config
 
-Inside the repository copy the file `shared/config.base.default.js` as `shared/config.base.js`.
+Inside the repository copy the file
+
+  * `shared/config.base.default.js` as `shared/config.base.js` and
+  * `shared/config.env.default.js` as `shared/config.env.prod.js`
 
 Customize the files `shared/config.base.js` and `shared/config.env.prod.js` according to your needs.
 
