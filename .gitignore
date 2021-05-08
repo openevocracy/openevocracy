@@ -49,7 +49,5 @@ switchuser.sh
 Thumbs.db
 
 /shared/config.base.js
-/shared/config.env.dev.js
 /shared/config.env.prod.js
-/shared/config.env.test.js
 /data
