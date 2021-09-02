@@ -54,7 +54,8 @@ export class UtilsService {
 	 * @desc: Strip html from given string
 	 */
 	public stripHtml(htmlString): string {
-		return htmlString.replace(/<(?:.|\n)*?>/gm, '');
+		//return htmlString.replace(/<(?:.|\n)*?>/gm, "");
+		return htmlString.replace(/<[^>]*>?>/gm, "");
 	}
 	
 	/**
@@ -69,7 +70,10 @@ export class UtilsService {
 	 * @desc: Strip html tags and count words
 	 */
 	public countHtmlWords(htmlString): number {
-		return this.countStringWords(this.stripHtml(htmlString));
+		//return this.countStringWords(this.stripHtml(htmlString));
+		const htmlLen = htmlString.replace(/<[^>]*>?/g, " ").split(/\s+/g).length;
+		// Reduce by 2 because of <p> and </p> tags in beginning and end, which are also replaced by whitespaces
+		return (htmlLen - 2);
 	}
 	
 	/**

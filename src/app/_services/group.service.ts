@@ -24,7 +24,7 @@ export class GroupService {
 	 * @desc: Gets basic group from cache
 	 */
 	public getBasicGroupFromCache(groupId: string): BasicGroup {
-		return _.findWhere(this.groups, { 'groupId': groupId });
+		return this.groups.find((group) => group.groupId == groupId);
 	}
 	
 	/**
@@ -34,26 +34,31 @@ export class GroupService {
 		// Create Observable, such that subscribe can be used, after this function was called
 		return Observable.create((observer: Observer<BasicGroup>) => {
 			// Try to get group from cache
-			const cachedGroup = this.getBasicGroupFromCache(groupId);
-			
-			//console.log(cachedGroup);
-			//if (!_.isUndefined(cachedGroup))
-			//	console.log(cachedGroup.expiration);
+			const cachedGroupIndex = this.groups.findIndex(group => group.groupId == groupId);
 			
 			// If group was found in cache and was not expired inbetween, return it
 			// Note: Groups in finished or rejected topics are always taken from the database (expiration equals last deadline)
 			//       We assume that these groups are not opened very often
-			if (!_.isUndefined(cachedGroup) && cachedGroup.expiration > Date.now()) {
+			//if (cachedGroup !== undefined && cachedGroup.expiration > Date.now()) {
+			if (cachedGroupIndex != -1 && this.groups[cachedGroupIndex].expiration > Date.now()) {
 				// Hand over to next subscription
-				observer.next(cachedGroup);
+				observer.next(this.groups[cachedGroupIndex]);
 				observer.complete();
 			// If group was not cached, get it from server, store it in cache an return it
 			} else {
 				return this.httpManagerService.get('/json/group/basic/' + groupId).subscribe((group) => {
-					// Add group to cache
-					this.groups.push(new BasicGroup(group));
+					const groupFromDb = new BasicGroup(group);
+					
+					// If group was not cached before, add group to cache
+					if (cachedGroupIndex == -1) {
+						this.groups.push(groupFromDb);
+					// If group was cached, update cache
+					} else {
+						this.groups[cachedGroupIndex] = groupFromDb;
+					}
+					
 					// Hand over to next subscription
-					observer.next(group);
+					observer.next(groupFromDb);
 					observer.complete();
 				});
 			}

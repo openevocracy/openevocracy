@@ -128,7 +128,7 @@
 	"GROUPVIS_PROPOSAL_DETAIL_SUFFIX": "and ends on {{expiration}}",
 	"GROUPVIS_PROPOSAL_DETAIL_SUFFIX_EXPIRED": "and ended on {{expiration}}",
 	"GROUPVIS_DETAIL_GROUP_BUTTON_LABEL": "Go to selected group",
-	"GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL": "Go to selected proposal",
+	"GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL": "Show selected proposal",
 	"GROUPVIS_LEGEND_ME": "My proposal/groups",
 	"GROUPVIS_LEGEND_GROUPS": "Other groups",
 	"GROUPVIS_LEGEND_PROPOSALS": "Other proposals",

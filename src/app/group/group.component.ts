@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { GroupWelcomeDialogComponent } from '../dialogs/groupwelcome/groupwelcome.component';
 
+import { StageUpdateService } from '../_services/stageupdate.service';
 import { HttpManagerService } from '../_services/http-manager.service';
 import { UserService } from '../_services/user.service';
 import { GroupService } from '../_services/group.service';
@@ -22,7 +23,8 @@ export class GroupComponent implements OnInit, OnDestroy {
 
 	public meId: string;
 	public groupId: string;
-	
+	public group: BasicGroup;
+	public deadlineInterval: number;
 	public routerSubscription: any;
 
 	constructor(
@@ -31,38 +33,38 @@ export class GroupComponent implements OnInit, OnDestroy {
 		private userService: UserService,
 		private groupService: GroupService,
 		private httpManagerService: HttpManagerService,
-		private route: ActivatedRoute
+		private route: ActivatedRoute,
+		private stageUpdateService: StageUpdateService
 	) {
 		// Get userId of logged in user and groupId
 		this.meId = this.userService.getUserId();
 		this.groupId = this.router.url.split('/')[2];
+		
+		// Get group from resolver
+		this.group = new BasicGroup(this.route.snapshot.data.basicGroup);
+		//this.group = this.groupService.getBasicGroupFromCache(this.groupId);
+			
+		// Initialize stage update countdown
+		this.deadlineInterval = this.stageUpdateService.initCountdown(
+			this.group.expiration,
+			['/group', this.groupId]
+		);
 	}
 	
 	ngOnInit() {
-		// Get group from resolver
-		const group = new BasicGroup(this.route.snapshot.data.basicGroup);
-			
 		// If user is member (if me is truthy), check welcome status and possibly show welcome message
-		if (group.isMember(this.meId))
+		if (this.group.isMember(this.meId))
 			this.checkWelcomeStatus();
-		
-		// Allow reload of the whole component
-		this.router.routeReuseStrategy.shouldReuseRoute = function () {
-			return false;
-		};
-		
-		this.routerSubscription = this.router.events.subscribe((event) => {
-			if (event instanceof NavigationEnd) {
-				// Trick the Router into believing it's last link wasn't previously loaded
-				this.router.navigated = false;
-			}
-		});
 	}
 	
 	ngOnDestroy() {
    	// Unsubscribe from subscription to avoid memory leak
 		if (this.routerSubscription)
 			this.routerSubscription.unsubscribe();
+			
+		// Stop countdown
+		if (this.deadlineInterval)
+			clearInterval(this.deadlineInterval);
 	}
 	
 	/**

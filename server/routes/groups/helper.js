@@ -11,6 +11,30 @@ const utils = require('../../utils');
 const pads = require('../pads');
 
 /**
+ * @desc: Get expiration date of group
+ */
+exports.getGroupExpirationDateAsync = function(groupId) {
+	return db.collection('pads_group')
+		.findOneAsync({'groupId': groupId}, { 'expiration': true })
+		.then((pad) => {
+			return pad.expiration;
+	});
+};
+
+/**
+ * @desc: Get the pad of a group
+ */
+exports.getGroupPad = function(groupId) {
+	return db.collection('pads_group').findOneAsync({'groupId': groupId}, { 'expiration': true, 'docId': true })
+		.then((pad) => {
+			return pads.getPadHTMLAsync('group', pad.docId).then((padHtml) => {
+				console.log({ 'html': padHtml, ...pad });
+				return { 'html': padHtml, ...pad };
+		});
+	});
+};
+
+/**
  * @desc: Get group relations for specific group from database
  */
 exports.getGroupMembersAsync = function(groupId) {
@@ -36,6 +60,9 @@ exports.generateMemberNames = function(groupId, userIds) {
 	return userNames;
 };
 
+/*
+ * @desc: Get the member name and if not available, create one
+ */
 exports.getOrGenerateMemberName = async function(groupId, userId) {
 	// Get all user names from group
 	const members = await db.collection('group_relations').find(

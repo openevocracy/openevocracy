@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Observer } from 'rxjs';
+import { Observable, Observer, of } from 'rxjs';
 
 import { BasicTopic } from '../_models/topic/basic';
 import { TopicToolbar } from '../_models/topic/toolbar';
@@ -68,10 +68,10 @@ export class TopicService {
 	}
 	
 	/**
-	 * @desc: Gets basic topic from list
+	 * @desc: Gets basic topic from list, if it cannot be found, returns undefined
 	 */
 	public getBasicTopicFromList(topicId: string): BasicTopic {
-		return _.findWhere(this.topics, { 'topicId': topicId });
+		return this.topics.find((topic) => topic.topicId == topicId);
 	}
 	
 	/**

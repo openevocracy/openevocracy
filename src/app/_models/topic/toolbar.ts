@@ -6,6 +6,8 @@ export class TopicToolbar {
 	name: string;
 	nextDeadline: number;
 	stage: number;
+	stageRejectedStarted: number;
+	stagePassedStarted: number;
 	
 	// Locally calculated
 	stageName: string;
@@ -15,6 +17,8 @@ export class TopicToolbar {
 		this._id = res._id;
 		this.name = res.name;
 		this.nextDeadline = res.nextDeadline;
+		this.stageRejectedStarted = res.stageRejectedStarted;
+		this.stagePassedStarted = res.stagePassedStarted;
 		this.stage = res.stage;
 		
 		// Get utils service instance

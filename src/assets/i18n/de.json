@@ -128,7 +128,7 @@
 	"GROUPVIS_PROPOSAL_DETAIL_SUFFIX": "geschrieben und endet am {{expiration}}",
 	"GROUPVIS_PROPOSAL_DETAIL_SUFFIX_EXPIRED": "geschrieben und endete am {{expiration}}",
 	"GROUPVIS_DETAIL_GROUP_BUTTON_LABEL": "Zur gewählten Gruppe",
-	"GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL": "Zum gewählten Vorschlag",
+	"GROUPVIS_DETAIL_PROPOSAL_BUTTON_LABEL": "Gewählten Vorschlag anzeigen",
 	"GROUPVIS_LEGEND_ME": "Mein Vorschlag / Meine Gruppen",
 	"GROUPVIS_LEGEND_GROUPS": "Andere Gruppen",
 	"GROUPVIS_LEGEND_PROPOSALS": "Andere Vorschläge",

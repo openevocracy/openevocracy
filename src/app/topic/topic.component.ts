@@ -1,5 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router } from '@angular/router';
+
+import { StageUpdateService } from '../_services/stageupdate.service';
+import { TopicService } from '../_services/topic.service';
 
 @Component({
 	selector: 'app-topic',
@@ -8,21 +11,26 @@ import { Router, NavigationEnd } from '@angular/router';
 })
 export class TopicComponent implements OnInit, OnDestroy {
 	
+	public topicId: string;
 	public routerSubscription: any;
+	public deadlineInterval: number;
 	
 	constructor(
-		private router: Router
+		private router: Router,
+		private topicService: TopicService,
+		private stageUpdateService: StageUpdateService
 	) {
-		this.router.routeReuseStrategy.shouldReuseRoute = function () {
-			return false;
-		};
+		// Get topicId from route
+		this.topicId = this.router.url.split('/')[2];
 		
-		this.routerSubscription = this.router.events.subscribe((event) => {
-			if (event instanceof NavigationEnd) {
-				// Trick the Router into believing it's last link wasn't previously loaded
-				this.router.navigated = false;
-			}
-		});
+		// Get basic topic
+		const basicTopic = this.topicService.getBasicTopicFromList(this.topicId);
+			
+		// Initialize stage update countdown
+		this.deadlineInterval = this.stageUpdateService.initCountdown(
+			basicTopic.nextDeadline,
+			['/topic', this.topicId]
+		);
 	}
 	
    ngOnInit() {}
@@ -31,6 +39,10 @@ export class TopicComponent implements OnInit, OnDestroy {
    	// Unsubscribe from subscription to avoid memory leak
 		if (this.routerSubscription)
 			this.routerSubscription.unsubscribe();
+		
+		// Stop countdown
+		if (this.deadlineInterval)
+			clearInterval(this.deadlineInterval);
 	}
 
 }
