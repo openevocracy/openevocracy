@@ -349,8 +349,6 @@ exports.update = function(req, res) {
 		// Validate password using parseley (no whitespace)
 		validation = validate(_.pick(userUpdate, 'password'), { 'password': { presence: true, format: /^\S+$/ } });
 		
-		console.log(userUpdate.password);
-		
 		if(!_.isUndefined(validation))
 			utils.sendAlert(res, 200, 'danger', 'USER_FORM_VALIDATION_ERROR_PASSWORD');
 		else

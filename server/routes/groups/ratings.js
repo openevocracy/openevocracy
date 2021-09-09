@@ -28,29 +28,43 @@ exports.getMembersRatings = function(req, res) {
 /**
  * @desc: Save rating
  */
-exports.rate = function(req, res) {
+exports.rate = async function(req, res) {
 	const ratedUserId = ObjectId(req.body.ratedUserId);  // The user who was rated
 	const groupId = ObjectId(req.body.groupId);
 	const userId = ObjectId(req.user._id);
 	const type = parseInt(req.body.type, 10);
 	const score = parseInt(req.body.score, 10);
 	
-	// Check if request is valid and store data
-	helper.getGroupMembersAsync(groupId).then((members) => {
-		// Check if user is member of group, otherwise reject
-		const member = utils.findWhereObjectId(members, { 'userId': userId });
-		if (_.isUndefined(member))
-			return utils.rejectPromiseWithMessage(403, 'FORBIDDEN');
+	// Get expiration date from group
+	const expiration_promise = helper.getGroupExpirationDateAsync(groupId);
+	
+	// Get members of the group
+	const groupMembers_promise = helper.getGroupMembersAsync(groupId);
+	
+	// Resolve both promises
+	const [expiration, groupMembers] = await Promise.all([expiration_promise, groupMembers_promise]);
+	
+	// Check if expired
+	const date = new Date();
+	if (expiration < date.getTime())
+		return res.status(403).send();  // FORBIDDEN 
+	
+	const member = utils.findWhereObjectId(groupMembers, { 'userId': userId });
+	
+	// Check if user is member of group
+	if (_.isUndefined(member))
+		return res.status(403).send();  // FORBIDDEN
+	
+	// Check if score is between 1 and 5
+	if(score < 1 || score > 5)
+		return res.status(400).send();  // BAD_REQUEST
+	
+	// Store rating in database
+	const rating = await db.collection('group_ratings').updateAsync(
+			{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type },
+			{ $set: { 'score': score } }, { upsert: true });
 			
-		// Check if score is between 1 and 5
-		if(score < 1 || score > 5)
-			return utils.rejectPromiseWithMessage(400, 'BAD_REQUEST');
-		
-		// Store rating in database
-		return db.collection('group_ratings').updateAsync(
-				{ 'ratedUserId': ratedUserId, 'groupId': groupId, 'userId': userId, 'type': type },
-				{ $set: { 'score': score } }, { upsert: true });
-	}).then(res.json.bind(res)).catch(utils.isOwnError, utils.handleOwnError(res));
+	return res.send(rating);
 };
 
 /**

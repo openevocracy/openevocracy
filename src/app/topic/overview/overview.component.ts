@@ -44,23 +44,25 @@ export class TopicOverviewComponent extends EditorComponent {
 	public faDownload = faDownload;
 
 	constructor(
-		protected snackBar: MatSnackBar,
 		protected router: Router,
 		protected userService: UserService,
 		protected translateService: TranslateService,
 		protected connectionAliveService: ConnectionAliveService,
 		protected editorService: EditorService,
 		protected dialog: MatDialog,
+		private snackBar: MatSnackBar,
 		private snackbarService: SnackbarService,
 		private topicService: TopicService,
 		private activityListService: ActivityListService
 	) {
-		super(snackBar, router, userService, translateService, connectionAliveService, editorService, dialog);
+		super(router, userService, translateService, connectionAliveService, editorService, dialog);
 		
 		this.C = C;
 		
 		// Get topicId from route
 		this.topicId = this.router.url.split('/')[2];
+		
+		console.log('overview topicId', this.topicId);
 		
 		// Get basic topic
 		this.basicTopic = this.topicService.getBasicTopicFromList(this.topicId);
@@ -137,14 +139,6 @@ export class TopicOverviewComponent extends EditorComponent {
 		
 		// Init editor
 		this.initializeEditor(quillEditor);
-	}
-	
-	/**
-	 * @desc: Updates the component view, when countdown has finished and stage is over
-	 */
-	public updateView() {
-		// Reload basic topic
-		this.router.navigate(['/topic', this.topicId]);
 	}
 
 }

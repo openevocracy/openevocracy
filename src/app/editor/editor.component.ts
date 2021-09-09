@@ -1,8 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
-import { forkJoin } from 'rxjs/observable/forkJoin';
-import { MatSnackBar, MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ConnectionAliveService } from '../_services/connection.service';
@@ -38,7 +37,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 	public quillModules;
 	public editor;
 	public userToken: string;
-	public deadlineInterval;
 	public padSocket;
 	
 	public connectionLostSubscription;
@@ -49,7 +47,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 	public faTimes = faTimes;
 
 	constructor(
-		protected snackBar: MatSnackBar,
 		protected router: Router,
 		protected userService: UserService,
 		protected translateService: TranslateService,
@@ -95,10 +92,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 		// Close pad socket
 		if (this.padSocket)
 			this.padSocket.close();
-		
-		// Stop countdown
-		if (this.deadlineInterval)
-			clearInterval(this.deadlineInterval);
 			
 		// Unsubscribe from event emitter
 		this.connectionLostSubscription.unsubscribe();
@@ -143,9 +136,6 @@ export class EditorComponent implements OnInit, OnDestroy {
 		
 		// Initialize socket
 		this.initializePadSocket();
-		
-		// Initialize countdown
-		this.initCountdown(this.editor.deadline);
 	}
 	
 	/**
@@ -303,55 +293,5 @@ export class EditorComponent implements OnInit, OnDestroy {
 	}
 	
 	public afterContentChanged() {}
-	
-	/*
-	 * @desc: Initialize timer and redirect from editor to view if deadline is over
-	 */
-	private initCountdown(deadline) {
-		let delta = deadline - Date.now();
-		
-		// Safely exit here, when deadline is over
-		if (delta <= 0)
-			return;
-		
-		// Run callback every second
-		this.deadlineInterval = setInterval(function() {
-			delta = deadline - Date.now();
-			const seconds = Math.floor(delta/1000);
-			
-			// If less than 2 minutes (120000ms) left, show time remaining in snackbar every 10 seconds
-			if (delta > 0 && delta <= 120000 && seconds % 10 == 0) {
-				var secondsLeft = String(Math.round(delta/1000));
-				forkJoin(
-					this.translateService.get('EDITOR_SNACKBAR_CLOSE_SECONDS', {s: secondsLeft}),
-					this.translateService.get('FORM_BUTTON_CLOSE'))
-				.subscribe(([msg, action]) => {
-					this.snackBar.open(msg, action, {
-						'duration': 3000
-					});
-				});
-			}
-			
-			// If less than 2 hours (7200000ms) left, show time remaining in snackbar every 10 minutes
-			if (delta > 0 && delta <= 7200000 && delta > 120000 && seconds % 600 == 0) {
-				var minutesLeft = String(Math.round(delta/(1000*60)));
-				forkJoin(
-					this.translateService.get('EDITOR_SNACKBAR_CLOSE_MINUTES', {m: minutesLeft}),
-					this.translateService.get('FORM_BUTTON_CLOSE'))
-				.subscribe(([msg, action]) => {
-					this.snackBar.open(msg, action, {
-						'duration': 10000
-					});
-				});
-			}
-			
-			// If countdown has finished, stop interval and update view
-			if (delta <= 0) {
-				clearInterval(this.deadlineInterval);
-				// Update view, this functions needs to be implemented in all child components
-				this.updateView();
-			}
-		}.bind(this), 1000);
-	}
 
 }

@@ -41,13 +41,18 @@ function assignParticipantsToGroups(participants) {
 	// Shuffle topic participants
 	_.shuffle(participants);
 	
+	console.log('_.size(participants)', _.size(participants));
+	
 	// Compute number of groups
-	var numGroups = calculateNumberOfGroups(_.size(participants));
+	const numGroups = calculateNumberOfGroups(_.size(participants));
+	
+	console.log('numGroups', numGroups);
 	
 	// Initialize groups (as empty array)
-	var groups = new Array(numGroups);
-	for(var i=0; i<numGroups; ++i)
+	let groups = new Array(numGroups);
+	for(let i=0; i<numGroups; ++i) {
 		groups[i] = [];
+	}
     
 	// Push topic participants into groups
 	_.each(participants, function(participant) {
@@ -58,7 +63,7 @@ function assignParticipantsToGroups(participants) {
     
 	// TODO log with logging library
 	// Log group member distribution
-	var counts = _.countBy(groups, function(group) {return _.size(group);});
+	const counts = _.countBy(groups, function(group) {return _.size(group);});
 	console.log('groups filled: ' + JSON.stringify(counts));
 	
 	return groups;

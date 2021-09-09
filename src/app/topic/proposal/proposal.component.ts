@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatSnackBar, MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { BasicTopic } from '../../_models/topic/basic';
@@ -11,7 +11,6 @@ import { EditorComponent } from '../../editor/editor.component';
 import { ConnectionAliveService } from '../../_services/connection.service';
 import { UserService } from '../../_services/user.service';
 import { TopicService } from '../../_services/topic.service';
-import { SnackbarService } from '../../_services/snackbar.service';
 import { UtilsService } from '../../_services/utils.service';
 import { ConfigService } from '../../_services/config.service';
 
@@ -47,7 +46,6 @@ export class TopicProposalComponent extends EditorComponent {
 	public faTimesCircle = faTimesCircle;
 
 	constructor(
-		protected snackBar: MatSnackBar,
 		protected router: Router,
 		protected userService: UserService,
 		protected translateService: TranslateService,
@@ -58,7 +56,7 @@ export class TopicProposalComponent extends EditorComponent {
 		private utilsService: UtilsService,
 		private configService: ConfigService
 	) {
-		super(snackBar, router, userService, translateService, connectionAliveService, editorService, dialog);
+		super(router, userService, translateService, connectionAliveService, editorService, dialog);
 		
 		this.C = C;
 		this.cfg = configService.get();
@@ -120,20 +118,14 @@ export class TopicProposalComponent extends EditorComponent {
 	 * @desc: Checks if a proposal is valid
 	 */
 	public isProposalValid(): boolean {
-		// Get raw text either from editor or from static proposal html
-		const text = this.editor ? this.editor.getText() : this.proposal.html;
-		// Count number of containing words
-		const numWords = this.utilsService.countStringWords(text);
+		let numWords = 0;
+		if (this.editor) {
+			numWords = this.utilsService.countStringWords(this.editor.getText()); // counts words based on spaces and linebreaks
+		} else {
+			numWords = this.utilsService.countHtmlWords(this.proposal.html); // replaces HTML tags by spaces and then counts words based on spaces
+		}
+		
 		// Return if proposal is valid or not
 		return (numWords >= this.cfg.MIN_WORDS_PROPOSAL);
 	}
-	
-	/**
-	 * @desc: Updates the component view, when countdown has finished and stage is over
-	 */
-	public updateView() {
-		// Reload basic topic
-		this.router.navigate(['/topic', this.topicId]);
-	}
-
 }

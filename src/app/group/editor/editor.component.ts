@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar, MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ConnectionAliveService } from '../../_services/connection.service';
 import { UserService } from '../../_services/user.service';
 import { GroupService } from '../../_services/group.service';
-import { SnackbarService } from '../../_services/snackbar.service';
 
 import { EditorService } from '../../_editor/editor.service';
 import { LineNumbersService } from '../../_editor/linenumbers.service';
@@ -43,7 +42,6 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 	public hideEditor: boolean = true;
 	
   constructor(
-		protected snackBar: MatSnackBar,
 		protected router: Router,
 		protected userService: UserService,
 		protected translateService: TranslateService,
@@ -53,7 +51,7 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 		private lineNumbersService: LineNumbersService,
 		private groupService: GroupService
 	) {
-		super(snackBar, router, userService, translateService, connectionAliveService, editorService, dialog);
+		super(router, userService, translateService, connectionAliveService, editorService, dialog);
 		
 		/*const bindings = {
 			// Called when Enter is pressed
@@ -153,13 +151,5 @@ export class GroupEditorComponent extends EditorComponent implements OnInit {
 		const numbering = document.getElementsByClassName("ql-numbering")[0];
 		numbering.remove();  // Remove
 		this.lineNumbersService.getLineNumbers(this.editor);  // Add
-	}
-	
-	/**
-	 * @desc: Updates the component view, when countdown has finished and stage is over
-	 */
-	public updateView() {
-		// When group is finished, navigate to group again
-		this.router.navigate(['/group', this.group.groupId]);
 	}
 }

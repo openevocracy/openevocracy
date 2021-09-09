@@ -15,7 +15,7 @@ services:
     # Define ENV environment variable here, since it is only valid for this container
      - ENV=prod
   mongodb:
-    image: mongo:3
+    image: mongo:4
     restart: always
     volumes:
     - ./data:/data/db

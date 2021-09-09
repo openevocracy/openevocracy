@@ -124,7 +124,9 @@ exports.equalId = function(a, b) {
  */
 exports.countHtmlWords = function(html) {
 	// Remove tags, split and get length
-	return html.replace(/<\/?[^>]+(>|$)/g, "").split(/\s+\b/).length;
+	const htmlLen = html.replace(/<[^>]*>?/g, " ").split(/\s+/g).length;
+	// Reduce by -2 because of <p> and </p> tags in beginning and end, which are also replaced by whitespaces
+	return (htmlLen - 2);
 };
 
 /*

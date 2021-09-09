@@ -76,8 +76,8 @@ exports.basic = function(req, res) {
 	
 	// Try to find topic and manage state
 	db.collection('topics').findOneAsync({ '_id': topicId }).then((topic) => {
-      return manage.manageTopicStateAsync(topic);
-	}).then(function(topic) {
+		return manage.manageTopicStateAsync(topic);
+	}).then((topic) => {
 		// If no topic was found, reject, otherwise return topic
 		if(_.isNull(topic))
 			return utils.rejectPromiseWithAlert(404, 'danger', 'TOPIC_NOT_FOUND');
@@ -111,7 +111,9 @@ exports.toolbar = function(req, res) {
    		'_id': topic._id,
    		'name': topic.name,
 			'stage': topic.stage,
-   		'nextDeadline': topic.nextDeadline
+   		'nextDeadline': topic.nextDeadline,
+   		'stageRejectedStarted': topic.stageRejectedStarted,
+   		'stagePassedStarted': topic.stagePassedStarted
    	};
    }).then(res.json.bind(res));
 };

@@ -53,8 +53,6 @@ exports.create = async function(req, res) {
 	const topic = await db.collection('topics').findOneAsync({ '_id': topicId });
 	
 	// Check if topic is at least in proposal stage to create proposal
-	console.log("topic", topic);
-	console.log(C.STAGE_PROPOSAL);
 	if (topic.stage < C.STAGE_PROPOSAL) {
 		utils.sendAlert(res, 400, 'danger', 'TOPIC_REQUIREMENT_PROPOSAL_STAGE');
 		return;

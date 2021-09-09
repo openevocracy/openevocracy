@@ -6,6 +6,7 @@ const Promise = require('bluebird');
 // Own references
 const db = require('../../database').db;
 const utils = require('../../utils');
+const manageTopic = require('../topics/manage');
 const pads = require('../pads');
 const users = require('../users');
 const helper = require('./helper');
@@ -42,13 +43,24 @@ exports.onlineMembers = function(req, res) {
 /**
  * @desc: Get basic group information
  */
-exports.getBasicGroup = function(req, res) {
+exports.getBasicGroup = async function(req, res) {
 	const groupId = ObjectId(req.params.id);
 	const userId = ObjectId(req.user._id);
 	
 	// Set lastActivity for the member querying the group
 	const lastActivity_promise = db.collection('group_relations')
-		.updateAsync({ 'grouId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
+		.updateAsync({ 'groupId': groupId, 'userId': userId }, { $set: {'lastActivity': Date.now()} });
+	
+	// Get topicId
+	const topicId = await db.collection('groups')
+		.findOneAsync({ '_id': groupId }, { 'topicId': true })
+		.then((group) => group.topicId);
+	
+	// Get topic
+	let topic = await db.collection('topics').findOneAsync({ '_id': topicId });
+	
+	// First manage topic stage and see if goup needs to jump to next stage/level
+	topic = await manageTopic.manageTopicStateAsync(topic);
 	
 	// Get group
 	const group_promise = db.collection('groups').findOneAsync({ '_id': groupId });
@@ -56,9 +68,12 @@ exports.getBasicGroup = function(req, res) {
 	// Get group members
 	const groupRelations_promise = helper.getGroupMembersAsync(groupId);
 	
+	// Resolve group and group member promises
+	const [group, groupRelations] = await Promise.all([group_promise, groupRelations_promise]);
+	
 	// Get previous pads
 	const prevPads_promise = Promise.join(group_promise, groupRelations_promise).spread(function(group, groupRelations) {
-		var prevPadIds = _.pluck(groupRelations, 'prevPadId');
+		const prevPadIds = _.pluck(groupRelations, 'prevPadId');
 		if (group.level == 0) {
 			return db.collection('pads_proposal')
 				.find({ '_id': {$in: prevPadIds} }, { 'authorId': true, 'docId': true }).toArrayAsync();
@@ -99,22 +114,12 @@ exports.getBasicGroup = function(req, res) {
       });
 	});
 	
-	// Get topic name
-	const topic_promise = group_promise.then((group) => {
-		return db.collection('topics').findOneAsync({ '_id': group.topicId }, { 'name': true });	
-	});
-	
-	// Get expiration date
-	const pad_promise = db.collection('pads_group').findOneAsync({'groupId': groupId}, { 'expiration': true, 'docId': true })
-		.then((pad) => {
-			return pads.getPadHTMLAsync('group', pad.docId).then((padHtml) => {
-				return { 'html': padHtml, ...pad };
-			});
-	});
+	// Get pad
+	const pad_promise = helper.getGroupPad(groupId);
 	
 	// Return result
-	Promise.join(group_promise, isLastGroup_promise, groupMembersDetails_promise, topic_promise, pad_promise, lastActivity_promise)
-		.spread((group, isLastGroup, groupMembersDetails, topic, pad) => {
+	Promise.join(group_promise, isLastGroup_promise, groupMembersDetails_promise, pad_promise, lastActivity_promise)
+		.spread((group, isLastGroup, groupMembersDetails, pad) => {
 		
 		return {
 			'groupId': groupId,

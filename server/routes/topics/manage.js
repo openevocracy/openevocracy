@@ -6,7 +6,6 @@ const fs = Promise.promisifyAll(require('fs'));
 const path = require('path');
 const appRoot = require('app-root-path');
 const AsyncLock = require('async-lock');
-const lock = new AsyncLock();
 
 // Own references
 const C = require('../../../shared/constants').C;
@@ -16,6 +15,9 @@ const utils = require('../../utils');
 const groups = require('../groups');
 const pads = require('../pads');
 const activities = require('../activities');
+
+// Define lock object to avoid race condition in manage topic
+const lock = new AsyncLock();
 
 function calculateDeadline(nextStage, prevDeadline, levelDuration) {
     // Define standard parameter
@@ -71,24 +73,23 @@ async function manageConsensusStageAsync(topic, levelDuration) {
 				// get the pad id of final document
 				// e.g. the proposal pad id of the group in the last level
 				
-				/* // async/await
+				// async/await
 				// Get pad HTML and save it in file system
-				const group = await db.collection('groups').findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true});
-				console.log(group);
-				const docId = await db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
-				const padHtml = await pads.getPadHTMLAsync('group', docId);
+				//const group = await db.collection('groups').findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true});
+				//console.log(group);
+				//const docId = await db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
+				//const padHtml = await pads.getPadHTMLAsync('group', docId);
 				
 				// Get pad PDF and save it in file system
-				const padPDF = await pads.getPadPDFAsync(topicId, topic.name, padHtml);
+				//const padPDF = await pads.getPadPDFAsync(topicId, topic.name, padHtml);
 				
 				// Updates below are only required if consensus stage is over
-            update_set_promise = {
-                'stage': (topic.stage = C.STAGE_PASSED),
-                'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_PASSED,prevDeadline)),
-                'stagePassedStarted': Date.now(),
-                'finalDocument': padPDF
-            };
-				*/
+            //update_set_promise = {
+            //    'stage': (topic.stage = C.STAGE_PASSED),
+            //    'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_PASSED,prevDeadline)),
+            //    'stagePassedStarted': Date.now(),
+            //    'finalDocument': padPDF
+            //};
 				
 				const finalDocumentHtml_promise = db.collection('groups')
 					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
@@ -149,6 +150,85 @@ async function manageConsensusStageAsync(topic, levelDuration) {
 }
 exports.manageConsensusStage = manageConsensusStageAsync;
 
+/*function manageConsensusStageAsync(topic, levelDuration) {
+    // levelDuration is an optional parameter
+    // it will get a default value in calculateDeadline if not set (for testing purposes)
+    var prevDeadline = topic.nextDeadline;
+    
+    return groups.manage.remixGroupsAsync(topic).then(function(result) {
+        var update_set_promise;
+        switch(result.nextStage) {
+        case C.STAGE_CONSENSUS:
+            // updates below are only required while we are in consensus stage
+            update_set_promise = {
+                'level': (++topic.level),
+                'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline,levelDuration))
+            };
+            break;
+        case C.STAGE_PASSED:
+				var topicId = topic._id;
+				
+				// get the pad id of final document
+				// e.g. the proposal pad id of the group in the last level
+				const finalDocumentHtml_promise = db.collection('groups')
+					.findOneAsync({ 'topicId': topicId, 'level': topic.level },{'_id': true})
+					.then(function(group) {
+						return db.collection('pads_group').findOneAsync({'groupId': group._id},{'docId': true}).get('docId');
+				    }).then(function(docId) {
+				    	return pads.getPadHTMLAsync('group', docId);
+				    });
+            
+            // Get pad PDF and save it in file system
+            finalDocumentHtml_promise.then((html) => {
+            	// NOTE: return has no function here
+            	return pads.getPadPDFAsync(topicId, topic.name, html);
+            });
+            
+            // Updates below are only required if consensus stage is over
+            update_set_promise = {
+                'stage': (topic.stage = C.STAGE_PASSED),
+                'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_PASSED,prevDeadline)),
+                'stagePassedStarted': Date.now(),
+                'finalDocument': finalDocumentHtml_promise
+            };
+            
+            // Add activity for author
+            const authorActivity_promise = activities.addActivityAsync(topic.authorId, C.ACT_TOPIC_COMPLETE, topicId);
+            
+            // Add activities for interested persons (persons who voted for the respective topics)
+				const interestedActivity_promise = db.collection('topic_votes')
+					.find({'topicId': topicId}, {'userId': true}).toArrayAsync()
+					.then(function(userVotes) {
+							_.each(userVotes, function(el) {
+									if (!utils.equalId(el.userId, topic.authorId)) // if activity has not yet been added
+										activities.addActivityAsync(el.userId, C.ACT_TOPIC_COMPLETE, topicId);
+								});
+						});
+		
+            break;
+        case C.STAGE_REJECTED:
+            // updates below are only required if topic was rejected
+            update_set_promise = {
+                'stage': (topic.stage = C.STAGE_REJECTED),
+                'nextDeadline': (topic.nextDeadline = calculateDeadline(C.STAGE_REJECTED,prevDeadline)),
+                'stageRejectedStarted': Date.now(),
+                'rejectedReason': result.rejectedReason
+            };
+            break;
+        default:
+            return Promise.reject('unknown stage');
+        }
+        
+        // update database
+        return Promise.props(update_set_promise).then(function(update_set) {
+            return db.collection('topics').updateAsync(
+                _.pick(topic, '_id'), { $set: update_set }, {}).
+                return(_.extend(topic, update_set));
+        });
+    });
+}
+exports.manageConsensusStage = manageConsensusStageAsync;*/
+
 /**
  * checks if a minimum of MIN_VOTES_PER_TOPIC proposal exists
  */
@@ -164,10 +244,8 @@ function isAccepted(topic) {
  * @return {object} topics - all adjusted topics
  */
 function manageAndListTopicsAsync() {
-	return lock.acquire('manageTopic', function() {
-		return db.collection('topics').find().toArrayAsync()
-			.map(_.partial(manageTopicStateAsync));
-	});
+	return db.collection('topics').find().toArrayAsync()
+		.map(_.partial(manageTopicStateAsync));
 }
 exports.manageAndListTopicsAsync = manageAndListTopicsAsync;
 
@@ -181,64 +259,76 @@ exports.manageAndListTopicsAsync = manageAndListTopicsAsync;
  */
 function manageTopicStateAsync(topic) {
 	
-	// Exit this function if topic does not exist or stage transition is not due yet
-	if(_.isNull(topic) || Date.now() < topic.nextDeadline)
+	// Stop early if topic has already ended
+	if (!_.isNull(topic) && (topic.stage == C.STAGE_REJECTED || topic.stage == C.STAGE_PASSED))
 		return Promise.resolve(topic);
-			
-	// Move to next stage
-	var prevDeadline = topic.nextDeadline;
-	switch (topic.stage) {
-		case C.STAGE_SELECTION: // we are currently in selection stage
-			return isAccepted(topic).then(function(isAccepted) {
-				var stageStartedEntryName;
-				if(isAccepted) {
-					// Topic does meet the minimum requirements for the next stage, move to next stage
-					topic.stage = C.STAGE_PROPOSAL;
-					topic.nextDeadline = calculateDeadline(C.STAGE_PROPOSAL,prevDeadline); // get deadline for proposal stage
-					stageStartedEntryName = 'stageProposalStarted';
-					topic[stageStartedEntryName] = Date.now();
-				} else {
-					// Topic has been rejected, move to rejection stage
-					topic.stage = C.STAGE_REJECTED;
-					topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VOTES';
-					stageStartedEntryName = 'stageRejectedStarted';
-					topic[stageStartedEntryName] = Date.now();
-				}
-				var updateTopicStatePromise = updateTopicStateAsync(topic,stageStartedEntryName);
-				var updatePadExpirationPromise = db.collection('pads_topic_description').updateAsync(
-					{ '_id': topic.pid }, { $set: { 'expiration': Date.now() }}
-				);
-				
-				return Promise.join(updateTopicStatePromise, updatePadExpirationPromise).
-				return(topic);
-			});
-		case C.STAGE_PROPOSAL: // we are currently in proposal stage
-			// Set the next deadline here, so we can use it in createGroupsAsync.
-			topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS,prevDeadline);
-			
-			return groups.manage.createGroupsAsync(topic).then(function(groups) {
-				var stageStartedEntryName;
-				
-				if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {
-					topic.stage = C.STAGE_CONSENSUS;
-					stageStartedEntryName = 'stageConsensusStarted';
-				} else {
-					topic.stage = C.STAGE_REJECTED;
-					//topic.nextDeadline = cfg.DURATION_NONE;
-					topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS';
-					stageStartedEntryName = 'stageRejectedStarted';
-				}
-				
-				topic[stageStartedEntryName] = Date.now();
-				return Promise.join(topic, stageStartedEntryName);
-			}).spread(function(topic, stageStartedEntryName) {
-				return updateTopicStateAsync(topic, stageStartedEntryName).return(topic);
-			});
-		case C.STAGE_CONSENSUS: // we are currently in consensus stage
-			return manageConsensusStageAsync(topic);
-	}
 	
-	return Promise.resolve(topic);
+	// Lock everything here to avoid race condition
+	return lock.acquire('manageTopic', async function() {
+		
+		// If topic does not exist, stop here (e.g. if a not-existing topic id was opend by the user)
+		if (_.isNull(topic))
+			return Promise.resolve(null);
+		
+		// Load nextDeadline from databse, for the case it has already been changed by a previous process
+		const nextDeadline = await db.collection('topics')
+			.findOneAsync({ '_id': ObjectId(topic._id) }, { 'nextDeadline': true })
+			.then((topicFromDb) => topicFromDb.nextDeadline);
+		
+		// If stage transition is not due yet, stop here
+		if (Date.now() < nextDeadline)
+			return Promise.resolve(topic);
+				
+		// Move to next stage
+		var prevDeadline = topic.nextDeadline;
+		switch (topic.stage) {
+			case C.STAGE_SELECTION: // we are currently in selection stage
+				return isAccepted(topic).then(function(isAccepted) {
+					var stageStartedEntryName;
+					if(isAccepted) {
+						// Topic does meet the minimum requirements for the next stage, move to next stage
+						topic.stage = C.STAGE_PROPOSAL;
+						topic.nextDeadline = calculateDeadline(C.STAGE_PROPOSAL, prevDeadline); // get deadline for proposal stage
+						stageStartedEntryName = 'stageProposalStarted';
+						topic[stageStartedEntryName] = Date.now();
+					} else {
+						// Topic has been rejected, move to rejection stage
+						topic.stage = C.STAGE_REJECTED;
+						topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VOTES';
+						stageStartedEntryName = 'stageRejectedStarted';
+						topic[stageStartedEntryName] = Date.now();
+					}
+					// Update topic and return result
+					return updateTopicStateAsync(topic, stageStartedEntryName).return(topic);
+				});
+			case C.STAGE_PROPOSAL: // we are currently in proposal stage
+				// Set the next deadline here, so we can use it in createGroupsAsync.
+				topic.nextDeadline = calculateDeadline(C.STAGE_CONSENSUS, prevDeadline);
+				
+				return groups.manage.createGroupsAsync(topic).then(function(groups) {
+					var stageStartedEntryName;
+					
+					if(_.size(groups) >= cfg.MIN_GROUPS_PER_TOPIC) {
+						topic.stage = C.STAGE_CONSENSUS;
+						stageStartedEntryName = 'stageConsensusStarted';
+					} else {
+						topic.stage = C.STAGE_REJECTED;
+						topic.nextDeadline = cfg.DURATION_NONE;
+						topic.rejectedReason = 'REJECTED_NOT_ENOUGH_VALID_USER_PROPOSALS';
+						stageStartedEntryName = 'stageRejectedStarted';
+					}
+					
+					topic[stageStartedEntryName] = Date.now();
+					return Promise.join(topic, stageStartedEntryName);
+				}).spread(function(topic, stageStartedEntryName) {
+					return updateTopicStateAsync(topic, stageStartedEntryName).return(topic);
+				});
+			case C.STAGE_CONSENSUS: // we are currently in consensus stage
+				return manageConsensusStageAsync(topic);
+		}
+		
+		return Promise.resolve(topic);
+	});
 }
 exports.manageTopicStateAsync = manageTopicStateAsync;
 
@@ -391,7 +481,7 @@ function appendTopicInfoAsync(topic, userId, with_details) {
 }
 exports.appendTopicInfoAsync = appendTopicInfoAsync;
 
-function updateTopicStateAsync(topic,stageStartedEntryName) {
+function updateTopicStateAsync(topic, stageStartedEntryName) {
     return db.collection('topics').updateAsync(
         _.pick(topic, '_id'),
         { $set: _.pick(topic, 'stage', 'nextDeadline', 'rejectedReason', stageStartedEntryName) },
