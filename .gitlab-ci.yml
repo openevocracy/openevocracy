@@ -80,4 +80,6 @@ release_docker:
   image: docker:stable
   stage: release
   script:
-  - docker build -t openevocracy .
+  - docker login -u openevocracy -p $DOCKERHUB_ACCESS_TOKEN
+  - docker build -t openevocracy/openevocracy:$CI_COMMIT_REF_SLUG .
+  - docker push openevocracy/openevocracy:$CI_COMMIT_REF_SLUG
