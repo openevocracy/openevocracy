@@ -20,7 +20,7 @@ export class StageUpdateService {
 	/*
 	 * @desc: Initialize timer and redirect from editor to view if deadline is over
 	 */
-	public initCountdown(deadline, route): number {
+	public initCountdown(deadline, route) : any {
 		let delta = deadline - Date.now();
 		
 		// Safely exit here, when deadline is over
@@ -68,7 +68,7 @@ export class StageUpdateService {
 			}
 		}, 1000);
 		
-		// Return the interval, sucht that the parent is able to close it
+		// Return the interval, such that the parent is able to close it
 		return interval;
 	}
 }

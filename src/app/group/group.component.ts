@@ -24,7 +24,7 @@ export class GroupComponent implements OnInit, OnDestroy {
 	public meId: string;
 	public groupId: string;
 	public group: BasicGroup;
-	public deadlineInterval: number;
+	public deadlineInterval: any;
 	public routerSubscription: any;
 
 	constructor(

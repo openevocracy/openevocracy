@@ -1,0 +1,82 @@
+<!DOCTYPE html><html class="default no-js"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>openevocracy</title><meta name="description" content="Documentation for openevocracy"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script async src="assets/search.js" id="search-script"></script></head><body><script>document.body.classList.add(localStorage.getItem(&quot;tsd-theme&quot;) || &quot;os&quot;)</script><header><div class="tsd-page-toolbar"><div class="container"><div class="table-wrap"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget search no-caption">Search</label><input type="text" id="tsd-search-field"/></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">openevocracy</a></div><div class="table-cell" id="tsd-widgets"><div id="tsd-filter"><a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a><div class="tsd-filter-group"><div class="tsd-select" id="tsd-filter-visibility"><span class="tsd-select-label">All</span><ul class="tsd-select-list"><li data-value="public">Public</li><li data-value="protected">Public/Protected</li><li data-value="private" class="selected">All</li></ul></div> <input type="checkbox" id="tsd-filter-inherited" checked/><label class="tsd-widget" for="tsd-filter-inherited">Inherited</label><input type="checkbox" id="tsd-filter-externals" checked/><label class="tsd-widget" for="tsd-filter-externals">Externals</label></div></div><a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a></div></div></div></div><div class="tsd-page-title"><div class="container"><h1> openevocracy</h1></div></div></header><div class="container container-main"><div class="row"><div class="col-8 col-content"><div class="tsd-panel tsd-typography">
+<a href="#openevocracy" id="openevocracy" style="color: inherit; text-decoration: none;">
+  <h1>OpenEvocracy</h1>
+</a>
+<p>Is an implementation of the Evocracy concept: <a href="https://openevocracy.org/">https://openevocracy.org/</a></p>
+<p>See a running demo instance at: <a href="https://demo.openevocracy.org/">https://demo.openevocracy.org/</a></p>
+
+<a href="#project" id="project" style="color: inherit; text-decoration: none;">
+  <h2>Project</h2>
+</a>
+<p>Evocracy is a concept for organizing democratic decisions and to this end uses modern technology. The goal is to enable high-quality decisions, decentralize decision processes and guarantee as much anonymity and safety as possible. The central aspect of the concept are <em>topics</em>. These define particular issues that shall be decided on.</p>
+<p>Discussions are outsourced to small groups and captured in group-specific documents. An elaborated board and a chatroom support the document-writing process. Due to the small group size, every idea has the chance to be considered. Based on their topic-specific knowledge and their ability to integrate ideas, members are elected as representatives of their groups for higher stages where they once more form small groups together with other elected representatives. The number of participants and groups reduce from stage to stage until only one document is left. The process yields the selection of ideas that have proven to be reasonable and capable of consensus throughout many groups. Through this self-organizing process, good ideas are selected in an evolutionary sense.</p>
+<p>In the future, location and authenticity of a user will be verified in a decentralized manner to prevent abuse. Yet identification of users shall not be possible. Furthermore, every topic will be linked to one of many possible target groups, which can dynamically evolve from relations between the locations of the users and thereby can be independent of existing structures (like states, cities, etc.).</p>
+<p>Evocracy is explicitly free of authorities; every user has the same rights. Everyone has the right to propose topics, and everyone has the possibility to participate anew in each new topic. </p>
+
+<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+  <h2>Installation</h2>
+</a>
+
+<a href="#requirements" id="requirements" style="color: inherit; text-decoration: none;">
+  <h3>Requirements</h3>
+</a>
+<p>You should have a server with ssh access and root permissions and you should know how to use basic shell commands in linux. Your system needs the following requirements:</p>
+<ul>
+<li>docker: <a href="https://docs.docker.com/install/">https://docs.docker.com/install/</a></li>
+<li>docker-compose: <a href="https://docs.docker.com/compose/install/">https://docs.docker.com/compose/install/</a></li>
+</ul>
+<p>Make sure to have <a href="https://github.com/openevocracy/openevocracy/wiki/Server-configuration"><strong>nginx</strong> webserver configured properly</a> to avoid socket connection interruptions.</p>
+
+<a href="#1-get-code" id="1-get-code" style="color: inherit; text-decoration: none;">
+  <h3>1. Get Code</h3>
+</a>
+<p>Get the code with <em>one</em> of the following two options:</p>
+<ul>
+<li>Download the <a href="https://github.com/openevocracy/openevocracy/releases/tag/v0.3.3">latest release</a> or</li>
+<li>Clone the repository with <code>git clone https://github.com/openevocracy/openevocracy.git</code> and switch to the latest stable branch with <code>git checkout v0.3.3</code></li>
+</ul>
+
+<a href="#2-customize-the-config" id="2-customize-the-config" style="color: inherit; text-decoration: none;">
+  <h3>2. Customize the config</h3>
+</a>
+<p>Inside the repository copy the files</p>
+<ul>
+<li><code>shared/config.base.default.js</code> as <code>shared/config.base.js</code></li>
+<li><code>shared/config.env.default.js</code> as <code>shared/config.env.prod.js</code></li>
+</ul>
+<p>Customize the files <code>shared/config.base.js</code> and <code>shared/config.env.prod.js</code> according to your needs.</p>
+
+<a href="#necessary-changes" id="necessary-changes" style="color: inherit; text-decoration: none;">
+  <h4>Necessary changes</h4>
+</a>
+<p>Change <code>BASE_URL</code> value in <code>shared/config.base.js</code> to the URL where the instance will be reachable.</p>
+
+<a href="#3-run-openevocracy" id="3-run-openevocracy" style="color: inherit; text-decoration: none;">
+  <h3>3. Run OpenEvocracy</h3>
+</a>
+<p>Change dir to project folder. Run <code>docker-compose up</code> to start OpenEvocracy in foreground mode or run <code>docker-compose up -d</code> to start OpenEvocracy in background mode.</p>
+
+<a href="#optional-choose-port" id="optional-choose-port" style="color: inherit; text-decoration: none;">
+  <h4>Optional: Choose port</h4>
+</a>
+<p>The default port is <code>8080</code>. Start OpenEvocracy e.g. with <code>PORT=80 docker-compose up -d</code> (where <code>80</code> is your port of choice).</p>
+
+<a href="#stop-openevocracy" id="stop-openevocracy" style="color: inherit; text-decoration: none;">
+  <h4>Stop OpenEvocracy</h4>
+</a>
+<p>If you want to stop the OpenEvocracy instance, change dir to project folder and execute <code>docker-compose down</code>.</p>
+
+<a href="#update" id="update" style="color: inherit; text-decoration: none;">
+  <h2>Update</h2>
+</a>
+<p>First stop the OpenEvocracy instance.</p>
+<pre><code><span class="hl-0">docker</span><span class="hl-1">-</span><span class="hl-0">compose</span><span class="hl-1"> </span><span class="hl-0">down</span>
+</code></pre>
+<p>Fetch new files and checkout the branch with git.</p>
+<pre><code><span class="hl-0">git</span><span class="hl-1"> </span><span class="hl-0">fetch</span><br/><span class="hl-0">git</span><span class="hl-1"> </span><span class="hl-0">checkout</span><span class="hl-1"> </span><span class="hl-0">v0</span><span class="hl-1">.</span><span class="hl-2">3</span>
+</code></pre>
+<p>Now pull the updated image, start the instance again. The database will not be touched.</p>
+<pre><code><span class="hl-0">docker</span><span class="hl-1"> </span><span class="hl-0">pull</span><span class="hl-1"> </span><span class="hl-0">openevocracy</span><span class="hl-1">/</span><span class="hl-3">openevocracy</span><span class="hl-1">:</span><span class="hl-0">v0</span><span class="hl-1">.</span><span class="hl-2">3</span><br/><span class="hl-0">docker</span><span class="hl-1">-</span><span class="hl-0">compose</span><span class="hl-1"> </span><span class="hl-0">up</span><span class="hl-1"> -</span><span class="hl-0">d</span>
+</code></pre>
+<p>When pulling the latest docker image, take great caution to specify a compatible version for the update.</p>
+</div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Exports</a></li></ul></nav><nav class="tsd-navigation secondary menu-sticky"><ul></ul></nav></div></div></div><footer class="with-border-bottom"><div class="container"><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="container tsd-generator"><p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div><div class="overlay"></div><script src="assets/main.js"></script></body></html>

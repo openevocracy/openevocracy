@@ -58,7 +58,11 @@ mail.initialize();
 // Initialize and start all cron jobs
 cron.initializeAndStart();
 
-// Define auth function for route permissions
+/** 
+ * @function auth
+ * Authentication function for route permissions
+ * @returns {any}
+ */
 function auth() {
 	return passport.authenticate('jwt', { session: false });
 }

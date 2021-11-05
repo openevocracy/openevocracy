@@ -9,10 +9,19 @@ import { Router, Event, NavigationStart, NavigationEnd, NavigationError, Navigat
 	host: {'[class.loading]':'loading'}
 })
 
+/** 
+ * AppComponent
+ * Root component of the client side 
+ */
 export class AppComponent {
 	public loading: boolean = false;
 	private routing: boolean = false;
 
+	/** 
+	 * @constructor
+	 * @param {LanguageService} languageService
+	 * @param {Router} router
+	 */
 	constructor(
 		private languageService: LanguageService,
 		private router: Router
@@ -26,8 +35,11 @@ export class AppComponent {
 		});
 	}
 
-	/**
-	 * @desc: Shows a loading animation when loading takes a bit longer than normal
+	/** 
+	 * @function checkRouterEvent
+	 * Shows a loading animation when loading takes a bit longer than normal
+	 * @param {Event} routerEvent
+	 * @returns {number}
 	 */
 	public checkRouterEvent(routerEvent: Event): void {
 		// Show loading if navigation starts

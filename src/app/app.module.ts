@@ -97,4 +97,6 @@ export function loadConfig(configService: ConfigService) {
 	entryComponents: [],
 	bootstrap: [AppComponent]
 })
+
+/** @module AppModule */
 export class AppModule { }

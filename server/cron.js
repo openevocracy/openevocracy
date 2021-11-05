@@ -31,13 +31,13 @@ exports.initializeAndStart = function() {
 /**
  * @desc: This function is called every minute
  */
-function calledEach5Minutes() {
+async function calledEach5Minutes() {
 	// Manage topics
-	topics.manage.manageAndListTopicsAsync().then(function(topics) {
-		// FIXME: An error could occur if i18n and mail initialization is not ready when cronjob runs for the first time
-		_.map(topics, mail.sendTopicReminderMessages); // NOTE Promise.map does not work above
-	});
-	
+	const topics = await topics.manage.manageAndListTopicsAsync();
+
+	// FIXME: An error could occur if i18n and mail initialization is not ready when cronjob runs for the first time
+	_.map(topics, mail.sendTopicReminderMessages); // NOTE Promise.map does not work above
+
 	// Regularily check for chatroom orphans
 	const now = new Date().getTime();
 	_.each(chats.rooms, (room, id) => {

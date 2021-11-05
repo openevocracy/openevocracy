@@ -11,9 +11,9 @@ import { TopicService } from '../_services/topic.service';
 })
 export class TopicComponent implements OnInit, OnDestroy {
 	
-	public topicId: string;
-	public routerSubscription: any;
-	public deadlineInterval: number;
+	public topicId : string;
+	public routerSubscription : any;
+	public deadlineInterval : any;
 	
 	constructor(
 		private router: Router,

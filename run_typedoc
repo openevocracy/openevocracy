@@ -1,0 +1,2 @@
+#./node_modules/.bin/typedoc --exclude "**/*+(index-legacy|moment|stageupdate.service).ts"
+./node_modules/.bin/typedoc --entryPoints ./src/app/app.module.ts

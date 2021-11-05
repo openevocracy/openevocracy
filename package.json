@@ -1,6 +1,6 @@
 {
   "name": "openevocracy",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -10,7 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "extract": "ngx-translate-extract --input ./src --output ./src/assets/i18n/*.json --clean --sort --format namespaced-json",
-    "test_integration": "ENV=test mocha --require test/it-helper test/users.js test/topics.js test/proposals.js test/activities.js"
+    "test_integration": "ENV=test mocha --require test/it-helper test/users.js test/topics.js test/proposals.js test/activities.js test/groups.js"
   },
   "private": true,
   "dependencies": {
@@ -145,6 +145,7 @@
     "component-emitter": "^1.3.0",
     "jasmine-core": "~3.4.0",
     "jasmine-spec-reporter": "~4.2.1",
+    "jsdoc": "^3.6.7",
     "karma": "^4.4.1",
     "karma-chrome-launcher": "~3.1.0",
     "karma-cli": "^2.0.0",
@@ -159,6 +160,7 @@
     "timsort": "^0.3.0",
     "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
+    "typedoc": "^0.22.6",
     "typescript": "~3.5.3"
   }
 }
