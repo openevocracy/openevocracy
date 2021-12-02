@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { trigger, transition, group, animate, style, state } from '@angular/animations'
 import { forkJoin } from 'rxjs';
 
@@ -35,7 +35,7 @@ import * as _ from 'underscore';
 })
 export class TopicGroupsComponent implements AfterViewInit, OnInit, OnDestroy {
 	
-	@ViewChild('network', { 'static': false }) public networkContainer: ElementRef;
+	@ViewChild('network') public networkContainer: ElementRef;
 	
 	public topicId: string;
 	

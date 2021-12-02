@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 
 import { CountdownComponent } from '../../countdown/countdown.component';
 import { AddtopicDialogComponent } from '../../dialogs/addtopic/addtopic.component';

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MatPaginatorIntl } from '@angular/material';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 import { TranslateService, TranslateParser } from '@ngx-translate/core';
 
 import { Observable } from 'rxjs';

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { MatDialog, MatDialogConfig } from "@angular/material";
+import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 
 import { ShareDialogComponent } from '../../dialogs/share/share.component';
 import { FeedbackDialogComponent } from '../../dialogs/feedback/feedback.component';

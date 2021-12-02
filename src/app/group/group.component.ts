@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from '@angular/router';
 
 import { GroupWelcomeDialogComponent } from '../dialogs/groupwelcome/groupwelcome.component';

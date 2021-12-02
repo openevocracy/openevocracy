@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TranslateService, LangChangeEvent } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
