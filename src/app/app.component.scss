@@ -32,11 +32,11 @@ $speed: 0.9;  /* Speed of animation in seconds */
   &.dot2 {
     left:50%;
     transform: translateX(-50%) scale(1);
-    animation-delay: ($speed/3 * 1s);
+    animation-delay: (math.div($speed, 3) * 1s);
   }
   &.dot3 {
     right:0;
-    animation-delay: ($speed/3 * 2s);
+    animation-delay: (math.div($speed, 3) * 2s);
   }
 }
 
