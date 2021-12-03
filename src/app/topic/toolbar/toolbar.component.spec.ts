@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { TopicToolbarComponent } from './toolbar.component';
 
@@ -6,7 +6,7 @@ describe('TopicToolbarComponent', () => {
   let component: TopicToolbarComponent;
   let fixture: ComponentFixture<TopicToolbarComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ TopicToolbarComponent ]
     })

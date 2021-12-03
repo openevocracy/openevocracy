@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CloseEditorDialogComponent } from './closeeditor.component';
 
@@ -6,7 +6,7 @@ describe('CloseEditorDialogComponent', () => {
   let component: CloseEditorDialogComponent;
   let fixture: ComponentFixture<CloseEditorDialogComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ CloseEditorDialogComponent ]
     })

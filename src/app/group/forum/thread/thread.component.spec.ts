@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { GroupForumThreadComponent } from './thread.component';
 
@@ -6,7 +6,7 @@ describe('GroupForumThreadComponent', () => {
   let component: GroupForumThreadComponent;
   let fixture: ComponentFixture<GroupForumThreadComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ GroupForumThreadComponent ]
     })

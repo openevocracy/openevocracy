@@ -29,11 +29,11 @@ const appRoutes: Routes = [
 	imports: [
 		CommonModule,
 		RouterModule.forRoot(appRoutes, {
-			scrollPositionRestoration: 'enabled',
-			anchorScrolling: 'enabled',
-			onSameUrlNavigation: 'reload',
-      	//preloadingStrategy: PreloadAllModules
-   	})
+    scrollPositionRestoration: 'enabled',
+    anchorScrolling: 'enabled',
+    onSameUrlNavigation: 'reload',
+    relativeLinkResolution: 'legacy'
+})
 	],
 	exports: [ RouterModule ],
 	declarations: []

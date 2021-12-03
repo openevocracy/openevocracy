@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { GroupMemberbarComponent } from './memberbar.component';
 
@@ -6,7 +6,7 @@ describe('GroupMemberbarComponent', () => {
   let component: GroupMemberbarComponent;
   let fixture: ComponentFixture<GroupMemberbarComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ GroupMemberbarComponent ]
     })

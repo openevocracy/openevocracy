@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { GroupDocumentComponent } from './document.component';
 
@@ -6,7 +6,7 @@ describe('GroupDocumentComponent', () => {
   let component: GroupDocumentComponent;
   let fixture: ComponentFixture<GroupDocumentComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ GroupDocumentComponent ]
     })
