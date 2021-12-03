@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs/Subscription';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -13,7 +12,6 @@ import { CloseEditorDialogComponent } from '../dialogs/closeeditor/closeeditor.c
 import * as sharedb from 'sharedb/lib/client';
 import * as richText from 'rich-text';
 
-import * as io from 'socket.io-client';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 
