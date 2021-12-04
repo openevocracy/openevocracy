@@ -1,4 +1,5 @@
 /* Import variables */
+@use 'sass:math';
 @import "~styles/variables";
 
 /* Inspired from: https://codepen.io/FabioG/pen/EKLMPb */
@@ -9,7 +10,7 @@ $speed: 0.9;  /* Speed of animation in seconds */
 
 .router-loading {
   width: $width + 0px;
-  height: ($width / 3) - 10px;
+  height: math.div($width, 3) - 10px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -17,8 +18,8 @@ $speed: 0.9;  /* Speed of animation in seconds */
 }
 .dot {
   will-change: transform;
-  height: ($width / 3) - 10px;
-  width: ($width / 3) - 10px;
+  height: math.div($width, 3) - 10px;
+  width: math.div($width, 3) - 10px;
   border-radius: 50%;
   background-color: $color;
   position: absolute;
