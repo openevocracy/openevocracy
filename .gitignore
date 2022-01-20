@@ -23,6 +23,10 @@
 .settings/
 *.sublime-workspace
 
+# Jupyterlab
+
+.ipynb_checkpoints
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
