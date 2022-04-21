@@ -198,6 +198,11 @@ describe('groups', () => {
 			});
 		}
 	});
+
+	it('should create groups', async() => {
+	    // should be 4 groups
+	    await app.groups.manage.createGroupsAsync(topic._id);
+	});
 	
 	it('should remix groups', async() => {
 	    // should be 4 groups

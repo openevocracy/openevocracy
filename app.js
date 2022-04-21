@@ -405,4 +405,7 @@ httpServer.on('upgrade', function upgrade(request, socket, head) {
 	}
 });
 
-module.exports = app;
+module.exports = Object.assign(app, {
+	cron, utils, chats, mail,
+	users, topics, groups, forums, tests, pads, activities, socialnet
+});
