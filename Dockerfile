@@ -1,5 +1,5 @@
 # builder container
-FROM node:lts as builder
+FROM node:14 as builder
 
 WORKDIR /home/node/app
 COPY shared/ shared/
@@ -9,7 +9,7 @@ RUN npm install
 RUN npm run build -- --prod
 
 # release container
-FROM node:lts
+FROM node:14
 
 EXPOSE 8080
 
