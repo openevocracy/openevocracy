@@ -13,7 +13,7 @@ FROM node:lts
 
 EXPOSE 8080
 
-RUN apt update && apt install -y pandoc texlive-latex-base texlive-fonts-recommended && rm -rf /var/lib/apt/lists/*
+RUN apt dist-upgrade -y && apt update && apt install -y pandoc texlive-latex-base texlive-fonts-recommended && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /home/node/app
 COPY --from=builder /home/node/app/dist/ dist/
