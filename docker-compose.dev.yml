@@ -6,7 +6,6 @@ services:
      - $PORT:8080
     depends_on:
      - mongodb
-    restart: always
     volumes:
      - ./shared/:/home/node/app/shared/
      - ./files/:/home/node/app/files/
@@ -14,6 +13,5 @@ services:
      - ENV=dev
   mongodb:
     image: mongo:3
-    restart: always
     volumes:
     - ./data:/data/db
